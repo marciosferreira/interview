@@ -245,7 +245,7 @@
     <button id="skip-btn" class="icon-btn" title="Skip audio">⏭ Skip</button>
     <button id="send-btn" class="icon-btn" disabled title="Send (Enter)">➤</button>
   </div>
-  <p id="hint">Hold <strong>🎙️</strong> to speak · Release to send · <strong>Enter</strong> to send text · <strong>Shift+Enter</strong> for new line</p>
+  <p id="hint">Click <strong>🎙️</strong> to start/stop recording · <strong>Enter</strong> to send text · <strong>Shift+Enter</strong> for new line</p>
 </div>
 
 <script>
@@ -528,13 +528,14 @@
 
   input.addEventListener('input', autoResize);
 
-  // Push-to-talk via MediaRecorder — no silence detection, full control.
-  micBtn.addEventListener('mousedown', startRecording);
-  micBtn.addEventListener('mouseup',   stopRecording);
-  micBtn.addEventListener('mouseleave', stopRecording);
-
-  micBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startRecording(); });
-  micBtn.addEventListener('touchend',   (e) => { e.preventDefault(); stopRecording(); });
+  // Toggle recording — click once to start, click again to stop.
+  micBtn.addEventListener('click', () => {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  });
 
   // ── Boot ──────────────────────────────────────────────────────────────
   connect();
