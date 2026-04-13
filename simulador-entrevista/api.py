@@ -13,6 +13,21 @@ from openai import AsyncOpenAI
 
 from simulator import graph, make_initial_state
 
+
+def _same_message(a: str, b: str) -> bool:
+    """Compare two strings tolerating minor LLM re-generation artifacts
+    (curly vs straight quotes, whitespace differences)."""
+    if a == b:
+        return True
+    import re
+    def norm(s: str) -> str:
+        s = s.strip()
+        s = s.replace('\u201c', '"').replace('\u201d', '"')   # " " → "
+        s = s.replace('\u2018', "'").replace('\u2019', "'")   # ' ' → '
+        s = re.sub(r'\s+', ' ', s)
+        return s
+    return norm(a) == norm(b)
+
 openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = FastAPI()
@@ -73,7 +88,7 @@ async def interview_ws(ws: WebSocket):
             for msg in new_messages:
                 if not first_ai_skipped and isinstance(msg, AIMessage):
                     first_ai_skipped = True
-                    if msg.content == last_shown_question:
+                    if _same_message(msg.content, last_shown_question):
                         continue   # already sent this one as the interrupt question
                 if isinstance(msg, AIMessage):
                     is_scorecard = "INTERVIEW SCORECARD" in msg.content or fase == "done"
