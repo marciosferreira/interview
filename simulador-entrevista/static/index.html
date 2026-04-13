@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mock Interview Simulator</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -91,6 +92,27 @@
     .bubble-row.ai   .bubble { background: #1e2235; border-top-left-radius: 4px; }
     .bubble-row.user .bubble { background: #1e3a5f; border-top-right-radius: 4px; color: #bfdbfe; }
 
+    /* Markdown rendering inside bubbles */
+    .bubble p, .feedback-card p { margin: 0 0 8px 0; }
+    .bubble p:last-child, .feedback-card p:last-child { margin-bottom: 0; }
+    .bubble strong, .feedback-card strong { color: #e2e8f0; }
+    .bubble em, .feedback-card em { color: #94a3b8; font-style: italic; }
+    .bubble ul, .bubble ol, .feedback-card ul, .feedback-card ol {
+      margin: 6px 0 6px 18px; padding: 0;
+    }
+    .bubble li, .feedback-card li { margin-bottom: 4px; }
+    .bubble hr, .feedback-card hr {
+      border: none; border-top: 1px solid #2d3148; margin: 12px 0;
+    }
+    .bubble h1, .bubble h2, .bubble h3,
+    .feedback-card h1, .feedback-card h2, .feedback-card h3 {
+      color: #a78bfa; margin: 12px 0 6px 0; font-size: 14px;
+    }
+    .bubble code, .feedback-card code {
+      background: #0f1117; border-radius: 4px;
+      padding: 1px 5px; font-size: 12px; color: #7dd3fc;
+    }
+
     /* Feedback card */
     .feedback-card {
       background: #1a1d27;
@@ -99,9 +121,7 @@
       padding: 24px;
       width: 100%;
     }
-    .feedback-card pre {
-      white-space: pre-wrap;
-      font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+    .feedback-card {
       font-size: 13px;
       line-height: 1.7;
       color: #94a3b8;
@@ -433,6 +453,10 @@
   }
 
   // ── UI helpers ────────────────────────────────────────────────────────
+  function renderMd(text) {
+    return marked.parse(text, { breaks: true });
+  }
+
   function addBubble(role, text) {
     const row = document.createElement('div');
     row.className = `bubble-row ${role}`;
@@ -443,7 +467,7 @@
 
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
-    bubble.textContent = text;
+    bubble.innerHTML = renderMd(text);
 
     row.appendChild(avatar);
     row.appendChild(bubble);
@@ -457,10 +481,8 @@
 
     const card = document.createElement('div');
     card.className = 'feedback-card';
+    card.innerHTML = renderMd(text);
 
-    const pre = document.createElement('pre');
-    pre.textContent = text;
-    card.appendChild(pre);
     row.appendChild(card);
     chat.appendChild(row);
     scrollBottom();
