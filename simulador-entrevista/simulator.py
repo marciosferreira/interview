@@ -222,9 +222,15 @@ def _make_node(system_prompt: str, output_class, checklist_key: str, notas_key: 
                 "fase": state["fase"],  # stay in current phase
             }
 
-        # Phase complete — transition
+        # Phase complete — transition.
+        # The AIMessage(feedback) is sent to the client via api.py.
+        # A trailing HumanMessage is required so the next node's LLM call
+        # does not receive a conversation ending in an AIMessage (Anthropic rejects that).
         return {
-            "messages": [AIMessage(content=avaliacao.mensagem)],
+            "messages": [
+                AIMessage(content=avaliacao.mensagem),
+                HumanMessage(content="[acknowledged — ready for next phase]"),
+            ],
             checklist_key: new_checklist,
             notas_key: new_notas,
             "ingles_erros_acumulados": new_ingles_erros,
