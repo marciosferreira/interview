@@ -283,45 +283,86 @@
   let typingEl = null;
   let currentAudio = null;
 
-  // ── TTS queue — guarantees sequential playback ─────────────────────────
-  // ttsChain is always the promise for the last queued item.
-  // Each speak() appends to the chain so items play one after another.
-  let ttsChain = Promise.resolve();
+  // ── TTS — chunked parallel fetch, sequential playback ────────────────
+  // Strategy: split text into sentence-sized chunks, fire ALL fetches
+  // immediately in parallel, then play chunks in order via a promise chain.
+  // Result: first chunk starts playing in ~0.5s; rest arrive while it plays.
 
-  async function _speakOne(text) {
-    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  let ttsChain = Promise.resolve();
+  let ttsToken  = 0;   // incremented on stopTTS/new speak to cancel in-flight chunks
+
+  function _stripMarkdown(text) {
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/\*(.*?)\*/g, '$1')
+      .replace(/#{1,6}\s+/g, '')
+      .replace(/---+/g, '. ')
+      .replace(/^\s*[-*•]\s+/gm, '')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/\n{2,}/g, '. ')
+      .replace(/\n/g, ' ')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+  }
+
+  function _splitChunks(text) {
+    const plain = _stripMarkdown(text);
+    // Split on sentence-ending punctuation followed by whitespace
+    const parts = plain.split(/(?<=[.!?:])\s+/).filter(p => p.trim().length > 0);
+    // Merge very short parts so we don't make dozens of tiny API calls
+    const chunks = [];
+    let current = '';
+    for (const part of parts) {
+      const merged = current ? current + ' ' + part : part;
+      if (merged.length <= 220) { current = merged; }
+      else { if (current) chunks.push(current); current = part; }
+    }
+    if (current) chunks.push(current);
+    return chunks.length > 0 ? chunks : [plain];
+  }
+
+  async function _fetchAudioUrl(text) {
     try {
       const res = await fetch(`/tts?text=${encodeURIComponent(text)}`);
-      if (!res.ok) return;
-      const blob = await res.blob();
-      const url  = URL.createObjectURL(blob);
-      const audio = new Audio(url);
-      currentAudio = audio;
-      skipBtn.style.display = 'flex';
-      await new Promise((resolve) => {
-        audio.onended = resolve;
-        audio.onerror = resolve;
-        audio.play().catch(resolve);
-      });
-      URL.revokeObjectURL(url);
-      currentAudio = null;
-    } catch (err) {
-      console.error('TTS error:', err);
-    } finally {
-      if (!currentAudio) skipBtn.style.display = 'none';
-    }
+      if (!res.ok) return null;
+      return URL.createObjectURL(await res.blob());
+    } catch { return null; }
   }
 
   function speak(text) {
-    // Append to chain — each item waits for the previous one to finish
-    const p = ttsChain.then(() => _speakOne(text));
-    ttsChain = p.catch(() => {});   // errors don't break the chain
-    return p;                        // caller can .then() for post-audio actions
+    const myToken = ++ttsToken;
+    const chunks  = _splitChunks(text);
+
+    // Fire ALL fetches NOW in parallel — they complete while earlier chunks play
+    const fetches = chunks.map(c => _fetchAudioUrl(c));
+    skipBtn.style.display = 'flex';
+
+    for (let i = 0; i < chunks.length; i++) {
+      const fetch_i = fetches[i];
+      const isLast  = i === chunks.length - 1;
+
+      ttsChain = ttsChain.then(async () => {
+        if (ttsToken !== myToken) return;          // aborted by skip / newer speak
+        const url = await fetch_i;
+        if (ttsToken !== myToken || !url) { if (url) URL.revokeObjectURL(url); return; }
+
+        const audio = new Audio(url);
+        currentAudio = audio;
+        await new Promise(r => { audio.onended = r; audio.onerror = r; audio.play().catch(r); });
+        URL.revokeObjectURL(url);
+        currentAudio = null;
+        if (isLast && ttsToken === myToken) skipBtn.style.display = 'none';
+      }).catch(() => {});
+    }
+
+    return ttsChain;   // caller can .then() — resolves when last chunk finishes
   }
 
   function stopTTS() {
+    ttsToken++;                                    // invalidates all queued chunks
     if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-    ttsChain = Promise.resolve();   // discard queued items
+    ttsChain = Promise.resolve();
     skipBtn.style.display = 'none';
   }
 
