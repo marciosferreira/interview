@@ -71,36 +71,51 @@ async def interview_ws(ws: WebSocket):
         )
 
         prev_msg_count = 1
-        last_shown_question = ""  # tracks the interrupt text already sent to the client
 
         while True:
             messages: list = result.get("messages", [])
             interrupts = result.get("__interrupt__", [])
             fase = result.get("fase", "")
 
-            # Send transition messages and final feedback.
-            # When fase_completa=False the node commits AIMessage(question)+HumanMessage(answer),
-            # so the first new AIMessage is the question already shown — skip it.
-            # When fase_completa=True the node only commits AIMessage(final_feedback), which is
-            # NEW and must NOT be skipped. We distinguish by comparing to last_shown_question.
+            # Filter new messages to send to the client.
+            #
+            # When fase_completa=False the node commits:
+            #   [AIMessage(re-generated-question), HumanMessage(user-answer)]
+            # The AIMessage is a re-generation of the question already sent as the
+            # interrupt value — skip it. The user response is not an AIMessage, skip too.
+            #
+            # When fase_completa=True the node commits:
+            #   [AIMessage(completion-feedback), HumanMessage("[acknowledged...]")]
+            # The AIMessage is NEW and must be shown.
+            #
+            # Reliable heuristic: the first new AIMessage should be skipped if and
+            # only if it is followed by a real user HumanMessage (not our placeholder).
+            # Completion feedback is always followed by "[acknowledged — ready for next phase]".
             new_messages = messages[prev_msg_count:]
-            first_ai_skipped = False
-            for msg in new_messages:
-                if not first_ai_skipped and isinstance(msg, AIMessage):
-                    first_ai_skipped = True
-                    if _same_message(msg.content, last_shown_question):
-                        continue   # already sent this one as the interrupt question
-                if isinstance(msg, AIMessage):
-                    is_scorecard = "INTERVIEW SCORECARD" in msg.content or fase == "done"
-                    msg_type = "feedback" if is_scorecard else "transition"
-                    await ws.send_json({"type": msg_type, "text": msg.content})
+            first_ai_idx = next(
+                (i for i, m in enumerate(new_messages) if isinstance(m, AIMessage)), None
+            )
+            for i, msg in enumerate(new_messages):
+                if not isinstance(msg, AIMessage):
+                    continue
+                if i == first_ai_idx:
+                    next_msg = new_messages[i + 1] if i + 1 < len(new_messages) else None
+                    is_replay = (
+                        next_msg is not None
+                        and isinstance(next_msg, HumanMessage)
+                        and "[acknowledged" not in next_msg.content
+                    )
+                    if is_replay:
+                        continue  # re-generated interrupt question — already shown
+                is_scorecard = "INTERVIEW SCORECARD" in msg.content or fase == "done"
+                msg_type = "feedback" if is_scorecard else "transition"
+                await ws.send_json({"type": msg_type, "text": msg.content})
 
             if not interrupts:
                 await ws.send_json({"type": "done"})
                 break
 
             question = interrupts[0].value
-            last_shown_question = question
             await ws.send_json({"type": "ai", "text": question})
 
             # Wait for user's spoken/typed response
