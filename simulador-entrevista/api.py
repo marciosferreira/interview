@@ -125,6 +125,14 @@ async def interview_ws(ws: WebSocket):
             for i, msg in enumerate(new_messages):
                 if not isinstance(msg, AIMessage):
                     continue
+                # When the user explicitly skipped, the streaming bubble already
+                # acknowledged it ("Got it — moving on.").  Suppress ALL graph
+                # AIMessages for this round (the echoed question AND the structured
+                # feedback) — the graph produces two of them when skipping, but only
+                # the streaming bubble should appear.  The per-phase feedback will
+                # still be visible in the final scorecard.
+                if had_transition and was_skip and "INTERVIEW SCORECARD" not in msg.content:
+                    continue
                 if i == first_ai_idx:
                     next_msg = new_messages[i + 1] if i + 1 < len(new_messages) else None
                     is_replay = (
@@ -134,11 +142,12 @@ async def interview_ws(ws: WebSocket):
                     )
                     if is_replay:
                         continue  # already shown/spoken — skip
-                    # When the user explicitly skipped, the streaming bubble already
-                    # acknowledged it ("Got it — moving on.").  Suppress the graph's
-                    # structured feedback block (it will appear in the final scorecard)
-                    # so the user doesn't see the same phase feedback twice.
-                    if had_transition and was_skip:
+                    # When streaming ran (was_streamed=True) and no phase transition
+                    # occurred, the first AIMessage is the graph's re-generation of
+                    # what was already shown in the streaming bubble.  Skip it to
+                    # avoid a duplicate bubble and competing TTS — unless it IS the
+                    # scorecard itself (which has no streaming equivalent).
+                    if was_streamed and not had_transition and "INTERVIEW SCORECARD" not in msg.content:
                         continue
                 is_scorecard = "INTERVIEW SCORECARD" in msg.content or fase == "done"
                 msg_type = "feedback" if is_scorecard else "transition"
@@ -162,20 +171,19 @@ async def interview_ws(ws: WebSocket):
             else:
                 await ws.send_json({"type": "ai", "text": question})
 
-            # Wait for the user's spoken/typed response
-            data = await ws.receive_json()
-            user_text = data.get("text", "").strip()
-            if not user_text:
-                continue
-
-            # Normalise skip intent: only the exact word "skip" (case-insensitive)
-            # triggers a phase skip.  Casual phrases like "move on", "Y", "ok",
-            # "let's continue" are passed through as normal answers so the LLM
-            # evaluates them as content — not as skip commands.
+            # Wait for the user's spoken/typed response.
+            # Only "skip" (or "s") is treated as an explicit phase skip —
+            # everything else goes straight to the graph.
             _SKIP_KEYWORDS = {"skip", "s"}
-            if user_text.lower() in _SKIP_KEYWORDS:
-                user_text = "skip"
-                prev_was_skip = True
+            while True:
+                data = await ws.receive_json()
+                user_text = data.get("text", "").strip()
+                if not user_text:
+                    continue
+                if user_text.lower() in _SKIP_KEYWORDS:
+                    user_text = "skip"
+                    prev_was_skip = True
+                break
 
             await ws.send_json({"type": "user", "text": user_text})
 
@@ -183,25 +191,11 @@ async def interview_ws(ws: WebSocket):
             system_prompt = FASE_TO_SYSTEM.get(fase, "")
 
             try:
-                # Only stream if the user gave a substantive answer (≥ 8 words).
-                # Short inputs like "Y", "ok", "let's go", "move on" are
-                # meta-commands or non-answers.  Streaming them produces
-                # confusing feedback bubbles; let the graph handle them silently.
-                _is_substantive = len(user_text.split()) >= 8
-
-                if system_prompt and _is_substantive:
+                if system_prompt:
                     # ── Parallel: stream reply to client + run graph evaluation ──
-                    # Trim stream context to the current phase only: messages after
-                    # the last "[acknowledged — ready for next phase]" sentinel.
-                    # This prevents the streaming model from seeing prior-phase
-                    # history (e.g. elevator-pitch feedback) and generating stale
-                    # feedback while the graph is already in a later phase.
-                    last_ack = max(
-                        (i for i, m in enumerate(messages)
-                         if isinstance(m, HumanMessage) and "[acknowledged" in m.content),
-                        default=-1,
-                    )
-                    phase_messages = messages[last_ack + 1:]
+                    # Use the graph's phase_messages (current-phase transcript only)
+                    # so the streaming model never sees prior-phase history.
+                    phase_messages = result.get("phase_messages") or messages
                     stream_messages = phase_messages + [
                         AIMessage(content=question),
                         HumanMessage(content=user_text),

@@ -92,6 +92,15 @@
     .bubble-row.ai   .bubble { background: #1e2235; border-top-left-radius: 4px; }
     .bubble-row.user .bubble { background: #1e3a5f; border-top-right-radius: 4px; color: #bfdbfe; }
 
+    .replay-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      margin-top: 6px; padding: 3px 8px;
+      background: transparent; border: 1px solid #2d3148;
+      border-radius: 12px; color: #64748b; font-size: 11px;
+      cursor: pointer; transition: color .15s, border-color .15s;
+    }
+    .replay-btn:hover { color: #a78bfa; border-color: #a78bfa; }
+
     /* Markdown rendering inside bubbles */
     .bubble p, .feedback-card p { margin: 0 0 8px 0; }
     .bubble p:last-child, .feedback-card p:last-child { margin-bottom: 0; }
@@ -284,7 +293,8 @@
   let currentAudio = null;
 
   // Streaming state
-  let streamBubbleEl = null;   // the growing bubble element during streaming
+  let streamBubbleEl  = null;   // the growing bubble element during streaming
+  let streamWrapperEl = null;   // flex column wrapper that holds bubble + replay btn
   let streamRawText  = '';     // full raw text accumulated so far (for bubble rendering)
   let streamTTSBuf   = '';     // text not yet dispatched to TTS
 
@@ -414,10 +424,15 @@
       const avatar = document.createElement('div');
       avatar.className = 'avatar ai';
       avatar.textContent = 'I';
+      streamWrapperEl = document.createElement('div');
+      streamWrapperEl.style.display = 'flex';
+      streamWrapperEl.style.flexDirection = 'column';
+      streamWrapperEl.style.alignItems = 'flex-start';
       streamBubbleEl = document.createElement('div');
       streamBubbleEl.className = 'bubble';
+      streamWrapperEl.appendChild(streamBubbleEl);
       row.appendChild(avatar);
-      row.appendChild(streamBubbleEl);
+      row.appendChild(streamWrapperEl);
       chat.appendChild(row);
     }
 
@@ -431,9 +446,25 @@
 
   function _finalizeStream() {
     _drainStreamTTS(true);   // flush any remaining text
-    streamBubbleEl = null;
-    streamRawText  = '';
-    streamTTSBuf   = '';
+
+    // Add replay button now that the full text is known
+    if (streamWrapperEl && streamRawText) {
+      const finalText = streamRawText;
+      const btn = document.createElement('button');
+      btn.className = 'replay-btn';
+      btn.innerHTML = '🔊 replay';
+      btn.title = 'Replay audio';
+      btn.addEventListener('click', () => {
+        stopTTS();
+        speak(_stripMarkdown(finalText));
+      });
+      streamWrapperEl.appendChild(btn);
+    }
+
+    streamBubbleEl  = null;
+    streamWrapperEl = null;
+    streamRawText   = '';
+    streamTTSBuf    = '';
   }
 
   // ── STT via MediaRecorder + Whisper ──────────────────────────────────
@@ -592,12 +623,30 @@
     avatar.className = `avatar ${role}`;
     avatar.textContent = role === 'ai' ? 'I' : 'Y';
 
+    const wrapper = document.createElement('div');
+    wrapper.style.display = 'flex';
+    wrapper.style.flexDirection = 'column';
+    wrapper.style.alignItems = 'flex-start';
+
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
     bubble.innerHTML = renderMd(text);
+    wrapper.appendChild(bubble);
+
+    if (role === 'ai') {
+      const btn = document.createElement('button');
+      btn.className = 'replay-btn';
+      btn.innerHTML = '🔊 replay';
+      btn.title = 'Replay audio';
+      btn.addEventListener('click', () => {
+        stopTTS();
+        speak(_stripMarkdown(text));
+      });
+      wrapper.appendChild(btn);
+    }
 
     row.appendChild(avatar);
-    row.appendChild(bubble);
+    row.appendChild(wrapper);
     chat.appendChild(row);
     scrollBottom();
   }

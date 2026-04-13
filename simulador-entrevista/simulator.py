@@ -10,9 +10,30 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langgraph.types import interrupt, Command
-from pydantic import BaseModel
+import json as _json
+from pydantic import BaseModel, BeforeValidator
 
 load_dotenv()
+
+
+def _coerce_list(v):
+    """Accept list[str] or a JSON-encoded string of a list (model sometimes returns the latter)."""
+    if isinstance(v, list):
+        return v
+    if isinstance(v, str):
+        try:
+            parsed = _json.loads(v)
+            if isinstance(parsed, list):
+                return parsed
+        except (_json.JSONDecodeError, ValueError):
+            pass
+        return [v] if v.strip() else []
+    return v
+
+
+# Type alias: list[str] that tolerates a JSON-string from the LLM
+StrList = Annotated[list[str], BeforeValidator(_coerce_list)]
+
 
 model = ChatAnthropic(
     model=os.getenv("MODEL_NAME", "claude-sonnet-4-6"),
@@ -50,7 +71,9 @@ SYSTEM_SCORECARD   = load_prompt("context_marcio.md", "scorecard.md")
 # ---------------------------------------------------------------------------
 
 class EntrevistaState(TypedDict):
-    messages: Annotated[list, add_messages]
+    messages: Annotated[list, add_messages]  # full history (LangGraph checkpointing)
+    phase_messages: list   # current-phase transcript only — reset on each transition
+    archive: list          # completed phases transcript — fed to scorecard at the end
     fase: str  # elevator_pitch | CAR | technical | leadership | motivation | marcio_questions | feedback | done
 
     checklist_pitch: dict
@@ -83,9 +106,9 @@ class AvaliacaoPitch(BaseModel):
     mensagem: str           # full conversational reply from Maria Ximena
     fase_completa: bool
     observacoes: str        # internal notes, not shown to candidate
-    oportunidades_perdidas: list[str]   # things Marcio knew but didn't mention
-    vocabulario_sugerido: list[str]     # stronger terms/framings he could have used
-    ingles_erros: list[str]             # specific English issues this turn
+    oportunidades_perdidas: StrList   # things Marcio knew but didn't mention
+    vocabulario_sugerido: StrList     # stronger terms/framings he could have used
+    ingles_erros: StrList             # specific English issues this turn
 
 
 class AvaliacaoCAR(BaseModel):
@@ -98,9 +121,9 @@ class AvaliacaoCAR(BaseModel):
     mensagem: str
     fase_completa: bool
     observacoes: str
-    oportunidades_perdidas: list[str]
-    vocabulario_sugerido: list[str]
-    ingles_erros: list[str]
+    oportunidades_perdidas: StrList
+    vocabulario_sugerido: StrList
+    ingles_erros: StrList
 
 
 class AvaliacaoTechnical(BaseModel):
@@ -112,9 +135,9 @@ class AvaliacaoTechnical(BaseModel):
     mensagem: str
     fase_completa: bool
     observacoes: str
-    oportunidades_perdidas: list[str]
-    vocabulario_sugerido: list[str]
-    ingles_erros: list[str]
+    oportunidades_perdidas: StrList
+    vocabulario_sugerido: StrList
+    ingles_erros: StrList
 
 
 class AvaliacaoLeadership(BaseModel):
@@ -126,9 +149,9 @@ class AvaliacaoLeadership(BaseModel):
     mensagem: str
     fase_completa: bool
     observacoes: str
-    oportunidades_perdidas: list[str]
-    vocabulario_sugerido: list[str]
-    ingles_erros: list[str]
+    oportunidades_perdidas: StrList
+    vocabulario_sugerido: StrList
+    ingles_erros: StrList
 
 
 class AvaliacaoMotivation(BaseModel):
@@ -139,9 +162,9 @@ class AvaliacaoMotivation(BaseModel):
     mensagem: str
     fase_completa: bool
     observacoes: str
-    oportunidades_perdidas: list[str]
-    vocabulario_sugerido: list[str]
-    ingles_erros: list[str]
+    oportunidades_perdidas: StrList
+    vocabulario_sugerido: StrList
+    ingles_erros: StrList
 
 
 class AvaliacaoMarcioQuestions(BaseModel):
@@ -162,18 +185,18 @@ class Scorecard(BaseModel):
     score_motivation: int
     comentario_motivation: str
     # What Marcio didn't say but should have — per phase
-    oportunidades_pitch: list[str]
-    oportunidades_CAR: list[str]
-    oportunidades_technical: list[str]
-    oportunidades_leadership: list[str]
+    oportunidades_pitch: StrList
+    oportunidades_CAR: StrList
+    oportunidades_technical: StrList
+    oportunidades_leadership: StrList
     # Vocabulary to practice — terms/framings Marcio avoided or weakened
-    vocabulario_para_praticar: list[str]   # each entry: "term → why it matters"
+    vocabulario_para_praticar: StrList   # each entry: "term → why it matters"
     ingles_rating: str
-    ingles_padroes: list[str]
+    ingles_padroes: StrList
     score_total: int
     hire_signal: str
-    forcas: list[str]
-    melhorias: list[str]
+    forcas: StrList
+    melhorias: StrList
     insight_chave: str
 
 
@@ -181,42 +204,23 @@ class Scorecard(BaseModel):
 # Generic node factory
 # ---------------------------------------------------------------------------
 
-def _phase_messages(all_messages: list) -> list:
-    """Return only the messages that belong to the current phase.
-
-    Each phase transition appends a HumanMessage("[acknowledged — ready for
-    next phase]") sentinel.  Everything *before* the last such sentinel belongs
-    to a completed phase and must not bleed into the current evaluation —
-    otherwise the LLM sees the elevator-pitch history while evaluating a CAR
-    answer and generates stale feedback.
-
-    On the very first invocation of a new phase the slice is empty (the
-    sentinel is the last message).  In that case return a neutral opener so
-    the API call always has at least one human message.
-    """
-    last_ack = max(
-        (i for i, m in enumerate(all_messages)
-         if isinstance(m, HumanMessage) and "[acknowledged" in m.content),
-        default=-1,
-    )
-    phase_msgs = all_messages[last_ack + 1:]
-    if not phase_msgs:
-        phase_msgs = [HumanMessage(content="I'm ready to start this phase.")]
-    return phase_msgs
-
-
 def _make_node(system_prompt: str, output_class, checklist_key: str, notas_key: str, next_fase: str):
     """
     Returns a node function that:
-    1. Calls the model with structured output (current-phase context only)
+    1. Evaluates ONLY the current-phase transcript (state["phase_messages"])
     2. Accumulates checklist booleans (only grows — never unsets)
-    3. If incomplete: interrupt() → wait for user, then return updated messages
-    4. If complete: add transition and advance fase
+    3. If incomplete: interrupt() → update phase_messages, stay in phase
+    4. If complete: archive phase transcript, reset phase_messages, advance fase
     """
     def node(state: EntrevistaState) -> dict:
         structured = model.with_structured_output(output_class)
-        # Use only messages from the current phase to avoid prior-phase contamination
-        phase_msgs = _phase_messages(state["messages"])
+
+        # Use only the current-phase transcript — completely isolated from
+        # prior phases.  If the phase just started (empty), seed with a
+        # neutral opener so the API call always has ≥ 1 human message.
+        phase_msgs: list = state.get("phase_messages") or [
+            HumanMessage(content="I'm ready to start this phase.")
+        ]
         messages = [SystemMessage(content=system_prompt)] + phase_msgs
         avaliacao = structured.invoke(messages)
 
@@ -237,26 +241,35 @@ def _make_node(system_prompt: str, output_class, checklist_key: str, notas_key: 
 
         if not avaliacao.fase_completa:
             user_response = interrupt(avaliacao.mensagem)
+            # Append this exchange to the phase transcript
+            new_phase_msgs = phase_msgs + [
+                AIMessage(content=avaliacao.mensagem),
+                HumanMessage(content=user_response),
+            ]
             return {
                 "messages": [
                     AIMessage(content=avaliacao.mensagem),
                     HumanMessage(content=user_response),
                 ],
+                "phase_messages": new_phase_msgs,
                 checklist_key: new_checklist,
                 notas_key: new_notas,
                 "ingles_erros_acumulados": new_ingles_erros,
                 "fase": state["fase"],  # stay in current phase
             }
 
-        # Phase complete — transition.
-        # The AIMessage(feedback) is sent to the client via api.py.
-        # A trailing HumanMessage is required so the next node's LLM call
-        # does not receive a conversation ending in an AIMessage (Anthropic rejects that).
+        # Phase complete — archive this phase's transcript + feedback,
+        # reset phase_messages to empty for the next phase.
+        completed_transcript = phase_msgs + [AIMessage(content=avaliacao.mensagem)]
+        new_archive = state.get("archive", []) + completed_transcript
+
         return {
             "messages": [
                 AIMessage(content=avaliacao.mensagem),
                 HumanMessage(content="[acknowledged — ready for next phase]"),
             ],
+            "phase_messages": [],   # fresh slate for next phase
+            "archive": new_archive,
             checklist_key: new_checklist,
             notas_key: new_notas,
             "ingles_erros_acumulados": new_ingles_erros,
@@ -304,29 +317,45 @@ motivation = _make_node(
 
 def marcio_questions(state: EntrevistaState) -> dict:
     structured = model.with_structured_output(AvaliacaoMarcioQuestions)
-    phase_msgs = _phase_messages(state["messages"])
+    phase_msgs: list = state.get("phase_messages") or [
+        HumanMessage(content="I'm ready to start this phase.")
+    ]
     messages = [SystemMessage(content=SYSTEM_MARCIO_Q)] + phase_msgs
     avaliacao = structured.invoke(messages)
 
     if not avaliacao.fase_completa:
         user_response = interrupt(avaliacao.mensagem)
+        new_phase_msgs = phase_msgs + [
+            AIMessage(content=avaliacao.mensagem),
+            HumanMessage(content=user_response),
+        ]
         return {
             "messages": [
                 AIMessage(content=avaliacao.mensagem),
                 HumanMessage(content=user_response),
             ],
+            "phase_messages": new_phase_msgs,
             "fase": "marcio_questions",
         }
 
+    # Archive this phase and reset
+    completed_transcript = phase_msgs + [AIMessage(content=avaliacao.mensagem)]
+    new_archive = state.get("archive", []) + completed_transcript
     return {
         "messages": [AIMessage(content=avaliacao.mensagem)],
+        "phase_messages": [],
+        "archive": new_archive,
         "fase": "feedback",
     }
 
 
 def feedback(state: EntrevistaState) -> dict:
     structured = model.with_structured_output(Scorecard)
-    messages = [SystemMessage(content=SYSTEM_SCORECARD)] + state["messages"]
+    # Scorecard sees the full interview: all archived phases + current phase
+    archive = state.get("archive", [])
+    phase_msgs = state.get("phase_messages") or []
+    full_context = archive + phase_msgs
+    messages = [SystemMessage(content=SYSTEM_SCORECARD)] + full_context
     scorecard: Scorecard = structured.invoke(messages)
 
     formatted = _format_scorecard(scorecard)
@@ -464,6 +493,8 @@ graph = builder.compile(checkpointer=checkpointer)
 def make_initial_state() -> EntrevistaState:
     return {
         "messages": [HumanMessage(content="Hi, I'm ready to start the interview.")],
+        "phase_messages": [HumanMessage(content="Hi, I'm ready to start the interview.")],
+        "archive": [],
         "fase": "elevator_pitch",
         "checklist_pitch": {
             "apresentacao_pessoal": False,
