@@ -160,10 +160,18 @@ async def interview_ws(ws: WebSocket):
             question = interrupts[0].value
 
             if had_transition:
-                # Phase transition: the transition feedback TTS is still playing.
-                # Send the new question as "phase_question" so the client can
-                # buffer it and only show/speak it after transition TTS drains.
-                await ws.send_json({"type": "phase_question", "text": question})
+                # Phase transition: feedback is shown/spoken. Wait for the user to
+                # signal they're ready (any input) before showing the next phase
+                # question — so the two don't appear simultaneously.
+                await ws.send_json({"type": "await_input"})
+                while True:
+                    data = await ws.receive_json()
+                    ready_text = data.get("text", "").strip()
+                    if ready_text:
+                        break
+                await ws.send_json({"type": "user", "text": ready_text})
+                # Now show the next phase's opening question.
+                await ws.send_json({"type": "ai", "text": question})
             elif was_streamed:
                 # Streaming bubble already shows the response — don't add a second
                 # bubble for the same interrupt question. Just enable input after TTS.
@@ -171,7 +179,7 @@ async def interview_ws(ws: WebSocket):
             else:
                 await ws.send_json({"type": "ai", "text": question})
 
-            # Wait for the user's spoken/typed response.
+            # Wait for the user's answer to the current question.
             # Only "skip" (or "s") is treated as an explicit phase skip —
             # everything else goes straight to the graph.
             _SKIP_KEYWORDS = {"skip", "s"}

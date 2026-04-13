@@ -473,11 +473,22 @@ for name, fn in [
 
 builder.add_edge(START, "elevator_pitch")
 
-# Each node routes back to itself (loop) or forward (transition), except feedback → END
-for node_name in ["elevator_pitch", "CAR", "technical", "leadership", "motivation", "marcio_questions"]:
+# Explicit path maps so LangGraph can infer the full topology for visualization.
+# Each phase node can loop back to itself (retry) or advance to the next phase.
+_PHASE_SEQUENCE = [
+    ("elevator_pitch",   {"elevator_pitch": "elevator_pitch", "CAR": "CAR"}),
+    ("CAR",              {"CAR": "CAR", "technical": "technical"}),
+    ("technical",        {"technical": "technical", "leadership": "leadership"}),
+    ("leadership",       {"leadership": "leadership", "motivation": "motivation"}),
+    ("motivation",       {"motivation": "motivation", "marcio_questions": "marcio_questions"}),
+    ("marcio_questions", {"marcio_questions": "marcio_questions", "feedback": "feedback"}),
+]
+
+for node_name, path_map in _PHASE_SEQUENCE:
     builder.add_conditional_edges(
         node_name,
-        lambda state, _n=node_name: FASE_TO_NODE.get(state["fase"], END),
+        lambda state, _m=path_map: _m.get(state["fase"], END),
+        path_map,
     )
 
 builder.add_edge("feedback", END)

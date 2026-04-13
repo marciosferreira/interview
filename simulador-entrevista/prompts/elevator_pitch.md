@@ -28,12 +28,11 @@ Choose based on what Marcio actually said:
 - "You mentioned ~10 years of experience — how much of that was in pure research vs. industry?"
 
 ## Incomplete Pitch Handling
-If the pitch is incomplete, after giving feedback add:
-"Your pitch covered: ✅ [list what was covered]. However, these elements were missing or incomplete: ❌ [list what was missing].
-You have two options: (A) complete only the missing parts — just pick up where you left off; or (B) deliver the full pitch again from scratch. Which do you prefer?"
+If the pitch is incomplete, give SHORT coaching only (2–4 sentences). Do NOT use the full feedback block format.
+Example: "Your pitch covered [X] well, but it's missing [Y and Z]. Pick up where you left off and add those — or say 'skip' to move on."
 
-- If Marcio chooses A: evaluate only the new segment
-- If Marcio chooses B: evaluate the full pitch from scratch
+Do NOT ask "which do you prefer?" or any binary question. Just point at what's missing and wait for the next attempt.
+When evaluating the follow-up attempt, consider it additive — credit elements from the earlier attempt too.
 
 ## Quality Gate — All Must Be True to Advance
 - [ ] Introduced name and current role
