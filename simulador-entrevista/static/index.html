@@ -331,7 +331,7 @@
   }
 
   function speak(text) {
-    const myToken = ++ttsToken;
+    const myToken = ttsToken;   // read current token — only stopTTS() increments it
     const chunks  = _splitChunks(text);
 
     // Fire ALL fetches NOW in parallel — they complete while earlier chunks play
