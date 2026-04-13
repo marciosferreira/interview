@@ -283,6 +283,11 @@
   let typingEl = null;
   let currentAudio = null;
 
+  // Streaming state
+  let streamBubbleEl = null;   // the growing bubble element during streaming
+  let streamRawText  = '';     // full raw text accumulated so far (for bubble rendering)
+  let streamTTSBuf   = '';     // text not yet dispatched to TTS
+
   // ── TTS — chunked parallel fetch, sequential playback ────────────────
   // Strategy: split text into sentence-sized chunks, fire ALL fetches
   // immediately in parallel, then play chunks in order via a promise chain.
@@ -372,6 +377,59 @@
     enableInput();
   });
 
+  // ── Streaming helpers ────────────────────────────────────────────────
+
+  function _drainStreamTTS(flush) {
+    // Extract complete sentences from streamTTSBuf and speak them.
+    // If flush=true, speak whatever remains even without sentence-end punctuation.
+    const parts = streamTTSBuf.split(/(?<=[.!?:])\s+/);
+    if (parts.length > 1) {
+      for (let i = 0; i < parts.length - 1; i++) {
+        const s = _stripMarkdown(parts[i]).trim();
+        if (s) speak(s);
+      }
+      streamTTSBuf = parts[parts.length - 1];
+    }
+    if (flush && streamTTSBuf.trim()) {
+      speak(_stripMarkdown(streamTTSBuf).trim());
+      streamTTSBuf = '';
+    }
+  }
+
+  function _appendStreamChunk(text) {
+    streamRawText += text;
+    streamTTSBuf  += text;
+
+    // Create bubble on first chunk
+    if (!streamBubbleEl) {
+      removeTyping();
+      const row = document.createElement('div');
+      row.className = 'bubble-row ai';
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar ai';
+      avatar.textContent = 'I';
+      streamBubbleEl = document.createElement('div');
+      streamBubbleEl.className = 'bubble';
+      row.appendChild(avatar);
+      row.appendChild(streamBubbleEl);
+      chat.appendChild(row);
+    }
+
+    // Update bubble with formatted markdown
+    streamBubbleEl.innerHTML = renderMd(streamRawText);
+    scrollBottom();
+
+    // Speak complete sentences as they arrive
+    _drainStreamTTS(false);
+  }
+
+  function _finalizeStream() {
+    _drainStreamTTS(true);   // flush any remaining text
+    streamBubbleEl = null;
+    streamRawText  = '';
+    streamTTSBuf   = '';
+  }
+
   // ── STT via MediaRecorder + Whisper ──────────────────────────────────
   // Records raw audio while button is held; transcribes on release via Whisper.
   // No silence detection — full control over start/stop.
@@ -445,6 +503,14 @@
       removeTyping();
 
       switch (msg.type) {
+        case 'stream_chunk':
+          _appendStreamChunk(msg.text);
+          break;
+
+        case 'stream_done':
+          _finalizeStream();
+          break;
+
         case 'ai':
           addBubble('ai', msg.text);
           // Speak question, then enable input so user can't interrupt mid-sentence
