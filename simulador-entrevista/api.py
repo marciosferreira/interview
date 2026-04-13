@@ -90,32 +90,42 @@ async def interview_ws(ws: WebSocket):
 
         prev_msg_count = 1
         did_stream = False   # True when the previous invoke used parallel streaming
+        question   = ""      # last interrupt value, needed for next stream_messages
+        prev_was_skip = False  # True when the previous user input was "skip"
 
         while True:
             messages: list = result.get("messages", [])
             interrupts = result.get("__interrupt__", [])
             fase = result.get("fase", "")
 
+            # Save and reset per-iteration flags
+            was_streamed  = did_stream
+            did_stream    = False
+            was_skip      = prev_was_skip
+            prev_was_skip = False
+
             # ── New-message filtering ─────────────────────────────────────────
-            # When did_stream=True, the conversational reply was already sent as
-            # stream_chunk events — skip the first new AIMessage (it's that reply).
-            #
-            # When did_stream=False, use the structural heuristic:
-            #   • First AIMessage followed by a real user HumanMessage → re-generated
-            #     interrupt question, already shown → skip.
-            #   • First AIMessage followed by "[acknowledged...]" → completion feedback,
-            #     NEW content → show as transition.
+            # Use a single heuristic for both streaming and non-streaming paths:
+            #   • First AIMessage followed by a real user HumanMessage (not
+            #     "[acknowledged...]") → echo of the interrupt question that was
+            #     already shown/spoken → skip.
+            #   • First AIMessage followed by "[acknowledged — ready for next phase]"
+            #     → completion feedback, NEW content → show as transition.
             new_messages = messages[prev_msg_count:]
             first_ai_idx = next(
                 (i for i, m in enumerate(new_messages) if isinstance(m, AIMessage)), None
             )
+
+            # True when a phase transition occurred in this result
+            had_transition = any(
+                isinstance(m, HumanMessage) and "[acknowledged" in m.content
+                for m in new_messages
+            )
+
             for i, msg in enumerate(new_messages):
                 if not isinstance(msg, AIMessage):
                     continue
                 if i == first_ai_idx:
-                    if did_stream:
-                        did_stream = False
-                        continue  # already sent via stream_chunk — don't repeat
                     next_msg = new_messages[i + 1] if i + 1 < len(new_messages) else None
                     is_replay = (
                         next_msg is not None
@@ -123,6 +133,12 @@ async def interview_ws(ws: WebSocket):
                         and "[acknowledged" not in next_msg.content
                     )
                     if is_replay:
+                        continue  # already shown/spoken — skip
+                    # When the user explicitly skipped, the streaming bubble already
+                    # acknowledged it ("Got it — moving on.").  Suppress the graph's
+                    # structured feedback block (it will appear in the final scorecard)
+                    # so the user doesn't see the same phase feedback twice.
+                    if had_transition and was_skip:
                         continue
                 is_scorecard = "INTERVIEW SCORECARD" in msg.content or fase == "done"
                 msg_type = "feedback" if is_scorecard else "transition"
@@ -133,7 +149,18 @@ async def interview_ws(ws: WebSocket):
                 break
 
             question = interrupts[0].value
-            await ws.send_json({"type": "ai", "text": question})
+
+            if had_transition:
+                # Phase transition: the transition feedback TTS is still playing.
+                # Send the new question as "phase_question" so the client can
+                # buffer it and only show/speak it after transition TTS drains.
+                await ws.send_json({"type": "phase_question", "text": question})
+            elif was_streamed:
+                # Streaming bubble already shows the response — don't add a second
+                # bubble for the same interrupt question. Just enable input after TTS.
+                await ws.send_json({"type": "await_input"})
+            else:
+                await ws.send_json({"type": "ai", "text": question})
 
             # Wait for the user's spoken/typed response
             data = await ws.receive_json()
@@ -141,18 +168,41 @@ async def interview_ws(ws: WebSocket):
             if not user_text:
                 continue
 
+            # Normalise skip intent: only the exact word "skip" (case-insensitive)
+            # triggers a phase skip.  Casual phrases like "move on", "Y", "ok",
+            # "let's continue" are passed through as normal answers so the LLM
+            # evaluates them as content — not as skip commands.
+            _SKIP_KEYWORDS = {"skip", "s"}
+            if user_text.lower() in _SKIP_KEYWORDS:
+                user_text = "skip"
+                prev_was_skip = True
+
             await ws.send_json({"type": "user", "text": user_text})
 
             prev_msg_count = len(messages)
             system_prompt = FASE_TO_SYSTEM.get(fase, "")
 
             try:
-                if system_prompt:
+                # Only stream if the user gave a substantive answer (≥ 8 words).
+                # Short inputs like "Y", "ok", "let's go", "move on" are
+                # meta-commands or non-answers.  Streaming them produces
+                # confusing feedback bubbles; let the graph handle them silently.
+                _is_substantive = len(user_text.split()) >= 8
+
+                if system_prompt and _is_substantive:
                     # ── Parallel: stream reply to client + run graph evaluation ──
-                    # The streaming LLM needs the full context: state messages +
-                    # the question that was shown (interrupt value) + user's answer.
-                    # These are NOT yet in state["messages"] at this point.
-                    stream_messages = messages + [
+                    # Trim stream context to the current phase only: messages after
+                    # the last "[acknowledged — ready for next phase]" sentinel.
+                    # This prevents the streaming model from seeing prior-phase
+                    # history (e.g. elevator-pitch feedback) and generating stale
+                    # feedback while the graph is already in a later phase.
+                    last_ack = max(
+                        (i for i, m in enumerate(messages)
+                         if isinstance(m, HumanMessage) and "[acknowledged" in m.content),
+                        default=-1,
+                    )
+                    phase_messages = messages[last_ack + 1:]
+                    stream_messages = phase_messages + [
                         AIMessage(content=question),
                         HumanMessage(content=user_text),
                     ]
@@ -171,7 +221,8 @@ async def interview_ws(ws: WebSocket):
                         raise result
                     did_stream = bool(streamed) and not isinstance(streamed, Exception)
                 else:
-                    # Feedback / unknown phase — no streaming, normal invoke
+                    # No streaming: either no system prompt, or input too short
+                    # to warrant a streamed response (avoids spurious feedback bubbles).
                     result = await loop.run_in_executor(
                         None,
                         functools.partial(graph.invoke, Command(resume=user_text), config),

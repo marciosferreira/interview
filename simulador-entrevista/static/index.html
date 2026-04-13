@@ -295,6 +295,7 @@
 
   let ttsChain = Promise.resolve();
   let ttsToken  = 0;   // incremented on stopTTS/new speak to cancel in-flight chunks
+  let ttsActiveSpeaks = 0;  // counts concurrent speak() calls; button hides only when 0
 
   function _stripMarkdown(text) {
     return text
@@ -342,6 +343,7 @@
     // Fire ALL fetches NOW in parallel — they complete while earlier chunks play
     const fetches = chunks.map(c => _fetchAudioUrl(c));
     skipBtn.style.display = 'flex';
+    ttsActiveSpeaks++;
 
     for (let i = 0; i < chunks.length; i++) {
       const fetch_i = fetches[i];
@@ -357,7 +359,10 @@
         await new Promise(r => { audio.onended = r; audio.onerror = r; audio.play().catch(r); });
         URL.revokeObjectURL(url);
         currentAudio = null;
-        if (isLast && ttsToken === myToken) skipBtn.style.display = 'none';
+        if (isLast && ttsToken === myToken) {
+          ttsActiveSpeaks = Math.max(0, ttsActiveSpeaks - 1);
+          if (ttsActiveSpeaks === 0) skipBtn.style.display = 'none';
+        }
       }).catch(() => {});
     }
 
@@ -366,6 +371,7 @@
 
   function stopTTS() {
     ttsToken++;                                    // invalidates all queued chunks
+    ttsActiveSpeaks = 0;
     if (currentAudio) { currentAudio.pause(); currentAudio = null; }
     ttsChain = Promise.resolve();
     skipBtn.style.display = 'none';
@@ -509,6 +515,20 @@
 
         case 'stream_done':
           _finalizeStream();
+          break;
+
+        case 'await_input':
+          // Streaming already showed the bubble — wait for TTS chain to drain, then enable input
+          ttsChain.then(() => enableInput());
+          break;
+
+        case 'phase_question':
+          // First question of a new phase. Stop any ongoing TTS (transition feedback)
+          // immediately so the new question appears cleanly, then enable input only
+          // after the question finishes speaking.
+          stopTTS();
+          addBubble('ai', msg.text);
+          speak(msg.text).then(() => enableInput());
           break;
 
         case 'ai':

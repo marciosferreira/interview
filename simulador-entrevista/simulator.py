@@ -181,17 +181,43 @@ class Scorecard(BaseModel):
 # Generic node factory
 # ---------------------------------------------------------------------------
 
+def _phase_messages(all_messages: list) -> list:
+    """Return only the messages that belong to the current phase.
+
+    Each phase transition appends a HumanMessage("[acknowledged — ready for
+    next phase]") sentinel.  Everything *before* the last such sentinel belongs
+    to a completed phase and must not bleed into the current evaluation —
+    otherwise the LLM sees the elevator-pitch history while evaluating a CAR
+    answer and generates stale feedback.
+
+    On the very first invocation of a new phase the slice is empty (the
+    sentinel is the last message).  In that case return a neutral opener so
+    the API call always has at least one human message.
+    """
+    last_ack = max(
+        (i for i, m in enumerate(all_messages)
+         if isinstance(m, HumanMessage) and "[acknowledged" in m.content),
+        default=-1,
+    )
+    phase_msgs = all_messages[last_ack + 1:]
+    if not phase_msgs:
+        phase_msgs = [HumanMessage(content="I'm ready to start this phase.")]
+    return phase_msgs
+
+
 def _make_node(system_prompt: str, output_class, checklist_key: str, notas_key: str, next_fase: str):
     """
     Returns a node function that:
-    1. Calls the model with structured output
+    1. Calls the model with structured output (current-phase context only)
     2. Accumulates checklist booleans (only grows — never unsets)
     3. If incomplete: interrupt() → wait for user, then return updated messages
     4. If complete: add transition and advance fase
     """
     def node(state: EntrevistaState) -> dict:
         structured = model.with_structured_output(output_class)
-        messages = [SystemMessage(content=system_prompt)] + state["messages"]
+        # Use only messages from the current phase to avoid prior-phase contamination
+        phase_msgs = _phase_messages(state["messages"])
+        messages = [SystemMessage(content=system_prompt)] + phase_msgs
         avaliacao = structured.invoke(messages)
 
         # Merge checklist — fields that are already True stay True
@@ -278,7 +304,8 @@ motivation = _make_node(
 
 def marcio_questions(state: EntrevistaState) -> dict:
     structured = model.with_structured_output(AvaliacaoMarcioQuestions)
-    messages = [SystemMessage(content=SYSTEM_MARCIO_Q)] + state["messages"]
+    phase_msgs = _phase_messages(state["messages"])
+    messages = [SystemMessage(content=SYSTEM_MARCIO_Q)] + phase_msgs
     avaliacao = structured.invoke(messages)
 
     if not avaliacao.fase_completa:
