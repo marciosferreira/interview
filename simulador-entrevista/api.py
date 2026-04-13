@@ -149,8 +149,15 @@ async def interview_ws(ws: WebSocket):
             try:
                 if system_prompt:
                     # ── Parallel: stream reply to client + run graph evaluation ──
+                    # The streaming LLM needs the full context: state messages +
+                    # the question that was shown (interrupt value) + user's answer.
+                    # These are NOT yet in state["messages"] at this point.
+                    stream_messages = messages + [
+                        AIMessage(content=question),
+                        HumanMessage(content=user_text),
+                    ]
                     stream_task = asyncio.create_task(
-                        _stream_to_client(ws, messages, system_prompt)
+                        _stream_to_client(ws, stream_messages, system_prompt)
                     )
                     graph_future = loop.run_in_executor(
                         None,
