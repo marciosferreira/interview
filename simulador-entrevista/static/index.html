@@ -393,6 +393,13 @@
           addFeedback(msg.text);
           break;
 
+        case 'error':
+          addBubble('ai', '⚠️ ' + msg.text);
+          disableInput(true);
+          badge.textContent = 'Error';
+          badge.className = '';
+          break;
+
         case 'done':
           doneBanner.style.display = 'block';
           disableInput(true);

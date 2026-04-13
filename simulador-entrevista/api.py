@@ -97,12 +97,31 @@ async def interview_ws(ws: WebSocket):
             await ws.send_json({"type": "user", "text": user_text})
 
             prev_msg_count = len(messages)
-            result = await loop.run_in_executor(
-                None, functools.partial(graph.invoke, Command(resume=user_text), config)
-            )
+            try:
+                result = await loop.run_in_executor(
+                    None, functools.partial(graph.invoke, Command(resume=user_text), config)
+                )
+            except Exception as exc:
+                import traceback
+                traceback.print_exc()
+                await ws.send_json({
+                    "type": "error",
+                    "text": f"[Server error — please reload and try again]\n{exc}"
+                })
+                break
 
     except WebSocketDisconnect:
         pass
+    except Exception as exc:
+        import traceback
+        traceback.print_exc()
+        try:
+            await ws.send_json({
+                "type": "error",
+                "text": f"[Connection error — please reload]\n{exc}"
+            })
+        except Exception:
+            pass
 
 
 # Serve the frontend — mount last so /ws is registered first
