@@ -263,11 +263,13 @@
   let typingEl = null;
   let currentAudio = null;
 
-  // ── TTS ───────────────────────────────────────────────────────────────
-  async function speak(text) {
-    // Stop any audio still playing
-    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  // ── TTS queue — guarantees sequential playback ─────────────────────────
+  // ttsChain is always the promise for the last queued item.
+  // Each speak() appends to the chain so items play one after another.
+  let ttsChain = Promise.resolve();
 
+  async function _speakOne(text) {
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
     try {
       const res = await fetch(`/tts?text=${encodeURIComponent(text)}`);
       if (!res.ok) return;
@@ -278,7 +280,7 @@
       skipBtn.style.display = 'flex';
       await new Promise((resolve) => {
         audio.onended = resolve;
-        audio.onerror = resolve;   // don't block on error
+        audio.onerror = resolve;
         audio.play().catch(resolve);
       });
       URL.revokeObjectURL(url);
@@ -286,17 +288,26 @@
     } catch (err) {
       console.error('TTS error:', err);
     } finally {
-      skipBtn.style.display = 'none';
+      if (!currentAudio) skipBtn.style.display = 'none';
     }
+  }
+
+  function speak(text) {
+    // Append to chain — each item waits for the previous one to finish
+    const p = ttsChain.then(() => _speakOne(text));
+    ttsChain = p.catch(() => {});   // errors don't break the chain
+    return p;                        // caller can .then() for post-audio actions
+  }
+
+  function stopTTS() {
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    ttsChain = Promise.resolve();   // discard queued items
+    skipBtn.style.display = 'none';
   }
 
   // ── Skip TTS ──────────────────────────────────────────────────────────
   skipBtn.addEventListener('click', () => {
-    if (currentAudio) {
-      currentAudio.pause();
-      currentAudio = null;
-    }
-    skipBtn.style.display = 'none';
+    stopTTS();
     enableInput();
   });
 
