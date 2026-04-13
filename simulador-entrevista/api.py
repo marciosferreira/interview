@@ -56,6 +56,7 @@ async def interview_ws(ws: WebSocket):
         )
 
         prev_msg_count = 1
+        last_shown_question = ""  # tracks the interrupt text already sent to the client
 
         while True:
             messages: list = result.get("messages", [])
@@ -63,14 +64,17 @@ async def interview_ws(ws: WebSocket):
             fase = result.get("fase", "")
 
             # Send transition messages and final feedback.
-            # The first new AIMessage is always the previously-shown question
-            # (committed on resume) — skip it. Everything after is new.
+            # When fase_completa=False the node commits AIMessage(question)+HumanMessage(answer),
+            # so the first new AIMessage is the question already shown — skip it.
+            # When fase_completa=True the node only commits AIMessage(final_feedback), which is
+            # NEW and must NOT be skipped. We distinguish by comparing to last_shown_question.
             new_messages = messages[prev_msg_count:]
-            skip_first_ai = True
+            first_ai_skipped = False
             for msg in new_messages:
-                if skip_first_ai and isinstance(msg, AIMessage):
-                    skip_first_ai = False
-                    continue
+                if not first_ai_skipped and isinstance(msg, AIMessage):
+                    first_ai_skipped = True
+                    if msg.content == last_shown_question:
+                        continue   # already sent this one as the interrupt question
                 if isinstance(msg, AIMessage):
                     is_scorecard = "INTERVIEW SCORECARD" in msg.content or fase == "done"
                     msg_type = "feedback" if is_scorecard else "transition"
@@ -81,6 +85,7 @@ async def interview_ws(ws: WebSocket):
                 break
 
             question = interrupts[0].value
+            last_shown_question = question
             await ws.send_json({"type": "ai", "text": question})
 
             # Wait for user's spoken/typed response
