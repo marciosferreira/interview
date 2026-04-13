@@ -186,6 +186,17 @@
     #send-btn:hover    { background: #4f46e5; }
     #send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
+    #skip-btn {
+      background: #2d3148;
+      color: #94a3b8;
+      display: none;
+      font-size: 13px;
+      font-weight: 600;
+      width: auto;
+      padding: 0 14px;
+    }
+    #skip-btn:hover { background: #3d4160; color: #e2e8f0; }
+
     @keyframes pulse {
       0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,.4); }
       50%       { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
@@ -231,6 +242,7 @@
     <button id="mic-btn" class="icon-btn" disabled title="Hold to speak">🎙️</button>
     <textarea id="text-input" placeholder="Type your answer or press 🎙️ to speak…"
               rows="1" disabled></textarea>
+    <button id="skip-btn" class="icon-btn" title="Skip audio">⏭ Skip</button>
     <button id="send-btn" class="icon-btn" disabled title="Send (Enter)">➤</button>
   </div>
   <p id="hint">Hold <strong>🎙️</strong> to speak · Release to send · <strong>Enter</strong> to send text · <strong>Shift+Enter</strong> for new line</p>
@@ -241,6 +253,7 @@
   const input     = document.getElementById('text-input');
   const micBtn    = document.getElementById('mic-btn');
   const sendBtn   = document.getElementById('send-btn');
+  const skipBtn   = document.getElementById('skip-btn');
   const badge     = document.getElementById('status-badge');
   const doneBanner = document.getElementById('done-banner');
 
@@ -262,6 +275,7 @@
       const url  = URL.createObjectURL(blob);
       const audio = new Audio(url);
       currentAudio = audio;
+      skipBtn.style.display = 'flex';
       await new Promise((resolve) => {
         audio.onended = resolve;
         audio.onerror = resolve;   // don't block on error
@@ -271,8 +285,20 @@
       currentAudio = null;
     } catch (err) {
       console.error('TTS error:', err);
+    } finally {
+      skipBtn.style.display = 'none';
     }
   }
+
+  // ── Skip TTS ──────────────────────────────────────────────────────────
+  skipBtn.addEventListener('click', () => {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio = null;
+    }
+    skipBtn.style.display = 'none';
+    enableInput();
+  });
 
   // ── STT via MediaRecorder + Whisper ──────────────────────────────────
   // Records raw audio while button is held; transcribes on release via Whisper.
