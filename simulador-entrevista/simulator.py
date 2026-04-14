@@ -112,6 +112,25 @@ class EntrevistaState(TypedDict):
 # Lean interview Pydantic models (no feedback fields — report node handles those)
 # ---------------------------------------------------------------------------
 
+# Shared Field descriptor for the `mensagem` field in all interview Pydantic models.
+# Rule (3) from previous versions ("deliver the Judge's feedback block") has been
+# removed — that caused the LLM to put report content into Maria's message.
+# The Judge streams the report separately; Maria's mensagem is ONLY a question or
+# short coaching nudge, never feedback, never a summary.
+_MENSAGEM_FIELD = Field(
+    description=(
+        "Maria Ximena's next spoken line — a question or short coaching nudge only. "
+        "(1) Opening turn: reproduce the exact greeting from the phase prompt verbatim. "
+        "(2) Ongoing interview: one follow-up question or coaching prompt, 1–3 sentences max. "
+        "(3) Coaching after 2+ failed attempts: a brief hint followed by "
+            "'take another attempt or say skip to move on'. "
+        "(4) When fase_completa=True: set this to exactly the string 'OK' and nothing else. "
+        "NEVER include feedback, scoring, report content, or a summary of how the candidate did. "
+        "The Judge handles all feedback after the phase ends — Maria never delivers it."
+    )
+)
+
+
 class PitchInterview(BaseModel):
     apresentacao_pessoal: bool    # item 1: name + current role introduced
     phd_como_forca: bool          # item 2: PhD framed as cognitive asset (not just credential)
@@ -124,16 +143,7 @@ class PitchInterview(BaseModel):
     sem_stack_names: bool         # item 9: no technical stack names used
     sem_metricas: bool            # item 10: no specific metrics or percentages
     ingles_adequado: bool         # item 11: English mostly fluent and natural
-    mensagem: str = Field(
-        description=(
-            "The exact text spoken aloud to the candidate. "
-            "VOICE RULES: (1) For the opening message, reproduce the exact greeting defined in the phase prompt — Maria Ximena introduces herself and asks for the elevator pitch. "
-            "(2) During the interview, this is Maria Ximena's follow-up question or coaching message in her natural voice. "
-            "(3) After a complete question + follow-up exchange, deliver the Judge's full feedback block first, then Maria's response to the gate result. "
-            "(4) Set to 'OK' ONLY when fase_completa=True. "
-            "NEVER write a placeholder, status message, or meta-commentary."
-        )
-    )
+    mensagem: str = _MENSAGEM_FIELD
     fase_completa: bool
     observacoes: str
     ingles_erros: StrList
@@ -148,53 +158,10 @@ class CARInterview(BaseModel):
     resultado_negocio: bool       # item 6: result in business impact terms
     production_mindset: bool      # item 7: proactive production thinking (NON-NEGOTIABLE)
     ingles_adequado: bool         # item 8: English mostly fluent and natural
-    mensagem: str = Field(
-        description=(
-            "The exact text spoken aloud to the candidate. "
-            "VOICE RULES: (1) For the opening message, use the transition defined in the phase prompt — ask the CAR opening question in Maria Ximena's natural voice. "
-            "(2) During the interview, this is Maria Ximena's follow-up question or coaching message. "
-            "(3) After a complete question + follow-up exchange, deliver the Judge's full feedback block first, then Maria's response to the gate. "
-            "(4) Set to 'OK' ONLY when fase_completa=True. "
-            "NEVER write a placeholder or status message."
-        )
-    )
+    mensagem: str = _MENSAGEM_FIELD
     fase_completa: bool
     observacoes: str
     ingles_erros: StrList
-
-
-_MENSAGEM_TECHNICAL = Field(
-    description=(
-        "The exact text spoken aloud to the candidate. "
-        "VOICE RULES: (1) For the opening message, use the transition defined in the phase prompt — ask the first technical question in Maria Ximena's natural voice. "
-        "(2) During the interview, this is Maria Ximena's follow-up question or coaching. "
-        "(3) After a complete question + follow-up exchange, deliver the Judge's full feedback block, then Maria's response to the gate. "
-        "(4) Set to 'OK' ONLY when fase_completa=True. "
-        "NEVER write a placeholder or status message."
-    )
-)
-
-_MENSAGEM_LEADERSHIP = Field(
-    description=(
-        "The exact text spoken aloud to the candidate. "
-        "VOICE RULES: (1) For the opening message, use the transition defined in the phase prompt — ask the leadership opening question in Maria Ximena's natural voice. "
-        "(2) During the interview, this is Maria Ximena's follow-up question or coaching. "
-        "(3) After a complete question + follow-up exchange, deliver the Judge's full feedback block, then Maria's response to the gate. "
-        "(4) Set to 'OK' ONLY when fase_completa=True. "
-        "NEVER write a placeholder or status message."
-    )
-)
-
-_MENSAGEM_MOTIVATION = Field(
-    description=(
-        "The exact text spoken aloud to the candidate. "
-        "VOICE RULES: (1) For the opening message, use the transition defined in the phase prompt — ask the motivation opening question in Maria Ximena's natural voice. "
-        "(2) During the interview, this is Maria Ximena's follow-up question or coaching. "
-        "(3) After a complete question + follow-up exchange, deliver the Judge's full feedback block, then Maria's response to the gate. "
-        "(4) Set to 'OK' ONLY when fase_completa=True. "
-        "NEVER write a placeholder or status message."
-    )
-)
 
 
 class TechnicalInterview(BaseModel):
@@ -203,7 +170,7 @@ class TechnicalInterview(BaseModel):
     q3_rag: bool
     producao_mindset: bool
     ingles_adequado: bool
-    mensagem: str = _MENSAGEM_TECHNICAL
+    mensagem: str = _MENSAGEM_FIELD
     fase_completa: bool
     observacoes: str
     ingles_erros: StrList
@@ -218,7 +185,7 @@ class LeadershipInterview(BaseModel):
     data_point_usado: bool         # item 6: industry data point used naturally
     experiencia_real: bool         # item 7: connects to real experience (Iris Hub / Venturus)
     ingles_adequado: bool          # item 8: English mostly fluent and natural
-    mensagem: str = _MENSAGEM_LEADERSHIP
+    mensagem: str = _MENSAGEM_FIELD
     fase_completa: bool
     observacoes: str
     ingles_erros: StrList
@@ -230,7 +197,7 @@ class MotivationInterview(BaseModel):
     nao_pode_obter_em_outro_lugar: bool    # item 3: names what he can't get in current role
     tom_genuino: bool                      # item 4: tone feels genuine, not rehearsed
     ingles_adequado: bool                  # item 5: English mostly fluent and natural
-    mensagem: str = _MENSAGEM_MOTIVATION
+    mensagem: str = _MENSAGEM_FIELD
     fase_completa: bool
     observacoes: str
     ingles_erros: StrList
