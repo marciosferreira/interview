@@ -13,12 +13,6 @@ from openai import AsyncOpenAI
 
 from simulator import graph, make_initial_state, model
 from simulator import (
-    SYSTEM_PITCH_INTERVIEW      as SYSTEM_PITCH,
-    SYSTEM_CAR_INTERVIEW        as SYSTEM_CAR,
-    SYSTEM_TECHNICAL_INTERVIEW  as SYSTEM_TECHNICAL,
-    SYSTEM_LEADERSHIP_INTERVIEW as SYSTEM_LEADERSHIP,
-    SYSTEM_MOTIVATION_INTERVIEW as SYSTEM_MOTIVATION,
-    SYSTEM_MARCIO_Q,
     SYSTEM_PITCH_REPORT,
     SYSTEM_CAR_REPORT,
     SYSTEM_TECHNICAL_REPORT,
@@ -29,16 +23,6 @@ from simulator import (
 openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = FastAPI()
-
-# Maps active interview phase → system prompt used for parallel streaming.
-FASE_TO_SYSTEM = {
-    "elevator_pitch":   SYSTEM_PITCH,
-    "CAR":              SYSTEM_CAR,
-    "technical":        SYSTEM_TECHNICAL,
-    "leadership":       SYSTEM_LEADERSHIP,
-    "motivation":       SYSTEM_MOTIVATION,
-    "marcio_questions": SYSTEM_MARCIO_Q,
-}
 
 # Maps report phase name → report system prompt.
 # Used when the report node fires "[report_ready]" — api.py streams the report
@@ -112,32 +96,28 @@ async def interview_ws(ws: WebSocket):
             None, functools.partial(graph.invoke, initial_state, config)
         )
 
-        prev_msg_count = 1
-        did_stream          = False  # True when previous invoke used parallel streaming
+        prev_msg_count       = 1
         prev_report_streamed = False  # True when previous iteration streamed a report
-        question            = ""     # last interrupt value, needed for next stream_messages
-        prev_was_skip       = False  # True when the previous user input was "skip"
+        prev_was_skip        = False  # True when the previous user input was "skip"
 
         while True:
             messages: list = result.get("messages", [])
             interrupts = result.get("__interrupt__", [])
             fase = result.get("fase", "")
 
+            # Notify the client of the current phase so the progress bar can update.
+            await ws.send_json({"type": "phase", "fase": fase})
+
             # Save and reset per-iteration flags
-            was_streamed         = did_stream
-            did_stream           = False
             was_report_streamed  = prev_report_streamed
             prev_report_streamed = False
-            was_skip             = prev_was_skip
             prev_was_skip        = False
 
             # ── New-message filtering ─────────────────────────────────────────
-            # Use a single heuristic for both streaming and non-streaming paths:
-            #   • First AIMessage followed by a real user HumanMessage (not
-            #     "[acknowledged...]") → echo of the interrupt question that was
-            #     already shown/spoken → skip.
-            #   • First AIMessage followed by "[acknowledged — ready for next phase]"
-            #     → completion feedback, NEW content → show as transition.
+            # • First AIMessage followed by a real HumanMessage → the question
+            #   that triggered the interrupt (already shown) → skip.
+            # • First AIMessage followed by "[acknowledged — ready for next phase]"
+            #   → phase report archived by the graph → suppress if already streamed.
             new_messages = messages[prev_msg_count:]
             first_ai_idx = next(
                 (i for i, m in enumerate(new_messages) if isinstance(m, AIMessage)), None
@@ -164,13 +144,6 @@ async def interview_ws(ws: WebSocket):
                     # Report was already streamed with onyx voice — suppress the
                     # graph's archived copy so it doesn't appear as a second bubble.
                     if was_report_streamed and had_transition:
-                        continue
-                    # When streaming ran (was_streamed=True) and no phase transition
-                    # occurred, the first AIMessage is the graph's re-generation of
-                    # what was already shown in the streaming bubble.  Skip it to
-                    # avoid a duplicate bubble and competing TTS — unless it IS the
-                    # scorecard itself (which has no streaming equivalent).
-                    if was_streamed and not had_transition and "INTERVIEW SCORECARD" not in msg.content:
                         continue
                 is_scorecard = "INTERVIEW SCORECARD" in msg.content or fase == "done"
                 msg_type = "feedback" if is_scorecard else "transition"
@@ -209,9 +182,8 @@ async def interview_ws(ws: WebSocket):
                 continue  # restart loop — next interrupt is the next phase's question
 
             if had_transition:
-                # Phase transition: feedback is shown/spoken. Wait for the user to
-                # signal they're ready (any input) before showing the next phase
-                # question — so the two don't appear simultaneously.
+                # Phase transition: report is shown/spoken. Wait for the user to
+                # signal they're ready before showing the next phase question.
                 await ws.send_json({"type": "await_input"})
                 while True:
                     data = await ws.receive_json()
@@ -222,12 +194,7 @@ async def interview_ws(ws: WebSocket):
                     if ready_text:
                         break
                 await ws.send_json({"type": "user", "text": ready_text})
-                # Now show the next phase's opening question.
                 await ws.send_json({"type": "ai", "text": question})
-            elif was_streamed:
-                # Streaming bubble already shows the response — don't add a second
-                # bubble for the same interrupt question. Just enable input after TTS.
-                await ws.send_json({"type": "await_input"})
             else:
                 await ws.send_json({"type": "ai", "text": question})
 
@@ -251,44 +218,18 @@ async def interview_ws(ws: WebSocket):
             await ws.send_json({"type": "user", "text": user_text})
 
             prev_msg_count = len(messages)
-            system_prompt = FASE_TO_SYSTEM.get(fase, "")
 
             try:
-                # Stream a live conversational reaction in parallel with graph
-                # evaluation — but only when the user sent real content.
-                # Skip streaming on "skip": the report node generates the feedback
-                # directly and there is nothing useful to stream for a skip signal.
-                if system_prompt and user_text != "skip":
-                    # ── Parallel: stream reply to client + run graph evaluation ──
-                    # Use the graph's phase_messages (current-phase transcript only)
-                    # so the streaming model never sees prior-phase history.
-                    phase_messages = result.get("phase_messages") or messages
-                    stream_messages = phase_messages + [
-                        AIMessage(content=question),
-                        HumanMessage(content=user_text),
-                    ]
-                    stream_task = asyncio.create_task(
-                        _stream_to_client(ws, stream_messages, system_prompt)
-                    )
-                    graph_future = loop.run_in_executor(
-                        None,
-                        functools.partial(graph.invoke, Command(resume=user_text), config),
-                    )
-                    outcomes = await asyncio.gather(
-                        stream_task, graph_future, return_exceptions=True
-                    )
-                    streamed, result = outcomes
-                    if isinstance(result, Exception):
-                        raise result
-                    did_stream = bool(streamed) and not isinstance(streamed, Exception)
-                else:
-                    # No streaming: no system prompt available, or user sent "skip".
-                    result = await loop.run_in_executor(
-                        None,
-                        functools.partial(graph.invoke, Command(resume=user_text), config),
-                    )
-                    did_stream = False
-
+                # Run graph evaluation and wait for the result.
+                # Parallel streaming was removed: the streaming LLM and the graph LLM
+                # independently decide what to ask next and often diverge, causing Maria
+                # to show two different questions and then evaluate answers against the
+                # wrong one.  A single graph call with the typing indicator is correct
+                # and the 3–7 s wait is acceptable for an interview context.
+                result = await loop.run_in_executor(
+                    None,
+                    functools.partial(graph.invoke, Command(resume=user_text), config),
+                )
             except Exception as exc:
                 import traceback
                 traceback.print_exc()
