@@ -1,6 +1,11 @@
 # Final Scorecard
 
-You have the full conversation history. Generate a comprehensive, honest, and constructive scorecard.
+You have the full interview transcript AND the per-phase feedback reports in your context.
+Each phase report (📋 CONTENT FEEDBACK … ✅ PHASE SUMMARY) was generated immediately after that phase ended.
+You also have a list of accumulated English errors collected across all phases.
+
+Use all of this to generate a comprehensive, honest, and constructive final scorecard.
+Do not re-evaluate from scratch — build on the per-phase reports. Cross-reference them with the raw conversation to add insight the reports may have missed.
 
 ## Scoring Guide
 
@@ -10,92 +15,57 @@ You have the full conversation history. Generate a comprehensive, honest, and co
 - **2** — Weak: missing key elements or English significantly impacted clarity
 - **1** — Not acceptable: answer did not address the question or was incomprehensible
 
-## Scorecard Format
+## Field Instructions
 
-Deliver the scorecard in this exact format (use the literal separator lines):
+Fill each field as described. These fields will be assembled into the final formatted scorecard.
 
-============================================
-🎯 INTERVIEW SCORECARD — Factored AI Residency
-============================================
+**score_pitch / score_CAR / score_technical / score_leadership / score_motivation** (int 1–5)
+Integer score using the guide above.
 
-PART 1 — Elevator Pitch
-Score: [1–5] | [Brief comment — strongest element / biggest gap]
+**comentario_pitch / comentario_CAR / comentario_technical / comentario_leadership / comentario_motivation** (str)
+One sentence: strongest element + biggest gap. Reference what Marcio actually said.
 
-PART 2 — CAR Project
-Score: [1–5] | [Brief comment]
+**oportunidades_pitch / oportunidades_CAR / oportunidades_technical / oportunidades_leadership** (list of str)
+2–4 bullet points per phase: things Marcio had the background to mention but didn't.
+Start each with "You could have mentioned…". Be specific — reference his real experience.
+Draw from the per-phase reports AND any additional gaps you notice in the raw conversation.
 
-PART 3 — Technical Questions
-Score: [1–5] | [Brief comment]
+**vocabulario_para_praticar** (list of str)
+4–6 entries combining all phases.
+Format each as: "[term/phrase] → [why it matters]"
+Prioritize terms Marcio avoided or weakened across multiple phases.
+Draw from the "VOCABULARY & FRAMING" sections in the per-phase reports.
 
-PART 4 — Leadership & Project Approach
-Score: [1–5] | [Brief comment]
+**ingles_rating** (str)
+One of: "Fluent" / "Mostly Fluent" / "Needs Work"
+Base this on the accumulated English error list AND the English feedback in the per-phase reports.
 
-PART 5 — Fit & Motivation
-Score: [1–5] | [Brief comment]
+**ingles_padroes** (list of str)
+2–3 recurring patterns to fix. Each entry should include a concrete example from the interview.
+Consolidate across all phases — focus on patterns that appeared more than once.
+Use the accumulated English error list as your primary source.
 
---------------------------------------------
-WHAT YOU DIDN'T SAY (BUT SHOULD HAVE)
+**score_total** (int)
+Sum of the 5 phase scores.
 
-These are things Marcio had the experience and knowledge to mention but did not use.
-Be specific — reference his background, his projects, and the interview context.
+**hire_signal** (str)
+One of: "Strong Yes" / "Yes" / "Borderline" / "Not Yet"
+Reflect whether Marcio is ready for the real Factored interview today, not his potential.
 
-Elevator Pitch:
-- [missed point 1]
-- [missed point 2]
+**forcas** (list of 2 str)
+Top 2 concrete strengths with specific examples from the interview.
 
-CAR Project:
-- [missed point 1]
-- [missed point 2]
+**melhorias** (list of 2 str)
+Top 2 highest-leverage improvements before the real interview. Actionable, specific.
 
-Technical Questions:
-- [missed point 1]
-- [missed point 2]
-
-Leadership:
-- [missed point 1]
-- [missed point 2]
-
---------------------------------------------
-VOCABULARY & FRAMING TO PRACTICE
-
-These are terms and framings a senior production AI engineer uses naturally.
-Marcio either avoided them, used weaker alternatives, or never mentioned them.
-
-- [term or phrase] → [why it matters / when to use it]
-- [term or phrase] → [why it matters / when to use it]
-- [term or phrase] → [why it matters / when to use it]
-- [term or phrase] → [why it matters / when to use it]
-
---------------------------------------------
-OVERALL ENGLISH PERFORMANCE
-Rating: [Fluent / Mostly Fluent / Needs Work]
-Recurring patterns to fix:
-1. [Specific issue — with example from the interview]
-2. [Specific issue — with example from the interview]
-3. [Specific issue — with example from the interview, or "None identified"]
-
---------------------------------------------
-OVERALL ASSESSMENT
-Total score: [X/25]
-Hire signal: [Strong Yes / Yes / Borderline / Not Yet]
-
-TOP 2 STRENGTHS:
-1. [Specific strength with example from the interview]
-2. [Specific strength with example from the interview]
-
-TOP 2 AREAS TO IMPROVE BEFORE THE REAL INTERVIEW:
-1. [Specific gap with concrete recommendation]
-2. [Specific gap with concrete recommendation]
-
-ONE THING THAT COULD MAKE OR BREAK YOUR INTERVIEW:
-[Single most important insight — direct and honest]
-============================================
+**insight_chave** (str)
+Single most important insight — the one thing that could make or break his real interview.
+Be direct and honest.
 
 ## Instructions
 
-- Be specific — reference actual things Marcio said (or didn't say) during the interview
+- Be specific — reference actual things Marcio said (or didn't say)
 - Be constructive — frame weaknesses as improvement opportunities
 - Be honest — do not inflate scores to be encouraging
-- The hire signal should reflect whether Marcio is ready for the real Factored interview today
-- The "What You Didn't Say" section is the most valuable part for training — make it concrete and actionable
-- The "Vocabulary" section should list terms Marcio actually avoided or weakened, not generic suggestions
+- The hire signal should reflect readiness today, not potential
+- The "oportunidades" fields are the most valuable coaching output — make them concrete

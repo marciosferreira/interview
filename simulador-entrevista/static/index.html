@@ -297,6 +297,7 @@
   let streamWrapperEl = null;   // flex column wrapper that holds bubble + replay btn
   let streamRawText  = '';     // full raw text accumulated so far (for bubble rendering)
   let streamTTSBuf   = '';     // text not yet dispatched to TTS
+  let streamVoice    = 'nova'; // TTS voice for the current streaming session
 
   // ── TTS — chunked parallel fetch, sequential playback ────────────────
   // Strategy: split text into sentence-sized chunks, fire ALL fetches
@@ -338,20 +339,20 @@
     return chunks.length > 0 ? chunks : [plain];
   }
 
-  async function _fetchAudioUrl(text) {
+  async function _fetchAudioUrl(text, voice = 'nova') {
     try {
-      const res = await fetch(`/tts?text=${encodeURIComponent(text)}`);
+      const res = await fetch(`/tts?text=${encodeURIComponent(text)}&voice=${voice}`);
       if (!res.ok) return null;
       return URL.createObjectURL(await res.blob());
     } catch { return null; }
   }
 
-  function speak(text) {
+  function speak(text, voice = 'nova') {
     const myToken = ttsToken;   // read current token — only stopTTS() increments it
     const chunks  = _splitChunks(text);
 
     // Fire ALL fetches NOW in parallel — they complete while earlier chunks play
-    const fetches = chunks.map(c => _fetchAudioUrl(c));
+    const fetches = chunks.map(c => _fetchAudioUrl(c, voice));
     skipBtn.style.display = 'flex';
     ttsActiveSpeaks++;
 
@@ -402,17 +403,18 @@
     if (parts.length > 1) {
       for (let i = 0; i < parts.length - 1; i++) {
         const s = _stripMarkdown(parts[i]).trim();
-        if (s) speak(s);
+        if (s) speak(s, streamVoice);
       }
       streamTTSBuf = parts[parts.length - 1];
     }
     if (flush && streamTTSBuf.trim()) {
-      speak(_stripMarkdown(streamTTSBuf).trim());
+      speak(_stripMarkdown(streamTTSBuf).trim(), streamVoice);
       streamTTSBuf = '';
     }
   }
 
-  function _appendStreamChunk(text) {
+  function _appendStreamChunk(text, voice = 'nova') {
+    streamVoice   = voice;   // all chunks in a session share the same voice
     streamRawText += text;
     streamTTSBuf  += text;
 
@@ -449,14 +451,15 @@
 
     // Add replay button now that the full text is known
     if (streamWrapperEl && streamRawText) {
-      const finalText = streamRawText;
+      const finalText  = streamRawText;
+      const finalVoice = streamVoice;   // capture before reset
       const btn = document.createElement('button');
       btn.className = 'replay-btn';
       btn.innerHTML = '🔊 replay';
       btn.title = 'Replay audio';
       btn.addEventListener('click', () => {
         stopTTS();
-        speak(_stripMarkdown(finalText));
+        speak(_stripMarkdown(finalText), finalVoice);
       });
       streamWrapperEl.appendChild(btn);
     }
@@ -465,6 +468,7 @@
     streamWrapperEl = null;
     streamRawText   = '';
     streamTTSBuf    = '';
+    streamVoice     = 'nova';  // reset to default for next streaming session
   }
 
   // ── STT via MediaRecorder + Whisper ──────────────────────────────────
@@ -541,7 +545,7 @@
 
       switch (msg.type) {
         case 'stream_chunk':
-          _appendStreamChunk(msg.text);
+          _appendStreamChunk(msg.text, msg.voice || 'nova');
           break;
 
         case 'stream_done':
@@ -569,8 +573,8 @@
           break;
 
         case 'transition':
-          addBubble('ai', msg.text);
-          speak(msg.text);     // fire-and-forget — graph keeps running in parallel
+          addBubble('ai', msg.text, 'onyx');
+          speak(msg.text, 'onyx');     // fire-and-forget — graph keeps running in parallel
           showTyping(true);
           break;
 
@@ -615,7 +619,7 @@
     return marked.parse(text, { breaks: true });
   }
 
-  function addBubble(role, text) {
+  function addBubble(role, text, voice = 'nova') {
     const row = document.createElement('div');
     row.className = `bubble-row ${role}`;
 
@@ -640,7 +644,7 @@
       btn.title = 'Replay audio';
       btn.addEventListener('click', () => {
         stopTTS();
-        speak(_stripMarkdown(text));
+        speak(_stripMarkdown(text), voice);
       });
       wrapper.appendChild(btn);
     }
@@ -655,13 +659,33 @@
     const row = document.createElement('div');
     row.className = 'bubble-row feedback';
 
+    const cardWrapper = document.createElement('div');
+    cardWrapper.style.display = 'flex';
+    cardWrapper.style.flexDirection = 'column';
+    cardWrapper.style.alignItems = 'flex-start';
+    cardWrapper.style.width = '100%';
+
     const card = document.createElement('div');
     card.className = 'feedback-card';
     card.innerHTML = renderMd(text);
+    cardWrapper.appendChild(card);
 
-    row.appendChild(card);
+    const btn = document.createElement('button');
+    btn.className = 'replay-btn';
+    btn.innerHTML = '🔊 replay';
+    btn.title = 'Replay audio';
+    btn.addEventListener('click', () => {
+      stopTTS();
+      speak(_stripMarkdown(text), 'onyx');
+    });
+    cardWrapper.appendChild(btn);
+
+    row.appendChild(cardWrapper);
     chat.appendChild(row);
     scrollBottom();
+
+    // Speak feedback automatically with male Judge voice
+    speak(_stripMarkdown(text), 'onyx');
   }
 
   function showTyping(visible) {

@@ -11,7 +11,7 @@ from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langgraph.types import interrupt, Command
 import json as _json
-from pydantic import BaseModel, BeforeValidator
+from pydantic import BaseModel, BeforeValidator, Field
 
 load_dotenv()
 
@@ -56,14 +56,31 @@ def load_prompt(*filenames: str) -> str:
     return "\n\n---\n\n".join(parts)
 
 
-# Composed system prompts — each node gets only the context it needs
-SYSTEM_PITCH       = load_prompt("persona.md", "context_marcio.md", "elevator_pitch.md")
-SYSTEM_CAR         = load_prompt("persona.md", "context_marcio.md", "car.md")
-SYSTEM_TECHNICAL   = load_prompt("persona.md", "context_marcio.md", "technical.md")
-SYSTEM_LEADERSHIP  = load_prompt("persona.md", "context_marcio.md", "leadership.md")
-SYSTEM_MOTIVATION  = load_prompt("persona.md", "context_marcio.md", "motivation.md")
-SYSTEM_MARCIO_Q    = load_prompt("persona.md", "marcio_questions.md")
-SYSTEM_SCORECARD   = load_prompt("context_marcio.md", "scorecard.md")
+# Interview system prompts — conduct the interview, ask follow-ups, coach
+SYSTEM_PITCH_INTERVIEW       = load_prompt("persona_interview.md", "context_marcio.md", "elevator_pitch.md")
+SYSTEM_CAR_INTERVIEW         = load_prompt("persona_interview.md", "context_marcio.md", "car.md")
+SYSTEM_TECHNICAL_INTERVIEW   = load_prompt("persona_interview.md", "context_marcio.md", "technical.md")
+SYSTEM_LEADERSHIP_INTERVIEW  = load_prompt("persona_interview.md", "context_marcio.md", "leadership.md")
+SYSTEM_MOTIVATION_INTERVIEW  = load_prompt("persona_interview.md", "context_marcio.md", "motivation.md")
+
+# Report system prompts — generate the structured feedback block after phase completion
+SYSTEM_PITCH_REPORT          = load_prompt("report_format.md", "context_marcio.md", "elevator_pitch.md")
+SYSTEM_CAR_REPORT            = load_prompt("report_format.md", "context_marcio.md", "car.md")
+SYSTEM_TECHNICAL_REPORT      = load_prompt("report_format.md", "context_marcio.md", "technical.md")
+SYSTEM_LEADERSHIP_REPORT     = load_prompt("report_format.md", "context_marcio.md", "leadership.md")
+SYSTEM_MOTIVATION_REPORT     = load_prompt("report_format.md", "context_marcio.md", "motivation.md")
+
+# Other phases
+SYSTEM_MARCIO_Q  = load_prompt("persona_interview.md", "marcio_questions.md")
+SYSTEM_SCORECARD = load_prompt("context_marcio.md", "scorecard.md")
+
+# Aliases for api.py streaming (interview nodes only)
+SYSTEM_PITCH      = SYSTEM_PITCH_INTERVIEW
+SYSTEM_CAR        = SYSTEM_CAR_INTERVIEW
+SYSTEM_TECHNICAL  = SYSTEM_TECHNICAL_INTERVIEW
+SYSTEM_LEADERSHIP = SYSTEM_LEADERSHIP_INTERVIEW
+SYSTEM_MOTIVATION = SYSTEM_MOTIVATION_INTERVIEW
+SYSTEM_MARCIO_Q   = SYSTEM_MARCIO_Q
 
 
 # ---------------------------------------------------------------------------
@@ -72,9 +89,9 @@ SYSTEM_SCORECARD   = load_prompt("context_marcio.md", "scorecard.md")
 
 class EntrevistaState(TypedDict):
     messages: Annotated[list, add_messages]  # full history (LangGraph checkpointing)
-    phase_messages: list   # current-phase transcript only — reset on each transition
+    phase_messages: list   # current-phase transcript — preserved until report node reads it
     archive: list          # completed phases transcript — fed to scorecard at the end
-    fase: str  # elevator_pitch | CAR | technical | leadership | motivation | marcio_questions | feedback | done
+    fase: str              # current phase name
 
     checklist_pitch: dict
     checklist_CAR: dict
@@ -88,82 +105,134 @@ class EntrevistaState(TypedDict):
     notas_leadership: str
     notas_motivation: str
 
-    ingles_erros_acumulados: list  # cross-phase English error accumulation
+    ingles_erros_acumulados: list
 
 
 # ---------------------------------------------------------------------------
-# Structured outputs
+# Lean interview Pydantic models (no feedback fields — report node handles those)
 # ---------------------------------------------------------------------------
 
-class AvaliacaoPitch(BaseModel):
-    apresentacao_pessoal: bool
-    phd_como_forca: bool
-    pesquisa_internacional: bool
-    software_cv: bool
-    transicao_industria: bool
-    sem_detalhes_tecnicos: bool
-    ingles_adequado: bool
-    mensagem: str           # full conversational reply from Maria Ximena
-    fase_completa: bool
-    observacoes: str        # internal notes, not shown to candidate
-    oportunidades_perdidas: StrList   # things Marcio knew but didn't mention
-    vocabulario_sugerido: StrList     # stronger terms/framings he could have used
-    ingles_erros: StrList             # specific English issues this turn
-
-
-class AvaliacaoCAR(BaseModel):
-    contexto_negocio: bool
-    acoes_pessoais: bool
-    token_optimization: bool
-    langfuse_observability: bool
-    resultado_negocio: bool
-    ingles_adequado: bool
-    mensagem: str
+class PitchInterview(BaseModel):
+    apresentacao_pessoal: bool    # item 1: name + current role introduced
+    phd_como_forca: bool          # item 2: PhD framed as cognitive asset (not just credential)
+    pesquisa_internacional: bool  # item 3: international research (EMBL-EBI / Tulane)
+    software_cv: bool             # item 4: first-author software with AI/CV referenced
+    transicao_industria: bool     # item 5: transition framed as evolution, not gap
+    venturus_milestone: bool      # item 6: Venturus framed as entry point into production AI
+    trabalho_atual_negocio: bool  # item 7: current work in business terms (no stack names)
+    closing_demo_producao: bool   # item 8: demo-to-production gap framing (NON-NEGOTIABLE)
+    sem_stack_names: bool         # item 9: no technical stack names used
+    sem_metricas: bool            # item 10: no specific metrics or percentages
+    ingles_adequado: bool         # item 11: English mostly fluent and natural
+    mensagem: str = Field(
+        description=(
+            "The exact text spoken aloud to the candidate. "
+            "VOICE RULES: (1) For the opening message, reproduce the exact greeting defined in the phase prompt — Maria Ximena introduces herself and asks for the elevator pitch. "
+            "(2) During the interview, this is Maria Ximena's follow-up question or coaching message in her natural voice. "
+            "(3) After a complete question + follow-up exchange, deliver the Judge's full feedback block first, then Maria's response to the gate result. "
+            "(4) Set to 'OK' ONLY when fase_completa=True. "
+            "NEVER write a placeholder, status message, or meta-commentary."
+        )
+    )
     fase_completa: bool
     observacoes: str
-    oportunidades_perdidas: StrList
-    vocabulario_sugerido: StrList
     ingles_erros: StrList
 
 
-class AvaliacaoTechnical(BaseModel):
+class CARInterview(BaseModel):
+    contexto_negocio: bool        # item 1: business context clear (manufacturing, account managers)
+    problema_negocio: bool        # item 2: problem stated in business terms (not technical framing)
+    acoes_pessoais: bool          # item 3: personal ownership — uses "I", not "we"
+    langfuse_observability: bool  # item 4: Langfuse as deliberate decision from day one
+    token_optimization: bool      # item 5: token problem + multi-technique fix + validation
+    resultado_negocio: bool       # item 6: result in business impact terms
+    production_mindset: bool      # item 7: proactive production thinking (NON-NEGOTIABLE)
+    ingles_adequado: bool         # item 8: English mostly fluent and natural
+    mensagem: str = Field(
+        description=(
+            "The exact text spoken aloud to the candidate. "
+            "VOICE RULES: (1) For the opening message, use the transition defined in the phase prompt — ask the CAR opening question in Maria Ximena's natural voice. "
+            "(2) During the interview, this is Maria Ximena's follow-up question or coaching message. "
+            "(3) After a complete question + follow-up exchange, deliver the Judge's full feedback block first, then Maria's response to the gate. "
+            "(4) Set to 'OK' ONLY when fase_completa=True. "
+            "NEVER write a placeholder or status message."
+        )
+    )
+    fase_completa: bool
+    observacoes: str
+    ingles_erros: StrList
+
+
+_MENSAGEM_TECHNICAL = Field(
+    description=(
+        "The exact text spoken aloud to the candidate. "
+        "VOICE RULES: (1) For the opening message, use the transition defined in the phase prompt — ask the first technical question in Maria Ximena's natural voice. "
+        "(2) During the interview, this is Maria Ximena's follow-up question or coaching. "
+        "(3) After a complete question + follow-up exchange, deliver the Judge's full feedback block, then Maria's response to the gate. "
+        "(4) Set to 'OK' ONLY when fase_completa=True. "
+        "NEVER write a placeholder or status message."
+    )
+)
+
+_MENSAGEM_LEADERSHIP = Field(
+    description=(
+        "The exact text spoken aloud to the candidate. "
+        "VOICE RULES: (1) For the opening message, use the transition defined in the phase prompt — ask the leadership opening question in Maria Ximena's natural voice. "
+        "(2) During the interview, this is Maria Ximena's follow-up question or coaching. "
+        "(3) After a complete question + follow-up exchange, deliver the Judge's full feedback block, then Maria's response to the gate. "
+        "(4) Set to 'OK' ONLY when fase_completa=True. "
+        "NEVER write a placeholder or status message."
+    )
+)
+
+_MENSAGEM_MOTIVATION = Field(
+    description=(
+        "The exact text spoken aloud to the candidate. "
+        "VOICE RULES: (1) For the opening message, use the transition defined in the phase prompt — ask the motivation opening question in Maria Ximena's natural voice. "
+        "(2) During the interview, this is Maria Ximena's follow-up question or coaching. "
+        "(3) After a complete question + follow-up exchange, deliver the Judge's full feedback block, then Maria's response to the gate. "
+        "(4) Set to 'OK' ONLY when fase_completa=True. "
+        "NEVER write a placeholder or status message."
+    )
+)
+
+
+class TechnicalInterview(BaseModel):
     q1_monitoring: bool
     q2_degradacao: bool
     q3_rag: bool
     producao_mindset: bool
     ingles_adequado: bool
-    mensagem: str
+    mensagem: str = _MENSAGEM_TECHNICAL
     fase_completa: bool
     observacoes: str
-    oportunidades_perdidas: StrList
-    vocabulario_sugerido: StrList
     ingles_erros: StrList
 
 
-class AvaliacaoLeadership(BaseModel):
-    data_audit: bool
-    pilot_producao_gap: bool
-    stakeholder_mgmt: bool
-    data_point_usado: bool
-    ingles_adequado: bool
-    mensagem: str
+class LeadershipInterview(BaseModel):
+    data_audit: bool               # item 1: data audit before any model code
+    data_como_risco_primario: bool # item 2: data framed as primary project risk
+    pilot_producao_gap: bool       # item 3: pilot-to-production gap named as known risk
+    mitigacao_concreta: bool       # item 4: concrete mitigation (observability, cost modeling, exit criteria)
+    stakeholder_mgmt: bool         # item 5: stakeholder management proactive, not reactive
+    data_point_usado: bool         # item 6: industry data point used naturally
+    experiencia_real: bool         # item 7: connects to real experience (Iris Hub / Venturus)
+    ingles_adequado: bool          # item 8: English mostly fluent and natural
+    mensagem: str = _MENSAGEM_LEADERSHIP
     fase_completa: bool
     observacoes: str
-    oportunidades_perdidas: StrList
-    vocabulario_sugerido: StrList
     ingles_erros: StrList
 
 
-class AvaliacaoMotivation(BaseModel):
-    especifico_factored: bool
-    producao_focus: bool
-    conexao_real: bool
-    ingles_adequado: bool
-    mensagem: str
+class MotivationInterview(BaseModel):
+    especifico_factored: bool              # item 1: references 2+ Factored attributes with understanding
+    conexao_real: bool                     # item 2: draws explicit line between background and Factored
+    nao_pode_obter_em_outro_lugar: bool    # item 3: names what he can't get in current role
+    tom_genuino: bool                      # item 4: tone feels genuine, not rehearsed
+    ingles_adequado: bool                  # item 5: English mostly fluent and natural
+    mensagem: str = _MENSAGEM_MOTIVATION
     fase_completa: bool
     observacoes: str
-    oportunidades_perdidas: StrList
-    vocabulario_sugerido: StrList
     ingles_erros: StrList
 
 
@@ -184,13 +253,11 @@ class Scorecard(BaseModel):
     comentario_leadership: str
     score_motivation: int
     comentario_motivation: str
-    # What Marcio didn't say but should have — per phase
     oportunidades_pitch: StrList
     oportunidades_CAR: StrList
     oportunidades_technical: StrList
     oportunidades_leadership: StrList
-    # Vocabulary to practice — terms/framings Marcio avoided or weakened
-    vocabulario_para_praticar: StrList   # each entry: "term → why it matters"
+    vocabulario_para_praticar: StrList
     ingles_rating: str
     ingles_padroes: StrList
     score_total: int
@@ -201,47 +268,56 @@ class Scorecard(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Generic node factory
+# Node factories
 # ---------------------------------------------------------------------------
 
-def _make_node(system_prompt: str, output_class, checklist_key: str, notas_key: str, next_fase: str):
+def _make_interview_node(system_prompt, output_class, checklist_key, notas_key, report_fase):
     """
-    Returns a node function that:
-    1. Evaluates ONLY the current-phase transcript (state["phase_messages"])
-    2. Accumulates checklist booleans (only grows — never unsets)
-    3. If incomplete: interrupt() → update phase_messages, stay in phase
-    4. If complete: archive phase transcript, reset phase_messages, advance fase
+    Interview node: asks questions, coaches, loops until quality gate met.
+    When complete, advances to the corresponding report node — no feedback generated here.
     """
     def node(state: EntrevistaState) -> dict:
         structured = model.with_structured_output(output_class)
 
-        # Use only the current-phase transcript — completely isolated from
-        # prior phases.  If the phase just started (empty), seed with a
-        # neutral opener so the API call always has ≥ 1 human message.
         phase_msgs: list = state.get("phase_messages") or [
             HumanMessage(content="I'm ready to start this phase.")
         ]
         messages = [SystemMessage(content=system_prompt)] + phase_msgs
         avaliacao = structured.invoke(messages)
 
-        # Merge checklist — fields that are already True stay True
+        # Merge checklist — fields already True stay True
         old_checklist = state[checklist_key]
         new_checklist = {
             k: old_checklist.get(k, False) or getattr(avaliacao, k, False)
             for k in old_checklist
         }
 
-        # Accumulate internal notes
         old_notas = state[notas_key]
         new_notas = (old_notas + "\n" + avaliacao.observacoes).strip() if avaliacao.observacoes else old_notas
 
-        # Accumulate English errors across phases
-        old_ingles_erros = state.get("ingles_erros_acumulados", [])
-        new_ingles_erros = old_ingles_erros + (avaliacao.ingles_erros or [])
+        old_ingles = state.get("ingles_erros_acumulados", [])
+        new_ingles = old_ingles + (avaliacao.ingles_erros or [])
 
         if not avaliacao.fase_completa:
             user_response = interrupt(avaliacao.mensagem)
-            # Append this exchange to the phase transcript
+
+            # Skip bypass: advance directly to the report without a second LLM call.
+            # When LangGraph resumes with "skip", interrupt() returns that value here.
+            # Returning report_fase immediately avoids the extra structured-output call
+            # that would otherwise be needed to re-evaluate the gate with "skip" in context.
+            if user_response.strip().lower() in ("skip", "s"):
+                return {
+                    "messages": [],
+                    "phase_messages": phase_msgs + [
+                        AIMessage(content=avaliacao.mensagem),
+                        HumanMessage(content="[Candidate skipped — phase incomplete]"),
+                    ],
+                    checklist_key: new_checklist,
+                    notas_key: new_notas,
+                    "ingles_erros_acumulados": new_ingles,
+                    "fase": report_fase,  # go straight to report, no second LLM call
+                }
+
             new_phase_msgs = phase_msgs + [
                 AIMessage(content=avaliacao.mensagem),
                 HumanMessage(content=user_response),
@@ -254,29 +330,52 @@ def _make_node(system_prompt: str, output_class, checklist_key: str, notas_key: 
                 "phase_messages": new_phase_msgs,
                 checklist_key: new_checklist,
                 notas_key: new_notas,
-                "ingles_erros_acumulados": new_ingles_erros,
-                "fase": state["fase"],  # stay in current phase
+                "ingles_erros_acumulados": new_ingles,
+                "fase": state["fase"],  # stay in interview phase
             }
 
-        # Phase complete — archive this phase's transcript + feedback,
-        # reset phase_messages to empty for the next phase.
-        completed_transcript = phase_msgs + [AIMessage(content=avaliacao.mensagem)]
-        new_archive = state.get("archive", []) + completed_transcript
+        # Quality gate met — route to report node.
+        # phase_messages is preserved intact for the report node to read.
+        return {
+            "messages": [],
+            "phase_messages": phase_msgs,
+            checklist_key: new_checklist,
+            notas_key: new_notas,
+            "ingles_erros_acumulados": new_ingles,
+            "fase": report_fase,
+        }
+
+    node.__name__ = f"interview_{checklist_key}"
+    return node
+
+
+def _make_report_node(system_prompt, next_fase):
+    """
+    Report node: pauses via interrupt so api.py can stream the report with model.astream().
+    api.py resumes with the full text; this node archives it and advances.
+    This keeps report generation fast (streaming) without double-calling the LLM.
+    """
+    def node(state: EntrevistaState) -> dict:
+        phase_msgs: list = state.get("phase_messages") or []
+
+        # Interrupt here — api.py will stream the report using model.astream() and
+        # resume with the complete text.  We use "[report_ready]" as the signal so
+        # api.py can distinguish this from a regular interview-phase interrupt.
+        feedback_text = interrupt("[report_ready]")
+
+        new_archive = state.get("archive", []) + phase_msgs + [AIMessage(content=feedback_text)]
 
         return {
             "messages": [
-                AIMessage(content=avaliacao.mensagem),
+                AIMessage(content=feedback_text),
                 HumanMessage(content="[acknowledged — ready for next phase]"),
             ],
-            "phase_messages": [],   # fresh slate for next phase
+            "phase_messages": [],   # fresh slate for next interview node
             "archive": new_archive,
-            checklist_key: new_checklist,
-            notas_key: new_notas,
-            "ingles_erros_acumulados": new_ingles_erros,
             "fase": next_fase,
         }
 
-    node.__name__ = f"node_{checklist_key}"
+    node.__name__ = f"report_to_{next_fase}"
     return node
 
 
@@ -284,35 +383,43 @@ def _make_node(system_prompt: str, output_class, checklist_key: str, notas_key: 
 # Nodes
 # ---------------------------------------------------------------------------
 
-elevator_pitch = _make_node(
-    SYSTEM_PITCH, AvaliacaoPitch,
+# Interview nodes
+elevator_pitch_interview = _make_interview_node(
+    SYSTEM_PITCH_INTERVIEW, PitchInterview,
     checklist_key="checklist_pitch", notas_key="notas_pitch",
-    next_fase="CAR",
+    report_fase="elevator_pitch_report",
 )
 
-CAR = _make_node(
-    SYSTEM_CAR, AvaliacaoCAR,
+CAR_interview = _make_interview_node(
+    SYSTEM_CAR_INTERVIEW, CARInterview,
     checklist_key="checklist_CAR", notas_key="notas_CAR",
-    next_fase="technical",
+    report_fase="CAR_report",
 )
 
-technical = _make_node(
-    SYSTEM_TECHNICAL, AvaliacaoTechnical,
+technical_interview = _make_interview_node(
+    SYSTEM_TECHNICAL_INTERVIEW, TechnicalInterview,
     checklist_key="checklist_technical", notas_key="notas_technical",
-    next_fase="leadership",
+    report_fase="technical_report",
 )
 
-leadership = _make_node(
-    SYSTEM_LEADERSHIP, AvaliacaoLeadership,
+leadership_interview = _make_interview_node(
+    SYSTEM_LEADERSHIP_INTERVIEW, LeadershipInterview,
     checklist_key="checklist_leadership", notas_key="notas_leadership",
-    next_fase="motivation",
+    report_fase="leadership_report",
 )
 
-motivation = _make_node(
-    SYSTEM_MOTIVATION, AvaliacaoMotivation,
+motivation_interview = _make_interview_node(
+    SYSTEM_MOTIVATION_INTERVIEW, MotivationInterview,
     checklist_key="checklist_motivation", notas_key="notas_motivation",
-    next_fase="marcio_questions",
+    report_fase="motivation_report",
 )
+
+# Report nodes
+elevator_pitch_report = _make_report_node(SYSTEM_PITCH_REPORT,      next_fase="CAR")
+CAR_report            = _make_report_node(SYSTEM_CAR_REPORT,         next_fase="technical")
+technical_report      = _make_report_node(SYSTEM_TECHNICAL_REPORT,   next_fase="leadership")
+leadership_report     = _make_report_node(SYSTEM_LEADERSHIP_REPORT,  next_fase="motivation")
+motivation_report     = _make_report_node(SYSTEM_MOTIVATION_REPORT,  next_fase="marcio_questions")
 
 
 def marcio_questions(state: EntrevistaState) -> dict:
@@ -338,11 +445,16 @@ def marcio_questions(state: EntrevistaState) -> dict:
             "fase": "marcio_questions",
         }
 
-    # Archive this phase and reset
-    completed_transcript = phase_msgs + [AIMessage(content=avaliacao.mensagem)]
+    # Phase complete — archive transcript, advance to scorecard.
+    # Only show the closing message if it's meaningful (not a bare "OK" from skip).
+    closing_msg = avaliacao.mensagem if avaliacao.mensagem.strip().lower() != "ok" else (
+        "Thank you, Marcio. This has been a really good session. "
+        "Let me put together your scorecard."
+    )
+    completed_transcript = phase_msgs + [AIMessage(content=closing_msg)]
     new_archive = state.get("archive", []) + completed_transcript
     return {
-        "messages": [AIMessage(content=avaliacao.mensagem)],
+        "messages": [AIMessage(content=closing_msg)],
         "phase_messages": [],
         "archive": new_archive,
         "fase": "feedback",
@@ -351,10 +463,20 @@ def marcio_questions(state: EntrevistaState) -> dict:
 
 def feedback(state: EntrevistaState) -> dict:
     structured = model.with_structured_output(Scorecard)
-    # Scorecard sees the full interview: all archived phases + current phase
     archive = state.get("archive", [])
     phase_msgs = state.get("phase_messages") or []
     full_context = archive + phase_msgs
+
+    # Inject the accumulated English error list as an explicit context message
+    # so the scorecard LLM can consolidate patterns across all phases.
+    ingles_erros = state.get("ingles_erros_acumulados") or []
+    if ingles_erros:
+        erros_text = (
+            "ACCUMULATED ENGLISH ERRORS — collected across all interview phases:\n"
+            + "\n".join(f"- {e}" for e in ingles_erros)
+        )
+        full_context = full_context + [HumanMessage(content=erros_text)]
+
     messages = [SystemMessage(content=SYSTEM_SCORECARD)] + full_context
     scorecard: Scorecard = structured.invoke(messages)
 
@@ -400,8 +522,6 @@ def _format_scorecard(s: Scorecard) -> str:
         "--------------------------------------------",
         "WHAT YOU DIDN'T SAY (BUT SHOULD HAVE)",
         "",
-        "These are things Marcio had the experience to mention but did not use.",
-        "",
         "Elevator Pitch:",
         bullets(s.oportunidades_pitch),
         "",
@@ -416,8 +536,6 @@ def _format_scorecard(s: Scorecard) -> str:
         "",
         "--------------------------------------------",
         "VOCABULARY & FRAMING TO PRACTICE",
-        "",
-        "Terms and framings a senior production AI engineer uses naturally.",
         "",
         bullets(s.vocabulario_para_praticar),
         "",
@@ -448,48 +566,50 @@ def _format_scorecard(s: Scorecard) -> str:
 # Graph
 # ---------------------------------------------------------------------------
 
-FASE_TO_NODE = {
-    "elevator_pitch":   "elevator_pitch",
-    "CAR":              "CAR",
-    "technical":        "technical",
-    "leadership":       "leadership",
-    "motivation":       "motivation",
-    "marcio_questions": "marcio_questions",
-    "feedback":         "feedback",
-}
-
 builder = StateGraph(EntrevistaState)
 
+# Register all nodes
 for name, fn in [
-    ("elevator_pitch",   elevator_pitch),
-    ("CAR",              CAR),
-    ("technical",        technical),
-    ("leadership",       leadership),
-    ("motivation",       motivation),
-    ("marcio_questions", marcio_questions),
-    ("feedback",         feedback),
+    ("elevator_pitch",        elevator_pitch_interview),
+    ("elevator_pitch_report", elevator_pitch_report),
+    ("CAR",                   CAR_interview),
+    ("CAR_report",            CAR_report),
+    ("technical",             technical_interview),
+    ("technical_report",      technical_report),
+    ("leadership",            leadership_interview),
+    ("leadership_report",     leadership_report),
+    ("motivation",            motivation_interview),
+    ("motivation_report",     motivation_report),
+    ("marcio_questions",      marcio_questions),
+    ("feedback",              feedback),
 ]:
     builder.add_node(name, fn)
 
 builder.add_edge(START, "elevator_pitch")
 
-# Explicit path maps so LangGraph can infer the full topology for visualization.
-# Each phase node can loop back to itself (retry) or advance to the next phase.
-_PHASE_SEQUENCE = [
-    ("elevator_pitch",   {"elevator_pitch": "elevator_pitch", "CAR": "CAR"}),
-    ("CAR",              {"CAR": "CAR", "technical": "technical"}),
-    ("technical",        {"technical": "technical", "leadership": "leadership"}),
-    ("leadership",       {"leadership": "leadership", "motivation": "motivation"}),
-    ("motivation",       {"motivation": "motivation", "marcio_questions": "marcio_questions"}),
+# Interview nodes: conditional edge — loop to self or advance to report node
+_INTERVIEW_ROUTING = [
+    ("elevator_pitch",   {"elevator_pitch": "elevator_pitch", "elevator_pitch_report": "elevator_pitch_report"}),
+    ("CAR",              {"CAR": "CAR", "CAR_report": "CAR_report"}),
+    ("technical",        {"technical": "technical", "technical_report": "technical_report"}),
+    ("leadership",       {"leadership": "leadership", "leadership_report": "leadership_report"}),
+    ("motivation",       {"motivation": "motivation", "motivation_report": "motivation_report"}),
     ("marcio_questions", {"marcio_questions": "marcio_questions", "feedback": "feedback"}),
 ]
 
-for node_name, path_map in _PHASE_SEQUENCE:
+for node_name, path_map in _INTERVIEW_ROUTING:
     builder.add_conditional_edges(
         node_name,
         lambda state, _m=path_map: _m.get(state["fase"], END),
         path_map,
     )
+
+# Report nodes: unconditional edge to next interview node
+builder.add_edge("elevator_pitch_report", "CAR")
+builder.add_edge("CAR_report",            "technical")
+builder.add_edge("technical_report",      "leadership")
+builder.add_edge("leadership_report",     "motivation")
+builder.add_edge("motivation_report",     "marcio_questions")
 
 builder.add_edge("feedback", END)
 
@@ -513,15 +633,21 @@ def make_initial_state() -> EntrevistaState:
             "pesquisa_internacional": False,
             "software_cv": False,
             "transicao_industria": False,
-            "sem_detalhes_tecnicos": False,
+            "venturus_milestone": False,
+            "trabalho_atual_negocio": False,
+            "closing_demo_producao": False,
+            "sem_stack_names": False,
+            "sem_metricas": False,
             "ingles_adequado": False,
         },
         "checklist_CAR": {
             "contexto_negocio": False,
+            "problema_negocio": False,
             "acoes_pessoais": False,
-            "token_optimization": False,
             "langfuse_observability": False,
+            "token_optimization": False,
             "resultado_negocio": False,
+            "production_mindset": False,
             "ingles_adequado": False,
         },
         "checklist_technical": {
@@ -533,15 +659,19 @@ def make_initial_state() -> EntrevistaState:
         },
         "checklist_leadership": {
             "data_audit": False,
+            "data_como_risco_primario": False,
             "pilot_producao_gap": False,
+            "mitigacao_concreta": False,
             "stakeholder_mgmt": False,
             "data_point_usado": False,
+            "experiencia_real": False,
             "ingles_adequado": False,
         },
         "checklist_motivation": {
             "especifico_factored": False,
-            "producao_focus": False,
             "conexao_real": False,
+            "nao_pode_obter_em_outro_lugar": False,
+            "tom_genuino": False,
             "ingles_adequado": False,
         },
         "notas_pitch": "",

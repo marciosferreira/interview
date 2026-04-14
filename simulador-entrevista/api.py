@@ -13,15 +13,24 @@ from openai import AsyncOpenAI
 
 from simulator import graph, make_initial_state, model
 from simulator import (
-    SYSTEM_PITCH, SYSTEM_CAR, SYSTEM_TECHNICAL,
-    SYSTEM_LEADERSHIP, SYSTEM_MOTIVATION, SYSTEM_MARCIO_Q,
+    SYSTEM_PITCH_INTERVIEW      as SYSTEM_PITCH,
+    SYSTEM_CAR_INTERVIEW        as SYSTEM_CAR,
+    SYSTEM_TECHNICAL_INTERVIEW  as SYSTEM_TECHNICAL,
+    SYSTEM_LEADERSHIP_INTERVIEW as SYSTEM_LEADERSHIP,
+    SYSTEM_MOTIVATION_INTERVIEW as SYSTEM_MOTIVATION,
+    SYSTEM_MARCIO_Q,
+    SYSTEM_PITCH_REPORT,
+    SYSTEM_CAR_REPORT,
+    SYSTEM_TECHNICAL_REPORT,
+    SYSTEM_LEADERSHIP_REPORT,
+    SYSTEM_MOTIVATION_REPORT,
 )
 
 openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = FastAPI()
 
-# Maps the active phase to the system prompt used for parallel streaming
+# Maps active interview phase → system prompt used for parallel streaming.
 FASE_TO_SYSTEM = {
     "elevator_pitch":   SYSTEM_PITCH,
     "CAR":              SYSTEM_CAR,
@@ -31,26 +40,37 @@ FASE_TO_SYSTEM = {
     "marcio_questions": SYSTEM_MARCIO_Q,
 }
 
+# Maps report phase name → report system prompt.
+# Used when the report node fires "[report_ready]" — api.py streams the report
+# with model.astream() and resumes the graph with the full text for archiving.
+FASE_TO_REPORT_SYSTEM = {
+    "elevator_pitch_report": SYSTEM_PITCH_REPORT,
+    "CAR_report":            SYSTEM_CAR_REPORT,
+    "technical_report":      SYSTEM_TECHNICAL_REPORT,
+    "leadership_report":     SYSTEM_LEADERSHIP_REPORT,
+    "motivation_report":     SYSTEM_MOTIVATION_REPORT,
+}
 
-async def _stream_to_client(ws: WebSocket, messages: list, system_prompt: str) -> bool:
+
+async def _stream_to_client(ws: WebSocket, messages: list, system_prompt: str, voice: str = "nova") -> str:
     """Stream LLM tokens directly to the client as stream_chunk events.
 
-    Runs in parallel with graph.invoke so the user hears audio in ~0.5s
-    instead of waiting for the full structured-output JSON to complete.
-    Returns True if any content was actually streamed.
+    Runs in parallel with graph.invoke (interview phase) or as the primary
+    generator (report phase).  Returns the full accumulated text so report
+    nodes can archive it without a second LLM call.
     """
-    streamed = False
+    full_text = ""
     try:
         async for chunk in model.astream(
             [SystemMessage(content=system_prompt)] + messages
         ):
             if chunk.content:
-                await ws.send_json({"type": "stream_chunk", "text": chunk.content})
-                streamed = True
+                full_text += chunk.content
+                await ws.send_json({"type": "stream_chunk", "text": chunk.content, "voice": voice})
     except Exception as exc:
         print(f"[stream error] {exc}")
     await ws.send_json({"type": "stream_done"})
-    return streamed
+    return full_text
 
 
 @app.post("/stt")
@@ -65,10 +85,14 @@ async def stt(audio: UploadFile):
 
 
 @app.get("/tts")
-async def tts(text: str):
+async def tts(text: str, voice: str = "nova"):
+    # Allowed voices: alloy, echo, fable, onyx, nova, shimmer
+    allowed = {"alloy", "echo", "fable", "onyx", "nova", "shimmer"}
+    if voice not in allowed:
+        voice = "nova"
     response = await openai_client.audio.speech.create(
         model="tts-1",
-        voice="nova",
+        voice=voice,
         input=text,
     )
     return Response(content=response.content, media_type="audio/mpeg")
@@ -89,9 +113,10 @@ async def interview_ws(ws: WebSocket):
         )
 
         prev_msg_count = 1
-        did_stream = False   # True when the previous invoke used parallel streaming
-        question   = ""      # last interrupt value, needed for next stream_messages
-        prev_was_skip = False  # True when the previous user input was "skip"
+        did_stream          = False  # True when previous invoke used parallel streaming
+        prev_report_streamed = False  # True when previous iteration streamed a report
+        question            = ""     # last interrupt value, needed for next stream_messages
+        prev_was_skip       = False  # True when the previous user input was "skip"
 
         while True:
             messages: list = result.get("messages", [])
@@ -99,10 +124,12 @@ async def interview_ws(ws: WebSocket):
             fase = result.get("fase", "")
 
             # Save and reset per-iteration flags
-            was_streamed  = did_stream
-            did_stream    = False
-            was_skip      = prev_was_skip
-            prev_was_skip = False
+            was_streamed         = did_stream
+            did_stream           = False
+            was_report_streamed  = prev_report_streamed
+            prev_report_streamed = False
+            was_skip             = prev_was_skip
+            prev_was_skip        = False
 
             # ── New-message filtering ─────────────────────────────────────────
             # Use a single heuristic for both streaming and non-streaming paths:
@@ -125,14 +152,6 @@ async def interview_ws(ws: WebSocket):
             for i, msg in enumerate(new_messages):
                 if not isinstance(msg, AIMessage):
                     continue
-                # When the user explicitly skipped, the streaming bubble already
-                # acknowledged it ("Got it — moving on.").  Suppress ALL graph
-                # AIMessages for this round (the echoed question AND the structured
-                # feedback) — the graph produces two of them when skipping, but only
-                # the streaming bubble should appear.  The per-phase feedback will
-                # still be visible in the final scorecard.
-                if had_transition and was_skip and "INTERVIEW SCORECARD" not in msg.content:
-                    continue
                 if i == first_ai_idx:
                     next_msg = new_messages[i + 1] if i + 1 < len(new_messages) else None
                     is_replay = (
@@ -142,6 +161,10 @@ async def interview_ws(ws: WebSocket):
                     )
                     if is_replay:
                         continue  # already shown/spoken — skip
+                    # Report was already streamed with onyx voice — suppress the
+                    # graph's archived copy so it doesn't appear as a second bubble.
+                    if was_report_streamed and had_transition:
+                        continue
                     # When streaming ran (was_streamed=True) and no phase transition
                     # occurred, the first AIMessage is the graph's re-generation of
                     # what was already shown in the streaming bubble.  Skip it to
@@ -158,6 +181,27 @@ async def interview_ws(ws: WebSocket):
                 break
 
             question = interrupts[0].value
+
+            # ── Report streaming ──────────────────────────────────────────────
+            # When the report node fires "[report_ready]", stream the report now
+            # with the Judge voice.  Resume the graph with the full text so the
+            # report node can archive it without a second LLM call.
+            if question == "[report_ready]":
+                report_system = FASE_TO_REPORT_SYSTEM.get(fase, "")
+                phase_messages = result.get("phase_messages") or []
+                if report_system:
+                    full_text = await _stream_to_client(
+                        ws, phase_messages, report_system, voice="onyx"
+                    )
+                else:
+                    full_text = ""
+                prev_msg_count       = len(messages)
+                prev_report_streamed = bool(full_text)
+                result = await loop.run_in_executor(
+                    None,
+                    functools.partial(graph.invoke, Command(resume=full_text or "[no_report]"), config),
+                )
+                continue  # restart loop — next interrupt is the next phase's question
 
             if had_transition:
                 # Phase transition: feedback is shown/spoken. Wait for the user to
@@ -199,7 +243,11 @@ async def interview_ws(ws: WebSocket):
             system_prompt = FASE_TO_SYSTEM.get(fase, "")
 
             try:
-                if system_prompt:
+                # Stream a live conversational reaction in parallel with graph
+                # evaluation — but only when the user sent real content.
+                # Skip streaming on "skip": the report node generates the feedback
+                # directly and there is nothing useful to stream for a skip signal.
+                if system_prompt and user_text != "skip":
                     # ── Parallel: stream reply to client + run graph evaluation ──
                     # Use the graph's phase_messages (current-phase transcript only)
                     # so the streaming model never sees prior-phase history.
@@ -223,8 +271,7 @@ async def interview_ws(ws: WebSocket):
                         raise result
                     did_stream = bool(streamed) and not isinstance(streamed, Exception)
                 else:
-                    # No streaming: either no system prompt, or input too short
-                    # to warrant a streamed response (avoids spurious feedback bubbles).
+                    # No streaming: no system prompt available, or user sent "skip".
                     result = await loop.run_in_executor(
                         None,
                         functools.partial(graph.invoke, Command(resume=user_text), config),

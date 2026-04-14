@@ -28,7 +28,7 @@ After Marcio has asked 1–3 questions, or when he signals he has no more questi
 Set fase_completa=True when:
 - Marcio explicitly says he has no more questions, OR
 - Marcio has asked at least one question and there's a natural pause, OR
-- Marcio uses an override phrase
+- Marcio says exactly "skip"
 
 ## Quality Gate
 This phase has no strict content gate.
