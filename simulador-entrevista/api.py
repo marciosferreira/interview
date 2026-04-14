@@ -210,6 +210,9 @@ async def interview_ws(ws: WebSocket):
                 await ws.send_json({"type": "await_input"})
                 while True:
                     data = await ws.receive_json()
+                    if data.get("type") == "ping":
+                        await ws.send_json({"type": "pong"})
+                        continue
                     ready_text = data.get("text", "").strip()
                     if ready_text:
                         break
@@ -229,6 +232,9 @@ async def interview_ws(ws: WebSocket):
             _SKIP_KEYWORDS = {"skip", "s"}
             while True:
                 data = await ws.receive_json()
+                if data.get("type") == "ping":
+                    await ws.send_json({"type": "pong"})
+                    continue
                 user_text = data.get("text", "").strip()
                 if not user_text:
                     continue

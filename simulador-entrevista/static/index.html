@@ -561,6 +561,8 @@
   }
 
   // ── WebSocket ─────────────────────────────────────────────────────────
+  let pingInterval = null;
+
   function connect() {
     const proto = location.protocol === 'https:' ? 'wss' : 'ws';
     ws = new WebSocket(`${proto}://${location.host}/ws`);
@@ -568,6 +570,14 @@
     ws.onopen = () => {
       badge.textContent = 'Connected';
       badge.className = 'connected';
+      // Send a ping every 25 s to keep the connection alive through proxies
+      // that close idle WebSocket connections at 60–120 s.
+      clearInterval(pingInterval);
+      pingInterval = setInterval(() => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: 'ping' }));
+        }
+      }, 25_000);
     };
 
     ws.onmessage = (e) => {
@@ -633,15 +643,25 @@
       }
     };
 
-    ws.onclose = () => {
-      badge.textContent = 'Disconnected';
+    ws.onclose = (e) => {
+      clearInterval(pingInterval);
+      // Code 1000 = clean close (interview finished normally) — don't reconnect.
+      if (e.code === 1000) {
+        badge.textContent = 'Done';
+        badge.className = '';
+        return;
+      }
+      badge.textContent = 'Reconnecting…';
       badge.className = '';
       disableInput(true);
+      // Wait 2 s then try again so we don't hammer the server.
+      setTimeout(connect, 2000);
     };
 
     ws.onerror = () => {
       badge.textContent = 'Error';
       badge.className = '';
+      // onclose fires right after onerror — reconnect logic runs there.
     };
   }
 
