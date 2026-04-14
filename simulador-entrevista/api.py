@@ -195,6 +195,11 @@ async def interview_ws(ws: WebSocket):
                     )
                 else:
                     full_text = ""
+                # Judge is done — Maria takes the floor back.
+                await ws.send_json({
+                    "type": "ai",
+                    "text": "Take your time with that. Whenever you're ready, just let me know.",
+                })
                 prev_msg_count       = len(messages)
                 prev_report_streamed = bool(full_text)
                 result = await loop.run_in_executor(
