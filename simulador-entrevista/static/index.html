@@ -299,6 +299,30 @@
   let streamTTSBuf   = '';     // text not yet dispatched to TTS
   let streamVoice    = 'nova'; // TTS voice for the current streaming session
 
+  // ── Mobile audio unlock ──────────────────────────────────────────────
+  // iOS and Android block autoplay until after a user gesture.
+  // We queue any speech that fires before the first interaction and flush
+  // it the moment the user taps/clicks anything.
+  let audioUnlocked  = false;
+  let pendingSpeakArgs = null;   // {text, voice} waiting for unlock
+
+  function _unlockAudio() {
+    if (audioUnlocked) return;
+    audioUnlocked = true;
+    // Remove the tap-to-start overlay if present
+    const overlay = document.getElementById('tap-overlay');
+    if (overlay) overlay.remove();
+    // Play whatever was queued before the first gesture
+    if (pendingSpeakArgs) {
+      const { text, voice } = pendingSpeakArgs;
+      pendingSpeakArgs = null;
+      speak(text, voice);
+    }
+  }
+  document.addEventListener('click',      _unlockAudio, { capture: true });
+  document.addEventListener('touchstart', _unlockAudio, { capture: true });
+  document.addEventListener('keydown',    _unlockAudio, { capture: true });
+
   // ── TTS — chunked parallel fetch, sequential playback ────────────────
   // Strategy: split text into sentence-sized chunks, fire ALL fetches
   // immediately in parallel, then play chunks in order via a promise chain.
@@ -348,6 +372,13 @@
   }
 
   function speak(text, voice = 'nova') {
+    // On mobile, audio is blocked until after a user gesture.
+    // Queue the most recent speak() call and play it once unlocked.
+    if (!audioUnlocked) {
+      pendingSpeakArgs = { text, voice };
+      return ttsChain;   // caller gets the existing (resolved) chain
+    }
+
     const myToken = ttsToken;   // read current token — only stopTTS() increments it
     const chunks  = _splitChunks(text);
 
@@ -780,6 +811,27 @@
   // ── Boot ──────────────────────────────────────────────────────────────
   connect();
   showTyping(true);   // waiting for first AI message
+
+  // Show a "tap to enable audio" overlay on touch devices.
+  // Removed automatically on first tap by _unlockAudio().
+  if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    const overlay = document.createElement('div');
+    overlay.id = 'tap-overlay';
+    overlay.style.cssText = [
+      'position:fixed', 'inset:0', 'z-index:9999',
+      'display:flex', 'align-items:flex-end', 'justify-content:center',
+      'padding-bottom:32px', 'pointer-events:none',
+    ].join(';');
+    const pill = document.createElement('div');
+    pill.style.cssText = [
+      'background:rgba(0,0,0,0.65)', 'color:#fff',
+      'font-size:13px', 'padding:8px 20px', 'border-radius:99px',
+      'backdrop-filter:blur(6px)', '-webkit-backdrop-filter:blur(6px)',
+    ].join(';');
+    pill.textContent = 'Tap anywhere to enable audio';
+    overlay.appendChild(pill);
+    document.body.appendChild(overlay);
+  }
 </script>
 </body>
 </html>
