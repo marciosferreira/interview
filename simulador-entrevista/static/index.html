@@ -226,6 +226,14 @@
     }
     #skip-btn:hover { background: #3d4160; color: #e2e8f0; }
 
+    #cancel-rec-btn {
+      background: #2d3148;
+      color: #f87171;
+      display: none;
+      font-size: 18px;
+    }
+    #cancel-rec-btn:hover { background: #3d4160; }
+
     @keyframes pulse {
       0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,.4); }
       50%       { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
@@ -268,7 +276,8 @@
 <div id="input-area">
   <div id="done-banner">Interview complete — check your feedback above!</div>
   <div id="input-row">
-    <button id="mic-btn" class="icon-btn" disabled title="Hold to speak">🎙️</button>
+    <button id="mic-btn" class="icon-btn" disabled title="Click to start/stop recording">🎙️</button>
+    <button id="cancel-rec-btn" class="icon-btn" title="Cancel recording">✕</button>
     <textarea id="text-input" placeholder="Type your answer or press 🎙️ to speak…"
               rows="1" disabled></textarea>
     <button id="skip-btn" class="icon-btn" title="Skip audio">⏭ Skip</button>
@@ -278,13 +287,14 @@
 </div>
 
 <script>
-  const chat      = document.getElementById('chat');
-  const input     = document.getElementById('text-input');
-  const micBtn    = document.getElementById('mic-btn');
-  const sendBtn   = document.getElementById('send-btn');
-  const skipBtn   = document.getElementById('skip-btn');
-  const badge     = document.getElementById('status-badge');
-  const doneBanner = document.getElementById('done-banner');
+  const chat         = document.getElementById('chat');
+  const input        = document.getElementById('text-input');
+  const micBtn       = document.getElementById('mic-btn');
+  const cancelRecBtn = document.getElementById('cancel-rec-btn');
+  const sendBtn      = document.getElementById('send-btn');
+  const skipBtn      = document.getElementById('skip-btn');
+  const badge        = document.getElementById('status-badge');
+  const doneBanner   = document.getElementById('done-banner');
 
   let ws = null;
   let mediaRecorder = null;
@@ -301,9 +311,11 @@
 
   // ── Mobile audio unlock ──────────────────────────────────────────────
   // iOS and Android block autoplay until after a user gesture.
-  // We queue any speech that fires before the first interaction and flush
-  // it the moment the user taps/clicks anything.
-  let audioUnlocked  = false;
+  // Desktop browsers allow autoplay freely, so we start unlocked there.
+  // On touch devices we queue any speech that fires before the first
+  // interaction and flush it the moment the user taps/clicks anything.
+  const _isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  let audioUnlocked  = !_isTouchDevice;
   let pendingSpeakArgs = null;   // {text, voice} waiting for unlock
 
   function _unlockAudio() {
@@ -419,6 +431,26 @@
     skipBtn.style.display = 'none';
   }
 
+  // ── Disconnection beep ───────────────────────────────────────────────
+  // Two short descending tones played via Web Audio API — no file needed.
+  function playDisconnectBeep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [[440, 0.00], [330, 0.18]].forEach(([freq, start]) => {
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.4, ctx.currentTime + start);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + 0.15);
+        osc.start(ctx.currentTime + start);
+        osc.stop(ctx.currentTime + start + 0.15);
+      });
+    } catch (_) {}
+  }
+
   // ── Skip TTS ──────────────────────────────────────────────────────────
   skipBtn.addEventListener('click', () => {
     stopTTS();
@@ -516,28 +548,50 @@
       mediaRecorder.start();
 
       micBtn.classList.add('active');
+      cancelRecBtn.style.display = 'flex';
       badge.textContent = '🔴 Recording';
       badge.className = 'recording';
-      input.placeholder = 'Recording… release to send';
+      input.placeholder = 'Recording… click 🎙️ to send or ✕ to cancel';
       input.value = '';
     } catch (err) {
       console.error('Mic error:', err);
     }
   }
 
+  function _stopMediaRecorder() {
+    if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+    mediaRecorder.stop();
+    mediaRecorder.stream.getTracks().forEach(t => t.stop());
+    micBtn.classList.remove('active');
+    cancelRecBtn.style.display = 'none';
+  }
+
+  function cancelRecording() {
+    if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+    // Mark as cancelled so the 'stop' handler discards the data
+    mediaRecorder._cancelled = true;
+    _stopMediaRecorder();
+    badge.textContent = 'Connected';
+    badge.className = 'connected';
+    input.placeholder = 'Type or hold 🎙️ to speak…';
+  }
+
   async function stopRecording() {
     if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
 
-    mediaRecorder.stop();
-    mediaRecorder.stream.getTracks().forEach(t => t.stop());
-
-    micBtn.classList.remove('active');
+    _stopMediaRecorder();
     badge.textContent = 'Transcribing…';
     badge.className = 'processing';
     input.placeholder = 'Transcribing…';
 
     // Wait for the final dataavailable event before reading chunks
     await new Promise(r => mediaRecorder.addEventListener('stop', r, { once: true }));
+
+    // Discard if the recording was cancelled
+    if (mediaRecorder._cancelled) {
+      mediaRecorder._cancelled = false;
+      return;
+    }
 
     const blob = new Blob(audioChunks, { type: 'audio/webm' });
     const form = new FormData();
@@ -651,6 +705,7 @@
         badge.className = '';
         return;
       }
+      playDisconnectBeep();
       badge.textContent = 'Reconnecting…';
       badge.className = '';
       disableInput(true);
@@ -828,13 +883,15 @@
     }
   });
 
+  cancelRecBtn.addEventListener('click', cancelRecording);
+
   // ── Boot ──────────────────────────────────────────────────────────────
   connect();
   showTyping(true);   // waiting for first AI message
 
   // Show a "tap to enable audio" overlay on touch devices.
   // Removed automatically on first tap by _unlockAudio().
-  if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+  if (_isTouchDevice) {
     const overlay = document.createElement('div');
     overlay.id = 'tap-overlay';
     overlay.style.cssText = [
