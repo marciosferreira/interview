@@ -49,6 +49,16 @@
     #status-badge.connected   { background: #14532d; color: #4ade80; }
     #status-badge.recording   { background: #450a0a; color: #f87171; }
     #status-badge.processing  { background: #1e1b4b; color: #a78bfa; }
+    #new-btn, #history-btn {
+      margin-left: 8px;
+      font-size: 11px; font-weight: 500;
+      padding: 4px 10px; border-radius: 20px;
+      background: transparent; border: 1px solid #2d3148;
+      color: #64748b; cursor: pointer; transition: all 0.2s;
+      text-decoration: none; display: inline-flex; align-items: center;
+    }
+    #new-btn:hover     { border-color: #f87171; color: #f87171; }
+    #history-btn:hover { border-color: #6366f1; color: #a78bfa; }
 
     /* ── Phase progress bar ── */
     #phase-bar {
@@ -288,6 +298,50 @@
     }
     #cancel-rec-btn:hover { background: #3d4160; }
 
+    /* ── Audio preview bar (shown after recording, before send) ── */
+    #audio-preview {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+    #ap-play {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: #6366f1; color: #fff; border: none;
+      font-size: 18px; cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    #ap-play:hover { background: #4f46e5; }
+    #ap-track {
+      flex: 1;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    #ap-progress {
+      width: 100%; height: 4px; border-radius: 2px;
+      background: #2d3148; appearance: none; cursor: pointer;
+      accent-color: #6366f1;
+    }
+    #ap-times {
+      display: flex; justify-content: space-between;
+      font-size: 10px; color: #64748b;
+    }
+    #ap-discard {
+      background: #2d3148; color: #f87171;
+      border: none; border-radius: 10px;
+      padding: 6px 12px; font-size: 12px; font-weight: 600;
+      cursor: pointer; white-space: nowrap; transition: background 0.2s;
+    }
+    #ap-discard:hover { background: #3d4160; }
+    #ap-send {
+      background: #6366f1; color: #fff;
+      border: none; border-radius: 10px;
+      padding: 6px 14px; font-size: 12px; font-weight: 600;
+      cursor: pointer; white-space: nowrap; transition: background 0.2s;
+    }
+    #ap-send:hover { background: #4f46e5; }
+
     @keyframes pulse {
       0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,.4); }
       50%       { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
@@ -323,6 +377,8 @@
     <p>Practice your tech interview in English</p>
   </div>
   <div id="status-badge">Connecting…</div>
+  <a id="history-btn" href="/history.html" title="View all past interviews">📋 History</a>
+  <button id="new-btn" title="Discard this session and start fresh">＋ New</button>
 </header>
 
 <nav id="phase-bar">
@@ -355,6 +411,15 @@
     <button id="skip-btn" class="icon-btn" title="Skip audio">⏭ Skip</button>
     <button id="send-btn" class="icon-btn" disabled title="Send (Enter)">➤</button>
   </div>
+  <div id="audio-preview">
+    <button id="ap-play" title="Play / Pause">▶</button>
+    <div id="ap-track">
+      <input id="ap-progress" type="range" min="0" max="100" value="0" step="0.1">
+      <div id="ap-times"><span id="ap-cur">0:00</span><span id="ap-dur">0:00</span></div>
+    </div>
+    <button id="ap-discard">✕ Discard</button>
+    <button id="ap-send">➤ Send</button>
+  </div>
   <p id="hint">Click <strong>🎙️</strong> to start/stop recording · <strong>Enter</strong> to send text · <strong>Shift+Enter</strong> for new line</p>
 </div>
 
@@ -378,7 +443,11 @@
   const phaseSteps = document.querySelectorAll('.phase-step');
   const phaseConns = document.querySelectorAll('.phase-connector');
 
+  // ── Phase progress bar + fase tracking ─────────────────────────────
+  let _currentFase = '';
+
   function setPhase(fase) {
+    _currentFase = fase;
     const active = FASE_TO_STEP[fase] ?? -1;
     phaseSteps.forEach((el) => {
       const s = parseInt(el.dataset.step, 10);
@@ -389,9 +458,83 @@
       const c = parseInt(el.dataset.conn, 10);
       el.classList.toggle('done', c < active);
     });
+    // Persist phase into SESSION_KEY + HISTORY_KEY
+    const raw = _loadRaw();
+    if (raw) {
+      raw.fase = fase;
+      localStorage.setItem(SESSION_KEY, JSON.stringify(raw));
+      _upsertHistory(raw.threadId, { fase });
+    }
     // Scroll the active step into view on small screens
     const activeEl = document.querySelector('.phase-step.active');
     if (activeEl) activeEl.scrollIntoView({ inline: 'center', behavior: 'smooth' });
+  }
+
+  // ── Session persistence (localStorage) ──────────────────────────────
+  // SESSION_KEY  → active session: { threadId, savedAt, fase, history[] }
+  // HISTORY_KEY  → last 10 sessions with full data for the history page
+  const SESSION_KEY   = 'interview_v1';
+  const HISTORY_KEY   = 'interview_history_v1';
+  const SESSION_TTL   = 48 * 60 * 60 * 1000;
+  const HISTORY_MAX   = 10;
+
+  function _getHistoryList() {
+    try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch { return []; }
+  }
+
+  // Insert or update a session entry in HISTORY_KEY.
+  function _upsertHistory(threadId, patch) {
+    if (!threadId) return;
+    const list = _getHistoryList();
+    const idx  = list.findIndex(s => s.threadId === threadId);
+    const now  = Date.now();
+    if (idx >= 0) {
+      Object.assign(list[idx], patch, { lastActiveAt: now });
+    } else {
+      list.unshift({ threadId, startedAt: now, lastActiveAt: now, fase: '', history: [], ...patch });
+    }
+    list.sort((a, b) => b.lastActiveAt - a.lastActiveAt);
+    if (list.length > HISTORY_MAX) list.length = HISTORY_MAX;
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+  }
+
+  function _saveSession(threadId) {
+    const existing    = _loadRaw() || {};
+    existing.threadId = threadId;
+    existing.savedAt  = Date.now();
+    if (!existing.startedAt) existing.startedAt = Date.now();
+    localStorage.setItem(SESSION_KEY, JSON.stringify(existing));
+    _upsertHistory(threadId, { startedAt: existing.startedAt });
+  }
+
+  function _loadRaw() {
+    try {
+      const d = JSON.parse(localStorage.getItem(SESSION_KEY));
+      if (!d) return null;
+      if (Date.now() - d.savedAt > SESSION_TTL) { localStorage.removeItem(SESSION_KEY); return null; }
+      return d;
+    } catch { return null; }
+  }
+
+  function _loadThreadId() {
+    return _loadRaw()?.threadId || null;
+  }
+
+  // Append a message record to the stored history (capped at 300 entries).
+  function _persistMsg(type, text, voice) {
+    const raw = _loadRaw();
+    if (!raw) return;
+    if (!raw.history) raw.history = [];
+    raw.history.push({ type, text, voice: voice || 'nova' });
+    if (raw.history.length > 300) raw.history = raw.history.slice(-300);
+    localStorage.setItem(SESSION_KEY, JSON.stringify(raw));
+    // Mirror to history index so the history page stays up to date.
+    _upsertHistory(raw.threadId, { history: raw.history, fase: _currentFase });
+  }
+
+  function clearSession() {
+    // Remove only the active-session pointer; history entries remain browsable.
+    localStorage.removeItem(SESSION_KEY);
   }
 
   const chat         = document.getElementById('chat');
@@ -406,6 +549,8 @@
   let ws = null;
   let mediaRecorder = null;
   let audioChunks = [];
+  let recTimerInterval = null;
+  let recStartTime = 0;
   let typingEl = null;
   let currentAudio = null;
 
@@ -632,6 +777,8 @@
         speak(_stripMarkdown(finalText), finalVoice);
       });
       streamWrapperEl.appendChild(btn);
+      // Persist the streamed report so it reappears in history on resume.
+      _persistMsg('ai', finalText, finalVoice);
     }
 
     streamBubbleEl  = null;
@@ -642,24 +789,149 @@
   }
 
   // ── STT via MediaRecorder + Whisper ──────────────────────────────────
-  // Records raw audio while button is held; transcribes on release via Whisper.
-  // No silence detection — full control over start/stop.
+  // After recording stops, a preview bar lets the user listen before sending.
+
+  const audioPreview = document.getElementById('audio-preview');
+  const inputRow     = document.getElementById('input-row');
+  const apPlay       = document.getElementById('ap-play');
+  const apProgress   = document.getElementById('ap-progress');
+  const apCur        = document.getElementById('ap-cur');
+  const apDur        = document.getElementById('ap-dur');
+  const apDiscard    = document.getElementById('ap-discard');
+  const apSend       = document.getElementById('ap-send');
+
+  let previewAudio   = null;   // HTMLAudioElement for the preview
+  let previewBlob    = null;   // kept so we can send it
+
+  // On every page load (new interview or resume) the very first AI question
+  // should NOT auto-play — user triggers TTS manually via the replay button.
+  let _skipNextAutoTTS = true;
+
+  function _fmtSecs(s) {
+    s = Math.floor(s || 0);
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  }
+
+  function _showPreview(blob) {
+    previewBlob = blob;
+    const url   = URL.createObjectURL(blob);
+    previewAudio = new Audio(url);
+
+    previewAudio.addEventListener('loadedmetadata', () => {
+      apDur.textContent = _fmtSecs(previewAudio.duration);
+      apProgress.max    = previewAudio.duration || 100;
+    });
+    previewAudio.addEventListener('timeupdate', () => {
+      apProgress.value  = previewAudio.currentTime;
+      apCur.textContent = _fmtSecs(previewAudio.currentTime);
+    });
+    previewAudio.addEventListener('ended', () => {
+      apPlay.textContent = '▶';
+      apProgress.value   = 0;
+      apCur.textContent  = _fmtSecs(0);
+    });
+
+    apProgress.value   = 0;
+    apCur.textContent  = '0:00';
+    apDur.textContent  = '…';
+    apPlay.textContent = '▶';
+
+    inputRow.style.display    = 'none';
+    audioPreview.style.display = 'flex';
+    badge.textContent = 'Ready to send';
+    badge.className   = 'connected';
+  }
+
+  function _hidePreview() {
+    if (previewAudio) {
+      previewAudio.pause();
+      URL.revokeObjectURL(previewAudio.src);
+      previewAudio = null;
+    }
+    previewBlob = null;
+    audioPreview.style.display = 'none';
+    inputRow.style.display     = '';
+    badge.textContent = 'Connected';
+    badge.className   = 'connected';
+    input.placeholder = 'Type your answer or press 🎙️ to speak…';
+  }
+
+  apPlay.addEventListener('click', () => {
+    if (!previewAudio) return;
+    if (previewAudio.paused) {
+      previewAudio.play();
+      apPlay.textContent = '⏸';
+    } else {
+      previewAudio.pause();
+      apPlay.textContent = '▶';
+    }
+  });
+
+  apProgress.addEventListener('input', () => {
+    if (previewAudio) previewAudio.currentTime = apProgress.value;
+  });
+
+  apDiscard.addEventListener('click', () => {
+    _hidePreview();
+  });
+
+  apSend.addEventListener('click', () => {
+    if (!previewBlob) return;
+    _transcribeAndSend(previewBlob);
+    _hidePreview();
+  });
+
+  async function _transcribeAndSend(blob) {
+    badge.textContent = 'Transcribing…';
+    badge.className   = 'processing';
+    input.placeholder = 'Transcribing…';
+    disableInput(true);
+
+    const form = new FormData();
+    form.append('audio', blob, 'recording.webm');
+    try {
+      const res  = await fetch('/stt', { method: 'POST', body: form });
+      const data = await res.json();
+      input.value = data.text || '';
+      autoResize();
+      badge.textContent = 'Connected';
+      badge.className   = 'connected';
+      input.placeholder = 'Type your answer or press 🎙️ to speak…';
+      if (input.value.trim()) sendMessage();
+      else enableInput();
+    } catch (err) {
+      console.error('STT error:', err);
+      badge.textContent = 'Connected';
+      badge.className   = 'connected';
+      input.placeholder = 'Type your answer or press 🎙️ to speak…';
+      enableInput();
+    }
+  }
 
   async function startRecording() {
     if (micBtn.disabled) return;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioChunks = [];
+      audioChunks  = [];
       mediaRecorder = new MediaRecorder(stream);
       mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
       mediaRecorder.start();
 
       micBtn.classList.add('active');
       cancelRecBtn.style.display = 'flex';
-      badge.textContent = '🔴 Recording';
       badge.className = 'recording';
-      input.placeholder = 'Recording… click 🎙️ to send or ✕ to cancel';
+      input.placeholder = 'Recording… click 🎙️ to stop';
       input.value = '';
+
+      recStartTime = Date.now();
+      const _tickTimer = () => {
+        const s  = Math.floor((Date.now() - recStartTime) / 1000);
+        const mm = String(Math.floor(s / 60)).padStart(2, '0');
+        const ss = String(s % 60).padStart(2, '0');
+        badge.textContent = `🔴 ${mm}:${ss}`;
+      };
+      _tickTimer();
+      recTimerInterval = setInterval(_tickTimer, 1000);
     } catch (err) {
       console.error('Mic error:', err);
     }
@@ -667,6 +939,8 @@
 
   function _stopMediaRecorder() {
     if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+    clearInterval(recTimerInterval);
+    recTimerInterval = null;
     mediaRecorder.stop();
     mediaRecorder.stream.getTracks().forEach(t => t.stop());
     micBtn.classList.remove('active');
@@ -675,50 +949,27 @@
 
   function cancelRecording() {
     if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
-    // Mark as cancelled so the 'stop' handler discards the data
     mediaRecorder._cancelled = true;
     _stopMediaRecorder();
     badge.textContent = 'Connected';
-    badge.className = 'connected';
-    input.placeholder = 'Type or hold 🎙️ to speak…';
+    badge.className   = 'connected';
+    input.placeholder = 'Type your answer or press 🎙️ to speak…';
   }
 
   async function stopRecording() {
     if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
-
     _stopMediaRecorder();
-    badge.textContent = 'Transcribing…';
-    badge.className = 'processing';
-    input.placeholder = 'Transcribing…';
 
-    // Wait for the final dataavailable event before reading chunks
+    // Wait for final dataavailable before reading chunks
     await new Promise(r => mediaRecorder.addEventListener('stop', r, { once: true }));
 
-    // Discard if the recording was cancelled
     if (mediaRecorder._cancelled) {
       mediaRecorder._cancelled = false;
       return;
     }
 
     const blob = new Blob(audioChunks, { type: 'audio/webm' });
-    const form = new FormData();
-    form.append('audio', blob, 'recording.webm');
-
-    try {
-      const res  = await fetch('/stt', { method: 'POST', body: form });
-      const data = await res.json();
-      input.value = data.text || '';
-      autoResize();
-      badge.textContent = 'Connected';
-      badge.className = 'connected';
-      input.placeholder = 'Type or hold 🎙️ to speak…';
-      if (input.value.trim()) sendMessage();
-    } catch (err) {
-      console.error('STT error:', err);
-      badge.textContent = 'Connected';
-      badge.className = 'connected';
-      input.placeholder = 'Type or hold 🎙️ to speak…';
-    }
+    _showPreview(blob);
   }
 
   // ── WebSocket ─────────────────────────────────────────────────────────
@@ -731,14 +982,14 @@
     ws.onopen = () => {
       badge.textContent = 'Connected';
       badge.className = 'connected';
-      // Send a ping every 25 s to keep the connection alive through proxies
-      // that close idle WebSocket connections at 60–120 s.
       clearInterval(pingInterval);
       pingInterval = setInterval(() => {
-        if (ws && ws.readyState === WebSocket.OPEN) {
+        if (ws && ws.readyState === WebSocket.OPEN)
           ws.send(JSON.stringify({ type: 'ping' }));
-        }
       }, 25_000);
+      // Try to resume an existing session before the server times out (500 ms).
+      const tid = _loadThreadId();
+      if (tid) ws.send(JSON.stringify({ type: 'resume', thread_id: tid }));
     };
 
     ws.onmessage = (e) => {
@@ -746,6 +997,40 @@
       removeTyping();
 
       switch (msg.type) {
+        case 'session':
+          // Server confirmed the thread_id — persist it for future reconnects.
+          _saveSession(msg.thread_id);
+          break;
+
+        case 'resumed': {
+          // Restore the stored chat history so the user can see prior turns.
+          const raw = _loadRaw();
+          if (raw?.history?.length) {
+            removeTyping();
+            const notice = document.createElement('div');
+            notice.style.cssText = 'text-align:center;font-size:11px;color:#475569;padding:6px 0 2px';
+            notice.textContent = '— session restored —';
+            chat.appendChild(notice);
+            // Drop the last 'ai' entry — the server is about to re-send the
+            // current pending question.  We also write the trimmed history back
+            // to localStorage so the server's re-send doesn't create a duplicate
+            // (otherwise the entry accumulates on every refresh).
+            let history = raw.history;
+            if (history.length > 0 && history[history.length - 1].type === 'ai') {
+              history = history.slice(0, -1);
+              raw.history = history;
+              localStorage.setItem(SESSION_KEY, JSON.stringify(raw));
+            }
+            for (const m of history) {
+              if (m.type === 'ai')            addBubble('ai',   m.text, m.voice, false);
+              else if (m.type === 'user')     addBubble('user', m.text, 'nova',  false);
+              else if (m.type === 'feedback') _addFeedbackSilent(m.text);
+            }
+            scrollBottom();
+          }
+          break;
+        }
+
         case 'phase':
           setPhase(msg.fase);
           break;
@@ -774,22 +1059,30 @@
 
         case 'ai':
           addBubble('ai', msg.text);
-          // Speak question, then enable input so user can't interrupt mid-sentence
-          speak(msg.text).then(() => enableInput());
+          _persistMsg('ai', msg.text, 'nova');
+          if (_skipNextAutoTTS) {
+            // First AI message on page load — don't auto-play, let user replay manually.
+            _skipNextAutoTTS = false;
+            enableInput();
+          } else {
+            speak(msg.text).then(() => enableInput());
+          }
           break;
 
         case 'transition':
           addBubble('ai', msg.text, 'onyx');
-          speak(msg.text, 'onyx');     // fire-and-forget — graph keeps running in parallel
+          _persistMsg('ai', msg.text, 'onyx');
+          speak(msg.text, 'onyx');
           showTyping(true);
           break;
 
         case 'user':
-          // Echoed back from server — already shown optimistically, ignore
+          _persistMsg('user', msg.text, 'nova');
           break;
 
         case 'feedback':
           addFeedback(msg.text);
+          _persistMsg('feedback', msg.text, 'onyx');
           break;
 
         case 'error':
@@ -836,7 +1129,7 @@
     return marked.parse(text, { breaks: true });
   }
 
-  function addBubble(role, text, voice = 'nova') {
+  function addBubble(role, text, voice = 'nova', autoReplay = true) {
     const row = document.createElement('div');
     row.className = `bubble-row ${role}`;
 
@@ -854,7 +1147,7 @@
     bubble.innerHTML = renderMd(text);
     wrapper.appendChild(bubble);
 
-    if (role === 'ai') {
+    if (role === 'ai' && autoReplay) {
       const btn = document.createElement('button');
       btn.className = 'replay-btn';
       btn.innerHTML = '🔊 replay';
@@ -903,6 +1196,17 @@
 
     // Speak feedback automatically with male Judge voice
     speak(_stripMarkdown(text), 'onyx');
+  }
+
+  // Render a feedback card without speaking (used when restoring history).
+  function _addFeedbackSilent(text) {
+    const row = document.createElement('div');
+    row.className = 'bubble-row feedback';
+    const card = document.createElement('div');
+    card.className = 'feedback-card';
+    card.innerHTML = renderMd(text);
+    row.appendChild(card);
+    chat.appendChild(row);
   }
 
   function showTyping(visible) {
@@ -995,6 +1299,12 @@
   });
 
   cancelRecBtn.addEventListener('click', cancelRecording);
+
+  document.getElementById('new-btn').addEventListener('click', () => {
+    if (!confirm('Start a new interview? The current session will be discarded.')) return;
+    clearSession();
+    location.reload();
+  });
 
   // ── Boot ──────────────────────────────────────────────────────────────
   connect();

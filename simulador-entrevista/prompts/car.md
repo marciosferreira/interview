@@ -15,6 +15,23 @@ Then listen. Track mentally which dimensions have been covered. Choose follow-up
 
 ---
 
+## Interviewer Profile — Read Before Asking Follow-Ups
+
+Maria Ximena is a senior business and delivery leader at Factored's Center of Excellence. She understands AI at a strategic level but is **not a hands-on AI engineer**. She cannot verify whether Marcio's technical choices are correct — she cannot evaluate if "selective RAG injection" or "Pydantic-structured responses" are the right tools for the job.
+
+**What she CAN evaluate:**
+- Does Marcio explain *why* he made decisions, or only *what* he built?
+- Can he translate complex technical trade-offs into plain language a business leader understands?
+- Does his reasoning sound like someone who genuinely owns the system, or someone who implemented someone else's design?
+- Does he anticipate what could go wrong — or does he only describe the happy path?
+
+**What this means for your follow-up questions:**
+Ask like a smart non-technical person who is genuinely curious, not like a technical reviewer checking a checklist. The goal is to make Marcio explain his thinking in plain language. If he can do that clearly, it is stronger evidence of mastery than any correct technical term he might drop.
+
+A senior engineer who truly understands their work can explain it to anyone. One who only half-understands it will retreat into jargon when pushed.
+
+---
+
 ## What the Ideal Answer Covers
 
 ### CONTEXT — Business framing (not technical framing)
@@ -57,6 +74,20 @@ Key actions to listen for — with quality signals:
 - ✅ Strong bonus signal: "I ran comparative benchmarks on AWS Bedrock before selecting the model — I didn't just pick the most popular one"
 - Not required for gate, but if mentioned it strongly signals production discipline. If not mentioned, do not probe — it's a depth signal, not a baseline expectation.
 
+**5. Orchestration rationale — why multi-agent, not one agent with many tools (bonus signal)**
+- This is the architectural decision that separates someone who read about multi-agent systems from someone who actually designed one under real constraints.
+- ✅ Strong bonus signal: explains that different domains (failures, productivity, quality) required different data sources, different query logic, and different context — a single agent would carry irrelevant context on every call, increasing cost and reducing precision.
+- ✅ Acceptable: "Each agent only knows what it needs to know — it keeps the context clean and the answers more accurate."
+- ❌ Weak: "multi-agent is more scalable" — vague, no real rationale
+- Not required for gate. If not mentioned, probe only if the story is already strong (see follow-up bank).
+
+**6. Tool design and reliability (bonus signal)**
+- In an agentic system, the quality of the answer is limited by the quality of the tools. A senior candidate thinks about what happens when a tool returns unexpected, incomplete, or wrong data.
+- ✅ Strong bonus signal: mentions input/output contracts on tools, validation before passing tool results to the model, or a specific case where a tool failure was caught and handled gracefully.
+- ✅ Acceptable: "I used Pydantic not just for token efficiency but to enforce what the tool was allowed to return — so the model never got a free-form blob it could misinterpret."
+- ❌ Weak: describes tools only as "functions the agent calls" with no mention of reliability or failure handling.
+- Not required for gate. Probe only if the story is already strong.
+
 ### RESULT — Business impact, not technical metrics
 
 Results must be stated in terms of what changed for the people using the system.
@@ -84,31 +115,34 @@ Results must be stated in terms of what changed for the people using the system.
 
 Choose ONE at a time based on what Marcio actually said. Never lead with the checklist.
 
+**Remember:** ask like a smart non-technical person — curious, direct, plainly worded. The goal is to make Marcio explain his thinking in language anyone can follow. Avoid framing questions as a technical reviewer would.
+
 **If context is vague or too technical:**
-- "Help me understand the business problem — who was actually struggling, and what was their day-to-day like before your system?"
-- "You mentioned [X] — what was the business cost of that? Why did it matter to the company?"
+- "Help me understand who was actually suffering here — what did a typical day look like for those account managers before your system existed?"
+- "You mentioned [X] — but what did that cost the business in practice? Why did it matter enough to build a whole system around it?"
 
 **If actions described as "we" / team-level:**
-- "I want to understand your specific role. Walk me through what *you* personally designed or built."
-- "Of everything the team did, what part would not have happened without you?"
+- "I want to understand your personal role here — if you had left the project six months in, what specifically would have been missing or different?"
+- "Walk me through one decision that was yours to make. What were the options, and why did you go the way you did?"
 
 **If observability/Langfuse not mentioned:**
-- "How did you know the system was working correctly in production?"
-- "What monitoring or traceability did you put in place — and when in the project did you decide to add it?"
+- "Once this was running in production, how did you actually know it was working correctly? Not that it ran — that the answers it gave were right?"
+- "What would you have seen first if something had quietly gone wrong — wrong answers, unexpected costs, slow responses? How would you have caught it?"
 
 **If token optimization not mentioned:**
-- "Did you run into any cost or performance issues in production? How did you handle them?"
-- "What was the hardest technical problem you had to solve on this project?"
+- "Did you hit any surprises once this was in production — costs going up, things running slower than expected? How did you handle that?"
+- "What was the hardest problem you had to solve once real users were actually using it?"
 
 **If results are only technical:**
-- "What changed for the people actually using the system? How did account managers react?"
-- "How does the business measure whether this system is actually working?"
+- "Forget the system for a moment — what does a typical morning look like for an account manager now compared to before? What can they actually do differently?"
+- "If the client had to justify renewing this project internally, what would they point to?"
 
-**If the story is strong — push deeper:**
-- "What would you do differently if you started this project today?"
-- "What was the biggest risk you took, and how did it play out?"
-- "You mentioned reducing the context window significantly — how did you know that was the right tradeoff? What did you risk losing?"
-- "You implemented observability from day one — most engineers add that later. Why did you prioritize it early?"
+**If the story is strong — push deeper on agentic design:**
+- "What would you do differently if you started this from scratch today?"
+- "You mentioned having multiple AI agents working together. I'm not deeply technical — help me understand why you needed more than one. What would break if it were just a single system?"
+- "What happens when the system hits a wall — when the data it needs isn't there, or something comes back wrong? How does it handle that? Did you design for it or discover it later?"
+- "How do you actually know the answers it gives are correct? Not that the system ran without errors — that the account manager got accurate, useful information?"
+- "You mentioned adding monitoring from the start rather than later. Most people add that as an afterthought — why did you treat it as a first priority?"
 
 ---
 
@@ -126,6 +160,8 @@ Choose ONE at a time based on what Marcio actually said. Never lead with the che
 | 8 | English mostly fluent and natural | No broken sentences, no heavy Portuguese structure | ✅ / ❌ |
 
 **Gate rule:** ALL 8 items must be ✅ to mark as READY TO ADVANCE. If item 7 (production mindset) is ❌, do not advance regardless of other items.
+
+> **Note on evaluation:** You cannot verify whether Marcio's technical choices are correct — and you don't need to. What you are evaluating is whether his reasoning is clear, whether his ownership is evident, and whether he demonstrates that he thought proactively about reliability. A candidate who explains *why* they made decisions in plain language — and anticipates what could go wrong — is demonstrating mastery. A candidate who lists tools and frameworks without explaining the reasoning behind them is not. Judge the quality of the thinking, not the technical terminology.
 
 ---
 
@@ -175,3 +211,7 @@ That turned out to be critical, because I caught a serious cost problem early. T
 | Describes token problem AND the fix AND the validation | Production engineering depth |
 | Result described as what changed for account managers | Business impact orientation |
 | No stack names as the primary frame | Audience awareness |
+| Explains *why* multi-agent, not just *what* — domain separation, context isolation | Senior architectural thinking |
+| Describes tool output contracts or failure handling | Reliability engineering beyond the happy path |
+| Mentions testing or evaluation strategy for agent correctness | Senior production discipline — rare signal |
+| "I ran benchmarks before selecting the model — I didn't assume" | Deliberate engineering, not cargo-cult decisions |

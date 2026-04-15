@@ -25,8 +25,10 @@ Deliverable in approximately 2 minutes. No technical stack names. No specific me
    - ✅ Acceptable: "my PhD background" without naming the field, if the framing is strong
    - ❌ Not enough: "I have a PhD in Aquatic Biology" — names the field without framing the value
 3. **Research credibility** — postdoc in Computational Biology & Applied Ecology at EMBL-EBI (UK); also collaborated with Tulane University (USA) and INPA (Brazil); first-author Python software for large-scale image analysis using computer vision and AI, published in *Bioinformatics* (Oxford Academic) and used by researchers internationally.
-   - ✅ Signal: specificity about institutions AND the software being actually used by researchers
-   - ❌ Not enough: "I did research abroad"
+   - ✅ Gate signal: mentions at least one world-class institution by name OR uses a phrase like "world-class research institutions" — specificity earns a bonus, but the framing matters more than the name-drop
+   - ✅ Depth bonus (not required to pass): names EMBL-EBI and/or Tulane specifically
+   - ✅ Depth bonus (not required to pass): mentions the published software for image analysis using AI
+   - ❌ Not enough: "I did research abroad" with no institution or publication signal at all
 4. **Transition narrative** — the move from biology/bioinformatics → applied AI in industry, framed as a *coherent evolution*, not a gap or accident.
    - ✅ Signal: "it naturally led me toward industry" or "that was my first real taste of applied AI"
    - ❌ Not enough: "then I started working in industry"
@@ -36,16 +38,20 @@ Deliverable in approximately 2 minutes. No technical stack names. No specific me
    - ❌ Wrong: "I built a TV manual chatbot" — underdescribes what was actually built and built at Venturus
 6. **Current chapter** — at FIT Instituto de Tecnologia, building an AI platform that helps account managers in manufacturing make better, faster decisions from real shop floor operational data.
    - ✅ Signal: business problem stated in non-technical language
+   - ✅ Depth bonus (not required to pass): uses language that implies autonomous reasoning without naming the stack — e.g. "systems that can reason over data and answer questions without human intervention," "agents that decide what to look at depending on what the manager asks." This signals AI Agent engineering, not just ML or analytics.
    - ❌ Not enough: describing the tech stack or architecture
-7. **Closing positioning** — the core challenge is not the technology itself, but making AI systems work reliably in production, at scale, delivering real business value. Ideally ending with something like:
+   - ❌ Weak: "AI platform" or "AI solution" with no sense of what makes it different from a dashboard or a model
+
+7. **Closing positioning** — the core challenge is not the technology itself, but making AI systems — especially autonomous ones — work reliably in production, at scale, delivering real business value. Ideally ending with something like:
    - ✅ Gold standard: *"That gap between a demo and a production system is what I find most interesting — and most difficult — about this work."*
+   - ✅ Strong equivalent for an agent-specific role: any closing that names the difficulty of making autonomous systems behave consistently and predictably — e.g. "the hard part isn't getting an agent to work once — it's making sure it works correctly every time, at scale, without supervision."
    - ✅ Acceptable equivalent: any closing that explicitly names production reliability, real-world constraints, or the gap between pilot and deployment as the hard part.
    - ❌ Weak closing: ending on technology, credentials, or generic enthusiasm ("I'm very passionate about AI")
 
 > **CRITICAL RULE — CLOSING LINE:**
 > The closing framing about the demo-to-production gap is the single most differentiating element of this pitch in the context of Factored's CoE.
 > If Marcio does NOT include this framing or a clear equivalent, the pitch does NOT pass the quality gate — even if all other checklist items are covered.
-> This line signals production mindset from the very first answer. It is what separates a good candidate from a memorable one.
+> For a Senior AI Agent Engineer role specifically, a closing that names the challenge of *autonomous system reliability* is stronger than a generic production mindset statement — it shows the candidate understands what is uniquely hard about agentic systems versus traditional software.
 
 ---
 
@@ -93,23 +99,33 @@ If the pitch is missing one or more required elements, give **SHORT coaching onl
 
 ---
 
-## Quality Gate — ALL must be true to advance
+## Quality Gate
 
-| # | Criterion | What to listen for | Pass signal |
-|---|-----------|-------------------|-------------|
-| 1 | Name and current role introduced | "I'm Marcio, Data Scientist / AI Engineer at FIT..." | ✅ / ❌ |
-| 2 | PhD framed as cognitive asset | "gave me a rigorous way of thinking" — not just "I have a PhD" | ✅ / ❌ |
-| 3 | International research experience named | EMBL-EBI and/or Tulane mentioned, or "world-class institutions" | ✅ / ❌ |
-| 4 | First-author software with AI/CV referenced briefly | "published software for image analysis using AI" or equivalent | ✅ / ❌ |
-| 5 | Transition framed as evolution, not gap | "naturally led me," "first real taste," or equivalent | ✅ / ❌ |
-| 6 | Venturus RAG work framed as milestone | "entry point into production AI" or equivalent | ✅ / ❌ |
-| 7 | Current work described in business terms | Manufacturing, account managers, operational data — no stack names | ✅ / ❌ |
-| 8 | Closing frames demo-to-production gap | Some version of "the hard part is making it work in production" | ✅ / ❌ |
-| 9 | No technical stack names used | LangGraph, Bedrock, FAISS, etc. absent | ✅ / ❌ |
-| 10 | No specific metrics used | No %, no token counts, no cost figures | ✅ / ❌ |
-| 11 | English mostly fluent and natural | No broken sentences, no heavy Portuguese structure | ✅ / ❌ |
+### Required to advance — ALL must be ✅
 
-**Gate rule:** ALL 11 items must be ✅ to mark as READY TO ADVANCE. If item 8 (closing) is ❌, do not advance regardless of other items.
+| # | Criterion | What to listen for |
+|---|-----------|-------------------|
+| 1 | Name and current role introduced | "I'm Marcio, Data Scientist / AI Engineer at FIT..." |
+| 2 | PhD framed as cognitive asset | "gave me a rigorous way of thinking" — not just "I have a PhD" |
+| 3 | International research experience signalled | At least one world-class institution named, OR "world-class institutions" as a phrase |
+| 4 | Transition framed as evolution, not gap | "naturally led me," "first real taste," or equivalent |
+| 5 | Venturus RAG work framed as milestone | "entry point into production AI" or equivalent |
+| 6 | Current work described in business terms | Manufacturing, account managers, operational data — no stack names |
+| 7 | Closing frames demo-to-production gap | Some version of "the hard part is making it work in production" |
+| 8 | No technical stack names used | LangGraph, Bedrock, FAISS, etc. absent |
+| 9 | No specific metrics used | No %, no token counts, no cost figures |
+| 10 | English mostly fluent and natural | No broken sentences, no heavy Portuguese structure |
+
+**Gate rule:** ALL 10 items must be ✅ to mark as READY TO ADVANCE. If item 7 (closing) is ❌, do not advance regardless of other items.
+
+### Depth signals — award in feedback, do NOT block advancement
+
+| Signal | What it demonstrates |
+| ------ | ------------------- |
+| Names EMBL-EBI and/or Tulane specifically | Specificity and international credibility beyond the minimum |
+| Mentions the published software for image analysis using AI | Bridges academic and production mindset early |
+
+If these depth signals are present, note them explicitly as strengths in the feedback block. If absent, do not penalise — they are differentiators, not requirements.
 
 ---
 

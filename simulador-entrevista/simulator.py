@@ -6,7 +6,15 @@ from typing_extensions import TypedDict
 from dotenv import load_dotenv
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
-from langgraph.checkpoint.memory import MemorySaver
+try:
+    import sqlite3 as _sqlite3
+    from langgraph.checkpoint.sqlite import SqliteSaver as _SqliteSaver
+    _db_path = str(Path(__file__).parent / "sessions.db")
+    _conn = _sqlite3.connect(_db_path, check_same_thread=False)
+    _Checkpointer = lambda: _SqliteSaver(_conn)   # noqa: E731
+except Exception:
+    from langgraph.checkpoint.memory import MemorySaver as _MemorySaver
+    _Checkpointer = _MemorySaver
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langgraph.types import interrupt, Command
@@ -580,7 +588,7 @@ builder.add_edge("motivation_report",     "marcio_questions")
 
 builder.add_edge("feedback", END)
 
-checkpointer = MemorySaver()
+checkpointer = _Checkpointer()
 graph = builder.compile(checkpointer=checkpointer)
 
 

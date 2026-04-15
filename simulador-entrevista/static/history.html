@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interview History</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      padding: 14px 24px;
+      background: #1a1d27;
+      border-bottom: 1px solid #2d3148;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .logo {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    header h1 { font-size: 16px; font-weight: 600; color: #f1f5f9; }
+    header p  { font-size: 12px; color: #64748b; margin-top: 1px; }
+
+    .hdr-btn {
+      margin-left: auto;
+      font-size: 11px; font-weight: 500;
+      padding: 5px 12px; border-radius: 20px;
+      background: transparent; border: 1px solid #2d3148;
+      color: #64748b; cursor: pointer; transition: all 0.2s;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+    }
+    .hdr-btn + .hdr-btn { margin-left: 8px; }
+    .hdr-btn.back:hover { border-color: #6366f1; color: #a78bfa; }
+    .hdr-btn.new:hover  { border-color: #22c55e; color: #4ade80; }
+
+    /* ── Content ── */
+    main {
+      flex: 1;
+      padding: 32px 24px;
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 4px;
+    }
+    .page-sub {
+      font-size: 13px;
+      color: #475569;
+      margin-bottom: 28px;
+    }
+
+    /* ── Session cards ── */
+    .session-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .session-card {
+      background: #1a1d27;
+      border: 1px solid #2d3148;
+      border-radius: 16px;
+      padding: 20px 24px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .session-card:hover {
+      border-color: #6366f1;
+      background: #1e2235;
+    }
+
+    .session-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .session-icon.done     { background: #14532d; }
+    .session-icon.progress { background: #1e1b4b; }
+
+    .session-body { flex: 1; min-width: 0; }
+
+    .session-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+
+    .session-date {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
+    .session-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .session-badge.done     { background: #14532d; color: #4ade80; }
+    .session-badge.progress { background: #1e1b4b; color: #a78bfa; }
+
+    .session-phase {
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 8px;
+    }
+
+    .session-preview {
+      font-size: 13px;
+      color: #94a3b8;
+      line-height: 1.5;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .session-footer {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .continue-btn {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid #6366f1;
+      color: #a78bfa;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      pointer-events: none; /* card click handles it */
+    }
+    .session-card:hover .continue-btn {
+      background: #6366f1;
+      color: #fff;
+    }
+
+    .session-msgs {
+      font-size: 11px;
+      color: #475569;
+    }
+
+    .delete-btn {
+      margin-left: auto;
+      background: transparent;
+      border: 1px solid transparent;
+      color: #475569;
+      border-radius: 8px;
+      padding: 3px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .session-card:hover .delete-btn { border-color: #3d1515; color: #f87171; }
+    .delete-btn:hover { background: #3d1515 !important; color: #f87171 !important; }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center;
+      padding: 80px 24px;
+    }
+    .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-title {
+      font-size: 18px; font-weight: 600; color: #94a3b8;
+      margin-bottom: 8px;
+    }
+    .empty-sub { font-size: 14px; color: #475569; margin-bottom: 24px; }
+    .start-btn {
+      display: inline-block;
+      padding: 10px 24px;
+      background: #6366f1;
+      color: #fff;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .start-btn:hover { background: #4f46e5; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🎤</div>
+  <div>
+    <h1>Mock Interview Simulator</h1>
+    <p>Interview history</p>
+  </div>
+  <a id="back-btn" class="hdr-btn back" href="/">← Current interview</a>
+  <button id="new-btn" class="hdr-btn new" onclick="newInterview()">＋ New interview</button>
+</header>
+
+<main>
+  <div class="page-title">Past interviews</div>
+  <div class="page-sub">Click any session to open and continue it.</div>
+  <div class="session-list" id="session-list"></div>
+</main>
+
+<script>
+  const SESSION_KEY  = 'interview_v1';
+  const HISTORY_KEY  = 'interview_history_v1';
+
+  const FASE_LABEL = {
+    elevator_pitch:        'Elevator Pitch',
+    elevator_pitch_report: 'Elevator Pitch — review',
+    CAR:                   'CAR Story',
+    CAR_report:            'CAR Story — review',
+    technical:             'Technical Questions',
+    technical_report:      'Technical — review',
+    leadership:            'Leadership Questions',
+    leadership_report:     'Leadership — review',
+    motivation:            'Motivation Questions',
+    motivation_report:     'Motivation — review',
+    marcio_questions:      'Your Questions',
+    feedback:              'Final Scorecard',
+    done:                  'Completed',
+  };
+
+  function _fmt(ts) {
+    if (!ts) return '—';
+    const d   = new Date(ts);
+    const now = new Date();
+    const diffDays = Math.floor((now - d) / 86400000);
+    const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (diffDays === 0) return `Today at ${time}`;
+    if (diffDays === 1) return `Yesterday at ${time}`;
+    if (diffDays < 7)  return `${d.toLocaleDateString([], { weekday: 'long' })} at ${time}`;
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) + ` at ${time}`;
+  }
+
+  function _preview(history) {
+    if (!history || !history.length) return '(no messages)';
+    // First user message is the most informative preview
+    const first = history.find(m => m.type === 'user');
+    const text  = first ? first.text : (history[0]?.text || '');
+    return text.length > 160 ? text.slice(0, 160) + '…' : text;
+  }
+
+  function _msgCount(history) {
+    if (!history) return 0;
+    return history.filter(m => m.type === 'user').length;
+  }
+
+  function deleteSession(threadId) {
+    let list = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    list = list.filter(s => s.threadId !== threadId);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+    // If this was the active session, clear it too
+    const active = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+    if (active?.threadId === threadId) localStorage.removeItem(SESSION_KEY);
+    render();
+  }
+
+  function openSession(threadId) {
+    const list    = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    const session = list.find(s => s.threadId === threadId);
+    if (!session) return;
+    // Set this session as the active one so index.html resumes it.
+    const active = {
+      threadId:  session.threadId,
+      savedAt:   Date.now(),
+      startedAt: session.startedAt,
+      fase:      session.fase || '',
+      history:   session.history || [],
+    };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(active));
+    window.location.href = '/';
+  }
+
+  function newInterview() {
+    localStorage.removeItem(SESSION_KEY);
+    window.location.href = '/';
+  }
+
+  function render() {
+    const list    = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    const listEl  = document.getElementById('session-list');
+    const backBtn = document.getElementById('back-btn');
+
+    // Show/hide "Back" depending on whether there's an active session
+    const active = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+    backBtn.style.display = active?.threadId ? '' : 'none';
+
+    if (!list.length) {
+      listEl.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">🎤</div>
+          <div class="empty-title">No interviews yet</div>
+          <div class="empty-sub">Start your first mock interview below.</div>
+          <a class="start-btn" href="/">Start interview</a>
+        </div>`;
+      return;
+    }
+
+    listEl.innerHTML = '';
+    for (const s of list) {
+      const isDone    = s.fase === 'done';
+      const phaseText = FASE_LABEL[s.fase] || (s.fase ? s.fase : 'Starting…');
+      const turns     = _msgCount(s.history);
+
+      const card = document.createElement('div');
+      card.className = 'session-card';
+      card.onclick   = () => openSession(s.threadId);
+      card.innerHTML = `
+        <div class="session-icon ${isDone ? 'done' : 'progress'}">
+          ${isDone ? '✅' : '🎙️'}
+        </div>
+        <div class="session-body">
+          <div class="session-top">
+            <span class="session-date">${_fmt(s.startedAt)}</span>
+            <span class="session-badge ${isDone ? 'done' : 'progress'}">
+              ${isDone ? 'Completed' : 'In progress'}
+            </span>
+          </div>
+          <div class="session-phase">Phase reached: ${phaseText}</div>
+          <div class="session-preview">${_escHtml(_preview(s.history))}</div>
+          <div class="session-footer">
+            <span class="continue-btn">${isDone ? '📖 Review' : '▶ Continue'}</span>
+            <span class="session-msgs">${turns} answer${turns !== 1 ? 's' : ''}</span>
+            <button class="delete-btn" title="Delete this session">🗑 Delete</button>
+          </div>
+        </div>`;
+
+      // Wire delete button — stop propagation so card click doesn't open the session
+      card.querySelector('.delete-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteSession(s.threadId);
+      });
+
+      listEl.appendChild(card);
+    }
+  }
+
+  function _escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  render();
+</script>
+</body>
+</html>

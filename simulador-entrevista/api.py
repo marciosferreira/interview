@@ -87,18 +87,51 @@ async def interview_ws(ws: WebSocket):
     await ws.accept()
     loop = asyncio.get_running_loop()
 
-    thread_id = str(uuid.uuid4())
+    # ── Session setup ────────────────────────────────────────────────────────
+    # Listen briefly for a {"type": "resume", "thread_id": "…"} from the client.
+    # If present, we restore the existing LangGraph checkpoint instead of starting
+    # a new session.  This allows the interview to survive page refreshes.
+    thread_id: str = str(uuid.uuid4())
+    is_resuming = False
+    try:
+        init = await asyncio.wait_for(ws.receive_json(), timeout=0.5)
+        if init.get("type") == "resume" and init.get("thread_id"):
+            thread_id = init["thread_id"]
+            is_resuming = True
+    except Exception:
+        pass
+
     config = {"configurable": {"thread_id": thread_id}}
-    initial_state = make_initial_state()
+    # Always echo the thread_id back so the client can persist it.
+    await ws.send_json({"type": "session", "thread_id": thread_id})
 
     try:
-        result = await loop.run_in_executor(
-            None, functools.partial(graph.invoke, initial_state, config)
-        )
+        if is_resuming:
+            state_snap = await loop.run_in_executor(
+                None, functools.partial(graph.get_state, config)
+            )
+            if state_snap and state_snap.values:
+                interrupts_list = [
+                    intr for task in state_snap.tasks for intr in task.interrupts
+                ]
+                result = dict(state_snap.values)
+                result["__interrupt__"] = interrupts_list
+                prev_msg_count       = len(state_snap.values.get("messages", []))
+                prev_report_streamed = False
+                prev_was_skip        = False
+                await ws.send_json({"type": "resumed"})
+                await ws.send_json({"type": "phase", "fase": result.get("fase", "")})
+            else:
+                is_resuming = False  # no checkpoint — fall through to fresh start
 
-        prev_msg_count       = 1
-        prev_report_streamed = False  # True when previous iteration streamed a report
-        prev_was_skip        = False  # True when the previous user input was "skip"
+        if not is_resuming:
+            initial_state = make_initial_state()
+            result = await loop.run_in_executor(
+                None, functools.partial(graph.invoke, initial_state, config)
+            )
+            prev_msg_count       = 1
+            prev_report_streamed = False
+            prev_was_skip        = False
 
         while True:
             messages: list = result.get("messages", [])
