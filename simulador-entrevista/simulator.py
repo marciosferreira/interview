@@ -11,7 +11,9 @@ try:
     from langgraph.checkpoint.sqlite import SqliteSaver as _SqliteSaver
     _db_path = str(Path(__file__).parent / "sessions.db")
     _conn = _sqlite3.connect(_db_path, check_same_thread=False)
-    _Checkpointer = lambda: _SqliteSaver(_conn)   # noqa: E731
+    _saver = _SqliteSaver(_conn)
+    _saver.setup()   # creates checkpoint tables if they don't exist yet
+    _Checkpointer = lambda: _saver   # noqa: E731
 except Exception:
     from langgraph.checkpoint.memory import MemorySaver as _MemorySaver
     _Checkpointer = _MemorySaver

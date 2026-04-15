@@ -152,6 +152,9 @@
       font-size: 14px;
       line-height: 1.6;
       max-width: 100%;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      min-width: 0;
     }
     .bubble-row.ai   .bubble { background: #1e2235; border-top-left-radius: 4px; }
     .bubble-row.user .bubble { background: #1e3a5f; border-top-right-radius: 4px; color: #bfdbfe; }
@@ -747,6 +750,8 @@
       streamWrapperEl.style.display = 'flex';
       streamWrapperEl.style.flexDirection = 'column';
       streamWrapperEl.style.alignItems = 'flex-start';
+      streamWrapperEl.style.minWidth = '0';
+      streamWrapperEl.style.flex = '1';
       streamBubbleEl = document.createElement('div');
       streamBubbleEl.className = 'bubble';
       streamWrapperEl.appendChild(streamBubbleEl);
@@ -1028,7 +1033,7 @@
               localStorage.setItem(SESSION_KEY, JSON.stringify(raw));
             }
             for (const m of history) {
-              if (m.type === 'ai')            addBubble('ai',   m.text, m.voice,        false);
+              if (m.type === 'ai')            addBubble('ai',   m.text, m.voice,        true);
               else if (m.type === 'user')     addBubble('user', m.text, USER_TTS_VOICE, true);
               else if (m.type === 'feedback') _addFeedbackSilent(m.text);
             }
@@ -1148,6 +1153,8 @@
     wrapper.style.flexDirection = 'column';
     // AI bubbles: align left; user bubbles: align right (matches bubble side)
     wrapper.style.alignItems = role === 'user' ? 'flex-end' : 'flex-start';
+    wrapper.style.minWidth = '0';
+    wrapper.style.flex = '1';
 
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
