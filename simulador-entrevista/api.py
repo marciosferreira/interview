@@ -74,12 +74,24 @@ async def tts(text: str, voice: str = "nova"):
     allowed = {"alloy", "echo", "fable", "onyx", "nova", "shimmer"}
     if voice not in allowed:
         voice = "nova"
-    response = await openai_client.audio.speech.create(
-        model="tts-1",
-        voice=voice,
-        input=text,
-    )
-    return Response(content=response.content, media_type="audio/mpeg")
+
+    last_exc: Exception | None = None
+    for attempt in range(3):
+        try:
+            response = await openai_client.audio.speech.create(
+                model="tts-1",
+                voice=voice,
+                input=text,
+            )
+            return Response(content=response.content, media_type="audio/mpeg")
+        except Exception as exc:
+            last_exc = exc
+            if attempt < 2:
+                await asyncio.sleep(0.5 * (attempt + 1))
+
+    print(f"[tts] failed after 3 attempts: {last_exc}")
+    from fastapi import HTTPException
+    raise HTTPException(status_code=503, detail="TTS service temporarily unavailable")
 
 
 @app.websocket("/ws")

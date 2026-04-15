@@ -164,6 +164,8 @@
       cursor: pointer; transition: color .15s, border-color .15s;
     }
     .replay-btn:hover { color: #a78bfa; border-color: #a78bfa; }
+    .replay-btn.user  { border-color: #1e3a5f; color: #475569; }
+    .replay-btn.user:hover { color: #93c5fd; border-color: #93c5fd; }
 
     /* Markdown rendering inside bubbles */
     .bubble p, .feedback-card p { margin: 0 0 8px 0; }
@@ -807,6 +809,10 @@
   // should NOT auto-play — user triggers TTS manually via the replay button.
   let _skipNextAutoTTS = true;
 
+  // Voice used to read back the user's own answers.
+  // Kept distinct from nova (Maria) and onyx (Judge).
+  const USER_TTS_VOICE = 'echo';
+
   function _fmtSecs(s) {
     s = Math.floor(s || 0);
     return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
@@ -1022,8 +1028,8 @@
               localStorage.setItem(SESSION_KEY, JSON.stringify(raw));
             }
             for (const m of history) {
-              if (m.type === 'ai')            addBubble('ai',   m.text, m.voice, false);
-              else if (m.type === 'user')     addBubble('user', m.text, 'nova',  false);
+              if (m.type === 'ai')            addBubble('ai',   m.text, m.voice,        false);
+              else if (m.type === 'user')     addBubble('user', m.text, USER_TTS_VOICE, true);
               else if (m.type === 'feedback') _addFeedbackSilent(m.text);
             }
             scrollBottom();
@@ -1140,18 +1146,19 @@
     const wrapper = document.createElement('div');
     wrapper.style.display = 'flex';
     wrapper.style.flexDirection = 'column';
-    wrapper.style.alignItems = 'flex-start';
+    // AI bubbles: align left; user bubbles: align right (matches bubble side)
+    wrapper.style.alignItems = role === 'user' ? 'flex-end' : 'flex-start';
 
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
     bubble.innerHTML = renderMd(text);
     wrapper.appendChild(bubble);
 
-    if (role === 'ai' && autoReplay) {
+    if (autoReplay) {
       const btn = document.createElement('button');
-      btn.className = 'replay-btn';
+      btn.className = role === 'user' ? 'replay-btn user' : 'replay-btn';
       btn.innerHTML = '🔊 replay';
-      btn.title = 'Replay audio';
+      btn.title = role === 'user' ? 'Listen to your answer (TTS)' : 'Replay audio';
       btn.addEventListener('click', () => {
         stopTTS();
         speak(_stripMarkdown(text), voice);
@@ -1269,7 +1276,7 @@
     const text = input.value.trim();
     if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
 
-    addBubble('user', text);
+    addBubble('user', text, USER_TTS_VOICE);
     ws.send(JSON.stringify({ text }));
     input.value = '';
     input.style.height = 'auto';
