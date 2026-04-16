@@ -1327,7 +1327,6 @@
   cancelRecBtn.addEventListener('click', cancelRecording);
 
   document.getElementById('new-btn').addEventListener('click', () => {
-    if (!confirm('Start a new interview? The current session will be discarded.')) return;
     clearSession();
     window.location.href = '/interview.html';
   });
