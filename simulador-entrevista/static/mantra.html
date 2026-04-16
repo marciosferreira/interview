@@ -132,6 +132,19 @@
       display: none;
     }
     #stop-btn:hover { border-color: #f87171; color: #f87171; }
+    .speed-select {
+      background: #0f1117;
+      border: 1px solid #2d3148;
+      border-radius: 8px;
+      color: #94a3b8;
+      font-size: 11px; font-weight: 600;
+      padding: 5px 8px;
+      cursor: pointer;
+      flex-shrink: 0;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .speed-select:hover { border-color: #6366f1; color: #a78bfa; }
 
     /* ── Sections ── */
     .section {
@@ -424,6 +437,12 @@
       <div class="play-title">Ouvir tudo em voz alta</div>
       <div class="play-status" id="play-status">Pronto para tocar</div>
     </div>
+    <select id="speed-select" class="speed-select" title="Velocidade de reprodução">
+      <option value="0.7">0.7×</option>
+      <option value="0.85">0.85×</option>
+      <option value="1" selected>1×</option>
+      <option value="1.25">1.25×</option>
+    </select>
     <button id="stop-btn">✕ Parar</button>
   </div>
 
@@ -512,6 +531,12 @@
         <div class="play-title">Ouvir o CAR em voz alta</div>
         <div class="play-status" id="car-status">Pronto para tocar</div>
       </div>
+      <select id="car-speed-select" class="speed-select" title="Velocidade de reprodução">
+        <option value="0.7">0.7×</option>
+        <option value="0.85">0.85×</option>
+        <option value="1" selected>1×</option>
+        <option value="1.25">1.25×</option>
+      </select>
       <button id="car-stop-btn">✕ Parar</button>
     </div>
     <div class="car-text">
@@ -543,6 +568,12 @@
         <div class="play-title">Ouvir o pitch em voz alta</div>
         <div class="play-status" id="pitch-status">Pronto para tocar</div>
       </div>
+      <select id="pitch-speed-select" class="speed-select" title="Velocidade de reprodução">
+        <option value="0.7">0.7×</option>
+        <option value="0.85">0.85×</option>
+        <option value="1" selected>1×</option>
+        <option value="1.25">1.25×</option>
+      </select>
       <button id="pitch-stop-btn">✕ Parar</button>
     </div>
     <div class="pitch-text">
@@ -578,10 +609,11 @@
     } catch { return null; }
   }
 
-  function makeTTSPlayer({ playBtnId, stopBtnId, statusId, text, voice, allPlayers }) {
+  function makeTTSPlayer({ playBtnId, stopBtnId, statusId, speedId, text, voice, allPlayers }) {
     const playBtn  = document.getElementById(playBtnId);
     const stopBtn  = document.getElementById(stopBtnId);
     const statusEl = document.getElementById(statusId);
+    const speedEl  = speedId ? document.getElementById(speedId) : null;
 
     let chain  = Promise.resolve();
     let token  = 0;
@@ -640,6 +672,7 @@
           idx++;
           statusEl.textContent = `Reproduzindo… (${idx}/${chunks.length})`;
           const audio = new Audio(url);
+          if (speedEl) audio.playbackRate = parseFloat(speedEl.value) || 1;
           currentAudio = audio;
           paused = false;
           await new Promise(r => { audio.onended = r; audio.onerror = r; audio.play().catch(r); });
@@ -703,6 +736,7 @@ The core challenge there is not the technology — it's making sure the system a
     playBtnId: 'play-btn',
     stopBtnId:  'stop-btn',
     statusId:   'play-status',
+    speedId:    'speed-select',
     text:       MANTRA_TEXT,
     voice:      'onyx',
     allPlayers,
@@ -712,6 +746,7 @@ The core challenge there is not the technology — it's making sure the system a
     playBtnId: 'pitch-play-btn',
     stopBtnId:  'pitch-stop-btn',
     statusId:   'pitch-status',
+    speedId:    'pitch-speed-select',
     text:       PITCH_TEXT,
     voice:      'nova',
     allPlayers,
@@ -733,6 +768,7 @@ Account managers can now access personalized operational reports through a conve
     playBtnId: 'car-play-btn',
     stopBtnId:  'car-stop-btn',
     statusId:   'car-status',
+    speedId:    'car-speed-select',
     text:       CAR_TEXT,
     voice:      'nova',
     allPlayers,

@@ -30,6 +30,10 @@ openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 TTS_CACHE_DIR = Path(__file__).parent / "static" / "tts_cache"
 TTS_CACHE_DIR.mkdir(exist_ok=True)
 
+# Audio is deterministic (same text+voice = identical bytes), so it can be
+# cached indefinitely in the browser — no need to ever revalidate.
+_TTS_CACHE_HEADERS = {"Cache-Control": "public, max-age=31536000, immutable"}
+
 app = FastAPI()
 
 # Maps report phase name → report system prompt.
@@ -121,17 +125,22 @@ async def stt(audio: UploadFile):
 
 
 @app.get("/tts")
-async def tts(text: str, voice: str = "nova"):
+async def tts(text: str, voice: str = "nova", nocache: bool = False):
     # Allowed voices: alloy, echo, fable, onyx, nova, shimmer
     allowed = {"alloy", "echo", "fable", "onyx", "nova", "shimmer"}
     if voice not in allowed:
         voice = "nova"
 
-    # Check disk cache first — same text+voice always produces identical audio.
-    cache_key  = hashlib.md5(f"{voice}:{text}".encode()).hexdigest()
-    cache_file = TTS_CACHE_DIR / f"{cache_key}.mp3"
-    if cache_file.exists():
-        return Response(content=cache_file.read_bytes(), media_type="audio/mpeg")
+    # Disk cache — keyed by md5(voice:text).
+    # Skipped when nocache=1 (interview responses are unique; caching them is wasteful).
+    if not nocache:
+        cache_key  = hashlib.md5(f"{voice}:{text}".encode()).hexdigest()
+        cache_file = TTS_CACHE_DIR / f"{cache_key}.mp3"
+        if cache_file.exists():
+            return Response(content=cache_file.read_bytes(), media_type="audio/mpeg",
+                            headers=_TTS_CACHE_HEADERS)
+    else:
+        cache_file = None
 
     last_exc: Exception | None = None
     for attempt in range(3):
@@ -142,8 +151,10 @@ async def tts(text: str, voice: str = "nova"):
                 input=text,
             )
             audio_bytes = response.content
-            cache_file.write_bytes(audio_bytes)   # save for future requests
-            return Response(content=audio_bytes, media_type="audio/mpeg")
+            if cache_file is not None:
+                cache_file.write_bytes(audio_bytes)   # save for future requests
+            headers = _TTS_CACHE_HEADERS if cache_file is not None else {}
+            return Response(content=audio_bytes, media_type="audio/mpeg", headers=headers)
         except Exception as exc:
             last_exc = exc
             if attempt < 2:
