@@ -353,6 +353,19 @@ def _make_interview_node(system_prompt, output_class, checklist_key, notas_key, 
         old_ingles = state.get("ingles_erros_acumulados", [])
         new_ingles = old_ingles + (avaliacao.ingles_erros or [])
 
+        # Safety guard: if the LLM returned mensagem="OK" but forgot to set
+        # fase_completa=True, treat it as complete — avoids the graph getting
+        # stuck waiting for user input with a bare "OK" as the question.
+        if avaliacao.mensagem.strip().lower() == "ok" and not avaliacao.fase_completa:
+            return {
+                "messages": [],
+                "phase_messages": phase_msgs,
+                checklist_key: new_checklist,
+                notas_key: new_notas,
+                "ingles_erros_acumulados": new_ingles,
+                "fase": report_fase,
+            }
+
         if not avaliacao.fase_completa:
             user_response = interrupt(avaliacao.mensagem)
 

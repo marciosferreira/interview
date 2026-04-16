@@ -291,7 +291,7 @@
     #send-btn:hover    { background: #4f46e5; }
     #send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    #skip-btn {
+    #pause-btn, #skip-btn {
       background: #2d3148;
       color: #94a3b8;
       display: none;
@@ -300,7 +300,8 @@
       width: auto;
       padding: 0 14px;
     }
-    #skip-btn:hover { background: #3d4160; color: #e2e8f0; }
+    #pause-btn:hover { background: #3d4160; color: #a78bfa; }
+    #skip-btn:hover  { background: #3d4160; color: #e2e8f0; }
 
     #cancel-rec-btn {
       background: #2d3148;
@@ -422,6 +423,7 @@
     <button id="cancel-rec-btn" class="icon-btn" title="Cancel recording">✕</button>
     <textarea id="text-input" placeholder="Type your answer or press 🎙️ to speak…"
               rows="1" disabled></textarea>
+    <button id="pause-btn" class="icon-btn" title="Pause / Resume audio">⏸ Pause</button>
     <button id="skip-btn" class="icon-btn" title="Skip audio">⏭ Skip</button>
     <button id="send-btn" class="icon-btn" disabled title="Send (Enter)">➤</button>
   </div>
@@ -560,6 +562,7 @@
   const cancelRecBtn = document.getElementById('cancel-rec-btn');
   const sendBtn      = document.getElementById('send-btn');
   const skipBtn      = document.getElementById('skip-btn');
+  const pauseBtn     = document.getElementById('pause-btn');
   const badge        = document.getElementById('status-badge');
   const doneBanner   = document.getElementById('done-banner');
 
@@ -612,6 +615,7 @@
   let ttsChain = Promise.resolve();
   let ttsToken  = 0;   // incremented on stopTTS/new speak to cancel in-flight chunks
   let ttsActiveSpeaks = 0;  // counts concurrent speak() calls; button hides only when 0
+  let ttsPaused = false;
 
   function _stripMarkdown(text) {
     return text
@@ -665,7 +669,10 @@
 
     // Fire ALL fetches NOW in parallel — they complete while earlier chunks play
     const fetches = chunks.map(c => _fetchAudioUrl(c, voice));
-    skipBtn.style.display = 'flex';
+    skipBtn.style.display  = 'flex';
+    pauseBtn.style.display = 'flex';
+    ttsPaused = false;
+    pauseBtn.textContent = '⏸ Pause';
     ttsActiveSpeaks++;
 
     for (let i = 0; i < chunks.length; i++) {
@@ -684,7 +691,11 @@
         currentAudio = null;
         if (isLast && ttsToken === myToken) {
           ttsActiveSpeaks = Math.max(0, ttsActiveSpeaks - 1);
-          if (ttsActiveSpeaks === 0) skipBtn.style.display = 'none';
+          if (ttsActiveSpeaks === 0) {
+            skipBtn.style.display  = 'none';
+            pauseBtn.style.display = 'none';
+            ttsPaused = false;
+          }
         }
       }).catch(() => {});
     }
@@ -695,9 +706,24 @@
   function stopTTS() {
     ttsToken++;                                    // invalidates all queued chunks
     ttsActiveSpeaks = 0;
+    ttsPaused = false;
     if (currentAudio) { currentAudio.pause(); currentAudio = null; }
     ttsChain = Promise.resolve();
-    skipBtn.style.display = 'none';
+    skipBtn.style.display  = 'none';
+    pauseBtn.style.display = 'none';
+  }
+
+  function togglePauseTTS() {
+    if (!currentAudio) return;
+    if (ttsPaused) {
+      currentAudio.play().catch(() => {});
+      ttsPaused = false;
+      pauseBtn.textContent = '⏸ Pause';
+    } else {
+      currentAudio.pause();
+      ttsPaused = true;
+      pauseBtn.textContent = '▶ Resume';
+    }
   }
 
   // ── Disconnection beep ───────────────────────────────────────────────
@@ -720,7 +746,9 @@
     } catch (_) {}
   }
 
-  // ── Skip TTS ──────────────────────────────────────────────────────────
+  // ── Pause / Resume / Skip TTS ─────────────────────────────────────────
+  pauseBtn.addEventListener('click', togglePauseTTS);
+
   skipBtn.addEventListener('click', () => {
     stopTTS();
     enableInput();
@@ -1136,8 +1164,12 @@
       badge.textContent = 'Reconnecting…';
       badge.className = '';
       disableInput(true);
-      // Wait 2 s then try again so we don't hammer the server.
-      setTimeout(connect, 2000);
+      // Reload the page instead of calling connect() again.
+      // Re-using the same JS context would leave the chat populated and cause
+      // the resumed handler to render history on top of existing bubbles,
+      // duplicating messages. A reload starts clean: localStorage + DB preserve
+      // all history and the normal boot path restores the session correctly.
+      setTimeout(() => window.location.reload(), 2000);
     };
 
     ws.onerror = () => {
