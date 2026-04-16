@@ -6,6 +6,8 @@ from typing_extensions import TypedDict
 from dotenv import load_dotenv
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+import json as _json
+
 try:
     import sqlite3 as _sqlite3
     from langgraph.checkpoint.sqlite import SqliteSaver as _SqliteSaver
@@ -15,12 +17,88 @@ try:
     _saver.setup()   # creates checkpoint tables if they don't exist yet
     _Checkpointer = lambda: _saver   # noqa: E731
 except Exception:
+    _conn = None
     from langgraph.checkpoint.memory import MemorySaver as _MemorySaver
     _Checkpointer = _MemorySaver
+
+
+class SessionStore:
+    """Stores chat history + metadata for the history page.
+    Backed by the same sessions.db used for LangGraph checkpoints.
+    Falls back to an in-memory dict if SQLite is unavailable.
+    """
+
+    def __init__(self, conn):
+        self._conn = conn
+        if conn:
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS session_meta (
+                    thread_id      TEXT PRIMARY KEY,
+                    started_at     INTEGER NOT NULL,
+                    last_active_at INTEGER NOT NULL,
+                    fase           TEXT    NOT NULL DEFAULT '',
+                    history        TEXT    NOT NULL DEFAULT '[]'
+                )
+            """)
+            conn.commit()
+        else:
+            self._mem: dict = {}
+
+    def upsert(self, thread_id: str, started_at: int, last_active_at: int,
+               fase: str, history: list) -> None:
+        if self._conn:
+            self._conn.execute(
+                """INSERT INTO session_meta (thread_id, started_at, last_active_at, fase, history)
+                   VALUES (?, ?, ?, ?, ?)
+                   ON CONFLICT(thread_id) DO UPDATE SET
+                       last_active_at = excluded.last_active_at,
+                       fase           = excluded.fase,
+                       history        = excluded.history""",
+                (thread_id, started_at, last_active_at, fase, _json.dumps(history)),
+            )
+            self._conn.commit()
+        else:
+            self._mem[thread_id] = dict(
+                threadId=thread_id, startedAt=started_at,
+                lastActiveAt=last_active_at, fase=fase, history=history,
+            )
+
+    def list_sessions(self, limit: int = 10) -> list:
+        if self._conn:
+            rows = self._conn.execute(
+                """SELECT thread_id, started_at, last_active_at, fase, history
+                   FROM session_meta
+                   ORDER BY last_active_at DESC LIMIT ?""",
+                (limit,),
+            ).fetchall()
+            return [
+                {
+                    "threadId":      r[0],
+                    "startedAt":     r[1],
+                    "lastActiveAt":  r[2],
+                    "fase":          r[3],
+                    "history":       _json.loads(r[4]),
+                }
+                for r in rows
+            ]
+        else:
+            return sorted(self._mem.values(),
+                          key=lambda s: s["lastActiveAt"], reverse=True)[:limit]
+
+    def delete(self, thread_id: str) -> None:
+        if self._conn:
+            self._conn.execute(
+                "DELETE FROM session_meta WHERE thread_id = ?", (thread_id,)
+            )
+            self._conn.commit()
+        else:
+            self._mem.pop(thread_id, None)
+
+
+session_store = SessionStore(_conn)
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langgraph.types import interrupt, Command
-import json as _json
 from pydantic import BaseModel, BeforeValidator, Field
 
 load_dotenv()

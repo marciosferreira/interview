@@ -234,7 +234,10 @@
 
 <script>
   const SESSION_KEY  = 'interview_v1';
-  const HISTORY_KEY  = 'interview_history_v1';
+
+  // Server is the source of truth for the history list.
+  // _sessionList is populated by render() each time the page loads / re-renders.
+  let _sessionList = [];
 
   const FASE_LABEL = {
     elevator_pitch:        'Elevator Pitch',
@@ -277,10 +280,10 @@
     return history.filter(m => m.type === 'user').length;
   }
 
-  function deleteSession(threadId) {
-    let list = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
-    list = list.filter(s => s.threadId !== threadId);
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+  async function deleteSession(threadId) {
+    try {
+      await fetch(`/sessions/${encodeURIComponent(threadId)}`, { method: 'DELETE' });
+    } catch { /* ignore */ }
     // If this was the active session, clear it too
     const active = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
     if (active?.threadId === threadId) localStorage.removeItem(SESSION_KEY);
@@ -288,8 +291,7 @@
   }
 
   function openSession(threadId) {
-    const list    = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
-    const session = list.find(s => s.threadId === threadId);
+    const session = _sessionList.find(s => s.threadId === threadId);
     if (!session) return;
     // Set this session as the active one so index.html resumes it.
     const active = {
@@ -308,8 +310,7 @@
     window.location.href = '/';
   }
 
-  function render() {
-    const list    = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+  async function render() {
     const listEl  = document.getElementById('session-list');
     const backBtn = document.getElementById('back-btn');
 
@@ -317,7 +318,15 @@
     const active = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
     backBtn.style.display = active?.threadId ? '' : 'none';
 
-    if (!list.length) {
+    // Fetch history from server (shared across all devices/browsers)
+    try {
+      const res  = await fetch('/sessions');
+      _sessionList = res.ok ? await res.json() : [];
+    } catch {
+      _sessionList = [];
+    }
+
+    if (!_sessionList.length) {
       listEl.innerHTML = `
         <div class="empty-state">
           <div class="empty-icon">🎤</div>
@@ -329,7 +338,7 @@
     }
 
     listEl.innerHTML = '';
-    for (const s of list) {
+    for (const s of _sessionList) {
       const isDone    = s.fase === 'done';
       const phaseText = FASE_LABEL[s.fase] || (s.fase ? s.fase : 'Starting…');
       const turns     = _msgCount(s.history);

@@ -4,14 +4,15 @@ import os
 import uuid
 from pathlib import Path
 
-from fastapi import FastAPI, UploadFile, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langgraph.types import Command
 from openai import AsyncOpenAI
+from pydantic import BaseModel
 
-from simulator import graph, make_initial_state, model
+from simulator import graph, make_initial_state, model, session_store
 from simulator import (
     SYSTEM_PITCH_REPORT,
     SYSTEM_CAR_REPORT,
@@ -56,6 +57,46 @@ async def _stream_to_client(ws: WebSocket, messages: list, system_prompt: str, v
     await ws.send_json({"type": "stream_done"})
     return full_text
 
+
+# ── Session history endpoints ────────────────────────────────────────────────
+
+class SessionUpsert(BaseModel):
+    startedAt:    int
+    lastActiveAt: int
+    fase:         str
+    history:      list
+
+
+@app.get("/sessions")
+async def list_sessions():
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(None, session_store.list_sessions)
+
+
+@app.put("/sessions/{thread_id}")
+async def upsert_session(thread_id: str, body: SessionUpsert):
+    loop = asyncio.get_running_loop()
+    await loop.run_in_executor(
+        None,
+        lambda: session_store.upsert(
+            thread_id,
+            body.startedAt,
+            body.lastActiveAt,
+            body.fase,
+            body.history,
+        ),
+    )
+    return {"ok": True}
+
+
+@app.delete("/sessions/{thread_id}")
+async def delete_session(thread_id: str):
+    loop = asyncio.get_running_loop()
+    await loop.run_in_executor(None, lambda: session_store.delete(thread_id))
+    return {"ok": True}
+
+
+# ── Audio endpoints ──────────────────────────────────────────────────────────
 
 @app.post("/stt")
 async def stt(audio: UploadFile):

@@ -468,7 +468,7 @@
     if (raw) {
       raw.fase = fase;
       localStorage.setItem(SESSION_KEY, JSON.stringify(raw));
-      _upsertHistory(raw.threadId, { fase });
+      _syncToServer();
     }
     // Scroll the active step into view on small screens
     const activeEl = document.querySelector('.phase-step.active');
@@ -479,29 +479,33 @@
   // SESSION_KEY  → active session: { threadId, savedAt, fase, history[] }
   // HISTORY_KEY  → last 10 sessions with full data for the history page
   const SESSION_KEY   = 'interview_v1';
-  const HISTORY_KEY   = 'interview_history_v1';
   const SESSION_TTL   = 48 * 60 * 60 * 1000;
-  const HISTORY_MAX   = 10;
 
-  function _getHistoryList() {
-    try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch { return []; }
+  // ── Server sync ──────────────────────────────────────────────────────
+  // Debounced PUT /sessions/{threadId} so any device/browser shares history.
+  let _syncDebounceTimer = null;
+  function _syncToServer(immediate = false) {
+    if (_syncDebounceTimer) clearTimeout(_syncDebounceTimer);
+    const doSync = async () => {
+      const raw = _loadRaw();
+      if (!raw?.threadId) return;
+      try {
+        await fetch(`/sessions/${encodeURIComponent(raw.threadId)}`, {
+          method:  'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({
+            startedAt:    raw.startedAt || Date.now(),
+            lastActiveAt: Date.now(),
+            fase:         raw.fase      || '',
+            history:      raw.history   || [],
+          }),
+        });
+      } catch { /* ignore — server picks it up on next sync */ }
+    };
+    if (immediate) { doSync(); }
+    else { _syncDebounceTimer = setTimeout(doSync, 3000); }
   }
-
-  // Insert or update a session entry in HISTORY_KEY.
-  function _upsertHistory(threadId, patch) {
-    if (!threadId) return;
-    const list = _getHistoryList();
-    const idx  = list.findIndex(s => s.threadId === threadId);
-    const now  = Date.now();
-    if (idx >= 0) {
-      Object.assign(list[idx], patch, { lastActiveAt: now });
-    } else {
-      list.unshift({ threadId, startedAt: now, lastActiveAt: now, fase: '', history: [], ...patch });
-    }
-    list.sort((a, b) => b.lastActiveAt - a.lastActiveAt);
-    if (list.length > HISTORY_MAX) list.length = HISTORY_MAX;
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
-  }
+  window.addEventListener('beforeunload', () => _syncToServer(true));
 
   function _saveSession(threadId) {
     const existing    = _loadRaw() || {};
@@ -509,7 +513,7 @@
     existing.savedAt  = Date.now();
     if (!existing.startedAt) existing.startedAt = Date.now();
     localStorage.setItem(SESSION_KEY, JSON.stringify(existing));
-    _upsertHistory(threadId, { startedAt: existing.startedAt });
+    _syncToServer();
   }
 
   function _loadRaw() {
@@ -533,8 +537,7 @@
     raw.history.push({ type, text, voice: voice || 'nova' });
     if (raw.history.length > 300) raw.history = raw.history.slice(-300);
     localStorage.setItem(SESSION_KEY, JSON.stringify(raw));
-    // Mirror to history index so the history page stays up to date.
-    _upsertHistory(raw.threadId, { history: raw.history, fase: _currentFase });
+    _syncToServer();
   }
 
   function clearSession() {
