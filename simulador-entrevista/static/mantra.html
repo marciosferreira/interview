@@ -546,14 +546,14 @@
       </div>
       <div class="car-section">
         <div class="car-section-label">A — Action</div>
-        <p>"I designed a multi-agent architecture where each agent is responsible for a specific domain — failures, productivity, quality control. The agents query operational data and generate natural language reports that require no technical knowledge from the user.</p>
+        <p>I designed a multi-agent architecture where each agent is responsible for a specific domain — failures, productivity, quality control. The agents query operational data and generate natural language reports that require no technical knowledge from the user.</p>
         <p style="margin-top:12px">One deliberate decision I made from day one was to <strong>instrument the system with Langfuse before we had any users</strong>. I wanted full observability — latency, cost per session, output quality — from the very beginning, not as an afterthought.</p>
         <p style="margin-top:12px">That turned out to be critical. When we moved to a staging environment with realistic usage patterns — edge cases, unexpected query combinations, higher volume — I could see immediately that costs and latency were becoming unsustainable. Because the observability was already in place, I had the data to diagnose the problem precisely.</p>
         <p style="margin-top:12px">My response was evidence-driven: I ran a formal benchmarking process across models on AWS Bedrock, comparing quality, cost, and latency. I also redesigned the data pipeline — compacting tool responses, optimizing variable tracking, restructuring how context was passed between agents. The result was <strong>a context window reduction from around 19,000 tokens to around 9,000</strong> — a 30 to 50 percent reduction in inference cost, with no degradation in output quality."</p>
       </div>
       <div class="car-section">
         <div class="car-section-label">R — Result</div>
-        <p>"Account managers can now access personalized operational reports through a conversational interface — in real time, without waiting for analyst support. <strong>The decision-making cycle that used to take hours or days now happens in seconds.</strong> And because I built the observability layer from the start, every call is fully traceable — cost, latency, and output quality are all monitored continuously."</p>
+        <p>Account managers can now access personalized operational reports through a conversational interface — in real time, without waiting for analyst support. <strong>The decision-making cycle that used to take hours or days now happens in seconds.</strong> And because I built the observability layer from the start, every call is fully traceable — cost, latency, and output quality are all monitored continuously.</p>
       </div>
     </div>
   </div>
@@ -577,7 +577,7 @@
       <button id="pitch-stop-btn">✕ Parar</button>
     </div>
     <div class="pitch-text">
-      <p>My name is Marcio. I'm a Data Scientist with a focus on Applied AI, based in Manaus, Brazil, with around 10 years of experience at the intersection of data science and applied AI.</p>
+      <p>My name is Marcio. I'm an AI Engineer based in Manaus, Brazil, with around 10 years of experience at the intersection of scientific research and production AI systems.</p>
       <p>My background is a bit unconventional — I started with a PhD in Aquatic Biology, which gave me something I think is rare in this field: a deeply rigorous, evidence-based way of thinking about problems. After my PhD, I did postdoctoral research in Computational Biology and Applied Ecology, collaborating with world-class researchers at institutions like EMBL-EBI in the UK and Tulane University in the US. One of the highlights of that period was being the first author of a published software for large-scale image analysis using computer vision and AI — built with an international team and used by researchers across the world.</p>
       <p>That experience — building scientific software that actually gets used — was my first real taste of applied AI. It naturally led me toward industry. At Venturus, I built a privacy-first RAG system from scratch using on-premise open-source models — my entry point into production AI.</p>
       <p>Now, at FIT Instituto de Tecnologia, I'm taking that further — building a multi-agent platform that uses modern AI to help account managers in manufacturing make better, faster decisions based on real operational data.</p>
@@ -726,7 +726,7 @@ O insight mais importante.
 Você tem um perfil genuinamente diferenciado — PhD, pesquisa internacional, software publicado, RAG em produção, sistema multi-agente com observabilidade e otimização de custo. O risco não é que você não tenha o que eles querem. O risco é que você não comunique isso com clareza suficiente, em inglês, dentro do tempo certo.
 A entrevista não testa se você é bom. Testa se você consegue provar que é bom em 35 minutos, em inglês, para alguém que não vai verificar seu código.`;
 
-  const PITCH_TEXT = `My name is Marcio. I'm a Data Scientist with a focus on Applied AI, based in Manaus, Brazil, with around 10 years of experience at the intersection of data science and applied AI.
+  const PITCH_TEXT = `My name is Marcio. I'm an AI Engineer based in Manaus, Brazil, with around 10 years of experience at the intersection of scientific research and production AI systems.
 My background is a bit unconventional — I started with a PhD in Aquatic Biology, which gave me something I think is rare in this field: a deeply rigorous, evidence-based way of thinking about problems. After my PhD, I did postdoctoral research in Computational Biology and Applied Ecology, collaborating with world-class researchers at institutions like EMBL-EBI in the UK and Tulane University in the US. One of the highlights of that period was being the first author of a published software for large-scale image analysis using computer vision and AI — built with an international team and used by researchers across the world.
 That experience — building scientific software that actually gets used — was my first real taste of applied AI. It naturally led me toward industry. At Venturus, I built a privacy-first RAG system from scratch using on-premisse open-source models — my entry point into production AI.
 Now, at FIT Instituto de Tecnologia, I'm taking that further — building a multi-agent platform that uses modern AI to help account managers in manufacturing make better, faster decisions based on real operational data.
