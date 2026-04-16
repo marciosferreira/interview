@@ -54,7 +54,11 @@ async def _stream_to_client(ws: WebSocket, messages: list, system_prompt: str, v
     full_text = ""
     try:
         async for chunk in model.astream(
-            [SystemMessage(content=system_prompt)] + messages
+            [SystemMessage(content=[{
+                "type": "text",
+                "text": system_prompt,
+                "cache_control": {"type": "ephemeral"},
+            }])] + messages
         ):
             if chunk.content:
                 full_text += chunk.content

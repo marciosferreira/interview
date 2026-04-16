@@ -171,6 +171,21 @@ SYSTEM_MOTIVATION = SYSTEM_MOTIVATION_INTERVIEW
 SYSTEM_MARCIO_Q   = SYSTEM_MARCIO_Q
 
 
+def _cached_system(prompt: str) -> SystemMessage:
+    """Wrap a system prompt in a cache_control block so Anthropic caches the prefix.
+
+    Identical prompt text across requests hits the cache after the first call,
+    cutting input-token cost by ~90 % for the system-prompt portion.
+    Cache TTL is 5 minutes; the prompts are constant at module load time so they
+    stay warm throughout a normal interview session.
+    """
+    return SystemMessage(content=[{
+        "type": "text",
+        "text": prompt,
+        "cache_control": {"type": "ephemeral"},
+    }])
+
+
 # ---------------------------------------------------------------------------
 # State
 # ---------------------------------------------------------------------------
@@ -337,7 +352,7 @@ def _make_interview_node(system_prompt, output_class, checklist_key, notas_key, 
         phase_msgs: list = state.get("phase_messages") or [
             HumanMessage(content="I'm ready to start this phase.")
         ]
-        messages = [SystemMessage(content=system_prompt)] + phase_msgs
+        messages = [_cached_system(system_prompt)] + phase_msgs
         avaliacao = structured.invoke(messages)
 
         # Merge checklist — fields already True stay True
@@ -495,7 +510,7 @@ def marcio_questions(state: EntrevistaState) -> dict:
     phase_msgs: list = state.get("phase_messages") or [
         HumanMessage(content="I'm ready to start this phase.")
     ]
-    messages = [SystemMessage(content=SYSTEM_MARCIO_Q)] + phase_msgs
+    messages = [_cached_system(SYSTEM_MARCIO_Q)] + phase_msgs
     avaliacao = structured.invoke(messages)
 
     if not avaliacao.fase_completa:
@@ -545,7 +560,7 @@ def feedback(state: EntrevistaState) -> dict:
         )
         full_context = full_context + [HumanMessage(content=erros_text)]
 
-    messages = [SystemMessage(content=SYSTEM_SCORECARD)] + full_context
+    messages = [_cached_system(SYSTEM_SCORECARD)] + full_context
     scorecard: Scorecard = structured.invoke(messages)
 
     formatted = _format_scorecard(scorecard)
