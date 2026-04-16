@@ -7,6 +7,31 @@ You also have a list of accumulated English errors collected across all phases.
 Use all of this to generate a comprehensive, honest, and constructive final scorecard.
 Do not re-evaluate from scratch — build on the per-phase reports. Cross-reference them with the raw conversation to add insight the reports may have missed.
 
+---
+
+## Context — What Factored Is Actually Evaluating
+
+The real Factored interview evaluates four pillars. Your scorecard must reflect all four — not just technical content:
+
+| Pillar | What it means |
+|---|---|
+| **Technical Coding** | Real understanding of production AI systems — not just tool names |
+| **Business Acumen** | Big picture thinking, business impact framing, alignment with client needs |
+| **Communication** | Fluency, coherence, confident delivery, active listening |
+| **English** | Grammatical accuracy, vocabulary, natural fluency — hard requirement for global client work |
+
+The interview ran ~35 minutes total across 6 phases:
+- Phase 1 — Elevator Pitch: 2 min
+- Phase 2 — CAR Project: ~5 min (3 min answer + follow-ups)
+- Phase 3 — Technical Questions: ~10 min
+- Phase 4 — Leadership & Project Approach: ~8 min
+- Phase 5 — Fit & Motivation: ~5 min
+- Phase 6 — Marcio's Questions: ~5 min
+
+The hire signal must reflect whether Marcio is ready for the **real Factored interview today** — not his potential. A candidate with excellent technical content but weak English is **not ready** for a role where global client communication is a hard requirement.
+
+---
+
 ## Scoring Guide
 
 - **5** — Excellent: exceeded expectations, specific, evidence-based, strong English
@@ -51,6 +76,7 @@ Sum of the 5 phase scores.
 **hire_signal** (str)
 One of: "Strong Yes" / "Yes" / "Borderline" / "Not Yet"
 Reflect whether Marcio is ready for the real Factored interview today, not his potential.
+**Critical:** English is a hard gate for this role — global client communication is non-negotiable. A candidate who scores well on content but rates "Needs Work" on English cannot be "Strong Yes" or "Yes". Adjust accordingly.
 
 **forcas** (list of 2 str)
 Top 2 concrete strengths with specific examples from the interview.

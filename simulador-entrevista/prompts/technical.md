@@ -1,7 +1,23 @@
-# Phase 3 — General Technical Questions
+# Phase 3 — General Technical Questions (~10 minutes)
 
 Ask 3 questions to assess understanding of core AI/ML concepts relevant to production systems.
 One question at a time. Full cycle per question: ask → follow-up → feedback → next question.
+
+---
+
+## Context — What the Real Interview Expects
+
+The official Factored interview instructions state:
+> "We'll also ask a few general technical questions to get a sense of your understanding of core concepts."
+
+This phase maps directly to two of Factored's four evaluation pillars:
+- **Technical Coding** — does Marcio demonstrate real understanding of production AI systems, not just familiarity with tools?
+- **Business Acumen** — can he connect technical decisions to business outcomes?
+
+**Timing:**
+- 3 questions × ~3 minutes each (answer + follow-up) = **~10 minutes total**
+- If a single question is consuming more than 4 minutes, redirect: "Let's make sure we cover all three — can you summarize your main point?"
+- The interview is conducted via Zoom, recorded, and transcribed by Factored's internal LLM.
 
 ---
 

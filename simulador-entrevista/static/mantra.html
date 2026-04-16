@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Os Sinais — Mantra</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      padding: 14px 24px;
+      background: #1a1d27;
+      border-bottom: 1px solid #2d3148;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .logo {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    header h1 { font-size: 16px; font-weight: 600; color: #f1f5f9; }
+    header p  { font-size: 12px; color: #64748b; margin-top: 1px; }
+    .home-link {
+      display: flex; align-items: center; gap: 12px;
+      text-decoration: none; color: inherit;
+      border-radius: 10px; padding: 2px 6px; margin: -2px -6px;
+      transition: background 0.2s;
+    }
+    .home-link:hover { background: rgba(99,102,241,0.08); }
+
+    .hdr-btn {
+      margin-left: auto;
+      font-size: 11px; font-weight: 500;
+      padding: 5px 12px; border-radius: 20px;
+      background: transparent; border: 1px solid #2d3148;
+      color: #64748b; cursor: pointer; transition: all 0.2s;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+    }
+    .hdr-btn + .hdr-btn { margin-left: 8px; }
+    .hdr-btn:hover { border-color: #6366f1; color: #a78bfa; }
+
+    /* ── Main ── */
+    main {
+      flex: 1;
+      padding: 40px 16px 60px;
+      max-width: 720px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .hero-icon {
+      font-size: 40px;
+      margin-bottom: 14px;
+    }
+    .hero h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 6px;
+    }
+    .hero p {
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    /* ── Play bar ── */
+    .play-bar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #1a1d27;
+      border: 1px solid #2d3148;
+      border-radius: 16px;
+      padding: 14px 20px;
+      margin-bottom: 36px;
+    }
+    #play-btn {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border: none; color: #fff;
+      font-size: 20px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: opacity 0.2s, transform 0.15s;
+      box-shadow: 0 0 18px #6366f140;
+    }
+    #play-btn:hover { opacity: 0.88; transform: scale(1.05); }
+    #play-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+    .play-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .play-info .play-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 4px;
+    }
+    .play-info .play-status {
+      font-size: 11px;
+      color: #64748b;
+    }
+    #stop-btn {
+      background: transparent;
+      border: 1px solid #2d3148;
+      border-radius: 10px;
+      color: #64748b; font-size: 11px; font-weight: 600;
+      padding: 6px 12px; cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+      display: none;
+    }
+    #stop-btn:hover { border-color: #f87171; color: #f87171; }
+
+    /* ── Sections ── */
+    .section {
+      margin-bottom: 28px;
+    }
+    .section-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .section-num {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .section-icon {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: #1e293b;
+      font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .section h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #a78bfa;
+      line-height: 1.4;
+    }
+    .section p {
+      font-size: 13.5px;
+      line-height: 1.75;
+      color: #94a3b8;
+      padding-left: 38px;
+    }
+    .section p strong {
+      color: #e2e8f0;
+    }
+    .section p em {
+      color: #a78bfa;
+      font-style: normal;
+      font-weight: 600;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid #2d3148;
+      margin: 36px 0;
+    }
+
+    /* ── Elimination block ── */
+    .elim-block {
+      background: #1a0f0f;
+      border: 1px solid #450a0a;
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 28px;
+    }
+    .elim-block h3 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #f87171;
+      margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .elim-block ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .elim-block li {
+      font-size: 13px;
+      color: #fca5a5;
+      line-height: 1.5;
+      display: flex; align-items: flex-start; gap: 8px;
+    }
+    .elim-block li::before {
+      content: "✕";
+      color: #ef4444;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── Insight block ── */
+    .insight-block {
+      background: linear-gradient(135deg, #1e1b4b, #1a1d27);
+      border: 1px solid #4f46e5;
+      border-radius: 14px;
+      padding: 24px;
+    }
+    .insight-block h3 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #a78bfa;
+      margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .insight-block p {
+      font-size: 14px;
+      line-height: 1.75;
+      color: #c4b5fd;
+    }
+    .insight-block p strong {
+      color: #f1f5f9;
+    }
+    .insight-highlight {
+      display: block;
+      margin-top: 12px;
+      font-size: 13.5px;
+      color: #a78bfa;
+      font-style: italic;
+      border-left: 3px solid #6366f1;
+      padding-left: 12px;
+      line-height: 1.65;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="home-link" href="/">
+    <div class="logo">🎤</div>
+    <div>
+      <h1>Mock Interview Simulator</h1>
+      <p>Practice your tech interview in English</p>
+    </div>
+  </a>
+  <a class="hdr-btn" href="/history.html">📋 History</a>
+  <a class="hdr-btn" href="/interview.html">▶ Practice</a>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="hero-icon">🎯</div>
+    <h2>Os Sinais que Vão te Contratar</h2>
+    <p>Leia antes de cada sessão. Ouça como um mantra.</p>
+  </div>
+
+  <!-- Play bar -->
+  <div class="play-bar">
+    <button id="play-btn" title="Ouvir o texto completo">▶</button>
+    <div class="play-info">
+      <div class="play-title">Ouvir tudo em voz alta</div>
+      <div class="play-status" id="play-status">Pronto para tocar</div>
+    </div>
+    <button id="stop-btn">✕ Parar</button>
+  </div>
+
+  <!-- Section 1 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <h3>O fechamento do elevator pitch</h3>
+    </div>
+    <p>É o sinal mais simples e mais eliminatório. A frase sobre o gap entre demo e produção é o que separa um engenheiro que constrói coisas de um engenheiro que entende por que a maioria das coisas falha. É exatamente o problema que a Factored vende como solução para os clientes. Se você fechar o pitch com isso de forma natural, você sinalizou <em>alinhamento de valores</em> antes mesmo de falar de qualquer projeto.</p>
+  </div>
+
+  <!-- Section 2 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <h3>Ownership com "I" no CAR</h3>
+    </div>
+    <p>Não <strong>"a gente construiu"</strong>, não <strong>"o time implementou"</strong>. Você projetou a arquitetura. Você decidiu colocar o Langfuse desde o dia um. Você identificou o problema de custo e redesenhou o pipeline. A Factored quer contratar o <em>arquiteto</em>, não o contribuidor. Esse sinal aparece em cada frase.</p>
+  </div>
+
+  <!-- Section 3 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <h3>Langfuse desde o dia um — não depois</h3>
+    </div>
+    <p>Esse detalhe específico é ouro. Não é <strong>"usamos monitoramento"</strong>. É <em>"eu implementei observabilidade antes de ir para produção porque não queria voar às cegas"</em>. Isso demonstra maturidade de engenharia que a maioria dos candidatos não tem — e conecta diretamente ao que a Factored cobra dos seus engenheiros em projetos reais.</p>
+  </div>
+
+  <!-- Section 4 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <h3>Token optimization como problema de engenharia sistemática</h3>
+    </div>
+    <p>Não <strong>"reduzimos tokens em 50%"</strong>. Mas sim: <em>identifiquei o problema → diagnostiquei três causas → apliquei três técnicas → validei antes de commitar.</em> Esse raciocínio estruturado sob pressão de produção é exatamente o que diferencia um engenheiro sênior de alguém que achou uma solução no Stack Overflow.</p>
+  </div>
+
+  <!-- Section 5 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <h3>English fluente sob pressão</h3>
+    </div>
+    <p>É o sinal mais subestimado e o mais eliminatório na prática. O conteúdo técnico pode ser excelente — se o inglês travar, pausar demais, ou soar traduzido do português, o candidato não passa. Não porque a Factored seja cruel, mas porque o papel exige comunicação direta com clientes globais. <em>Fluência não é sotaque — é clareza, vocabulário profissional e estrutura de raciocínio em inglês.</em></p>
+  </div>
+
+  <!-- Section 6 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <h3>Conhecimento real da Factored na motivação</h3>
+    </div>
+    <p>Não <strong>"Andrew Ng é incrível"</strong>. Mas sim: o que a Factored representa — produção, não demo; execução, não coursework; benchmark real contra os melhores engenheiros da América Latina. E a conexão direta com algo real na sua trajetória. Esse sinal mostra que você pesquisou, pensou, e tem uma <em>razão genuína</em> para estar lá.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- Elimination block -->
+  <div class="elim-block">
+    <h3>⚠️ O que pode te eliminar mesmo com bom conteúdo</h3>
+    <ul>
+      <li>English fraco — eliminatório, sem exceção</li>
+      <li>Pitch sem o fechamento de produção — passa pela triagem mas não convence</li>
+      <li>CAR com "we" em vez de "I" — soa como quem seguiu ordens, não quem liderou</li>
+      <li>Respostas teóricas sem âncora em Iris Hub ou Venturus — qualquer candidato pode decorar frameworks; só você viveu esses projetos</li>
+      <li>Motivação genérica — "quero crescer" não diferencia ninguém</li>
+    </ul>
+  </div>
+
+  <!-- Insight block -->
+  <div class="insight-block">
+    <h3>💡 O insight mais importante</h3>
+    <p>Você tem um perfil genuinamente diferenciado — PhD, pesquisa internacional, software publicado, RAG em produção, sistema multi-agente com observabilidade e otimização de custo. O risco não é que você não tenha o que eles querem.</p>
+    <span class="insight-highlight">O risco é que você não comunique isso com clareza suficiente, em inglês, dentro do tempo certo.<br><br>A entrevista não testa se você é bom. Testa se você consegue <strong>provar que é bom em 35 minutos, em inglês</strong>, para alguém que não vai verificar seu código.</span>
+  </div>
+</main>
+
+<script>
+  // ── TTS — mesma engine do interview.html ────────────────────────────
+  const playBtn    = document.getElementById('play-btn');
+  const stopBtn    = document.getElementById('stop-btn');
+  const playStatus = document.getElementById('play-status');
+
+  let ttsChain  = Promise.resolve();
+  let ttsToken  = 0;
+  let isPlaying = false;
+
+  // Full text to read aloud (plain, no markup)
+  const MANTRA_TEXT = `Os sinais que vão te contratar.
+
+Número 1. O fechamento do elevator pitch.
+É o sinal mais simples e mais eliminatório. A frase sobre o gap entre demo e produção é o que separa um engenheiro que constrói coisas de um engenheiro que entende por que a maioria das coisas falha. É exatamente o problema que a Factored vende como solução para os clientes. Se você fechar o pitch com isso de forma natural, você sinalizou alinhamento de valores antes mesmo de falar de qualquer projeto.
+
+Número 2. Ownership com "I" no CAR.
+Não "a gente construiu", não "o time implementou". Você projetou a arquitetura. Você decidiu colocar o Langfuse desde o dia um. Você identificou o problema de custo e redesenhou o pipeline. A Factored quer contratar o arquiteto, não o contribuidor. Esse sinal aparece em cada frase.
+
+Número 3. Langfuse desde o dia um — não depois.
+Esse detalhe específico é ouro. Não é "usamos monitoramento". É: eu implementei observabilidade antes de ir para produção porque não queria voar às cegas. Isso demonstra maturidade de engenharia que a maioria dos candidatos não tem — e conecta diretamente ao que a Factored cobra dos seus engenheiros em projetos reais.
+
+Número 4. Token optimization como problema de engenharia sistemática.
+Não "reduzimos tokens em cinquenta por cento". Mas sim: identifiquei o problema, diagnostiquei três causas, apliquei três técnicas, validei antes de commitar. Esse raciocínio estruturado sob pressão de produção é exatamente o que diferencia um engenheiro sênior de alguém que achou uma solução no Stack Overflow.
+
+Número 5. English fluente sob pressão.
+É o sinal mais subestimado e o mais eliminatório na prática. O conteúdo técnico pode ser excelente — se o inglês travar, pausar demais, ou soar traduzido do português, o candidato não passa. Não porque a Factored seja cruel, mas porque o papel exige comunicação direta com clientes globais. Fluência não é sotaque — é clareza, vocabulário profissional e estrutura de raciocínio em inglês.
+
+Número 6. Conhecimento real da Factored na motivação.
+Não "Andrew Ng é incrível". Mas sim: o que a Factored representa — produção, não demo; execução, não coursework; benchmark real contra os melhores engenheiros da América Latina. E a conexão direta com algo real na sua trajetória. Esse sinal mostra que você pesquisou, pensou, e tem uma razão genuína para estar lá.
+
+O que pode te eliminar mesmo com bom conteúdo. Em ordem de risco:
+English fraco — eliminatório, sem exceção.
+Pitch sem o fechamento de produção — passa pela triagem mas não convence.
+CAR com "we" em vez de "I" — soa como quem seguiu ordens, não quem liderou.
+Respostas teóricas sem âncora em Iris Hub ou Venturus — qualquer candidato pode decorar frameworks; só você viveu esses projetos.
+Motivação genérica — "quero crescer" não diferencia ninguém.
+
+O insight mais importante.
+Você tem um perfil genuinamente diferenciado — PhD, pesquisa internacional, software publicado, RAG em produção, sistema multi-agente com observabilidade e otimização de custo. O risco não é que você não tenha o que eles querem. O risco é que você não comunique isso com clareza suficiente, em inglês, dentro do tempo certo.
+A entrevista não testa se você é bom. Testa se você consegue provar que é bom em 35 minutos, em inglês, para alguém que não vai verificar seu código.`;
+
+  // Split into ~200-char sentence chunks for parallel TTS fetching
+  function splitChunks(text) {
+    const parts = text.split(/(?<=[.!?])\s+/).filter(p => p.trim().length > 0);
+    const chunks = [];
+    let cur = '';
+    for (const p of parts) {
+      const merged = cur ? cur + ' ' + p : p;
+      if (merged.length <= 220) { cur = merged; }
+      else { if (cur) chunks.push(cur); cur = p; }
+    }
+    if (cur) chunks.push(cur);
+    return chunks.length > 0 ? chunks : [text];
+  }
+
+  async function fetchAudioUrl(text) {
+    try {
+      const res = await fetch(`/tts?text=${encodeURIComponent(text)}&voice=onyx`);
+      if (!res.ok) return null;
+      return URL.createObjectURL(await res.blob());
+    } catch { return null; }
+  }
+
+  function setPlaying(active) {
+    isPlaying = active;
+    playBtn.textContent = active ? '⏸' : '▶';
+    stopBtn.style.display = active ? 'inline-flex' : 'none';
+    playStatus.textContent = active ? 'Reproduzindo…' : 'Pronto para tocar';
+  }
+
+  let currentAudio = null;
+  let paused = false;
+
+  playBtn.addEventListener('click', () => {
+    if (isPlaying && !paused) {
+      // Pause
+      if (currentAudio) { currentAudio.pause(); paused = true; }
+      playBtn.textContent = '▶';
+      playStatus.textContent = 'Pausado';
+      return;
+    }
+    if (paused && currentAudio) {
+      // Resume
+      currentAudio.play().catch(() => {});
+      paused = false;
+      playBtn.textContent = '⏸';
+      playStatus.textContent = 'Reproduzindo…';
+      return;
+    }
+
+    // Start fresh
+    stopAll();
+    const myToken = ttsToken;
+    const chunks  = splitChunks(MANTRA_TEXT);
+    const fetches = chunks.map(c => fetchAudioUrl(c));
+
+    setPlaying(true);
+
+    let chunkIndex = 0;
+    for (let i = 0; i < chunks.length; i++) {
+      const fetch_i = fetches[i];
+      const isLast  = i === chunks.length - 1;
+      ttsChain = ttsChain.then(async () => {
+        if (ttsToken !== myToken) return;
+        const url = await fetch_i;
+        if (ttsToken !== myToken || !url) { if (url) URL.revokeObjectURL(url); return; }
+        chunkIndex++;
+        playStatus.textContent = `Reproduzindo… (${chunkIndex}/${chunks.length})`;
+        const audio = new Audio(url);
+        currentAudio = audio;
+        paused = false;
+        await new Promise(r => { audio.onended = r; audio.onerror = r; audio.play().catch(r); });
+        URL.revokeObjectURL(url);
+        currentAudio = null;
+        if (isLast && ttsToken === myToken) {
+          setPlaying(false);
+          playStatus.textContent = 'Concluído';
+        }
+      }).catch(() => {});
+    }
+  });
+
+  stopBtn.addEventListener('click', stopAll);
+
+  function stopAll() {
+    ttsToken++;
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    ttsChain = Promise.resolve();
+    paused = false;
+    setPlaying(false);
+    playStatus.textContent = 'Pronto para tocar';
+  }
+</script>
+</body>
+</html>

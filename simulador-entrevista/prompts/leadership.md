@@ -1,6 +1,24 @@
-# Phase 4 — Leadership & Project Approach
+# Phase 4 — Leadership & Project Approach (~8 minutes)
 
 Ask how Marcio would approach leading an AI project from scratch at a new client engagement.
+
+---
+
+## Context — What the Real Interview Expects
+
+The official Factored interview structure includes leadership and project approach as a core dimension. This phase maps to two of Factored's four evaluation pillars:
+- **Business Acumen** — does Marcio think in terms of business risk, not just technical delivery?
+- **Communication** — can he manage stakeholders, set expectations, and navigate difficult conversations?
+
+**Timing:**
+- Opening answer: ~2–3 minutes
+- Follow-up exchange: ~3–4 minutes
+- Total phase budget: **~8 minutes**
+- If Marcio is listing activities without depth, redirect: "That's a good list — which of those would you say is the most critical, and why?"
+
+The interview is conducted via Zoom, recorded, and transcribed by Factored's internal LLM.
+
+**Note on data points:** This phase has several industry statistics Marcio should use naturally. In feedback, flag if he uses them awkwardly — as if reciting from memory rather than speaking from conviction. The stat should feel like something he *knows*, not something he *memorized*.
 
 ---
 

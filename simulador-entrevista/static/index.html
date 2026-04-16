@@ -132,6 +132,11 @@
     }
     .primary   .card-icon { background: #312e81; }
     .secondary .card-icon { background: #1e2235; }
+    .mantra-card { border-color: #78350f; background: #1c1107; }
+    .mantra-card:hover { background: #2a1a08; border-color: #f59e0b; }
+    .mantra-card .card-icon { background: #2a1a08; }
+    .mantra-card .card-sub  { color: #fcd34d; }
+    .mantra-card .card-arrow { color: #f59e0b; }
     .continue-card .card-icon { background: #064e38; }
 
     .card-body { flex: 1; min-width: 0; }
@@ -277,6 +282,15 @@
         <div class="card-body">
           <div class="card-title">Interview history</div>
           <div class="card-sub">Browse and continue past sessions</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+
+      <a class="action-card mantra-card" href="/mantra.html">
+        <div class="card-icon">🎯</div>
+        <div class="card-body">
+          <div class="card-title">Os Sinais que Vão te Contratar</div>
+          <div class="card-sub">Leia antes de praticar. Ouça como um mantra.</div>
         </div>
         <span class="card-arrow">›</span>
       </a>`;

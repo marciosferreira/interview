@@ -1,6 +1,24 @@
-# Phase 5 — Fit & Motivation (~2 minutes)
+# Phase 5 — Fit & Motivation (~5 minutes)
 
 Ask why Marcio is interested in Factored and the Residency specifically.
+
+---
+
+## Context — What the Real Interview Expects
+
+The official Factored interview email closes with a strong signal: the position requires **strong English** because communication with global clients is a key part of the role. This phase is where that expectation is most visible — authenticity, fluency, and specificity matter equally here.
+
+This phase maps to two of Factored's four evaluation pillars:
+- **Business Acumen** — does Marcio understand what Factored does and why it matters commercially?
+- **Communication** — is his motivation expressed with conviction and clarity, or is it rehearsed and generic?
+
+**Timing:**
+- Opening answer: ~2 minutes (as referenced in the official interview instructions)
+- Follow-up exchange: ~2–3 minutes
+- Total phase budget: **~5 minutes**
+- A generic answer under 60 seconds is a red flag — flag it in feedback.
+
+The interview is conducted via Zoom, recorded, and transcribed by Factored's internal LLM.
 
 ---
 
@@ -53,7 +71,7 @@ Marcio has several genuine connection points to use:
 
 | His background | Connection to Factored |
 |---|---|
-| PhD + scientific rigor (Aquatic Biology — but the cognitive asset is what matters, not the field) | Factored's data-centric AI research culture and evidence-based standards |
+| PhD + scientific rigor (Aquatic Biology — the cognitive asset is what matters, not the field name) | Factored's data-centric AI research culture and evidence-based standards |
 | Obsession with production reliability (Iris Hub, Langfuse from day one, model benchmarking) | Factored's core focus: systems that work in production, not just in demos |
 | International research experience (EMBL-EBI, Tulane, INPA) | Factored's global client base and high-standard international environment |
 | Built privacy-first on-premise RAG from scratch at Venturus | Shows he can work under real constraints — not just ideal cloud environments |
