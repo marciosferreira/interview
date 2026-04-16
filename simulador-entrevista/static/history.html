@@ -222,7 +222,7 @@
     <h1>Mock Interview Simulator</h1>
     <p>Interview history</p>
   </div>
-  <a id="back-btn" class="hdr-btn back" href="/">← Current interview</a>
+  <a id="back-btn" class="hdr-btn back" href="/interview.html">← Current interview</a>
   <button id="new-btn" class="hdr-btn new" onclick="newInterview()">＋ New interview</button>
 </header>
 
@@ -302,12 +302,12 @@
       history:   session.history || [],
     };
     localStorage.setItem(SESSION_KEY, JSON.stringify(active));
-    window.location.href = '/';
+    window.location.href = '/interview.html';
   }
 
   function newInterview() {
     localStorage.removeItem(SESSION_KEY);
-    window.location.href = '/';
+    window.location.href = '/interview.html';
   }
 
   async function render() {
@@ -332,7 +332,7 @@
           <div class="empty-icon">🎤</div>
           <div class="empty-title">No interviews yet</div>
           <div class="empty-sub">Start your first mock interview below.</div>
-          <a class="start-btn" href="/">Start interview</a>
+          <a class="start-btn" href="/interview.html">Start interview</a>
         </div>`;
       return;
     }
