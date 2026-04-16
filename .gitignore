@@ -26,3 +26,6 @@ Thumbs.db
 # Runtime data (sessions.db is intentionally tracked)
 *.sqlite
 *.sqlite3
+
+# TTS audio cache — generated on first play, not worth committing
+simulador-entrevista/static/tts_cache/

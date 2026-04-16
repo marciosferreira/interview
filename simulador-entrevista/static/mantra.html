@@ -257,6 +257,143 @@
       padding-left: 12px;
       line-height: 1.65;
     }
+
+    /* ── Gold standard pitch block ── */
+    .pitch-block {
+      background: linear-gradient(135deg, #0a1f0a, #0f1f0e);
+      border: 1px solid #166534;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 28px;
+    }
+    .pitch-block h3 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #4ade80;
+      margin-bottom: 6px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .pitch-block .pitch-subtitle {
+      font-size: 11px;
+      color: #166534;
+      margin-bottom: 18px;
+    }
+    .pitch-play-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #0d1a0d;
+      border: 1px solid #166534;
+      border-radius: 12px;
+      padding: 10px 16px;
+      margin-bottom: 20px;
+    }
+    #pitch-play-btn {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      border: none; color: #fff;
+      font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: opacity 0.2s, transform 0.15s;
+      box-shadow: 0 0 14px #16a34a40;
+    }
+    #pitch-play-btn:hover { opacity: 0.88; transform: scale(1.05); }
+    .pitch-play-bar .play-info .play-title { color: #4ade80; }
+    .pitch-play-bar .play-info .play-status { color: #166534; }
+    #pitch-stop-btn {
+      background: transparent;
+      border: 1px solid #166534;
+      border-radius: 8px;
+      color: #166534; font-size: 11px; font-weight: 600;
+      padding: 5px 10px; cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+      display: none;
+    }
+    #pitch-stop-btn:hover { border-color: #f87171; color: #f87171; }
+    .pitch-text {
+      font-size: 13.5px;
+      line-height: 1.85;
+      color: #86efac;
+    }
+    .pitch-text p {
+      margin-bottom: 14px;
+    }
+    .pitch-text p:last-child { margin-bottom: 0; }
+    .pitch-text strong { color: #bbf7d0; }
+
+    /* ── CAR gold standard block ── */
+    .car-block {
+      background: linear-gradient(135deg, #0d0f1f, #0f1117);
+      border: 1px solid #3730a3;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 20px;
+    }
+    .car-block h3 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #818cf8;
+      margin-bottom: 6px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .car-block .pitch-subtitle { color: #3730a3; margin-bottom: 18px; }
+    .car-play-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #0a0b14;
+      border: 1px solid #3730a3;
+      border-radius: 12px;
+      padding: 10px 16px;
+      margin-bottom: 20px;
+    }
+    #car-play-btn {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4f46e5, #4338ca);
+      border: none; color: #fff;
+      font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: opacity 0.2s, transform 0.15s;
+      box-shadow: 0 0 14px #4f46e540;
+    }
+    #car-play-btn:hover { opacity: 0.88; transform: scale(1.05); }
+    .car-play-bar .play-info .play-title { color: #818cf8; }
+    .car-play-bar .play-info .play-status { color: #3730a3; }
+    #car-stop-btn {
+      background: transparent;
+      border: 1px solid #3730a3;
+      border-radius: 8px;
+      color: #3730a3; font-size: 11px; font-weight: 600;
+      padding: 5px 10px; cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+      display: none;
+    }
+    #car-stop-btn:hover { border-color: #f87171; color: #f87171; }
+    .car-text {
+      font-size: 13.5px;
+      line-height: 1.85;
+      color: #a5b4fc;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .car-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #4f46e5;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .car-text p { margin: 0; }
+    .car-text strong { color: #c7d2fe; }
+    .car-section { border-left: 2px solid #3730a3; padding-left: 14px; }
   </style>
 </head>
 <body>
@@ -364,19 +501,167 @@
     <p>Você tem um perfil genuinamente diferenciado — PhD, pesquisa internacional, software publicado, RAG em produção, sistema multi-agente com observabilidade e otimização de custo. O risco não é que você não tenha o que eles querem.</p>
     <span class="insight-highlight">O risco é que você não comunique isso com clareza suficiente, em inglês, dentro do tempo certo.<br><br>A entrevista não testa se você é bom. Testa se você consegue <strong>provar que é bom em 35 minutos, em inglês</strong>, para alguém que não vai verificar seu código.</span>
   </div>
+
+  <!-- Gold standard CAR -->
+  <div class="car-block">
+    <h3>🔵 CAR Story — Padrão Ouro</h3>
+    <div class="pitch-subtitle">Iris Hub · FIT Instituto de Tecnologia</div>
+    <div class="car-play-bar">
+      <button id="car-play-btn" title="Ouvir o CAR completo">▶</button>
+      <div class="play-info">
+        <div class="play-title">Ouvir o CAR em voz alta</div>
+        <div class="play-status" id="car-status">Pronto para tocar</div>
+      </div>
+      <button id="car-stop-btn">✕ Parar</button>
+    </div>
+    <div class="car-text">
+      <div class="car-section">
+        <div class="car-section-label">C — Context</div>
+        <p>"At FIT Instituto de Tecnologia, I'm building an AI platform called Iris Hub for a manufacturing client. The account managers there already had access to dashboards and could download data — but they had no way to customize their analysis. If they wanted insights about equipment failures, production rates, or defective parts, they had to wait for an analyst to generate a report. What they really needed was something like <strong>a virtual data scientist</strong> — something they could just ask, in plain language, and get a personalized answer immediately."</p>
+      </div>
+      <div class="car-section">
+        <div class="car-section-label">A — Action</div>
+        <p>"I designed a multi-agent architecture where each agent is responsible for a specific domain — failures, productivity, quality control. The agents query operational data and generate natural language reports that require no technical knowledge from the user.</p>
+        <p style="margin-top:12px">One deliberate decision I made from day one was to <strong>instrument the system with Langfuse before we had any users</strong>. I wanted full observability — latency, cost per session, output quality — from the very beginning, not as an afterthought.</p>
+        <p style="margin-top:12px">That turned out to be critical. When we moved to a staging environment with realistic usage patterns — edge cases, unexpected query combinations, higher volume — I could see immediately that costs and latency were becoming unsustainable. Because the observability was already in place, I had the data to diagnose the problem precisely.</p>
+        <p style="margin-top:12px">My response was evidence-driven: I ran a formal benchmarking process across models on AWS Bedrock, comparing quality, cost, and latency. I also redesigned the data pipeline — compacting tool responses, optimizing variable tracking, restructuring how context was passed between agents. The result was <strong>a context window reduction from around 19,000 tokens to around 9,000</strong> — a 30 to 50 percent reduction in inference cost, with no degradation in output quality."</p>
+      </div>
+      <div class="car-section">
+        <div class="car-section-label">R — Result</div>
+        <p>"Account managers can now access personalized operational reports through a conversational interface — in real time, without waiting for analyst support. <strong>The decision-making cycle that used to take hours or days now happens in seconds.</strong> And because I built the observability layer from the start, every call is fully traceable — cost, latency, and output quality are all monitored continuously."</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gold standard pitch -->
+  <div class="pitch-block">
+    <h3>🟢 Elevator Pitch — Padrão Ouro</h3>
+    <div class="pitch-subtitle">Ouça, internalise, e diga com suas próprias palavras.</div>
+    <div class="pitch-play-bar">
+      <button id="pitch-play-btn" title="Ouvir o pitch completo">▶</button>
+      <div class="play-info">
+        <div class="play-title">Ouvir o pitch em voz alta</div>
+        <div class="play-status" id="pitch-status">Pronto para tocar</div>
+      </div>
+      <button id="pitch-stop-btn">✕ Parar</button>
+    </div>
+    <div class="pitch-text">
+      <p>My name is Marcio. I'm a Data Scientist with a focus on Applied AI, based in Manaus, Brazil, with around 10 years of experience at the intersection of data science and applied AI.</p>
+      <p>My background is a bit unconventional — I started with a PhD in Aquatic Biology, which gave me something I think is rare in this field: a deeply rigorous, evidence-based way of thinking about problems. After my PhD, I did postdoctoral research in Computational Biology and Applied Ecology, collaborating with world-class researchers at institutions like EMBL-EBI in the UK and Tulane University in the US. One of the highlights of that period was being the first author of a published software for large-scale image analysis using computer vision and AI — built with an international team and used by researchers across the world.</p>
+      <p>That experience — building scientific software that actually gets used — was my first real taste of applied AI. It naturally led me toward industry. At Venturus, I built a privacy-first RAG system from scratch using open-source models — my entry point into production AI.</p>
+      <p>Now, at FIT Instituto de Tecnologia, I'm taking that further — building a platform that uses modern AI to help account managers in manufacturing make better, faster decisions based on real operational data.</p>
+      <p><strong>The core challenge there is not the technology — it's making sure the system actually works reliably in production, at scale, and delivers real business value. That gap between a demo and a production system is what I find most interesting — and most difficult — about this work.</strong></p>
+    </div>
+  </div>
 </main>
 
 <script>
-  // ── TTS — mesma engine do interview.html ────────────────────────────
-  const playBtn    = document.getElementById('play-btn');
-  const stopBtn    = document.getElementById('stop-btn');
-  const playStatus = document.getElementById('play-status');
+  // ── TTS player factory — creates independent play/pause/stop for any text ──
+  function splitChunks(text) {
+    const parts = text.split(/(?<=[.!?])\s+/).filter(p => p.trim().length > 0);
+    const chunks = [];
+    let cur = '';
+    for (const p of parts) {
+      const merged = cur ? cur + ' ' + p : p;
+      if (merged.length <= 220) { cur = merged; }
+      else { if (cur) chunks.push(cur); cur = p; }
+    }
+    if (cur) chunks.push(cur);
+    return chunks.length > 0 ? chunks : [text];
+  }
 
-  let ttsChain  = Promise.resolve();
-  let ttsToken  = 0;
-  let isPlaying = false;
+  async function fetchAudioUrl(text, voice) {
+    try {
+      const res = await fetch(`/tts?text=${encodeURIComponent(text)}&voice=${voice}`);
+      if (!res.ok) return null;
+      return URL.createObjectURL(await res.blob());
+    } catch { return null; }
+  }
 
-  // Full text to read aloud (plain, no markup)
+  function makeTTSPlayer({ playBtnId, stopBtnId, statusId, text, voice, allPlayers }) {
+    const playBtn  = document.getElementById(playBtnId);
+    const stopBtn  = document.getElementById(stopBtnId);
+    const statusEl = document.getElementById(statusId);
+
+    let chain  = Promise.resolve();
+    let token  = 0;
+    let active = false;
+    let paused = false;
+    let currentAudio = null;
+
+    function setActive(on) {
+      active = on;
+      playBtn.textContent      = on ? '⏸' : '▶';
+      stopBtn.style.display    = on ? 'inline-flex' : 'none';
+      statusEl.textContent     = on ? 'Reproduzindo…' : 'Pronto para tocar';
+    }
+
+    function stop() {
+      token++;
+      if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+      chain  = Promise.resolve();
+      paused = false;
+      setActive(false);
+      statusEl.textContent = 'Pronto para tocar';
+    }
+
+    playBtn.addEventListener('click', () => {
+      // Stop any other player that's running
+      allPlayers.forEach(p => { if (p !== player) p.stop(); });
+
+      if (active && !paused) {
+        if (currentAudio) { currentAudio.pause(); paused = true; }
+        playBtn.textContent  = '▶';
+        statusEl.textContent = 'Pausado';
+        return;
+      }
+      if (paused && currentAudio) {
+        currentAudio.play().catch(() => {});
+        paused = false;
+        playBtn.textContent  = '⏸';
+        statusEl.textContent = 'Reproduzindo…';
+        return;
+      }
+
+      stop();
+      const myToken = token;
+      const chunks  = splitChunks(text);
+      const fetches = chunks.map(c => fetchAudioUrl(c, voice));
+      setActive(true);
+
+      let idx = 0;
+      for (let i = 0; i < chunks.length; i++) {
+        const fetch_i = fetches[i];
+        const isLast  = i === chunks.length - 1;
+        chain = chain.then(async () => {
+          if (token !== myToken) return;
+          const url = await fetch_i;
+          if (token !== myToken || !url) { if (url) URL.revokeObjectURL(url); return; }
+          idx++;
+          statusEl.textContent = `Reproduzindo… (${idx}/${chunks.length})`;
+          const audio = new Audio(url);
+          currentAudio = audio;
+          paused = false;
+          await new Promise(r => { audio.onended = r; audio.onerror = r; audio.play().catch(r); });
+          URL.revokeObjectURL(url);
+          currentAudio = null;
+          if (isLast && token === myToken) {
+            setActive(false);
+            statusEl.textContent = 'Concluído';
+          }
+        }).catch(() => {});
+      }
+    });
+
+    stopBtn.addEventListener('click', stop);
+
+    const player = { stop };
+    return player;
+  }
+
+  // ── Instantiate both players ─────────────────────────────────────────
+  const allPlayers = [];
+
   const MANTRA_TEXT = `Os sinais que vão te contratar.
 
 Número 1. O fechamento do elevator pitch.
@@ -408,97 +693,50 @@ O insight mais importante.
 Você tem um perfil genuinamente diferenciado — PhD, pesquisa internacional, software publicado, RAG em produção, sistema multi-agente com observabilidade e otimização de custo. O risco não é que você não tenha o que eles querem. O risco é que você não comunique isso com clareza suficiente, em inglês, dentro do tempo certo.
 A entrevista não testa se você é bom. Testa se você consegue provar que é bom em 35 minutos, em inglês, para alguém que não vai verificar seu código.`;
 
-  // Split into ~200-char sentence chunks for parallel TTS fetching
-  function splitChunks(text) {
-    const parts = text.split(/(?<=[.!?])\s+/).filter(p => p.trim().length > 0);
-    const chunks = [];
-    let cur = '';
-    for (const p of parts) {
-      const merged = cur ? cur + ' ' + p : p;
-      if (merged.length <= 220) { cur = merged; }
-      else { if (cur) chunks.push(cur); cur = p; }
-    }
-    if (cur) chunks.push(cur);
-    return chunks.length > 0 ? chunks : [text];
-  }
+  const PITCH_TEXT = `My name is Marcio. I'm a Data Scientist with a focus on Applied AI, based in Manaus, Brazil, with around 10 years of experience at the intersection of data science and applied AI.
+My background is a bit unconventional — I started with a PhD in Aquatic Biology, which gave me something I think is rare in this field: a deeply rigorous, evidence-based way of thinking about problems. After my PhD, I did postdoctoral research in Computational Biology and Applied Ecology, collaborating with world-class researchers at institutions like EMBL-EBI in the UK and Tulane University in the US. One of the highlights of that period was being the first author of a published software for large-scale image analysis using computer vision and AI — built with an international team and used by researchers across the world.
+That experience — building scientific software that actually gets used — was my first real taste of applied AI. It naturally led me toward industry. At Venturus, I built a privacy-first RAG system from scratch using open-source models — my entry point into production AI.
+Now, at FIT Instituto de Tecnologia, I'm taking that further — building a platform that uses modern AI to help account managers in manufacturing make better, faster decisions based on real operational data.
+The core challenge there is not the technology — it's making sure the system actually works reliably in production, at scale, and delivers real business value. That gap between a demo and a production system is what I find most interesting — and most difficult — about this work.`;
 
-  async function fetchAudioUrl(text) {
-    try {
-      const res = await fetch(`/tts?text=${encodeURIComponent(text)}&voice=onyx`);
-      if (!res.ok) return null;
-      return URL.createObjectURL(await res.blob());
-    } catch { return null; }
-  }
+  allPlayers.push(makeTTSPlayer({
+    playBtnId: 'play-btn',
+    stopBtnId:  'stop-btn',
+    statusId:   'play-status',
+    text:       MANTRA_TEXT,
+    voice:      'onyx',
+    allPlayers,
+  }));
 
-  function setPlaying(active) {
-    isPlaying = active;
-    playBtn.textContent = active ? '⏸' : '▶';
-    stopBtn.style.display = active ? 'inline-flex' : 'none';
-    playStatus.textContent = active ? 'Reproduzindo…' : 'Pronto para tocar';
-  }
+  allPlayers.push(makeTTSPlayer({
+    playBtnId: 'pitch-play-btn',
+    stopBtnId:  'pitch-stop-btn',
+    statusId:   'pitch-status',
+    text:       PITCH_TEXT,
+    voice:      'nova',
+    allPlayers,
+  }));
 
-  let currentAudio = null;
-  let paused = false;
+  const CAR_TEXT = `C — Context.
+At FIT Instituto de Tecnologia, I'm building an AI platform called Iris Hub for a manufacturing client. The account managers there already had access to dashboards and could download data — but they had no way to customize their analysis. If they wanted insights about equipment failures, production rates, or defective parts, they had to wait for an analyst to generate a report. What they really needed was something like a virtual data scientist — something they could just ask, in plain language, and get a personalized answer immediately.
 
-  playBtn.addEventListener('click', () => {
-    if (isPlaying && !paused) {
-      // Pause
-      if (currentAudio) { currentAudio.pause(); paused = true; }
-      playBtn.textContent = '▶';
-      playStatus.textContent = 'Pausado';
-      return;
-    }
-    if (paused && currentAudio) {
-      // Resume
-      currentAudio.play().catch(() => {});
-      paused = false;
-      playBtn.textContent = '⏸';
-      playStatus.textContent = 'Reproduzindo…';
-      return;
-    }
+A — Action.
+I designed a multi-agent architecture where each agent is responsible for a specific domain — failures, productivity, quality control. The agents query operational data and generate natural language reports that require no technical knowledge from the user.
+One deliberate decision I made from day one was to instrument the system with Langfuse before we had any users. I wanted full observability — latency, cost per session, output quality — from the very beginning, not as an afterthought.
+That turned out to be critical. When we moved to a staging environment with realistic usage patterns — edge cases, unexpected query combinations, higher volume — I could see immediately that costs and latency were becoming unsustainable. Because the observability was already in place, I had the data to diagnose the problem precisely.
+My response was evidence-driven: I ran a formal benchmarking process across models on AWS Bedrock, comparing quality, cost, and latency. I also redesigned the data pipeline — compacting tool responses, optimizing variable tracking, restructuring how context was passed between agents. The result was a context window reduction from around 19,000 tokens to around 9,000 — a 30 to 50 percent reduction in inference cost, with no degradation in output quality.
 
-    // Start fresh
-    stopAll();
-    const myToken = ttsToken;
-    const chunks  = splitChunks(MANTRA_TEXT);
-    const fetches = chunks.map(c => fetchAudioUrl(c));
+R — Result.
+Account managers can now access personalized operational reports through a conversational interface — in real time, without waiting for analyst support. The decision-making cycle that used to take hours or days now happens in seconds. And because I built the observability layer from the start, every call is fully traceable — cost, latency, and output quality are all monitored continuously.`;
 
-    setPlaying(true);
-
-    let chunkIndex = 0;
-    for (let i = 0; i < chunks.length; i++) {
-      const fetch_i = fetches[i];
-      const isLast  = i === chunks.length - 1;
-      ttsChain = ttsChain.then(async () => {
-        if (ttsToken !== myToken) return;
-        const url = await fetch_i;
-        if (ttsToken !== myToken || !url) { if (url) URL.revokeObjectURL(url); return; }
-        chunkIndex++;
-        playStatus.textContent = `Reproduzindo… (${chunkIndex}/${chunks.length})`;
-        const audio = new Audio(url);
-        currentAudio = audio;
-        paused = false;
-        await new Promise(r => { audio.onended = r; audio.onerror = r; audio.play().catch(r); });
-        URL.revokeObjectURL(url);
-        currentAudio = null;
-        if (isLast && ttsToken === myToken) {
-          setPlaying(false);
-          playStatus.textContent = 'Concluído';
-        }
-      }).catch(() => {});
-    }
-  });
-
-  stopBtn.addEventListener('click', stopAll);
-
-  function stopAll() {
-    ttsToken++;
-    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-    ttsChain = Promise.resolve();
-    paused = false;
-    setPlaying(false);
-    playStatus.textContent = 'Pronto para tocar';
-  }
+  allPlayers.push(makeTTSPlayer({
+    playBtnId: 'car-play-btn',
+    stopBtnId:  'car-stop-btn',
+    statusId:   'car-status',
+    text:       CAR_TEXT,
+    voice:      'nova',
+    allPlayers,
+  }));
 </script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 import asyncio
 import functools
+import hashlib
 import os
 import uuid
 from pathlib import Path
@@ -22,6 +23,12 @@ from simulator import (
 )
 
 openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+# ── TTS disk cache ────────────────────────────────────────────────────────────
+# Audio is generated once and stored in static/tts_cache/ keyed by md5(voice:text).
+# Subsequent requests for the same text+voice are served directly from disk — free.
+TTS_CACHE_DIR = Path(__file__).parent / "static" / "tts_cache"
+TTS_CACHE_DIR.mkdir(exist_ok=True)
 
 app = FastAPI()
 
@@ -116,6 +123,12 @@ async def tts(text: str, voice: str = "nova"):
     if voice not in allowed:
         voice = "nova"
 
+    # Check disk cache first — same text+voice always produces identical audio.
+    cache_key  = hashlib.md5(f"{voice}:{text}".encode()).hexdigest()
+    cache_file = TTS_CACHE_DIR / f"{cache_key}.mp3"
+    if cache_file.exists():
+        return Response(content=cache_file.read_bytes(), media_type="audio/mpeg")
+
     last_exc: Exception | None = None
     for attempt in range(3):
         try:
@@ -124,14 +137,15 @@ async def tts(text: str, voice: str = "nova"):
                 voice=voice,
                 input=text,
             )
-            return Response(content=response.content, media_type="audio/mpeg")
+            audio_bytes = response.content
+            cache_file.write_bytes(audio_bytes)   # save for future requests
+            return Response(content=audio_bytes, media_type="audio/mpeg")
         except Exception as exc:
             last_exc = exc
             if attempt < 2:
                 await asyncio.sleep(0.5 * (attempt + 1))
 
     print(f"[tts] failed after 3 attempts: {last_exc}")
-    from fastapi import HTTPException
     raise HTTPException(status_code=503, detail="TTS service temporarily unavailable")
 
 
