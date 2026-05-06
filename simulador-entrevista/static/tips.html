@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interview Tips — Interview Coach</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      padding: 14px 24px;
+      background: #1a1d27;
+      border-bottom: 1px solid #2d3148;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    header h1 { font-size: 16px; font-weight: 600; color: #f1f5f9; }
+    header p  { font-size: 12px; color: #64748b; margin-top: 1px; }
+    .home-link {
+      display: flex; align-items: center; gap: 12px;
+      text-decoration: none; color: inherit;
+      border-radius: 10px; padding: 2px 6px; margin: -2px -6px;
+      transition: background 0.2s;
+    }
+    .home-link:hover { background: rgba(99,102,241,0.08); }
+
+    .plan-pill {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; padding: 3px 10px; border-radius: 20px;
+      flex-shrink: 0; display: none;
+    }
+    .plan-pill { position: relative; cursor: default; }
+    .plan-pill.hunter  { background: #312e81; color: #a5b4fc; }
+    .plan-pill.explorer { background: #1e293b; color: #64748b; }
+    .plan-pill::after {
+      content: attr(data-tooltip); position: absolute;
+      bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+      background: #1e2235; border: 1px solid #3d4160; color: #e2e8f0;
+      font-size: 11px; font-weight: 500; text-transform: none; letter-spacing: 0;
+      white-space: nowrap; padding: 5px 10px; border-radius: 8px;
+      pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 999;
+    }
+    .plan-pill:hover::after, .plan-pill.tooltip-open::after { opacity: 1; }
+
+    .hdr-btn {
+      font-size: 11px; font-weight: 500;
+      padding: 5px 12px; border-radius: 20px;
+      background: transparent; border: 1px solid #2d3148;
+      color: #64748b; cursor: pointer; transition: all 0.2s;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+      flex-shrink: 0;
+    }
+    .hdr-btn:hover { border-color: #6366f1; color: #a78bfa; }
+    .hdr-spacer { margin-left: auto; }
+
+    /* ── Main content ── */
+    main {
+      flex: 1;
+      padding: 48px 16px 80px;
+      max-width: 760px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      margin-bottom: 52px;
+    }
+    .hero-badge {
+      display: inline-block;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; padding: 4px 14px; border-radius: 20px;
+      background: #1e1b4b; color: #818cf8; border: 1px solid #3730a3;
+      margin-bottom: 20px;
+    }
+    .hero h2 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 800; color: #f1f5f9; line-height: 1.2;
+      margin-bottom: 12px;
+    }
+    .hero p {
+      font-size: 14px;
+      color: #64748b;
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.65;
+    }
+
+    /* ── Section card ── */
+    .tip-card {
+      background: #1a1d27;
+      border: 1px solid #2d3148;
+      border-radius: 16px;
+      padding: 28px 28px 24px;
+      margin-bottom: 24px;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .card-icon {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .card-icon.indigo  { background: #1e1b4b; }
+    .card-icon.green   { background: #052e16; }
+    .card-icon.amber   { background: #1c1407; border: 1px solid #78350f; }
+    .card-icon.red     { background: #1a0f0f; }
+    .card-icon.blue    { background: #0c1a2e; }
+    .card-icon.purple  { background: #1a0f2e; }
+
+    .card-title {
+      flex: 1;
+    }
+    .card-title h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 2px;
+    }
+    .card-title span {
+      font-size: 11px;
+      color: #475569;
+      font-weight: 500;
+    }
+
+    .card-body {
+      font-size: 13.5px;
+      line-height: 1.75;
+      color: #94a3b8;
+    }
+    .card-body p { margin-bottom: 12px; }
+    .card-body p:last-child { margin-bottom: 0; }
+    .card-body strong { color: #e2e8f0; }
+    .card-body em { color: #a78bfa; font-style: normal; font-weight: 600; }
+
+    /* ── Structure breakdown ── */
+    .structure {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 16px 0;
+    }
+    .structure-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .structure-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .structure-label.indigo { background: #1e1b4b; color: #818cf8; }
+    .structure-label.green  { background: #052e16; color: #4ade80; }
+    .structure-label.amber  { background: #1c1407; color: #fbbf24; border: 1px solid #78350f; }
+    .structure-label.teal   { background: #042f2e; color: #2dd4bf; }
+    .structure-label.slate  { background: #1e293b; color: #94a3b8; }
+
+    .structure-row p {
+      font-size: 13px;
+      line-height: 1.65;
+      color: #94a3b8;
+      margin: 0;
+    }
+    .structure-row p strong { color: #e2e8f0; }
+
+    /* ── Example block ── */
+    .example-block {
+      background: #0f1117;
+      border: 1px solid #2d3148;
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin: 16px 0;
+    }
+    .example-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+    .example-text {
+      font-size: 13px;
+      line-height: 1.7;
+      color: #c4b5fd;
+      font-style: italic;
+    }
+    .example-text.green { color: #86efac; }
+    .example-text.red   { color: #fca5a5; }
+
+    /* ── Do / Don't inline ── */
+    .do-dont {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 16px 0;
+    }
+    @media (max-width: 520px) { .do-dont { grid-template-columns: 1fr; } }
+    .do-block, .dont-block {
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .do-block {
+      background: #052e16;
+      border: 1px solid #166534;
+    }
+    .dont-block {
+      background: #1a0f0f;
+      border: 1px solid #450a0a;
+    }
+    .do-block .dd-label   { color: #4ade80; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+    .dont-block .dd-label { color: #f87171; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+    .do-block ul, .dont-block ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .do-block li   { font-size: 12.5px; color: #86efac; line-height: 1.5; display: flex; gap: 7px; }
+    .dont-block li { font-size: 12.5px; color: #fca5a5; line-height: 1.5; display: flex; gap: 7px; }
+    .do-block li::before   { content: "✓"; font-weight: 700; color: #22c55e; flex-shrink: 0; }
+    .dont-block li::before { content: "✕"; font-weight: 700; color: #ef4444; flex-shrink: 0; }
+
+    /* ── Tip list ── */
+    .tip-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .tip-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13.5px;
+      color: #94a3b8;
+      line-height: 1.65;
+    }
+    .tip-item::before {
+      content: "→";
+      color: #6366f1;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .tip-item strong { color: #e2e8f0; }
+
+    /* ── Divider ── */
+    .divider { border: none; border-top: 1px solid #1e2235; margin: 36px 0; }
+
+    /* ── CTA block ── */
+    .cta-block {
+      background: linear-gradient(135deg, #1e1b4b, #1a1d27);
+      border: 1px solid #4f46e5;
+      border-radius: 16px;
+      padding: 32px 28px;
+      text-align: center;
+    }
+    .cta-block h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 10px;
+    }
+    .cta-block p {
+      font-size: 13.5px;
+      color: #94a3b8;
+      line-height: 1.65;
+      margin-bottom: 24px;
+      max-width: 420px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .cta-btn {
+      display: inline-block;
+      padding: 12px 28px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, #6366f1, #7c3aed);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .cta-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="home-link" href="/">
+    <div class="logo">🎯</div>
+    <div>
+      <h1>Interview Coach</h1>
+      <p>Interview Tips &amp; Frameworks</p>
+    </div>
+  </a>
+  <span class="hdr-spacer"></span>
+  <span id="plan-pill" class="plan-pill"></span>
+  <a id="hdr-history" class="hdr-btn" href="/history.html" style="display:none">📋 History</a>
+  <a id="hdr-practice" class="hdr-btn" href="/interview.html">▶ Practice</a>
+  <a id="hdr-login"    class="hdr-btn" href="/login.html"   style="display:none">Log in</a>
+</header>
+
+<main>
+
+  <div class="hero">
+    <div class="hero-badge">Interview Playbook</div>
+    <h2>How to Ace Your Tech Interview</h2>
+    <p>Frameworks, structures, and tips used by top candidates — from the first impression to the final question.</p>
+  </div>
+
+  <!-- 1. Elevator Pitch -->
+  <div class="tip-card">
+    <div class="card-header">
+      <div class="card-icon indigo">🎤</div>
+      <div class="card-title">
+        <h3>The Elevator Pitch</h3>
+        <span>Your first 90 seconds — make them count</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p>The elevator pitch is your answer to <strong>"Tell me about yourself."</strong> It's not your biography — it's a curated highlight reel designed to make the interviewer want to keep listening.</p>
+
+      <div class="structure">
+        <div class="structure-row">
+          <span class="structure-label indigo">Who</span>
+          <p>Who you are and your role today. One or two sentences max. Skip the graduation year.</p>
+        </div>
+        <div class="structure-row">
+          <span class="structure-label green">What</span>
+          <p>What kind of problems you solve. Be specific — <strong>"I build production ML pipelines"</strong> beats <strong>"I work in AI."</strong></p>
+        </div>
+        <div class="structure-row">
+          <span class="structure-label amber">Highlight</span>
+          <p>One concrete achievement with a number or outcome. This is the hook that differentiates you from everyone else.</p>
+        </div>
+        <div class="structure-row">
+          <span class="structure-label teal">Why</span>
+          <p>Why <em>this role</em>. Connect something real in your background to something real about the company. Generic answers kill momentum.</p>
+        </div>
+      </div>
+
+      <div class="do-dont">
+        <div class="do-block">
+          <div class="dd-label">Do say</div>
+          <ul>
+            <li>Use "I built", "I led", "I designed"</li>
+            <li>Include one specific metric</li>
+            <li>End with a strong hook or question</li>
+            <li>Practice until it sounds natural, not memorized</li>
+          </ul>
+        </div>
+        <div class="dont-block">
+          <div class="dd-label">Avoid</div>
+          <ul>
+            <li>Reading your resume chronologically</li>
+            <li>Going over 2 minutes</li>
+            <li>Vague phrases like "passionate about tech"</li>
+            <li>Ending without connecting to the role</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. CAR Framework -->
+  <div class="tip-card">
+    <div class="card-header">
+      <div class="card-icon green">🚗</div>
+      <div class="card-title">
+        <h3>The CAR Framework</h3>
+        <span>Challenge → Action → Result</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p>Use CAR for every behavioral question: <strong>"Tell me about a time you…"</strong>, <strong>"Describe a challenge you faced…"</strong>, <strong>"Give me an example of…"</strong></p>
+      <p>It's also called STAR (Situation, Task, Action, Result) — same idea, CAR is tighter. Think of it as a 2-minute story where you're the protagonist who solves a real problem.</p>
+
+      <div class="structure">
+        <div class="structure-row">
+          <span class="structure-label indigo">C — Challenge</span>
+          <p>Set the scene in 2–3 sentences. What was the problem, the constraint, or the stakes? Make the interviewer understand <em>why it was hard</em>.</p>
+        </div>
+        <div class="structure-row">
+          <span class="structure-label green">A — Action</span>
+          <p>This is the bulk of your answer. What did <strong>you</strong> specifically decide and do? Break it into 2–3 clear steps. Use "I", not "we."</p>
+        </div>
+        <div class="structure-row">
+          <span class="structure-label amber">R — Result</span>
+          <p>What happened? Quantify where you can (%, time, users, cost). Also mention what you learned if the outcome was mixed.</p>
+        </div>
+      </div>
+
+      <p style="margin-top:16px">The most common mistake is spending too long on the Challenge and rushing the Result. Interviewers care most about the Action — your thinking and your decisions.</p>
+
+      <div class="example-block">
+        <div class="example-label">Weak answer</div>
+        <div class="example-text red">"We had performance issues so the team fixed the database queries and things got faster."</div>
+      </div>
+      <div class="example-block">
+        <div class="example-label">Strong CAR answer</div>
+        <div class="example-text green">"Our API latency was spiking under load, causing timeouts for 8% of users. I profiled the slowest endpoints and found N+1 query patterns in three critical paths. I refactored them to use batch fetching and added a Redis cache layer for frequently-read data. Latency dropped from 1.4s to 180ms at peak and the timeout rate went to zero."</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Behavioral Questions -->
+  <div class="tip-card">
+    <div class="card-header">
+      <div class="card-icon blue">🧠</div>
+      <div class="card-title">
+        <h3>Behavioral Questions</h3>
+        <span>Prepare stories, not answers</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p>Behavioral questions probe how you've handled real situations. They're predictable — most fall into 6 themes. Prepare <strong>2–3 strong CAR stories</strong> per theme and you can answer almost anything.</p>
+
+      <div class="tip-list">
+        <div class="tip-item"><span><strong>Leadership &amp; influence</strong> — A time you led without authority, changed someone's mind, or rallied a team.</span></div>
+        <div class="tip-item"><span><strong>Conflict &amp; disagreement</strong> — A time you handled a difficult colleague, pushback from a manager, or a team dispute.</span></div>
+        <div class="tip-item"><span><strong>Failure &amp; learning</strong> — A time something went wrong. Own it, explain what you learned, show you grew.</span></div>
+        <div class="tip-item"><span><strong>Ambiguity &amp; problem-solving</strong> — A time you navigated a vague or changing requirement.</span></div>
+        <div class="tip-item"><span><strong>Prioritization &amp; trade-offs</strong> — A time you had too much to do and had to choose.</span></div>
+        <div class="tip-item"><span><strong>Impact &amp; ownership</strong> — A time you went beyond your role and delivered results that mattered.</span></div>
+      </div>
+
+      <p style="margin-top:16px"><em>Pro tip:</em> Your best stories can flex across themes. A story about a system failure can answer leadership, problem-solving, and failure questions. Practice telling the same story with a different lens.</p>
+    </div>
+  </div>
+
+  <!-- 4. Technical Questions -->
+  <div class="tip-card">
+    <div class="card-header">
+      <div class="card-icon purple">💻</div>
+      <div class="card-title">
+        <h3>Technical Questions</h3>
+        <span>Show your thinking, not just your answer</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p>Technical interviews test how you think under pressure as much as what you know. Follow this structure:</p>
+
+      <div class="tip-list">
+        <div class="tip-item"><span><strong>Clarify first.</strong> Before answering, ask one or two clarifying questions. This shows you don't jump to solutions without understanding the problem.</span></div>
+        <div class="tip-item"><span><strong>Think aloud.</strong> Narrate your reasoning as you go. Silence is worse than imperfect thinking — interviewers can't give hints if they don't know where you're stuck.</span></div>
+        <div class="tip-item"><span><strong>Start simple, then optimize.</strong> Give a working solution first, even a brute-force one. Then discuss trade-offs and improvements. Never start by overengineering.</span></div>
+        <div class="tip-item"><span><strong>Acknowledge edge cases.</strong> After your answer, proactively mention what could break it. This signals maturity.</span></div>
+        <div class="tip-item"><span><strong>When you don't know, say so — then reason.</strong> "I haven't used X directly, but based on how Y works, I'd expect…" is far better than silence or guessing.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Motivation & Culture Fit -->
+  <div class="tip-card">
+    <div class="card-header">
+      <div class="card-icon amber">🎯</div>
+      <div class="card-title">
+        <h3>Motivation &amp; Culture Fit</h3>
+        <span>Why this company, why this role, why now</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p>"Why do you want to work here?" is deceptively simple. Generic answers ("I admire the mission") are forgettable. What makes a great answer: <strong>specificity + personal connection.</strong></p>
+
+      <div class="structure">
+        <div class="structure-row">
+          <span class="structure-label indigo">Company</span>
+          <p>Name something specific — a product, a technical challenge the company is solving, a cultural value — and explain why it resonates with your experience.</p>
+        </div>
+        <div class="structure-row">
+          <span class="structure-label green">Role</span>
+          <p>Show you've read the job description. Connect specific responsibilities to specific things you've done and want to do more of.</p>
+        </div>
+        <div class="structure-row">
+          <span class="structure-label amber">Timing</span>
+          <p>Why now? What's changed in your trajectory or career goals that makes this the right move at this moment?</p>
+        </div>
+      </div>
+
+      <div class="example-block">
+        <div class="example-label">Generic (forgettable)</div>
+        <div class="example-text red">"I want to grow my career and I think this company does great work."</div>
+      </div>
+      <div class="example-block">
+        <div class="example-label">Specific (memorable)</div>
+        <div class="example-text green">"I've been building AI systems that go to production, and the hardest part has always been the gap between a demo and a reliable system at scale — that's the problem I find most interesting. When I read about what your team is doing with [X], it's exactly that problem. That's why this role caught my attention."</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Questions to Ask -->
+  <div class="tip-card">
+    <div class="card-header">
+      <div class="card-icon indigo">💬</div>
+      <div class="card-title">
+        <h3>Questions to Ask the Interviewer</h3>
+        <span>Good questions show curiosity and seriousness</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p>Always have 3–4 questions ready. "I don't have any questions" is a red flag. These are consistently strong:</p>
+
+      <div class="tip-list">
+        <div class="tip-item"><span>"What does success look like in the first 90 days in this role?"</span></div>
+        <div class="tip-item"><span>"What's the biggest technical challenge the team is currently facing?"</span></div>
+        <div class="tip-item"><span>"How does the team handle technical debt vs. feature velocity?"</span></div>
+        <div class="tip-item"><span>"Can you tell me about a time someone on this team grew significantly — what did that look like?"</span></div>
+        <div class="tip-item"><span>"What do you personally enjoy most about working here?"</span></div>
+        <div class="tip-item"><span>"Is there anything in my background you'd like me to expand on?"</span></div>
+      </div>
+
+      <p style="margin-top:14px"><em>Avoid:</em> questions easily answered by the company website, questions about salary before an offer, and questions that make you sound like you're already negotiating.</p>
+    </div>
+  </div>
+
+  <!-- 7. Common Mistakes -->
+  <div class="tip-card" style="border-color: #450a0a; background: #130a0a;">
+    <div class="card-header">
+      <div class="card-icon red">⚠️</div>
+      <div class="card-title">
+        <h3>Common Mistakes That Sink Candidates</h3>
+        <span>Even strong candidates make these</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="tip-list">
+        <div class="tip-item" style="color:#fca5a5"><span><strong style="color:#f1f5f9">Using "we" instead of "I"</strong> in behavioral answers. Interviewers want to know what <em>you</em> did. "We built the system" raises the question of whether you contributed meaningfully.</span></div>
+        <div class="tip-item" style="color:#fca5a5"><span><strong style="color:#f1f5f9">No quantified results.</strong> "Things improved" is forgettable. "Latency dropped by 60%, error rate went to zero" is memorable. Always try to put a number on the outcome.</span></div>
+        <div class="tip-item" style="color:#fca5a5"><span><strong style="color:#f1f5f9">Rambling.</strong> Answers over 3 minutes lose the interviewer. Practice timing your answers. 90 seconds for the pitch, 2 minutes for CAR stories.</span></div>
+        <div class="tip-item" style="color:#fca5a5"><span><strong style="color:#f1f5f9">Criticizing past employers.</strong> Even if justified, it raises doubts about how you'll talk about <em>this</em> company someday. Keep it neutral and focus on what you learned.</span></div>
+        <div class="tip-item" style="color:#fca5a5"><span><strong style="color:#f1f5f9">Not asking for clarification.</strong> Especially on technical questions — jumping to an answer before understanding the problem signals poor judgment.</span></div>
+        <div class="tip-item" style="color:#fca5a5"><span><strong style="color:#f1f5f9">Fluency under pressure.</strong> Content can be excellent but if hesitation, filler words, or unclear structure make you hard to follow, it affects the impression. Recording yourself to review is painful but effective.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- CTA -->
+  <div class="cta-block" id="cta-section">
+    <h3>Ready to put it into practice?</h3>
+    <p>The best way to internalize these frameworks is to practice them out loud. Our AI interviewer gives you real-time feedback on structure, language, and confidence.</p>
+    <a href="/interview.html" class="cta-btn" id="cta-btn">Start Practicing →</a>
+  </div>
+
+</main>
+
+<script>
+(function () {
+  try {
+    const token = localStorage.getItem('auth_token');
+    const user  = JSON.parse(localStorage.getItem('auth_user') || 'null');
+
+    const hdrHistory = document.getElementById('hdr-history');
+    const hdrLogin   = document.getElementById('hdr-login');
+    const planPill   = document.getElementById('plan-pill');
+    const ctaSection = document.getElementById('cta-section');
+    const ctaBtn     = document.getElementById('cta-btn');
+
+    if (token && user) {
+      // Logged in
+      hdrHistory.style.display = '';
+      // Plan badge
+      const isHunter = user.plan === 'hunter';
+      planPill.className = 'plan-pill ' + (isHunter ? 'hunter' : 'explorer');
+      planPill.textContent = isHunter ? '🎯 Hunter' : '🗺️ Explorer';
+      planPill.setAttribute('data-tooltip', 'Your current plan');
+      planPill.style.display = 'inline-block';
+      planPill.style.cursor = 'pointer';
+      planPill.addEventListener('click', () => location.href = '/upgrade.html');
+    } else {
+      // Not logged in — show login button, adjust CTA
+      hdrLogin.style.display = '';
+      ctaSection.querySelector('p').textContent =
+        'Create a free account and start practicing with our AI interviewer. You get 3 sessions per week, free forever.';
+      ctaBtn.href = '/register.html';
+      ctaBtn.textContent = 'Create Free Account →';
+    }
+  } catch (_) {}
+})();
+</script>
+
+</body>
+</html>

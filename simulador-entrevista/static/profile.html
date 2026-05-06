@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile Settings — Interview Coach</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1117; color: #e2e8f0; min-height: 100dvh;
+      display: flex; flex-direction: column;
+    }
+    header {
+      padding: 14px 24px; background: #1a1d27;
+      border-bottom: 1px solid #2d3148;
+      display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+    }
+    .logo {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; font-size: 18px;
+    }
+    .home-link {
+      display: flex; align-items: center; gap: 12px;
+      text-decoration: none; color: inherit; border-radius: 10px;
+      padding: 2px 6px; margin: -2px -6px; transition: background 0.2s;
+    }
+    .home-link:hover { background: rgba(99,102,241,0.08); }
+    header h1 { font-size: 16px; font-weight: 600; color: #f1f5f9; }
+    header p  { font-size: 12px; color: #64748b; margin-top: 1px; }
+    .plan-pill {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; padding: 3px 10px; border-radius: 20px;
+      flex-shrink: 0; display: none;
+    }
+    .plan-pill { position: relative; cursor: default; }
+    .plan-pill.hunter  { background: #312e81; color: #a5b4fc; }
+    .plan-pill.explorer { background: #1e293b; color: #64748b; }
+    .plan-pill::after {
+      content: attr(data-tooltip); position: absolute;
+      bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+      background: #1e2235; border: 1px solid #3d4160; color: #e2e8f0;
+      font-size: 11px; font-weight: 500; text-transform: none; letter-spacing: 0;
+      white-space: nowrap; padding: 5px 10px; border-radius: 8px;
+      pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 999;
+    }
+    .plan-pill:hover::after, .plan-pill.tooltip-open::after { opacity: 1; }
+    .hdr-btn {
+      font-size: 11px; font-weight: 500;
+      padding: 5px 12px; border-radius: 20px;
+      background: transparent; border: 1px solid #2d3148;
+      color: #64748b; cursor: pointer; transition: all 0.2s;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+    }
+    .hdr-btn:hover { border-color: #6366f1; color: #a78bfa; }
+
+    main {
+      flex: 1; padding: 32px 24px;
+      max-width: 600px; width: 100%; margin: 0 auto;
+    }
+    .page-title { font-size: 20px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px; }
+    .page-sub { font-size: 13px; color: #475569; margin-bottom: 32px; }
+
+    /* Verification banner */
+    #verify-banner {
+      display: none; margin-bottom: 24px;
+      background: #1c1700; border: 1px solid #854d0e;
+      border-radius: 12px; padding: 14px 18px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    #verify-banner.hidden { display: none !important; }
+    .banner-text { flex: 1; font-size: 13px; color: #fbbf24; line-height: 1.5; }
+    .banner-text strong { display: block; margin-bottom: 2px; }
+    #resend-btn {
+      font-size: 12px; font-weight: 600; padding: 6px 14px;
+      border-radius: 20px; border: 1px solid #854d0e;
+      background: transparent; color: #fbbf24; cursor: pointer;
+      transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+    }
+    #resend-btn:hover { background: #854d0e; color: #fff; }
+    #resend-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .section {
+      background: #1a1d27; border: 1px solid #2d3148;
+      border-radius: 16px; padding: 24px; margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: 14px; font-weight: 600; color: #94a3b8;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 20px;
+    }
+    label { display: block; font-size: 13px; font-weight: 500; color: #94a3b8; margin-bottom: 6px; }
+    input {
+      width: 100%; padding: 10px 14px;
+      background: #0f1117; border: 1px solid #2d3148;
+      border-radius: 8px; color: #f1f5f9; font-size: 14px;
+      outline: none; transition: border-color 0.2s; margin-bottom: 16px;
+    }
+    input:focus { border-color: #6366f1; }
+    input::placeholder { color: #475569; }
+    input:disabled { opacity: 0.5; cursor: not-allowed; }
+    .field-hint { font-size: 11px; color: #475569; margin-top: -12px; margin-bottom: 16px; }
+    .btn {
+      padding: 10px 22px;
+      background: linear-gradient(135deg, #6366f1, #7c3aed);
+      border: none; border-radius: 8px; color: #fff;
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .msg {
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 13px; margin-bottom: 16px; display: none;
+    }
+    .msg.error   { background: #450a0a; border: 1px solid #7f1d1d; color: #fca5a5; }
+    .msg.success { background: #14532d; border: 1px solid #166534; color: #4ade80; }
+    .logout-btn {
+      width: 100%; padding: 10px;
+      background: transparent; border: 1px solid #3d1515;
+      border-radius: 8px; color: #f87171; font-size: 14px;
+      font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .logout-btn:hover { background: #3d1515; }
+    .spinner {
+      display: inline-block; width: 13px; height: 13px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 5px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="home-link" href="/">
+    <div class="logo">🎯</div>
+    <div><h1>Interview Coach</h1><p>Account settings</p></div>
+  </a>
+  <span id="plan-pill" class="plan-pill" style="margin-left:auto"></span>
+  <a class="hdr-btn" href="/interview.html">← Back to interview</a>
+</header>
+
+<main>
+  <div class="page-title">Profile Settings</div>
+  <div class="page-sub">Manage your account details and password.</div>
+
+  <!-- Plan banner -->
+  <div id="plan-banner" style="display:none;margin-bottom:24px;background:#1a1d27;border:1px solid #2d3148;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px">
+    <div style="flex:1">
+      <div style="font-size:12px;color:#64748b;margin-bottom:2px">Current plan</div>
+      <div id="plan-name" style="font-size:15px;font-weight:700;color:#f1f5f9"></div>
+    </div>
+    <div id="plan-usage" style="font-size:12px;color:#64748b;text-align:right;margin-right:8px"></div>
+    <a id="plan-upgrade-link" href="/upgrade.html" style="display:none;font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;border:1px solid #6366f1;color:#a78bfa;text-decoration:none;white-space:nowrap;transition:all 0.2s">Upgrade →</a>
+    <button id="plan-downgrade-btn" style="display:none;font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;border:1px solid #3d1515;background:transparent;color:#f87171;cursor:pointer;white-space:nowrap;transition:all 0.2s" onmouseover="this.style.background='#3d1515'" onmouseout="this.style.background='transparent'">Downgrade</button>
+  </div>
+
+  <!-- Email verification banner -->
+  <div id="verify-banner" class="hidden">
+    <span style="font-size:20px">✉️</span>
+    <div class="banner-text">
+      <strong>Please verify your email address</strong>
+      You must verify your email to continue past the Elevator Pitch phase.
+    </div>
+    <button id="resend-btn">Resend email</button>
+  </div>
+
+  <!-- Profile section -->
+  <div class="section">
+    <div class="section-title">Profile</div>
+    <div class="msg" id="profile-msg"></div>
+    <form id="profile-form">
+      <label for="name">Full name</label>
+      <input type="text" id="name" placeholder="Your name" autocomplete="name" />
+
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="you@example.com" autocomplete="email" />
+      <div class="field-hint">Changing your email will require re-verification and needs your current password.</div>
+
+      <label for="cur-pw-profile">Current password <span style="color:#475569">(required only when changing email)</span></label>
+      <input type="password" id="cur-pw-profile" placeholder="••••••••" autocomplete="current-password" />
+
+      <button class="btn" type="submit" id="profile-btn">Save changes</button>
+    </form>
+  </div>
+
+  <!-- Password section -->
+  <div class="section">
+    <div class="section-title">Change Password</div>
+    <div class="msg" id="pw-msg"></div>
+    <form id="pw-form">
+      <label for="cur-pw">Current password</label>
+      <input type="password" id="cur-pw" placeholder="••••••••" autocomplete="current-password" />
+
+      <label for="new-pw">New password</label>
+      <input type="password" id="new-pw" placeholder="At least 8 characters" autocomplete="new-password" />
+
+      <label for="confirm-pw">Confirm new password</label>
+      <input type="password" id="confirm-pw" placeholder="Repeat new password" autocomplete="new-password" />
+
+      <button class="btn" type="submit" id="pw-btn">Update password</button>
+    </form>
+  </div>
+
+  <!-- Logout section -->
+  <div class="section">
+    <div class="section-title">Session</div>
+    <button class="logout-btn" id="logout-btn">Sign out of all devices</button>
+  </div>
+</main>
+
+<script>
+  const _token = localStorage.getItem('auth_token');
+  if (!_token) location.replace('/login.html?next=/profile.html');
+
+  const _authHeader = { 'Authorization': `Bearer ${_token}`, 'Content-Type': 'application/json' };
+
+  function showMsg(id, text, type) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = `msg ${type}`;
+    el.style.display = 'block';
+  }
+
+  // Load current user data
+  async function loadUser() {
+    try {
+      const [meRes, usageRes] = await Promise.all([
+        fetch('/auth/me',      { headers: { 'Authorization': `Bearer ${_token}` } }),
+        fetch('/auth/usage',   { headers: { 'Authorization': `Bearer ${_token}` } }),
+      ]);
+      if (!meRes.ok) { location.replace('/login.html'); return; }
+      const user  = await meRes.json();
+      const usage = usageRes.ok ? await usageRes.json() : null;
+
+      document.getElementById('name').value  = user.name  || '';
+      document.getElementById('email').value = user.email || '';
+
+      if (!user.email_verified) {
+        document.getElementById('verify-banner').classList.remove('hidden');
+      }
+
+      // Plan banner
+      if (usage) {
+        const planBanner = document.getElementById('plan-banner');
+        planBanner.style.display = 'flex';
+        const isHunter = usage.plan === 'hunter';
+        document.getElementById('plan-name').innerHTML = isHunter
+          ? '🎯 Hunter <span style="font-size:11px;font-weight:500;background:#3730a3;color:#a5b4fc;padding:2px 8px;border-radius:20px;margin-left:6px">Active</span>'
+          : '🗺️ Explorer <span style="font-size:11px;font-weight:500;background:#1e293b;color:#64748b;padding:2px 8px;border-radius:20px;margin-left:6px">Free</span>';
+        document.getElementById('plan-usage').textContent =
+          `${usage.used} / ${usage.limit} interviews this week`;
+        if (!isHunter) document.getElementById('plan-upgrade-link').style.display = '';
+        if (isHunter)  document.getElementById('plan-downgrade-btn').style.display = '';
+      }
+    } catch {}
+  }
+  loadUser();
+
+  // Resend verification
+  document.getElementById('resend-btn').addEventListener('click', async () => {
+    const btn = document.getElementById('resend-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Sending…';
+    try {
+      const res  = await fetch('/auth/send-verification', {
+        method: 'POST', headers: { 'Authorization': `Bearer ${_token}` },
+      });
+      const data = await res.json();
+      if (data.dev_token) {
+        const link = `${location.origin}/verify-email.html?token=${data.dev_token}`;
+        alert(`[DEV] Verification link:\n${link}`);
+      } else {
+        btn.textContent = '✓ Email sent';
+        setTimeout(() => { btn.disabled = false; btn.textContent = 'Resend email'; }, 5000);
+        return;
+      }
+    } catch {
+      alert('Failed to send email — please try again.');
+    }
+    btn.disabled = false;
+    btn.textContent = 'Resend email';
+  });
+
+  // Profile form
+  document.getElementById('profile-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    document.getElementById('profile-msg').style.display = 'none';
+    const btn = document.getElementById('profile-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Saving…';
+
+    const body = {
+      name:             document.getElementById('name').value.trim() || undefined,
+      email:            document.getElementById('email').value.trim() || undefined,
+      current_password: document.getElementById('cur-pw-profile').value || undefined,
+    };
+
+    try {
+      const res  = await fetch('/auth/profile', {
+        method: 'PUT', headers: _authHeader, body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) { showMsg('profile-msg', data.detail || 'Update failed.', 'error'); return; }
+      showMsg('profile-msg', data.email_changed
+        ? 'Profile updated. A verification email was sent to your new address.'
+        : 'Profile updated successfully.', 'success');
+      if (data.email_changed) {
+        document.getElementById('verify-banner').classList.remove('hidden');
+      }
+      // Update cached user
+      try {
+        const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
+        if (u) {
+          if (data.name)  u.name  = data.name;
+          if (data.email) u.email = data.email;
+          if (data.email_changed) u.email_verified = false;
+          localStorage.setItem('auth_user', JSON.stringify(u));
+        }
+      } catch {}
+    } catch {
+      showMsg('profile-msg', 'Network error — please try again.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save changes';
+    }
+  });
+
+  // Password form
+  document.getElementById('pw-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    document.getElementById('pw-msg').style.display = 'none';
+    const newPw  = document.getElementById('new-pw').value;
+    const confPw = document.getElementById('confirm-pw').value;
+    if (newPw !== confPw) { showMsg('pw-msg', 'Passwords do not match.', 'error'); return; }
+    if (newPw.length < 8) { showMsg('pw-msg', 'Password must be at least 8 characters.', 'error'); return; }
+
+    const btn = document.getElementById('pw-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Saving…';
+
+    try {
+      const res  = await fetch('/auth/profile', {
+        method: 'PUT', headers: _authHeader,
+        body: JSON.stringify({
+          current_password: document.getElementById('cur-pw').value,
+          new_password:     newPw,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) { showMsg('pw-msg', data.detail || 'Update failed.', 'error'); return; }
+      showMsg('pw-msg', 'Password updated successfully.', 'success');
+      document.getElementById('pw-form').reset();
+    } catch {
+      showMsg('pw-msg', 'Network error — please try again.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Update password';
+    }
+  });
+
+  // Downgrade
+  document.getElementById('plan-downgrade-btn').addEventListener('click', async () => {
+    if (!confirm('Downgrade to Explorer? You\'ll be limited to 3 interviews per week, effective immediately.')) return;
+    const btn = document.getElementById('plan-downgrade-btn');
+    btn.disabled = true;
+    btn.textContent = 'Downgrading…';
+    try {
+      const res  = await fetch('/auth/downgrade', {
+        method: 'POST', headers: { 'Authorization': `Bearer ${_token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) { alert(data.detail || 'Downgrade failed.'); btn.disabled = false; btn.textContent = 'Downgrade'; return; }
+      try {
+        const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
+        if (u) { u.plan = 'free'; localStorage.setItem('auth_user', JSON.stringify(u)); }
+      } catch {}
+      location.reload();
+    } catch {
+      alert('Network error — please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Downgrade';
+    }
+  });
+
+  // Logout
+  document.getElementById('logout-btn').addEventListener('click', () => {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
+    localStorage.removeItem('interview_v1');
+    location.replace('/login.html');
+  });
+</script>
+<script>
+(function(){
+  try {
+    const u = JSON.parse(localStorage.getItem('auth_user')||'null');
+    if(!u) return;
+    const el = document.getElementById('plan-pill');
+    if(!el) return;
+    const isHunter = u.plan === 'hunter';
+    el.className = 'plan-pill ' + (isHunter ? 'hunter' : 'explorer');
+    el.textContent = isHunter ? '🎯 Hunter' : '🗺️ Explorer';
+    el.setAttribute('data-tooltip', 'Your current plan');
+    el.style.display = 'inline-block';
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', () => location.href = '/upgrade.html');
+  } catch(_){}
+})();
+</script>
+</body>
+</html>

@@ -56,7 +56,7 @@
     #status-badge.connected   { background: #14532d; color: #4ade80; }
     #status-badge.recording   { background: #450a0a; color: #f87171; }
     #status-badge.processing  { background: #1e1b4b; color: #a78bfa; }
-    #new-btn, #history-btn {
+    #home-btn, #new-btn, #history-btn {
       margin-left: 8px;
       font-size: 11px; font-weight: 500;
       padding: 4px 10px; border-radius: 20px;
@@ -64,8 +64,39 @@
       color: #64748b; cursor: pointer; transition: all 0.2s;
       text-decoration: none; display: inline-flex; align-items: center;
     }
+    #home-btn:hover    { border-color: #6366f1; color: #a78bfa; }
     #new-btn:hover     { border-color: #f87171; color: #f87171; }
     #history-btn:hover { border-color: #6366f1; color: #a78bfa; }
+
+    /* ── New-interview popover ── */
+    #new-popover {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: #1e2235;
+      border: 1px solid #2d3148;
+      border-radius: 14px;
+      padding: 8px;
+      z-index: 600;
+      min-width: 220px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    #new-popover.open { display: block; }
+    .pop-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .pop-item:hover { background: #2d3148; }
+    .pop-item-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .pop-item-text strong { display: block; font-size: 13px; color: #e2e8f0; }
+    .pop-item-text span   { font-size: 11px; color: #64748b; }
+    #new-btn-wrap { position: relative; display: inline-flex; margin-left: 8px; }
 
     /* ── Phase progress bar ── */
     #phase-bar {
@@ -291,16 +322,53 @@
     #send-btn:hover    { background: #4f46e5; }
     #send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    #pause-btn, #skip-btn {
-      background: #2d3148;
-      color: #94a3b8;
+    /* ── TTS bar (sits between phase-bar and chat, no overlap) ── */
+    #tts-player {
       display: none;
-      font-size: 13px;
-      font-weight: 600;
-      width: auto;
-      padding: 0 14px;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: #13151f;
+      border-bottom: 1px solid #4f46e5;
+      padding: 7px 24px;
+      animation: tts-fadein 0.15s ease;
     }
-    #pause-btn:hover { background: #3d4160; color: #a78bfa; }
+    @keyframes tts-fadein {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    #tts-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: #a78bfa;
+      white-space: nowrap;
+    }
+    #tts-label .tts-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #6366f1;
+      margin-right: 6px;
+      animation: tts-pulse 1.2s ease-in-out infinite;
+    }
+    @keyframes tts-pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+    #pause-btn, #skip-btn {
+      background: transparent;
+      border: 1px solid #3d4160;
+      color: #94a3b8;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    #pause-btn:hover { background: #3d4160; color: #a78bfa; border-color: #6366f1; }
     #skip-btn:hover  { background: #3d4160; color: #e2e8f0; }
 
     #cancel-rec-btn {
@@ -379,22 +447,83 @@
       border-radius: 8px;
       margin-bottom: 10px;
     }
+  .plan-pill {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; padding: 3px 10px; border-radius: 20px;
+    flex-shrink: 0; display: none;
+  }
+  .plan-pill { position: relative; cursor: default; }
+  .plan-pill.hunter  { background: #312e81; color: #a5b4fc; }
+  .plan-pill.explorer { background: #1e293b; color: #64748b; }
+  .plan-pill::after {
+    content: attr(data-tooltip); position: absolute;
+    bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+    background: #1e2235; border: 1px solid #3d4160; color: #e2e8f0;
+    font-size: 11px; font-weight: 500; text-transform: none; letter-spacing: 0;
+    white-space: nowrap; padding: 5px 10px; border-radius: 8px;
+    pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 999;
+  }
+  .plan-pill:hover::after, .plan-pill.tooltip-open::after { opacity: 1; }
+
+  /* ── Scorecard panel ── */
+  #scorecard-panel {
+    padding: 8px 16px 20px;
+  }
+  #scorecard-panel .sc-inner {
+    max-width: 820px;
+    margin: 0 auto;
+    background: #1a1d27;
+    border: 1px solid #4f46e5;
+    border-radius: 16px;
+    padding: 24px 28px;
+  }
+  #scorecard-panel .sc-inner h1,
+  #scorecard-panel .sc-inner h2,
+  #scorecard-panel .sc-inner h3 { color: #a78bfa; margin: 16px 0 8px; font-size: 14px; }
+  #scorecard-panel .sc-inner h1 { font-size: 16px; color: #f1f5f9; margin-top: 0; }
+  #scorecard-panel .sc-inner p  { font-size: 13.5px; color: #94a3b8; line-height: 1.75; margin-bottom: 10px; }
+  #scorecard-panel .sc-inner strong { color: #e2e8f0; }
+  #scorecard-panel .sc-inner ul,
+  #scorecard-panel .sc-inner ol { padding-left: 20px; margin-bottom: 10px; }
+  #scorecard-panel .sc-inner li { font-size: 13.5px; color: #94a3b8; line-height: 1.7; }
+  #scorecard-panel .sc-inner hr { border: none; border-top: 1px solid #2d3148; margin: 16px 0; }
+  #scorecard-panel .sc-loading { text-align: center; color: #475569; font-size: 13px; padding: 24px; }
   </style>
 </head>
 <body>
 
 <header>
   <a class="home-link" href="/">
-    <div class="logo">🎤</div>
+    <div class="logo">🎯</div>
     <div>
-      <h1>Mock Interview Simulator</h1>
-      <p>Practice your tech interview in English</p>
+      <h1>Interview Coach</h1>
+      <p id="header-subtitle">Connecting…</p>
     </div>
   </a>
   <div id="status-badge">Connecting…</div>
+  <span id="plan-pill" class="plan-pill"></span>
+  <a id="profile-btn-hdr" href="/profile.html" title="Account settings">⚙️ Settings</a>
+  <a href="/tips.html" title="Interview tips &amp; frameworks" style="font-size:11px;font-weight:500;padding:5px 12px;border-radius:20px;background:transparent;border:1px solid #2d3148;color:#64748b;text-decoration:none;transition:all 0.2s" onmouseover="this.style.borderColor='#6366f1';this.style.color='#a78bfa'" onmouseout="this.style.borderColor='#2d3148';this.style.color='#64748b'">💡 Tips</a>
   <a id="history-btn" href="/history.html" title="View all past interviews">📋 History</a>
-  <a id="mantra-btn" href="/mantra.html" title="Os sinais que vão te contratar" style="margin-left:8px;font-size:11px;font-weight:500;padding:4px 10px;border-radius:20px;background:transparent;border:1px solid #2d3148;color:#64748b;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;">🎯 Mantra</a>
-  <button id="new-btn" title="Discard this session and start fresh">＋ New</button>
+  <div id="new-btn-wrap">
+    <button id="new-btn" title="Start a new interview">＋ New</button>
+    <div id="new-popover">
+      <div class="pop-item" id="pop-same-role">
+        <div class="pop-item-icon">🔄</div>
+        <div class="pop-item-text">
+          <strong>New round — same role</strong>
+          <span>Practice again with the same job &amp; resume</span>
+        </div>
+      </div>
+      <div class="pop-item" id="pop-new-role">
+        <div class="pop-item-icon">📝</div>
+        <div class="pop-item-text">
+          <strong>New role</strong>
+          <span>Enter a different job description &amp; resume</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </header>
 
 <nav id="phase-bar">
@@ -415,17 +544,25 @@
   </div>
 </nav>
 
-<div id="chat"></div>
+<!-- Floating TTS player pill -->
+<div id="tts-player">
+  <span id="tts-label"><span class="tts-dot"></span>Alex is speaking…</span>
+  <button id="pause-btn" title="Pause / Resume audio">⏸ Pause</button>
+  <button id="skip-btn" title="Skip audio">⏭ Skip</button>
+</div>
+
+<div id="chat">
+  <!-- Scorecard panel — rendered from server, never stored in localStorage -->
+  <div id="scorecard-panel" style="display:none"></div>
+</div>
 
 <div id="input-area">
-  <div id="done-banner">Interview complete — check your feedback above!</div>
+  <div id="done-banner" onclick="document.getElementById('scorecard-panel').scrollIntoView({behavior:'smooth',block:'start'})" style="cursor:pointer" title="Click to scroll to scorecard">Interview complete — scroll down to see your scorecard ↓</div>
   <div id="input-row">
     <button id="mic-btn" class="icon-btn" disabled title="Click to start/stop recording">🎙️</button>
     <button id="cancel-rec-btn" class="icon-btn" title="Cancel recording">✕</button>
     <textarea id="text-input" placeholder="Type your answer or press 🎙️ to speak…"
               rows="1" disabled></textarea>
-    <button id="pause-btn" class="icon-btn" title="Pause / Resume audio">⏸ Pause</button>
-    <button id="skip-btn" class="icon-btn" title="Skip audio">⏭ Skip</button>
     <button id="send-btn" class="icon-btn" disabled title="Send (Enter)">➤</button>
   </div>
   <div id="audio-preview">
@@ -453,7 +590,7 @@
     leadership_report:     3,
     motivation:            4,
     motivation_report:     4,
-    marcio_questions:      5,
+    candidate_questions:   5,
     feedback:              6,
     done:                  6,
   };
@@ -487,9 +624,31 @@
     if (activeEl) activeEl.scrollIntoView({ inline: 'center', behavior: 'smooth' });
   }
 
+  // ── Auth check ─────────────────────────────────────────────────────
+  const _authToken = localStorage.getItem('auth_token');
+  if (!_authToken) { location.replace('/login.html?next=/interview.html'); }
+
+  // Load pending job session (set by onboarding.html)
+  let _pendingJobSession = null;
+  try {
+    const pjs = localStorage.getItem('pending_job_session');
+    if (pjs) { _pendingJobSession = JSON.parse(pjs); localStorage.removeItem('pending_job_session'); }
+  } catch (_) {}
+
+  // Update header subtitle with job title + company
+  function _updateHeaderSubtitle() {
+    const subtitle = document.getElementById('header-subtitle');
+    if (!subtitle) return;
+    const src = _pendingJobSession || _loadRaw();
+    const title   = src?.jobTitle || '';
+    const company = src?.company  || '';
+    if (title && company) subtitle.textContent = `${title} · ${company}`;
+    else if (title)       subtitle.textContent = title;
+    else                  subtitle.textContent = 'AI-powered mock interview';
+  }
+
   // ── Session persistence (localStorage) ──────────────────────────────
-  // SESSION_KEY  → active session: { threadId, savedAt, fase, history[] }
-  // HISTORY_KEY  → last 10 sessions with full data for the history page
+  // SESSION_KEY  → active session: { threadId, savedAt, fase, history[], jobSessionId, jobTitle }
   const SESSION_KEY   = 'interview_v1';
   const SESSION_TTL   = 48 * 60 * 60 * 1000;
 
@@ -504,12 +663,16 @@
       try {
         await fetch(`/sessions/${encodeURIComponent(raw.threadId)}`, {
           method:  'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({
-            startedAt:    raw.startedAt || Date.now(),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${_authToken}`,
+          },
+          body: JSON.stringify({
+            startedAt:    raw.startedAt    || Date.now(),
             lastActiveAt: Date.now(),
-            fase:         raw.fase      || '',
-            history:      raw.history   || [],
+            fase:         raw.fase         || '',
+            history:      raw.history      || [],
+            jobSessionId: raw.jobSessionId || '',
           }),
         });
       } catch { /* ignore — server picks it up on next sync */ }
@@ -520,12 +683,19 @@
   window.addEventListener('beforeunload', () => _syncToServer(true));
 
   function _saveSession(threadId) {
-    const existing    = _loadRaw() || {};
-    existing.threadId = threadId;
-    existing.savedAt  = Date.now();
+    const existing      = _loadRaw() || {};
+    existing.threadId   = threadId;
+    existing.savedAt    = Date.now();
     if (!existing.startedAt) existing.startedAt = Date.now();
+    // Carry over job session info from pending (first time) or existing session
+    if (_pendingJobSession) {
+      existing.jobSessionId = _pendingJobSession.jobSessionId;
+      existing.jobTitle     = _pendingJobSession.jobTitle;
+      existing.company      = _pendingJobSession.company;
+    }
     localStorage.setItem(SESSION_KEY, JSON.stringify(existing));
     _syncToServer();
+    _updateHeaderSubtitle();
   }
 
   function _loadRaw() {
@@ -562,6 +732,7 @@
   const micBtn       = document.getElementById('mic-btn');
   const cancelRecBtn = document.getElementById('cancel-rec-btn');
   const sendBtn      = document.getElementById('send-btn');
+  const ttsPlayer    = document.getElementById('tts-player');
   const skipBtn      = document.getElementById('skip-btn');
   const pauseBtn     = document.getElementById('pause-btn');
   const badge        = document.getElementById('status-badge');
@@ -670,8 +841,7 @@
 
     // Fire ALL fetches NOW in parallel — they complete while earlier chunks play
     const fetches = chunks.map(c => _fetchAudioUrl(c, voice));
-    skipBtn.style.display  = 'flex';
-    pauseBtn.style.display = 'flex';
+    ttsPlayer.style.display = 'flex';
     ttsPaused = false;
     pauseBtn.textContent = '⏸ Pause';
     ttsActiveSpeaks++;
@@ -693,8 +863,7 @@
         if (isLast && ttsToken === myToken) {
           ttsActiveSpeaks = Math.max(0, ttsActiveSpeaks - 1);
           if (ttsActiveSpeaks === 0) {
-            skipBtn.style.display  = 'none';
-            pauseBtn.style.display = 'none';
+            ttsPlayer.style.display = 'none';
             ttsPaused = false;
           }
         }
@@ -710,8 +879,7 @@
     ttsPaused = false;
     if (currentAudio) { currentAudio.pause(); currentAudio = null; }
     ttsChain = Promise.resolve();
-    skipBtn.style.display  = 'none';
-    pauseBtn.style.display = 'none';
+    ttsPlayer.style.display = 'none';
   }
 
   function togglePauseTTS() {
@@ -1039,9 +1207,16 @@
         if (ws && ws.readyState === WebSocket.OPEN)
           ws.send(JSON.stringify({ type: 'ping' }));
       }, 25_000);
-      // Try to resume an existing session before the server times out (500 ms).
-      const tid = _loadThreadId();
-      if (tid) ws.send(JSON.stringify({ type: 'resume', thread_id: tid }));
+      // Send init message with auth token and job session info.
+      // If resuming an existing session, include the thread_id.
+      const tid    = _loadThreadId();
+      const raw    = _loadRaw();
+      const jobSid = _pendingJobSession?.jobSessionId || raw?.jobSessionId || '';
+      if (tid && !_pendingJobSession) {
+        ws.send(JSON.stringify({ type: 'resume', thread_id: tid, token: _authToken, job_session_id: jobSid }));
+      } else {
+        ws.send(JSON.stringify({ type: 'new', token: _authToken, job_session_id: jobSid }));
+      }
     };
 
     ws.onmessage = (e) => {
@@ -1137,6 +1312,10 @@
           _persistMsg('feedback', msg.text, 'onyx');
           break;
 
+        case 'scorecard_ready':
+          _fetchAndRenderScorecard(_loadRaw()?.threadId);
+          break;
+
         case 'error':
           addBubble('ai', '⚠️ ' + msg.text);
           disableInput(true);
@@ -1155,8 +1334,9 @@
 
     ws.onclose = (e) => {
       clearInterval(pingInterval);
-      // Code 1000 = clean close (interview finished normally) — don't reconnect.
-      if (e.code === 1000) {
+      // Don't reconnect if the interview is already finished.
+      const _closeRaw = _loadRaw();
+      if (e.code === 1000 || _closeRaw?.fase === 'done') {
         badge.textContent = 'Done';
         badge.className = '';
         return;
@@ -1268,6 +1448,39 @@
     chat.appendChild(row);
   }
 
+  const scorecardPanel = document.getElementById('scorecard-panel');
+
+  function _fetchAndRenderScorecard(threadId) {
+    if (!threadId || !_authToken) return;
+    scorecardPanel.style.display = 'block';
+    scorecardPanel.innerHTML = '<div class="sc-loading">Loading scorecard…</div>';
+    fetch(`/sessions/${encodeURIComponent(threadId)}/scorecard`, {
+      headers: { 'Authorization': `Bearer ${_authToken}` },
+    })
+      .then(r => ({ ok: r.ok, status: r.status, json: r.json() }))
+      .then(async ({ ok, status, json }) => {
+        const data = await json.catch(() => null);
+        if (ok && data?.scorecard) {
+          scorecardPanel.innerHTML = `<div class="sc-inner">${renderMd(data.scorecard)}</div>`;
+        } else if (status === 403) {
+          scorecardPanel.innerHTML = `<div class="sc-inner" style="border-color:#3d4160;text-align:center;padding:32px 24px">
+            <div style="font-size:28px;margin-bottom:12px">📄</div>
+            <h2 style="font-size:15px;color:#f1f5f9;margin-bottom:8px">Your scorecard is ready</h2>
+            <p style="color:#64748b;font-size:13px;max-width:380px;margin:0 auto 20px">
+              Phase-by-phase scores, vocabulary tips, and your overall hire signal are waiting for you.
+            </p>
+            <a href="/upgrade.html" style="display:inline-block;padding:10px 24px;border-radius:20px;background:linear-gradient(135deg,#6366f1,#7c3aed);color:#fff;font-size:13px;font-weight:600;text-decoration:none">
+              Upgrade to Hunter — free during beta →
+            </a>
+          </div>`;
+        } else {
+          scorecardPanel.style.display = 'none';
+        }
+        scrollBottom();
+      })
+      .catch(() => { scorecardPanel.style.display = 'none'; });
+  }
+
   function showTyping(visible) {
     if (!visible) return;
     if (typingEl) return;
@@ -1359,14 +1572,63 @@
 
   cancelRecBtn.addEventListener('click', cancelRecording);
 
-  document.getElementById('new-btn').addEventListener('click', () => {
+  // ── New-interview popover ─────────────────────────────────────────────
+  const newPopover = document.getElementById('new-popover');
+
+  document.getElementById('new-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    newPopover.classList.toggle('open');
+  });
+
+  document.getElementById('pop-same-role').addEventListener('click', () => {
+    const raw = _loadRaw();
+    if (raw?.jobSessionId) {
+      // Keep the job context, start a fresh thread
+      localStorage.setItem('pending_job_session', JSON.stringify({
+        jobSessionId: raw.jobSessionId,
+        jobTitle:     raw.jobTitle  || '',
+        company:      raw.company   || '',
+      }));
+    }
     clearSession();
     window.location.href = '/interview.html';
   });
 
+  document.getElementById('pop-new-role').addEventListener('click', () => {
+    clearSession();
+    window.location.href = '/onboarding.html';
+  });
+
+  // Close popover when clicking outside
+  document.addEventListener('click', () => newPopover.classList.remove('open'));
+
   // ── Boot ──────────────────────────────────────────────────────────────
-  connect();
-  showTyping(true);   // waiting for first AI message
+  _updateHeaderSubtitle();
+
+  // If the stored session is already finished, just show the done banner
+  // without opening a WebSocket — avoids an infinite reconnect loop.
+  const _bootRaw = _loadRaw();
+  if (_bootRaw?.fase === 'done' && !_pendingJobSession) {
+    badge.textContent = 'Done';
+    badge.className = '';
+    doneBanner.style.display = 'block';
+    disableInput(true);
+    // Restore chat history (scorecard is NOT stored here — fetched from server below).
+    if (_bootRaw.history?.length) {
+      for (const m of _bootRaw.history) {
+        if (m.type === 'ai' || m.type === 'transition') addBubble('ai', m.text, m.voice || 'nova', true);
+        else if (m.type === 'user') addBubble('user', m.text, 'nova', false);
+        else if (m.type === 'feedback' && !m.text?.includes('INTERVIEW SCORECARD')) addFeedback(m.text);
+      }
+      scrollBottom();
+    }
+    // Always fetch scorecard from server — it enforces plan gating.
+    // Hunter → renders in scorecard panel. Free/downgraded → 403, panel stays hidden.
+    _fetchAndRenderScorecard(_bootRaw.threadId);
+  } else {
+    connect();
+    showTyping(true);   // waiting for first AI message
+  }
 
   // Show a "tap to enable audio" overlay on touch devices.
   // Removed automatically on first tap by _unlockAudio().
@@ -1388,6 +1650,23 @@
     overlay.appendChild(pill);
     document.body.appendChild(overlay);
   }
+</script>
+<script>
+(function(){
+  try {
+    const u = JSON.parse(localStorage.getItem('auth_user')||'null');
+    if(!u) return;
+    const el = document.getElementById('plan-pill');
+    if(!el) return;
+    const isHunter = u.plan === 'hunter';
+    el.className = 'plan-pill ' + (isHunter ? 'hunter' : 'explorer');
+    el.textContent = isHunter ? '🎯 Hunter' : '🗺️ Explorer';
+    el.setAttribute('data-tooltip', 'Your current plan');
+    el.style.display = 'inline-block';
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', () => location.href = '/upgrade.html');
+  } catch(_){}
+})();
 </script>
 </body>
 </html>

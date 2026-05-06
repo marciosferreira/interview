@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upgrade — Interview Coach</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1117; color: #e2e8f0;
+      min-height: 100dvh; display: flex; flex-direction: column;
+    }
+    header {
+      padding: 14px 24px; background: #1a1d27;
+      border-bottom: 1px solid #2d3148;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .logo {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; font-size: 18px;
+    }
+    .home-link {
+      display: flex; align-items: center; gap: 12px;
+      text-decoration: none; color: inherit; border-radius: 10px;
+      padding: 2px 6px; margin: -2px -6px; transition: background 0.2s;
+    }
+    .home-link:hover { background: rgba(99,102,241,0.08); }
+    header h1 { font-size: 16px; font-weight: 600; color: #f1f5f9; }
+    header p  { font-size: 12px; color: #64748b; margin-top: 1px; }
+    .plan-pill {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; padding: 3px 10px; border-radius: 20px;
+      flex-shrink: 0; display: none;
+    }
+    .plan-pill { position: relative; cursor: default; }
+    .plan-pill.hunter  { background: #312e81; color: #a5b4fc; }
+    .plan-pill.explorer { background: #1e293b; color: #64748b; }
+    .plan-pill::after {
+      content: attr(data-tooltip); position: absolute;
+      bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+      background: #1e2235; border: 1px solid #3d4160; color: #e2e8f0;
+      font-size: 11px; font-weight: 500; text-transform: none; letter-spacing: 0;
+      white-space: nowrap; padding: 5px 10px; border-radius: 8px;
+      pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 999;
+    }
+    .plan-pill:hover::after, .plan-pill.tooltip-open::after { opacity: 1; }
+    .hdr-back {
+      font-size: 11px; font-weight: 500;
+      padding: 5px 12px; border-radius: 20px;
+      background: transparent; border: 1px solid #2d3148;
+      color: #64748b; text-decoration: none; transition: all 0.2s;
+    }
+    .hdr-back:hover { border-color: #6366f1; color: #a78bfa; }
+
+    main {
+      flex: 1; padding: 48px 24px;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .hero-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #6366f1; margin-bottom: 12px;
+    }
+    h2 {
+      font-size: 28px; font-weight: 800; color: #f1f5f9;
+      text-align: center; margin-bottom: 10px; line-height: 1.3;
+    }
+    .hero-sub {
+      font-size: 15px; color: #64748b; text-align: center;
+      max-width: 480px; margin-bottom: 48px; line-height: 1.6;
+    }
+
+    .plans {
+      display: flex; gap: 20px; flex-wrap: wrap;
+      justify-content: center; width: 100%; max-width: 780px;
+    }
+
+    .plan-card {
+      flex: 1; min-width: 280px; max-width: 360px;
+      background: #1a1d27; border: 1px solid #2d3148;
+      border-radius: 20px; padding: 32px 28px;
+      display: flex; flex-direction: column; gap: 0;
+      transition: border-color 0.2s;
+    }
+    .plan-card.featured {
+      border-color: #6366f1;
+      background: linear-gradient(160deg, #1e1b4b 0%, #1a1d27 60%);
+      position: relative; overflow: hidden;
+    }
+    .plan-card.featured::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6, #6366f1);
+    }
+    .plan-badge {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 20px; margin-bottom: 16px;
+      width: fit-content;
+    }
+    .plan-badge.free    { background: #1e293b; color: #64748b; }
+    .plan-badge.hunter  { background: #3730a3; color: #a5b4fc; }
+
+    .plan-name {
+      font-size: 22px; font-weight: 800; color: #f1f5f9; margin-bottom: 4px;
+    }
+    .plan-tagline {
+      font-size: 13px; color: #64748b; margin-bottom: 24px;
+    }
+    .plan-price {
+      font-size: 36px; font-weight: 800; color: #f1f5f9;
+      margin-bottom: 4px; line-height: 1;
+    }
+    .plan-price span { font-size: 15px; font-weight: 400; color: #64748b; }
+    .plan-price-note {
+      font-size: 12px; color: #475569; margin-bottom: 28px;
+    }
+
+    .plan-features {
+      list-style: none; display: flex; flex-direction: column;
+      gap: 10px; margin-bottom: 32px; flex: 1;
+    }
+    .plan-features li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 13px; color: #94a3b8; line-height: 1.5;
+    }
+    .plan-features li .check { color: #4ade80; flex-shrink: 0; margin-top: 1px; }
+    .plan-features li .dash  { color: #334155; flex-shrink: 0; margin-top: 1px; }
+
+    .plan-btn {
+      width: 100%; padding: 13px;
+      border-radius: 12px; font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s; border: none;
+    }
+    .plan-btn.current {
+      background: #1e293b; color: #475569; cursor: default;
+    }
+    .plan-btn.upgrade {
+      background: linear-gradient(135deg, #6366f1, #7c3aed);
+      color: #fff; box-shadow: 0 4px 20px rgba(99,102,241,0.35);
+    }
+    .plan-btn.upgrade:hover { opacity: 0.9; transform: translateY(-1px); }
+    .plan-btn.upgrade:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .plan-btn.downgrade {
+      background: transparent; border: 1px solid #2d3148; color: #475569;
+    }
+
+    .trial-note {
+      font-size: 12px; color: #4ade80; text-align: center;
+      margin-top: 10px; font-weight: 600;
+    }
+
+    #success-msg {
+      display: none;
+      margin-top: 32px; text-align: center;
+      background: #14532d; border: 1px solid #166534;
+      border-radius: 16px; padding: 24px 32px;
+      max-width: 400px;
+    }
+    #success-msg .big { font-size: 36px; margin-bottom: 12px; }
+    #success-msg h3 { font-size: 18px; font-weight: 700; color: #4ade80; margin-bottom: 8px; }
+    #success-msg p { font-size: 13px; color: #86efac; margin-bottom: 20px; }
+    #success-msg a {
+      display: inline-block; padding: 10px 24px;
+      background: #166534; border-radius: 10px;
+      color: #4ade80; text-decoration: none; font-weight: 600; font-size: 14px;
+    }
+
+    .spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle; margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Usage bar */
+    .usage-bar-wrap {
+      width: 100%; max-width: 400px; margin-bottom: 40px;
+    }
+    .usage-top {
+      display: flex; justify-content: space-between;
+      font-size: 12px; color: #64748b; margin-bottom: 6px;
+    }
+    .usage-bar {
+      height: 6px; background: #1e293b; border-radius: 99px; overflow: hidden;
+    }
+    .usage-fill {
+      height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6);
+      transition: width 0.4s ease;
+    }
+    .usage-fill.full { background: linear-gradient(90deg, #dc2626, #ef4444); }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="home-link" href="/">
+    <div class="logo">🎯</div>
+    <div><h1>Interview Coach</h1><p>Plans &amp; pricing</p></div>
+  </a>
+  <span id="plan-pill" class="plan-pill" style="margin-left:auto"></span>
+  <a class="hdr-back" id="hdr-history" href="/history.html" style="display:none">📋 History</a>
+  <a class="hdr-back" id="hdr-settings" href="/profile.html" style="display:none">⚙️ Settings</a>
+  <a class="hdr-back" id="hdr-login" href="/login.html" style="display:none">Log in</a>
+</header>
+
+<main>
+  <div class="hero-label">Choose your plan</div>
+  <h2>Practice more.<br>Land the role.</h2>
+  <p class="hero-sub">
+    Every interview session is fully personalized to your resume and target role.
+    Upgrade to practice more rounds per week.
+  </p>
+
+  <!-- Usage meter (shown when logged in) -->
+  <div class="usage-bar-wrap" id="usage-wrap" style="display:none">
+    <div class="usage-top">
+      <span id="usage-label">This week's usage</span>
+      <span id="usage-count">—</span>
+    </div>
+    <div class="usage-bar"><div class="usage-fill" id="usage-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="plans">
+    <!-- Explorer (Free) -->
+    <div class="plan-card" id="card-free">
+      <div class="plan-badge free">Explorer</div>
+      <div class="plan-name">Explorer</div>
+      <div class="plan-tagline">For casual practice</div>
+      <div class="plan-price">$0 <span>/ month</span></div>
+      <div class="plan-price-note">Always free</div>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> 3 interviews per week</li>
+        <li><span class="check">✓</span> Full 7-phase interview flow</li>
+        <li><span class="check">✓</span> Phase-by-phase feedback</li>
+        <li><span class="check">✓</span> Interview history</li>
+        <li><span class="dash">–</span> <span style="color:#475569">AI scorecard</span></li>
+        <li><span class="dash">–</span> <span style="color:#475569">Priority processing</span></li>
+      </ul>
+      <button class="plan-btn current" id="free-btn">Current plan</button>
+    </div>
+
+    <!-- Hunter -->
+    <div class="plan-card featured" id="card-hunter">
+      <div class="plan-badge hunter">🎯 Hunter</div>
+      <div class="plan-name">Hunter</div>
+      <div class="plan-tagline">For serious job seekers</div>
+      <div class="plan-price">$0 <span>/ month</span></div>
+      <div class="plan-price-note" id="hunter-price-note" style="color:#4ade80;font-weight:600">✦ Free during beta</div>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> <strong style="color:#e2e8f0">15 interviews per week</strong></li>
+        <li><span class="check">✓</span> Full 7-phase interview flow</li>
+        <li><span class="check">✓</span> Phase-by-phase feedback</li>
+        <li><span class="check">✓</span> <strong style="color:#e2e8f0">AI scorecard</strong></li>
+        <li><span class="check">✓</span> Interview history</li>
+        <li><span class="check">✓</span> Priority processing</li>
+      </ul>
+      <button class="plan-btn upgrade" id="hunter-btn">Upgrade to Hunter — Free</button>
+      <div class="trial-note">No credit card required</div>
+    </div>
+  </div>
+
+  <div id="success-msg">
+    <div class="big">🎯</div>
+    <h3>You're a Hunter now!</h3>
+    <p>15 interview sessions per week, unlocked. Go crush those interviews.</p>
+    <a href="/onboarding.html">Start a new interview →</a>
+  </div>
+</main>
+
+<script>
+  const _token = localStorage.getItem('auth_token');
+
+  async function loadUsage() {
+    if (!_token) {
+      document.getElementById('hdr-login').style.display = '';
+      document.getElementById('free-btn').className   = 'plan-btn upgrade';
+      document.getElementById('free-btn').textContent = 'Get started free →';
+      document.getElementById('free-btn').onclick = () => location.href = '/register.html';
+      document.getElementById('hunter-btn').textContent = 'Create account →';
+      document.getElementById('hunter-btn').dataset.linked = '1';
+      document.getElementById('hunter-btn').onclick = () => location.href = '/register.html';
+      return;
+    }
+    document.getElementById('hdr-history').style.display = '';
+    document.getElementById('hdr-settings').style.display = '';
+    try {
+      const res  = await fetch('/auth/usage', { headers: { 'Authorization': `Bearer ${_token}` } });
+      if (!res.ok) return;
+      const data = await res.json();
+      const plan = data.plan;
+
+      if (plan === 'hunter') {
+        document.getElementById('free-btn').className   = 'plan-btn downgrade';
+        document.getElementById('free-btn').textContent = 'Downgrade';
+        document.getElementById('hunter-btn').className   = 'plan-btn current';
+        document.getElementById('hunter-btn').textContent = '✓ Current plan';
+        document.getElementById('hunter-price-note').textContent = 'Active plan';
+      }
+
+      const wrap  = document.getElementById('usage-wrap');
+      const fill  = document.getElementById('usage-fill');
+      const count = document.getElementById('usage-count');
+      const label = document.getElementById('usage-label');
+      wrap.style.display = 'block';
+      const pct = Math.min(100, Math.round((data.used / data.limit) * 100));
+      fill.style.width = pct + '%';
+      if (pct >= 100) fill.classList.add('full');
+      count.textContent = `${data.used} / ${data.limit} used`;
+      label.textContent = `This week — ${plan === 'hunter' ? '🎯 Hunter' : '🗺️ Explorer'} plan`;
+
+      try {
+        const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
+        if (u) { u.plan = plan; localStorage.setItem('auth_user', JSON.stringify(u)); }
+      } catch {}
+    } catch {}
+  }
+  loadUsage();
+
+  document.getElementById('hunter-btn').addEventListener('click', async () => {
+    const btn = document.getElementById('hunter-btn');
+    if (btn.classList.contains('current') || btn.dataset.linked) return;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Upgrading…';
+    try {
+      const res  = await fetch('/auth/upgrade', {
+        method: 'POST', headers: { 'Authorization': `Bearer ${_token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) { alert(data.detail || 'Upgrade failed.'); return; }
+      try {
+        const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
+        if (u) { u.plan = 'hunter'; localStorage.setItem('auth_user', JSON.stringify(u)); }
+      } catch {}
+      document.querySelector('.plans').style.display = 'none';
+      document.getElementById('usage-wrap').style.display = 'none';
+      document.getElementById('success-msg').style.display = 'block';
+    } catch {
+      alert('Network error — please try again.');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById('free-btn').addEventListener('click', async () => {
+    const btn = document.getElementById('free-btn');
+    if (!btn.classList.contains('downgrade')) return;
+    if (!confirm('Downgrade to Explorer? You\'ll be limited to 3 interviews per week.')) return;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Downgrading…';
+    try {
+      const res  = await fetch('/auth/downgrade', {
+        method: 'POST', headers: { 'Authorization': `Bearer ${_token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) { alert(data.detail || 'Downgrade failed.'); return; }
+      try {
+        const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
+        if (u) { u.plan = 'free'; localStorage.setItem('auth_user', JSON.stringify(u)); }
+      } catch {}
+      location.reload();
+    } catch {
+      alert('Network error — please try again.');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+</script>
+<script>
+(function(){
+  try {
+    const u = JSON.parse(localStorage.getItem('auth_user')||'null');
+    if(!u) return;
+    const el = document.getElementById('plan-pill');
+    if(!el) return;
+    const isHunter = u.plan === 'hunter';
+    el.className = 'plan-pill ' + (isHunter ? 'hunter' : 'explorer');
+    el.textContent = isHunter ? '🎯 Hunter' : '🗺️ Explorer';
+    el.setAttribute('data-tooltip', 'Your current plan');
+    el.style.display = 'inline-block';
+  } catch(_){}
+})();
+</script>
+</body>
+</html>

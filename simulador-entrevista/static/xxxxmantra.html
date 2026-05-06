@@ -43,8 +43,14 @@
     }
     .home-link:hover { background: rgba(99,102,241,0.08); }
 
+    .plan-pill {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; padding: 3px 10px; border-radius: 20px;
+      flex-shrink: 0; display: none;
+    }
+    .plan-pill.hunter { background: #312e81; color: #a5b4fc; }
+    .plan-pill.explorer { background: #1e293b; color: #64748b; }
     .hdr-btn {
-      margin-left: auto;
       font-size: 11px; font-weight: 500;
       padding: 5px 12px; border-radius: 20px;
       background: transparent; border: 1px solid #2d3148;
@@ -419,8 +425,10 @@
       <p>Practice your tech interview in English</p>
     </div>
   </a>
+  <span id="plan-pill" class="plan-pill" style="margin-left:auto"></span>
   <a class="hdr-btn" href="/history.html">📋 History</a>
   <a class="hdr-btn" href="/interview.html">▶ Practice</a>
+  <a class="hdr-btn" href="/profile.html">⚙️ Settings</a>
 </header>
 
 <main>
@@ -773,6 +781,20 @@ Account managers can now access personalized operational reports through a conve
     voice:      'nova',
     allPlayers,
   }));
+</script>
+<script>
+(function(){
+  try {
+    const u = JSON.parse(localStorage.getItem('auth_user')||'null');
+    if(!u) return;
+    const el = document.getElementById('plan-pill');
+    if(!el) return;
+    const isHunter = u.plan === 'hunter';
+    el.className = 'plan-pill ' + (isHunter ? 'hunter' : 'explorer');
+    el.textContent = isHunter ? '🎯 Hunter' : 'Explorer';
+    el.style.display = 'inline-block';
+  } catch(_){}
+})();
 </script>
 </body>
 </html>

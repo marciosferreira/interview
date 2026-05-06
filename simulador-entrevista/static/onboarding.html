@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prepare Your Interview — Interview Coach</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1117; color: #e2e8f0;
+      min-height: 100dvh; display: flex; flex-direction: column;
+    }
+    header {
+      padding: 14px 24px; background: #1a1d27;
+      border-bottom: 1px solid #2d3148;
+      display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+    }
+    .logo {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    header h1 { font-size: 16px; font-weight: 600; color: #f1f5f9; }
+    header p  { font-size: 12px; color: #64748b; margin-top: 1px; }
+    .home-link {
+      display: flex; align-items: center; gap: 12px;
+      text-decoration: none; color: inherit;
+      border-radius: 10px; padding: 2px 6px; margin: -2px -6px;
+      transition: background 0.2s;
+    }
+    .home-link:hover { background: rgba(99,102,241,0.08); }
+    .user-pill {
+      margin-left: auto; display: flex; align-items: center; gap: 10px;
+      font-size: 13px; color: #94a3b8;
+    }
+    .logout-btn {
+      font-size: 12px; color: #475569; background: none; border: none;
+      cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: color 0.2s;
+    }
+    .logout-btn:hover { color: #f87171; }
+
+    main {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; padding: 40px 24px 60px; gap: 0;
+    }
+
+    /* Steps progress */
+    .steps {
+      display: flex; align-items: center; gap: 0;
+      margin-bottom: 36px;
+    }
+    .step-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 500; color: #475569;
+    }
+    .step-item.active { color: #818cf8; }
+    .step-item.done   { color: #4ade80; }
+    .step-dot {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: #1e293b; border: 1.5px solid #2d3148;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: #475569;
+      flex-shrink: 0;
+    }
+    .step-item.active .step-dot { background: #312e81; border-color: #6366f1; color: #818cf8; }
+    .step-item.done .step-dot   { background: #14532d; border-color: #22c55e; color: #4ade80; }
+    .step-line { width: 40px; height: 1px; background: #2d3148; flex-shrink: 0; }
+
+    /* Form card */
+    .form-card {
+      background: #1a1d27; border: 1px solid #2d3148; border-radius: 16px;
+      padding: 32px; width: 100%; max-width: 720px;
+    }
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+
+    h2 { font-size: 20px; font-weight: 700; color: #f1f5f9; margin-bottom: 8px; }
+    .desc { font-size: 14px; color: #64748b; line-height: 1.6; margin-bottom: 24px; }
+
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 560px) { .row-2 { grid-template-columns: 1fr; } }
+
+    label { display: block; font-size: 13px; font-weight: 500; color: #94a3b8; margin-bottom: 6px; }
+    input[type="text"], textarea {
+      width: 100%; padding: 10px 14px;
+      background: #0f1117; border: 1px solid #2d3148;
+      border-radius: 8px; color: #f1f5f9; font-size: 14px;
+      outline: none; transition: border-color 0.2s; resize: vertical;
+    }
+    input[type="text"]:focus, textarea:focus { border-color: #6366f1; }
+    input[type="text"]::placeholder, textarea::placeholder { color: #475569; }
+    .field { margin-bottom: 20px; }
+    .field-hint { font-size: 11px; color: #475569; margin-top: 5px; }
+
+    .btn-row { display: flex; gap: 12px; justify-content: flex-end; margin-top: 28px; }
+    .btn-back {
+      padding: 10px 20px; background: transparent;
+      border: 1px solid #2d3148; border-radius: 8px;
+      color: #64748b; font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-back:hover { border-color: #4f4f6f; color: #94a3b8; }
+    .btn-next {
+      padding: 10px 24px;
+      background: linear-gradient(135deg, #6366f1, #7c3aed);
+      border: none; border-radius: 8px;
+      color: #fff; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn-next:hover { opacity: 0.9; }
+    .btn-next:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle; margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error {
+      background: #450a0a; border: 1px solid #7f1d1d; color: #fca5a5;
+      border-radius: 8px; padding: 10px 14px; font-size: 13px;
+      margin-bottom: 16px; display: none;
+    }
+
+    /* Step 3 — generating */
+    .generating-card {
+      text-align: center; padding: 48px 32px;
+    }
+    .big-spinner {
+      width: 48px; height: 48px;
+      border: 3px solid #2d3148; border-top-color: #6366f1;
+      border-radius: 50%; animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    .generating-card h3 { font-size: 18px; font-weight: 600; color: #f1f5f9; margin-bottom: 8px; }
+    .generating-card p  { font-size: 14px; color: #64748b; line-height: 1.6; }
+    .tip-list { list-style: none; text-align: left; margin-top: 20px; display: inline-block; }
+    .tip-list li {
+      font-size: 13px; color: #475569; padding: 4px 0;
+    }
+    .tip-list li::before { content: "✓ "; color: #4ade80; }
+    .plan-pill {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; padding: 3px 10px; border-radius: 20px;
+      flex-shrink: 0; display: none;
+    }
+    .plan-pill { position: relative; cursor: default; }
+    .plan-pill.hunter  { background: #312e81; color: #a5b4fc; }
+    .plan-pill.explorer { background: #1e293b; color: #64748b; }
+    .plan-pill::after {
+      content: attr(data-tooltip); position: absolute;
+      bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+      background: #1e2235; border: 1px solid #3d4160; color: #e2e8f0;
+      font-size: 11px; font-weight: 500; text-transform: none; letter-spacing: 0;
+      white-space: nowrap; padding: 5px 10px; border-radius: 8px;
+      pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 999;
+    }
+    .plan-pill:hover::after, .plan-pill.tooltip-open::after { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="home-link" href="/">
+    <div class="logo">🎯</div>
+    <div>
+      <h1>Interview Coach</h1>
+      <p>AI-powered mock interview preparation</p>
+    </div>
+  </a>
+  <div class="user-pill">
+    <span id="plan-pill" class="plan-pill"></span>
+    <a href="/profile.html" style="font-size:12px;color:#475569;text-decoration:none;padding:4px 8px;border-radius:6px;transition:color 0.2s" onmouseover="this.style.color='#a78bfa'" onmouseout="this.style.color='#475569'">⚙️ Settings</a>
+    <span id="user-name-display"></span>
+    <button class="logout-btn" onclick="logout()">Sign out</button>
+  </div>
+</header>
+
+<main>
+  <!-- Steps indicator -->
+  <div class="steps">
+    <div class="step-item active" id="step-indicator-1">
+      <div class="step-dot">1</div>
+      <span>Job Description</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item" id="step-indicator-2">
+      <div class="step-dot">2</div>
+      <span>Your Resume</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item" id="step-indicator-3">
+      <div class="step-dot">3</div>
+      <span>Preparing</span>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <div class="error" id="error-msg"></div>
+
+    <!-- Step 1: Job Description -->
+    <div class="step-panel active" id="panel-1">
+      <h2>What role are you interviewing for?</h2>
+      <p class="desc">Paste the job description below. The more detail you provide, the more targeted your mock interview will be.</p>
+
+      <div class="row-2">
+        <div class="field">
+          <label for="job-title">Job title *</label>
+          <input type="text" id="job-title" placeholder="e.g. Senior AI Engineer" />
+        </div>
+        <div class="field">
+          <label for="company">Company name</label>
+          <input type="text" id="company" placeholder="e.g. Acme Corp" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="job-description">Job description *</label>
+        <textarea id="job-description" rows="12"
+          placeholder="Paste the full job description here — responsibilities, requirements, qualifications, and any other relevant details…"></textarea>
+        <p class="field-hint">Minimum 50 characters required</p>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-next" onclick="goToStep2()">Next: Add your resume →</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Resume -->
+    <div class="step-panel" id="panel-2">
+      <h2>Paste your resume</h2>
+      <p class="desc">Copy and paste your resume below. Include your work experience, education, projects, and skills. The AI will use this to personalize every phase of your mock interview.</p>
+
+      <div class="field">
+        <label for="resume-text">Resume text *</label>
+        <textarea id="resume-text" rows="16"
+          placeholder="Paste your resume here — work experience, education, projects, skills, publications, etc.…"></textarea>
+        <p class="field-hint">Minimum 50 characters required</p>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="goToStep1()">← Back</button>
+        <button class="btn-next" onclick="startPreparing()">Prepare my interview →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Generating -->
+    <div class="step-panel" id="panel-3">
+      <div class="generating-card">
+        <div class="big-spinner"></div>
+        <h3>Preparing your personalized interview…</h3>
+        <p>Our AI is analyzing your resume and the job description to create a tailored mock interview experience.</p>
+        <ul class="tip-list">
+          <li>Reading your background and key achievements</li>
+          <li>Analyzing what the role requires</li>
+          <li>Crafting interview phases specific to you</li>
+          <li>Preparing evaluation criteria for each phase</li>
+        </ul>
+        <p style="margin-top: 20px; font-size: 12px; color: #334155;">This usually takes 10–20 seconds.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  // ── Auth check ────────────────────────────────────────────────────────────
+  const token = localStorage.getItem('auth_token');
+  if (!token) { location.replace('/login.html?next=/onboarding.html'); }
+
+  const userRaw = localStorage.getItem('auth_user');
+  if (userRaw) {
+    try {
+      const u = JSON.parse(userRaw);
+      document.getElementById('user-name-display').textContent = u.name || u.email || '';
+    } catch (_) {}
+  }
+
+  function logout() {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
+    location.replace('/login.html');
+  }
+
+  // ── Step navigation ───────────────────────────────────────────────────────
+  function setStep(n) {
+    for (let i = 1; i <= 3; i++) {
+      document.getElementById(`panel-${i}`).classList.toggle('active', i === n);
+      const ind = document.getElementById(`step-indicator-${i}`);
+      ind.classList.remove('active', 'done');
+      if (i < n)  ind.classList.add('done');
+      if (i === n) ind.classList.add('active');
+    }
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('error-msg');
+    el.innerHTML = msg;
+    el.style.display = 'block';
+  }
+
+  function hideError() {
+    document.getElementById('error-msg').style.display = 'none';
+  }
+
+  function goToStep1() { hideError(); setStep(1); }
+
+  function goToStep2() {
+    hideError();
+    const title = document.getElementById('job-title').value.trim();
+    const desc  = document.getElementById('job-description').value.trim();
+    if (!title) { showError('Please enter the job title.'); return; }
+    if (desc.length < 50) { showError('Job description is too short. Please paste the full description.'); return; }
+    setStep(2);
+  }
+
+  async function startPreparing() {
+    hideError();
+    const title  = document.getElementById('job-title').value.trim();
+    const company = document.getElementById('company').value.trim();
+    const desc   = document.getElementById('job-description').value.trim();
+    const resume = document.getElementById('resume-text').value.trim();
+
+    if (resume.length < 50) { showError('Resume is too short. Please paste your full resume.'); return; }
+
+    setStep(3);
+
+    try {
+      const res = await fetch('/prepare', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          job_title: title,
+          company:   company,
+          job_description: desc,
+          resume_text: resume,
+        }),
+      });
+
+      if (res.status === 401) {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_user');
+        location.replace('/login.html?next=/onboarding.html');
+        return;
+      }
+
+      const data = await res.json();
+      if (!res.ok) {
+        setStep(2);
+        if (res.status === 429 && data.detail?.code === 'weekly_limit_reached') {
+          const plan  = data.detail.plan;
+          const limit = data.detail.limit;
+          const used  = data.detail.used;
+          showError(
+            `You've used all ${limit} interviews this week on your ${plan === 'hunter' ? '🎯 Hunter' : 'Explorer'} plan. ` +
+            (plan === 'free'
+              ? `<a href="/upgrade.html" style="color:#a78bfa;font-weight:600">Upgrade to Hunter</a> for 15 per week.`
+              : `Your limit resets every 7 days.`)
+          );
+        } else {
+          showError(data.detail || 'Something went wrong. Please try again.');
+        }
+        return;
+      }
+
+      // Save job session info for the interview page
+      localStorage.setItem('pending_job_session', JSON.stringify({
+        jobSessionId:  data.job_session_id,
+        candidateName: data.candidate_name,
+        jobTitle:      data.job_title,
+        company:       data.company,
+      }));
+
+      // Clear any old interview session so a fresh one starts
+      localStorage.removeItem('interview_v1');
+
+      location.replace('/interview.html');
+    } catch (err) {
+      setStep(2);
+      showError('Network error — please check your connection and try again.');
+    }
+  }
+</script>
+<script>
+(function(){
+  try {
+    const u = JSON.parse(localStorage.getItem('auth_user')||'null');
+    if(!u) return;
+    const el = document.getElementById('plan-pill');
+    if(!el) return;
+    const isHunter = u.plan === 'hunter';
+    el.className = 'plan-pill ' + (isHunter ? 'hunter' : 'explorer');
+    el.textContent = isHunter ? '🎯 Hunter' : '🗺️ Explorer';
+    el.setAttribute('data-tooltip', 'Your current plan');
+    el.style.display = 'inline-block';
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', () => location.href = '/upgrade.html');
+  } catch(_){}
+})();
+</script>
+</body>
+</html>

@@ -3,35 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mock Interview Simulator</title>
+  <title>Interview Coach — AI-Powered Mock Interviews</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0f1117;
-      color: #e2e8f0;
-      min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
+      background: #0f1117; color: #e2e8f0;
+      min-height: 100dvh; display: flex; flex-direction: column;
     }
 
-    /* ── Header ── */
+    /* ── Shared header ── */
     header {
-      padding: 14px 24px;
-      background: #1a1d27;
+      padding: 14px 24px; background: #1a1d27;
       border-bottom: 1px solid #2d3148;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-shrink: 0;
+      display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+      position: sticky; top: 0; z-index: 100;
     }
     .logo {
       width: 36px; height: 36px;
       background: linear-gradient(135deg, #6366f1, #8b5cf6);
       border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px;
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
     }
     header h1 { font-size: 16px; font-weight: 600; color: #f1f5f9; }
     header p  { font-size: 12px; color: #64748b; margin-top: 1px; }
@@ -42,178 +34,388 @@
       transition: background 0.2s;
     }
     .home-link:hover { background: rgba(99,102,241,0.08); }
-
-    /* ── Main content ── */
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 24px;
-      gap: 48px;
+    .user-pill {
+      margin-left: auto; display: flex; align-items: center; gap: 10px;
+      font-size: 13px; color: #94a3b8;
     }
+    .logout-btn {
+      font-size: 12px; color: #475569; background: none; border: none;
+      cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: color 0.2s;
+    }
+    .logout-btn:hover { color: #f87171; }
+    .nav-link {
+      font-size: 12px; color: #475569; text-decoration: none;
+      padding: 4px 8px; border-radius: 6px; transition: color 0.2s;
+    }
+    .nav-link:hover { color: #a78bfa; }
+    .nav-cta {
+      font-size: 13px; font-weight: 600;
+      padding: 7px 16px; border-radius: 20px;
+      background: linear-gradient(135deg, #6366f1, #7c3aed);
+      color: #fff; text-decoration: none; transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
 
-    /* ── Hero ── */
+    /* ══════════════════════════════════════
+       LANDING PAGE (unauthenticated)
+    ══════════════════════════════════════ */
+    #landing { display: none; flex-direction: column; }
+
+    /* Hero */
     .hero {
+      padding: 80px 24px 64px;
       text-align: center;
-      max-width: 520px;
+      display: flex; flex-direction: column; align-items: center;
     }
-    .hero-icon {
+    .hero-badge {
+      display: inline-block; font-size: 11px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 4px 12px; border-radius: 20px;
+      background: #1e1b4b; color: #818cf8; border: 1px solid #3730a3;
+      margin-bottom: 24px;
+    }
+    .hero h2 {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 800; color: #f1f5f9; line-height: 1.15;
+      max-width: 680px; margin-bottom: 20px;
+    }
+    .hero h2 span { color: #818cf8; }
+    .hero-sub {
+      font-size: 17px; color: #64748b; line-height: 1.7;
+      max-width: 520px; margin-bottom: 40px;
+    }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .btn-primary {
+      display: inline-block; padding: 14px 32px;
+      background: linear-gradient(135deg, #6366f1, #7c3aed);
+      color: #fff; border-radius: 12px; font-size: 16px; font-weight: 700;
+      text-decoration: none; transition: opacity 0.2s, transform 0.15s;
+      box-shadow: 0 4px 24px rgba(99,102,241,0.4);
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-secondary {
+      display: inline-block; padding: 14px 32px;
+      background: transparent; border: 1px solid #2d3148;
+      color: #94a3b8; border-radius: 12px; font-size: 16px; font-weight: 600;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .btn-secondary:hover { border-color: #6366f1; color: #a78bfa; }
+
+    /* How it works */
+    .section {
+      padding: 64px 24px;
+      max-width: 900px; width: 100%; margin: 0 auto;
+    }
+    .section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #6366f1; margin-bottom: 12px;
+      text-align: center;
+    }
+    .section-title {
+      font-size: clamp(22px, 3vw, 30px); font-weight: 800; color: #f1f5f9;
+      text-align: center; margin-bottom: 8px;
+    }
+    .section-sub {
+      font-size: 14px; color: #475569; text-align: center;
+      margin-bottom: 48px; line-height: 1.6;
+    }
+
+    /* Phases */
+    .phases {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .phase-card {
+      background: #1a1d27; border: 1px solid #2d3148;
+      border-radius: 16px; padding: 22px 20px;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .phase-card:hover { border-color: #4f46e5; transform: translateY(-2px); }
+    .phase-num {
+      font-size: 11px; font-weight: 700; color: #4f46e5;
+      letter-spacing: 0.06em; margin-bottom: 10px;
+    }
+    .phase-icon { font-size: 26px; margin-bottom: 10px; }
+    .phase-name { font-size: 15px; font-weight: 700; color: #f1f5f9; margin-bottom: 6px; }
+    .phase-desc { font-size: 12px; color: #64748b; line-height: 1.6; }
+
+    /* Features strip */
+    .features {
+      background: #13151f; border-top: 1px solid #1e2235;
+      border-bottom: 1px solid #1e2235;
+      padding: 48px 24px;
+    }
+    .features-inner {
+      max-width: 900px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 32px;
+    }
+    .feature { text-align: center; }
+    .feature-icon { font-size: 28px; margin-bottom: 12px; }
+    .feature-title { font-size: 14px; font-weight: 700; color: #f1f5f9; margin-bottom: 6px; }
+    .feature-desc  { font-size: 12px; color: #475569; line-height: 1.6; }
+
+    /* Bottom CTA */
+    .cta-section {
+      padding: 80px 24px; text-align: center;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .cta-section h3 { font-size: 28px; font-weight: 800; color: #f1f5f9; margin-bottom: 12px; }
+    .cta-section p  { font-size: 15px; color: #64748b; margin-bottom: 32px; }
+
+    /* ══════════════════════════════════════
+       DASHBOARD (authenticated)
+    ══════════════════════════════════════ */
+    #dashboard {
+      display: none; flex: 1; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 40px 24px; gap: 48px;
+    }
+    .dash-hero { text-align: center; max-width: 520px; }
+    .dash-hero-icon {
       width: 72px; height: 72px;
       background: linear-gradient(135deg, #6366f1, #8b5cf6);
       border-radius: 20px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 36px;
+      display: flex; align-items: center; justify-content: center; font-size: 36px;
       margin: 0 auto 20px;
     }
-    .hero h2 {
-      font-size: 26px;
-      font-weight: 700;
-      color: #f1f5f9;
-      margin-bottom: 10px;
-    }
-    .hero p {
-      font-size: 15px;
-      color: #64748b;
-      line-height: 1.6;
-    }
+    .dash-hero h2 { font-size: 26px; font-weight: 700; color: #f1f5f9; margin-bottom: 10px; }
+    .dash-hero p  { font-size: 15px; color: #64748b; line-height: 1.6; }
 
-    /* ── Action cards ── */
-    .actions {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      width: 100%;
-      max-width: 440px;
-    }
-
+    .actions { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 440px; }
     .action-card {
-      background: #1a1d27;
-      border: 1px solid #2d3148;
-      border-radius: 18px;
-      padding: 22px 24px;
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      cursor: pointer;
-      text-decoration: none;
-      color: inherit;
+      background: #1a1d27; border: 1px solid #2d3148; border-radius: 18px;
+      padding: 22px 24px; display: flex; align-items: center; gap: 18px;
+      cursor: pointer; text-decoration: none; color: inherit;
       transition: border-color 0.2s, background 0.2s, transform 0.15s;
     }
-    .action-card:hover {
-      border-color: #6366f1;
-      background: #1e2235;
-      transform: translateY(-1px);
-    }
-    .action-card.primary {
-      border-color: #4f46e5;
-      background: #1e1b4b;
-    }
-    .action-card.primary:hover {
-      background: #25226a;
-      border-color: #818cf8;
-    }
-    .action-card.continue-card {
-      border-color: #065f46;
-      background: #052e1c;
-    }
-    .action-card.continue-card:hover {
-      background: #064e38;
-      border-color: #34d399;
-    }
-
+    .action-card:hover { border-color: #6366f1; background: #1e2235; transform: translateY(-1px); }
+    .action-card.primary   { border-color: #4f46e5; background: #1e1b4b; }
+    .action-card.primary:hover { background: #25226a; border-color: #818cf8; }
+    .action-card.continue-card { border-color: #065f46; background: #052e1c; }
+    .action-card.continue-card:hover { background: #064e38; border-color: #34d399; }
     .card-icon {
-      width: 48px; height: 48px;
-      border-radius: 14px;
+      width: 48px; height: 48px; border-radius: 14px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 24px;
-      flex-shrink: 0;
+      font-size: 24px; flex-shrink: 0;
     }
-    .primary   .card-icon { background: #312e81; }
-    .secondary .card-icon { background: #1e2235; }
-    .mantra-card { border-color: #78350f; background: #1c1107; }
-    .mantra-card:hover { background: #2a1a08; border-color: #f59e0b; }
-    .mantra-card .card-icon { background: #2a1a08; }
-    .mantra-card .card-sub  { color: #fcd34d; }
-    .mantra-card .card-arrow { color: #f59e0b; }
+    .primary       .card-icon { background: #312e81; }
+    .secondary     .card-icon { background: #1e2235; }
     .continue-card .card-icon { background: #064e38; }
-
     .card-body { flex: 1; min-width: 0; }
-    .card-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: #f1f5f9;
-      margin-bottom: 3px;
-    }
-    .card-sub {
-      font-size: 12px;
-      color: #64748b;
-      line-height: 1.4;
-    }
+    .card-title { font-size: 15px; font-weight: 700; color: #f1f5f9; margin-bottom: 3px; }
+    .card-sub   { font-size: 12px; color: #64748b; line-height: 1.4; }
     .continue-card .card-sub { color: #6ee7b7; }
-
-    .card-arrow {
-      font-size: 18px;
-      color: #475569;
-      flex-shrink: 0;
-    }
+    .card-arrow { font-size: 18px; color: #475569; flex-shrink: 0; }
     .primary       .card-arrow { color: #a5b4fc; }
     .continue-card .card-arrow { color: #6ee7b7; }
 
-    /* ── Footer ── */
-    footer {
-      padding: 16px;
-      text-align: center;
-      font-size: 11px;
-      color: #334155;
+    footer { padding: 20px; text-align: center; font-size: 11px; color: #334155; }
+    .plan-pill {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; padding: 3px 10px; border-radius: 20px;
+      flex-shrink: 0; display: none;
     }
+    .plan-pill { position: relative; cursor: default; }
+    .plan-pill.hunter  { background: #312e81; color: #a5b4fc; }
+    .plan-pill.explorer { background: #1e293b; color: #64748b; }
+    .plan-pill::after {
+      content: attr(data-tooltip); position: absolute;
+      bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+      background: #1e2235; border: 1px solid #3d4160; color: #e2e8f0;
+      font-size: 11px; font-weight: 500; text-transform: none; letter-spacing: 0;
+      white-space: nowrap; padding: 5px 10px; border-radius: 8px;
+      pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 999;
+    }
+    .plan-pill:hover::after, .plan-pill.tooltip-open::after { opacity: 1; }
   </style>
 </head>
 <body>
 
 <header>
   <a class="home-link" href="/">
-    <div class="logo">🎤</div>
+    <div class="logo">🎯</div>
     <div>
-      <h1>Mock Interview Simulator</h1>
-      <p>Practice your tech interview in English</p>
+      <h1>Interview Coach</h1>
+      <p>AI-powered mock interview preparation</p>
     </div>
   </a>
+  <!-- Nav for logged-out users -->
+  <div id="nav-guest" style="margin-left:auto;display:none;align-items:center;gap:8px">
+    <a class="nav-link" href="/tips.html">💡 Tips</a>
+    <a class="nav-link" href="/login.html">Sign in</a>
+    <a class="nav-cta" href="/register.html">Get started free</a>
+  </div>
+  <!-- Nav for logged-in users -->
+  <div class="user-pill" id="nav-user" style="display:none">
+    <span id="plan-pill" class="plan-pill"></span>
+    <a href="/tips.html" class="nav-link">💡 Tips</a>
+    <a href="/profile.html" class="nav-link">⚙️ Settings</a>
+    <span id="user-name-display"></span>
+    <button class="logout-btn" onclick="logout()">Sign out</button>
+  </div>
 </header>
 
-<main>
+<!-- ══ LANDING (unauthenticated) ══════════════════════════════════════════ -->
+<div id="landing">
+
+  <!-- Hero -->
   <div class="hero">
-    <div class="hero-icon">🎤</div>
+    <div class="hero-badge">AI-Powered · Fully Personalized</div>
+    <h2>Practice interviews that <span>feel real</span>.<br>Land the role you want.</h2>
+    <p class="hero-sub">
+      Paste your resume and a job description. Your AI interviewer runs a full
+      structured interview — tailored to <em>you</em> — with coaching feedback after every phase.
+    </p>
+    <div class="hero-actions">
+      <a class="btn-primary" href="/register.html">Start for free →</a>
+      <a class="btn-secondary" href="/login.html">Sign in</a>
+    </div>
+  </div>
+
+  <!-- How it works — phases -->
+  <div class="section">
+    <div class="section-label">How it works</div>
+    <div class="section-title">7 phases. One complete interview.</div>
+    <div class="section-sub">Every session mirrors a real senior interview, from first impression to your closing questions.</div>
+    <div class="phases">
+      <div class="phase-card">
+        <div class="phase-num">PHASE 1</div>
+        <div class="phase-icon">🎤</div>
+        <div class="phase-name">Elevator Pitch</div>
+        <div class="phase-desc">Introduce yourself in 90 seconds. Get instant feedback on clarity, confidence, and relevance.</div>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">PHASE 2</div>
+        <div class="phase-icon">🚗</div>
+        <div class="phase-name">CAR Story</div>
+        <div class="phase-desc">Tell a structured story — Challenge, Action, Result — about a project from your experience.</div>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">PHASE 3</div>
+        <div class="phase-icon">💻</div>
+        <div class="phase-name">Technical Questions</div>
+        <div class="phase-desc">Role-specific technical depth tailored to the job description you provided.</div>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">PHASE 4</div>
+        <div class="phase-icon">🧭</div>
+        <div class="phase-name">Leadership & Projects</div>
+        <div class="phase-desc">How you influence teams, handle ambiguity, and drive projects to completion.</div>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">PHASE 5</div>
+        <div class="phase-icon">💡</div>
+        <div class="phase-name">Fit & Motivation</div>
+        <div class="phase-desc">Why this role, why this company, and what drives you — answered authentically.</div>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">PHASE 6</div>
+        <div class="phase-icon">🙋</div>
+        <div class="phase-name">Your Questions</div>
+        <div class="phase-desc">Practice asking smart, insightful questions that show you've done your homework.</div>
+      </div>
+      <div class="phase-card" style="grid-column: span 1">
+        <div class="phase-num">PHASE 7</div>
+        <div class="phase-icon">📊</div>
+        <div class="phase-name">Final Scorecard</div>
+        <div class="phase-desc">A detailed scorecard across every dimension — strengths, gaps, and what to work on next.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div class="features">
+    <div class="features-inner">
+      <div class="feature">
+        <div class="feature-icon">🧠</div>
+        <div class="feature-title">Truly personalized</div>
+        <div class="feature-desc">Your AI interviewer reads your actual resume and the real job description before asking a single question.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🎙️</div>
+        <div class="feature-title">Voice or text</div>
+        <div class="feature-desc">Answer by speaking or typing. The interviewer responds with realistic audio via text-to-speech.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔄</div>
+        <div class="feature-title">Practice as many times as you need</div>
+        <div class="feature-desc">Each round is a fresh interview. Same role or new one — build fluency through repetition.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📋</div>
+        <div class="feature-title">Full history</div>
+        <div class="feature-desc">Every session is saved. Review past scorecards and track improvement over time.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom CTA -->
+  <div class="cta-section">
+    <h3>Ready to start practicing?</h3>
+    <p>Free to use. No credit card required.</p>
+    <a class="btn-primary" href="/register.html">Create your free account →</a>
+  </div>
+
+  <footer>Powered by Claude · Whisper · OpenAI TTS &nbsp;·&nbsp; <a href="/upgrade.html" style="color:#475569;text-decoration:none" onmouseover="this.style.color='#a78bfa'" onmouseout="this.style.color='#475569'">Plans</a> &nbsp;·&nbsp; <a href="/tips.html" style="color:#475569;text-decoration:none" onmouseover="this.style.color='#a78bfa'" onmouseout="this.style.color='#475569'">Interview Tips</a><span id="admin-link"></span></footer>
+</div>
+
+
+<!-- ══ DASHBOARD (authenticated) ════════════════════════════════════════════ -->
+<div id="dashboard">
+  <div class="dash-hero">
+    <div class="dash-hero-icon">🎯</div>
     <h2>Ready to practice?</h2>
-    <p>Sharpen your interview skills with an AI-powered mock interview. Get real-time feedback on your Elevator Pitch, CAR stories, technical depth, and more.</p>
+    <p>Paste a job description and your resume — Alex will run a personalized full-length mock interview with feedback on every phase.</p>
   </div>
-
-  <div class="actions" id="actions">
-    <!-- Cards injected by JS so the "Continue" card can be shown conditionally -->
-  </div>
-</main>
-
-<footer>Powered by Claude + Whisper + OpenAI TTS</footer>
+  <div class="actions" id="actions"></div>
+  <footer>Powered by Claude · Whisper · OpenAI TTS &nbsp;·&nbsp; <a href="/upgrade.html" style="color:#475569;text-decoration:none" onmouseover="this.style.color='#a78bfa'" onmouseout="this.style.color='#475569'">Plans</a> &nbsp;·&nbsp; <a href="/tips.html" style="color:#475569;text-decoration:none" onmouseover="this.style.color='#a78bfa'" onmouseout="this.style.color='#475569'">Interview Tips</a><span id="admin-link"></span></footer>
+</div>
 
 <script>
+  const token   = localStorage.getItem('auth_token');
+  const userRaw = localStorage.getItem('auth_user');
+
+  if (token) {
+    // ── Logged in: show dashboard ─────────────────────────────────────────
+    document.getElementById('nav-user').style.display = 'flex';
+    document.getElementById('dashboard').style.display = 'flex';
+    if (userRaw) {
+      try {
+        const u = JSON.parse(userRaw);
+        document.getElementById('user-name-display').textContent = u.name || u.email || '';
+        if (u.email === 'marciosferreira@yahoo.com.br') {
+          document.querySelectorAll('#admin-link').forEach(el => {
+            el.innerHTML = ' &nbsp;·&nbsp; <a href="/admin.html" style="color:#475569;text-decoration:none" onmouseover="this.style.color=\'#a78bfa\'" onmouseout="this.style.color=\'#475569\'">⚙ Admin</a>';
+          });
+        }
+      } catch {}
+    }
+  } else {
+    // ── Guest: show landing page ──────────────────────────────────────────
+    document.getElementById('nav-guest').style.display = 'flex';
+    document.getElementById('landing').style.display = 'flex';
+  }
+
+  function logout() {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
+    localStorage.removeItem('interview_v1');
+    localStorage.removeItem('pending_job_session');
+    location.replace('/');
+  }
+
+  // ── Dashboard logic ───────────────────────────────────────────────────────
   const SESSION_KEY = 'interview_v1';
   const SESSION_TTL = 48 * 60 * 60 * 1000;
-
   const FASE_LABEL = {
-    elevator_pitch:        'Elevator Pitch',
-    elevator_pitch_report: 'Elevator Pitch — review',
-    CAR:                   'CAR Story',
-    CAR_report:            'CAR Story — review',
-    technical:             'Technical Questions',
-    technical_report:      'Technical — review',
-    leadership:            'Leadership Questions',
-    leadership_report:     'Leadership — review',
-    motivation:            'Motivation Questions',
-    motivation_report:     'Motivation — review',
-    marcio_questions:      'Your Questions',
-    feedback:              'Final Scorecard',
-    done:                  'Completed',
+    elevator_pitch: 'Elevator Pitch', elevator_pitch_report: 'Elevator Pitch — review',
+    CAR: 'CAR Story', CAR_report: 'CAR Story — review',
+    technical: 'Technical Questions', technical_report: 'Technical — review',
+    leadership: 'Leadership Questions', leadership_report: 'Leadership — review',
+    motivation: 'Motivation Questions', motivation_report: 'Motivation — review',
+    candidate_questions: 'Your Questions', feedback: 'Final Scorecard', done: 'Completed',
   };
 
   function _loadRaw() {
@@ -227,8 +429,7 @@
 
   function _fmt(ts) {
     if (!ts) return '';
-    const d   = new Date(ts);
-    const now = new Date();
+    const d = new Date(ts), now = new Date();
     const diffDays = Math.floor((now - d) / 86400000);
     const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     if (diffDays === 0) return `Today at ${time}`;
@@ -236,69 +437,62 @@
     return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ` at ${time}`;
   }
 
-  function startNew() {
-    localStorage.removeItem(SESSION_KEY);
-    window.location.href = '/interview.html';
-  }
-
-  function continueSession() {
-    // SESSION_KEY already has the active session — interview.html will resume it.
-    window.location.href = '/interview.html';
-  }
-
   function render() {
     const actionsEl = document.getElementById('actions');
+    if (!actionsEl) return;
     const raw = _loadRaw();
-
     let html = '';
-
-    // "Continue" card — only when there's a non-completed active session
     if (raw?.threadId && raw.fase !== 'done') {
-      const phase = FASE_LABEL[raw.fase] || (raw.fase ? raw.fase : 'Starting…');
-      const when  = _fmt(raw.savedAt);
+      const phase   = FASE_LABEL[raw.fase] || (raw.fase || 'Starting…');
+      const jobInfo = raw.jobTitle ? ` · ${raw.jobTitle}` : '';
       html += `
-        <div class="action-card continue-card" onclick="continueSession()">
+        <div class="action-card continue-card" onclick="location.href='/interview.html'">
           <div class="card-icon">▶️</div>
           <div class="card-body">
             <div class="card-title">Continue interview</div>
-            <div class="card-sub">${phase}${when ? ' · ' + when : ''}</div>
+            <div class="card-sub">${phase}${jobInfo}${raw.savedAt ? ' · ' + _fmt(raw.savedAt) : ''}</div>
           </div>
           <span class="card-arrow">›</span>
         </div>`;
     }
-
     html += `
-      <div class="action-card primary" onclick="startNew()">
+      <div class="action-card primary" onclick="location.href='/onboarding.html'">
         <div class="card-icon">✨</div>
         <div class="card-body">
           <div class="card-title">New interview</div>
-          <div class="card-sub">Start a fresh session from the beginning</div>
+          <div class="card-sub">Paste a job description + resume to start a personalized session</div>
         </div>
         <span class="card-arrow">›</span>
       </div>
-
       <a class="action-card secondary" href="/history.html">
         <div class="card-icon">📋</div>
         <div class="card-body">
           <div class="card-title">Interview history</div>
-          <div class="card-sub">Browse and continue past sessions</div>
-        </div>
-        <span class="card-arrow">›</span>
-      </a>
-
-      <a class="action-card mantra-card" href="/mantra.html">
-        <div class="card-icon">🎯</div>
-        <div class="card-body">
-          <div class="card-title">Os Sinais que Vão te Contratar</div>
-          <div class="card-sub">Leia antes de praticar. Ouça como um mantra.</div>
+          <div class="card-sub">Browse and continue past sessions by role</div>
         </div>
         <span class="card-arrow">›</span>
       </a>`;
-
     actionsEl.innerHTML = html;
   }
 
-  render();
+  if (token) render();
+</script>
+<script>
+(function(){
+  try {
+    const u = JSON.parse(localStorage.getItem('auth_user')||'null');
+    if(!u) return;
+    const el = document.getElementById('plan-pill');
+    if(!el) return;
+    const isHunter = u.plan === 'hunter';
+    el.className = 'plan-pill ' + (isHunter ? 'hunter' : 'explorer');
+    el.textContent = isHunter ? '🎯 Hunter' : '🗺️ Explorer';
+    el.setAttribute('data-tooltip', 'Your current plan');
+    el.style.display = 'inline-block';
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', () => location.href = '/upgrade.html');
+  } catch(_){}
+})();
 </script>
 </body>
 </html>

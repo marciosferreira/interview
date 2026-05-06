@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify Email — Interview Coach</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1117; color: #e2e8f0;
+      min-height: 100dvh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .card {
+      background: #1a1d27; border: 1px solid #2d3148;
+      border-radius: 16px; padding: 48px 36px;
+      width: 100%; max-width: 420px; text-align: center;
+    }
+    .icon { font-size: 52px; margin-bottom: 20px; }
+    h1 { font-size: 22px; font-weight: 700; color: #f1f5f9; margin-bottom: 8px; }
+    p { font-size: 14px; color: #64748b; margin-bottom: 28px; line-height: 1.6; }
+    .btn {
+      display: inline-block; padding: 11px 28px;
+      background: linear-gradient(135deg, #6366f1, #7c3aed);
+      border: none; border-radius: 8px; color: #fff;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      text-decoration: none; transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .spinner {
+      display: inline-block; width: 28px; height: 28px;
+      border: 3px solid #2d3148; border-top-color: #6366f1;
+      border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="spinner"></div>
+  <h1>Verifying…</h1>
+  <p>Please wait a moment.</p>
+</div>
+
+<script>
+  const token = new URLSearchParams(location.search).get('token');
+  const card  = document.getElementById('card');
+
+  async function verify() {
+    if (!token) {
+      card.innerHTML = `<div class="icon">❌</div><h1>Invalid link</h1><p>This verification link is missing a token.</p><a class="btn" href="/login.html">Go to sign in</a>`;
+      return;
+    }
+    try {
+      const res  = await fetch(`/auth/verify-email?token=${encodeURIComponent(token)}`);
+      const data = await res.json();
+      if (res.ok) {
+        // Update cached user object if present
+        try {
+          const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
+          if (u) { u.email_verified = true; localStorage.setItem('auth_user', JSON.stringify(u)); }
+        } catch {}
+        card.innerHTML = `<div class="icon">✅</div><h1>Email verified!</h1><p>Your account is fully activated. You can now continue your interviews.</p><a class="btn" href="/interview.html">Continue →</a>`;
+      } else {
+        card.innerHTML = `<div class="icon">⚠️</div><h1>Link expired</h1><p>${data.detail || 'This verification link has expired or already been used.'}</p><a class="btn" href="/login.html">Go to sign in</a>`;
+      }
+    } catch {
+      card.innerHTML = `<div class="icon">❌</div><h1>Network error</h1><p>Could not verify your email. Please try again.</p><a class="btn" href="/login.html">Go to sign in</a>`;
+    }
+  }
+
+  verify();
+</script>
+</body>
+</html>

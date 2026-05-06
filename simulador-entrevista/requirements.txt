@@ -8,3 +8,6 @@ fastapi
 uvicorn[standard]
 openai
 python-multipart
+bcrypt
+python-jose[cryptography]
+boto3

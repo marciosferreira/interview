@@ -1,12 +1,29 @@
 import os
+import time
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Optional
 from typing_extensions import TypedDict
+from langchain_core.runnables import RunnableConfig
 
 from dotenv import load_dotenv
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 import json as _json
+
+
+def _invoke_with_retry(runnable, messages, max_retries: int = 5, base_delay: float = 5.0):
+    """Invoke a LangChain runnable with exponential backoff on Anthropic 529 Overloaded."""
+    from anthropic import APIStatusError
+    for attempt in range(max_retries):
+        try:
+            return runnable.invoke(messages)
+        except APIStatusError as exc:
+            if exc.status_code == 529 and attempt < max_retries - 1:
+                wait = base_delay * (2 ** attempt)
+                print(f"[retry] Anthropic overloaded (529) — waiting {wait:.0f}s (attempt {attempt + 1}/{max_retries})")
+                time.sleep(wait)
+            else:
+                raise
 
 try:
     import sqlite3 as _sqlite3
@@ -14,18 +31,19 @@ try:
     _db_path = str(Path(__file__).parent / "sessions.db")
     _conn = _sqlite3.connect(_db_path, check_same_thread=False)
     _saver = _SqliteSaver(_conn)
-    _saver.setup()   # creates checkpoint tables if they don't exist yet
-    _Checkpointer = lambda: _saver   # noqa: E731
+    _saver.setup()
+    _Checkpointer = lambda: _saver  # noqa: E731
 except Exception:
     _conn = None
     from langgraph.checkpoint.memory import MemorySaver as _MemorySaver
     _Checkpointer = _MemorySaver
 
 
+# ── Session store ─────────────────────────────────────────────────────────────
+
 class SessionStore:
-    """Stores chat history + metadata for the history page.
-    Backed by the same sessions.db used for LangGraph checkpoints.
-    Falls back to an in-memory dict if SQLite is unavailable.
+    """Stores chat history + metadata for the dashboard page.
+    Backed by sessions.db; falls back to in-memory dict if SQLite unavailable.
     """
 
     def __init__(self, conn):
@@ -34,68 +52,134 @@ class SessionStore:
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS session_meta (
                     thread_id      TEXT PRIMARY KEY,
+                    user_id        TEXT,
+                    job_session_id TEXT,
                     started_at     INTEGER NOT NULL,
                     last_active_at INTEGER NOT NULL,
                     fase           TEXT    NOT NULL DEFAULT '',
                     history        TEXT    NOT NULL DEFAULT '[]'
                 )
             """)
+            # Migration: add columns if they don't exist yet (existing DBs from v1)
+            for col_def in [
+                "ALTER TABLE session_meta ADD COLUMN user_id TEXT",
+                "ALTER TABLE session_meta ADD COLUMN job_session_id TEXT",
+                "ALTER TABLE session_meta ADD COLUMN scorecard_text TEXT",
+            ]:
+                try:
+                    conn.execute(col_def)
+                except Exception:
+                    pass
             conn.commit()
         else:
             self._mem: dict = {}
 
     def upsert(self, thread_id: str, started_at: int, last_active_at: int,
-               fase: str, history: list) -> None:
+               fase: str, history: list,
+               user_id: Optional[str] = None, job_session_id: Optional[str] = None) -> None:
         if self._conn:
             self._conn.execute(
-                """INSERT INTO session_meta (thread_id, started_at, last_active_at, fase, history)
-                   VALUES (?, ?, ?, ?, ?)
+                """INSERT INTO session_meta
+                       (thread_id, user_id, job_session_id, started_at, last_active_at, fase, history)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)
                    ON CONFLICT(thread_id) DO UPDATE SET
                        last_active_at = excluded.last_active_at,
                        fase           = excluded.fase,
                        history        = excluded.history""",
-                (thread_id, started_at, last_active_at, fase, _json.dumps(history)),
+                (thread_id, user_id, job_session_id, started_at, last_active_at,
+                 fase, _json.dumps(history)),
             )
             self._conn.commit()
         else:
             self._mem[thread_id] = dict(
-                threadId=thread_id, startedAt=started_at,
-                lastActiveAt=last_active_at, fase=fase, history=history,
+                threadId=thread_id, userId=user_id, jobSessionId=job_session_id,
+                startedAt=started_at, lastActiveAt=last_active_at, fase=fase, history=history,
             )
 
-    def list_sessions(self, limit: int = 10) -> list:
+    def list_sessions(self, user_id: Optional[str] = None, limit: int = 20) -> list:
         if self._conn:
-            rows = self._conn.execute(
-                """SELECT thread_id, started_at, last_active_at, fase, history
-                   FROM session_meta
-                   ORDER BY last_active_at DESC LIMIT ?""",
-                (limit,),
-            ).fetchall()
+            if user_id:
+                rows = self._conn.execute(
+                    """SELECT sm.thread_id, sm.user_id, sm.job_session_id,
+                              sm.started_at, sm.last_active_at, sm.fase, sm.history,
+                              js.job_title, js.company
+                       FROM session_meta sm
+                       LEFT JOIN job_sessions js ON sm.job_session_id = js.id
+                       WHERE sm.user_id = ?
+                       ORDER BY sm.last_active_at DESC LIMIT ?""",
+                    (user_id, limit),
+                ).fetchall()
+            else:
+                rows = self._conn.execute(
+                    """SELECT sm.thread_id, sm.user_id, sm.job_session_id,
+                              sm.started_at, sm.last_active_at, sm.fase, sm.history,
+                              js.job_title, js.company
+                       FROM session_meta sm
+                       LEFT JOIN job_sessions js ON sm.job_session_id = js.id
+                       ORDER BY sm.last_active_at DESC LIMIT ?""",
+                    (limit,),
+                ).fetchall()
             return [
                 {
                     "threadId":      r[0],
-                    "startedAt":     r[1],
-                    "lastActiveAt":  r[2],
-                    "fase":          r[3],
-                    "history":       _json.loads(r[4]),
+                    "userId":        r[1],
+                    "jobSessionId":  r[2],
+                    "startedAt":     r[3],
+                    "lastActiveAt":  r[4],
+                    "fase":          r[5],
+                    "history":       _json.loads(r[6]),
+                    "jobTitle":      r[7] or "",
+                    "company":       r[8] or "",
                 }
                 for r in rows
             ]
         else:
-            return sorted(self._mem.values(),
-                          key=lambda s: s["lastActiveAt"], reverse=True)[:limit]
+            sessions = list(self._mem.values())
+            if user_id:
+                sessions = [s for s in sessions if s.get("userId") == user_id]
+            return sorted(sessions, key=lambda s: s["lastActiveAt"], reverse=True)[:limit]
 
-    def delete(self, thread_id: str) -> None:
+    def delete(self, thread_id: str, user_id: Optional[str] = None) -> None:
         if self._conn:
-            self._conn.execute(
-                "DELETE FROM session_meta WHERE thread_id = ?", (thread_id,)
-            )
+            if user_id:
+                self._conn.execute(
+                    "DELETE FROM session_meta WHERE thread_id = ? AND user_id = ?",
+                    (thread_id, user_id),
+                )
+            else:
+                self._conn.execute(
+                    "DELETE FROM session_meta WHERE thread_id = ?", (thread_id,)
+                )
             self._conn.commit()
         else:
             self._mem.pop(thread_id, None)
 
+    def save_scorecard(self, thread_id: str, user_id: str, scorecard_text: str) -> None:
+        if self._conn:
+            self._conn.execute(
+                "UPDATE session_meta SET scorecard_text = ? WHERE thread_id = ? AND user_id = ?",
+                (scorecard_text, thread_id, user_id),
+            )
+            self._conn.commit()
+
+    def get_scorecard(self, thread_id: str, user_id: str) -> Optional[str]:
+        if self._conn:
+            row = self._conn.execute(
+                "SELECT scorecard_text FROM session_meta WHERE thread_id = ? AND user_id = ?",
+                (thread_id, user_id),
+            ).fetchone()
+            return row[0] if row else None
+        return None
+
 
 session_store = SessionStore(_conn)
+
+# ── Setup auth tables ─────────────────────────────────────────────────────────
+# Done here so _conn is shared across auth.py and simulator.py without circular imports.
+if _conn:
+    from auth import setup_user_tables
+    setup_user_tables(_conn)
+
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langgraph.types import interrupt, Command
@@ -105,7 +189,6 @@ load_dotenv()
 
 
 def _coerce_list(v):
-    """Accept list[str] or a JSON-encoded string of a list (model sometimes returns the latter)."""
     if isinstance(v, list):
         return v
     if isinstance(v, str):
@@ -119,9 +202,7 @@ def _coerce_list(v):
     return v
 
 
-# Type alias: list[str] that tolerates a JSON-string from the LLM
 StrList = Annotated[list[str], BeforeValidator(_coerce_list)]
-
 
 model = ChatAnthropic(
     model=os.getenv("MODEL_NAME", "claude-sonnet-4-6"),
@@ -136,7 +217,6 @@ PROMPTS_DIR = Path(__file__).parent / "prompts"
 
 
 def load_prompt(*filenames: str) -> str:
-    """Concatenate one or more .md prompt files into a single system prompt."""
     parts = []
     for name in filenames:
         path = PROMPTS_DIR / name
@@ -144,41 +224,52 @@ def load_prompt(*filenames: str) -> str:
     return "\n\n---\n\n".join(parts)
 
 
-# Interview system prompts — conduct the interview, ask follow-ups, coach
-SYSTEM_PITCH_INTERVIEW       = load_prompt("persona_interview.md", "context_marcio.md", "elevator_pitch.md")
-SYSTEM_CAR_INTERVIEW         = load_prompt("persona_interview.md", "context_marcio.md", "car.md")
-SYSTEM_TECHNICAL_INTERVIEW   = load_prompt("persona_interview.md", "context_marcio.md", "technical.md")
-SYSTEM_LEADERSHIP_INTERVIEW  = load_prompt("persona_interview.md", "context_marcio.md", "leadership.md")
-SYSTEM_MOTIVATION_INTERVIEW  = load_prompt("persona_interview.md", "context_marcio.md", "motivation.md")
+# Static base prompts (generic — no candidate-specific content)
+_PERSONA      = load_prompt("persona_alex.md")
+_REPORT_BASE  = load_prompt("report_format_generic.md")
+_SCORECARD    = load_prompt("scorecard_generic.md")
+_PHASE_FILES  = {
+    "elevator_pitch": load_prompt("elevator_pitch_generic.md"),
+    "CAR":            load_prompt("car_generic.md"),
+    "technical":      load_prompt("technical_generic.md"),
+    "leadership":     load_prompt("leadership_generic.md"),
+    "motivation":     load_prompt("motivation_generic.md"),
+    "candidate_questions": load_prompt("candidate_questions_generic.md"),
+}
 
-# Report system prompts — generate the structured feedback block after phase completion
-SYSTEM_PITCH_REPORT          = load_prompt("report_format.md", "context_marcio.md", "elevator_pitch.md")
-SYSTEM_CAR_REPORT            = load_prompt("report_format.md", "context_marcio.md", "car.md")
-SYSTEM_TECHNICAL_REPORT      = load_prompt("report_format.md", "context_marcio.md", "technical.md")
-SYSTEM_LEADERSHIP_REPORT     = load_prompt("report_format.md", "context_marcio.md", "leadership.md")
-SYSTEM_MOTIVATION_REPORT     = load_prompt("report_format.md", "context_marcio.md", "motivation.md")
 
-# Other phases
-SYSTEM_MARCIO_Q  = load_prompt("persona_interview.md", "marcio_questions.md")
-SYSTEM_SCORECARD = load_prompt("context_marcio.md", "scorecard.md")
+def _build_interview_system(interview_context: str, phase: str) -> str:
+    """Compose: persona + candidate context + phase guide."""
+    phase_guide = _PHASE_FILES.get(phase, "")
+    context_block = (
+        "\n\n---\n\n## CANDIDATE & JOB CONTEXT\n\n"
+        + interview_context
+        + "\n\n---\n\n"
+    ) if interview_context else "\n\n---\n\n"
+    return _PERSONA + context_block + phase_guide
 
-# Aliases for api.py streaming (interview nodes only)
-SYSTEM_PITCH      = SYSTEM_PITCH_INTERVIEW
-SYSTEM_CAR        = SYSTEM_CAR_INTERVIEW
-SYSTEM_TECHNICAL  = SYSTEM_TECHNICAL_INTERVIEW
-SYSTEM_LEADERSHIP = SYSTEM_LEADERSHIP_INTERVIEW
-SYSTEM_MOTIVATION = SYSTEM_MOTIVATION_INTERVIEW
-SYSTEM_MARCIO_Q   = SYSTEM_MARCIO_Q
+
+def _build_report_system(interview_context: str, phase: str) -> str:
+    """Compose: report format + candidate context + phase guide."""
+    phase_guide = _PHASE_FILES.get(phase, "")
+    context_block = (
+        "\n\n---\n\n## CANDIDATE & JOB CONTEXT\n\n"
+        + interview_context
+        + "\n\n---\n\n"
+    ) if interview_context else "\n\n---\n\n"
+    return _REPORT_BASE + context_block + phase_guide
+
+
+def _build_scorecard_system(interview_context: str) -> str:
+    context_block = (
+        "\n\n---\n\n## CANDIDATE & JOB CONTEXT\n\n"
+        + interview_context
+        + "\n\n---\n\n"
+    ) if interview_context else "\n\n---\n\n"
+    return _SCORECARD + context_block
 
 
 def _cached_system(prompt: str) -> SystemMessage:
-    """Wrap a system prompt in a cache_control block so Anthropic caches the prefix.
-
-    Identical prompt text across requests hits the cache after the first call,
-    cutting input-token cost by ~90 % for the system-prompt portion.
-    Cache TTL is 5 minutes; the prompts are constant at module load time so they
-    stay warm throughout a normal interview session.
-    """
     return SystemMessage(content=[{
         "type": "text",
         "text": prompt,
@@ -191,20 +282,24 @@ def _cached_system(prompt: str) -> SystemMessage:
 # ---------------------------------------------------------------------------
 
 class EntrevistaState(TypedDict):
-    messages: Annotated[list, add_messages]  # full history (LangGraph checkpointing)
-    phase_messages: list   # current-phase transcript — preserved until report node reads it
-    archive: list          # completed phases transcript — fed to scorecard at the end
-    fase: str              # current phase name
+    messages:       Annotated[list, add_messages]
+    phase_messages: list
+    archive:        list
+    fase:           str
+    interview_context: str   # generated per-session from CV + job description
+    candidate_name: str      # extracted from interview_context
+    job_title:      str
+    company:        str
 
-    checklist_pitch: dict
-    checklist_CAR: dict
-    checklist_technical: dict
+    checklist_pitch:      dict
+    checklist_CAR:        dict
+    checklist_technical:  dict
     checklist_leadership: dict
     checklist_motivation: dict
 
-    notas_pitch: str
-    notas_CAR: str
-    notas_technical: str
+    notas_pitch:      str
+    notas_CAR:        str
+    notas_technical:  str
     notas_leadership: str
     notas_motivation: str
 
@@ -212,165 +307,149 @@ class EntrevistaState(TypedDict):
 
 
 # ---------------------------------------------------------------------------
-# Lean interview Pydantic models (no feedback fields — report node handles those)
+# Generic Pydantic models (phase-agnostic, driven by system prompt context)
 # ---------------------------------------------------------------------------
 
-# Shared Field descriptor for the `mensagem` field in all interview Pydantic models.
-# Rule (3) from previous versions ("deliver the Judge's feedback block") has been
-# removed — that caused the LLM to put report content into Maria's message.
-# The Judge streams the report separately; Maria's mensagem is ONLY a question or
-# short coaching nudge, never feedback, never a summary.
 _MENSAGEM_FIELD = Field(
     description=(
-        "Maria Ximena's next spoken line — a question or short coaching nudge only. "
+        "Alex's next spoken line — a question or short coaching nudge only. "
         "(1) Opening turn: reproduce the exact greeting from the phase prompt verbatim. "
         "(2) Ongoing interview: one follow-up question or coaching prompt, 1–3 sentences max. "
         "(3) Coaching after 2+ failed attempts: a brief hint followed by "
             "'take another attempt or say skip to move on'. "
         "(4) When fase_completa=True: set this to exactly the string 'OK' and nothing else. "
         "NEVER include feedback, scoring, report content, or a summary of how the candidate did. "
-        "The Judge handles all feedback after the phase ends — Maria never delivers it."
+        "The Judge handles all feedback after the phase ends — Alex never delivers it."
     )
 )
 
 
-class PitchInterview(BaseModel):
-    apresentacao_pessoal: bool    # item 1: name + current role introduced
-    phd_como_forca: bool          # item 2: PhD framed as cognitive asset (not just credential)
-    pesquisa_internacional: bool  # item 3: international research (EMBL-EBI / Tulane)
-    software_cv: bool             # item 4: first-author software with AI/CV referenced
-    transicao_industria: bool     # item 5: transition framed as evolution, not gap
-    venturus_milestone: bool      # item 6: Venturus framed as entry point into production AI
-    trabalho_atual_negocio: bool  # item 7: current work in business terms (no stack names)
-    closing_demo_producao: bool   # item 8: demo-to-production gap framing (NON-NEGOTIABLE)
-    sem_stack_names: bool         # item 9: no technical stack names used
-    sem_metricas: bool            # item 10: no specific metrics or percentages
-    ingles_adequado: bool         # item 11: English mostly fluent and natural
+class ElevatorPitchPhase(BaseModel):
+    personal_intro_clear: bool
+    background_framed_as_asset: bool
+    key_achievement_mentioned: bool
+    career_narrative_coherent: bool
+    current_role_in_business_terms: bool
+    closes_with_differentiator: bool
+    english_adequate: bool
     mensagem: str = _MENSAGEM_FIELD
     fase_completa: bool
     observacoes: str
     ingles_erros: StrList
 
 
-class CARInterview(BaseModel):
-    contexto_negocio: bool        # item 1: business context clear (manufacturing, account managers)
-    problema_negocio: bool        # item 2: problem stated in business terms (not technical framing)
-    acoes_pessoais: bool          # item 3: personal ownership — uses "I", not "we"
-    langfuse_observability: bool  # item 4: Langfuse as deliberate decision from day one
-    token_optimization: bool      # item 5: token problem + multi-technique fix + validation
-    resultado_negocio: bool       # item 6: result in business impact terms
-    production_mindset: bool      # item 7: proactive production thinking (NON-NEGOTIABLE)
-    ingles_adequado: bool         # item 8: English mostly fluent and natural
+class CARPhase(BaseModel):
+    business_context_clear: bool
+    problem_stated_clearly: bool
+    personal_ownership: bool
+    specific_actions: bool
+    deliberate_choices: bool
+    result_in_business_terms: bool
+    production_mindset: bool
+    english_adequate: bool
     mensagem: str = _MENSAGEM_FIELD
     fase_completa: bool
     observacoes: str
     ingles_erros: StrList
 
 
-class TechnicalInterview(BaseModel):
-    q1_monitoring: bool
-    q2_degradacao: bool
-    q3_rag: bool
-    producao_mindset: bool
-    ingles_adequado: bool
+class TechnicalPhase(BaseModel):
+    q1_answered: bool
+    q2_answered: bool
+    q3_answered: bool
+    answers_show_depth: bool
+    production_mindset: bool
+    english_adequate: bool
     mensagem: str = _MENSAGEM_FIELD
     fase_completa: bool
     observacoes: str
     ingles_erros: StrList
 
 
-class LeadershipInterview(BaseModel):
-    data_audit: bool               # item 1: data audit before any model code
-    data_como_risco_primario: bool # item 2: data framed as primary project risk
-    pilot_producao_gap: bool       # item 3: pilot-to-production gap named as known risk
-    mitigacao_concreta: bool       # item 4: concrete mitigation (observability, cost modeling, exit criteria)
-    stakeholder_mgmt: bool         # item 5: stakeholder management proactive, not reactive
-    data_point_usado: bool         # item 6: industry data point used naturally
-    experiencia_real: bool         # item 7: connects to real experience (Iris Hub / Venturus)
-    ingles_adequado: bool          # item 8: English mostly fluent and natural
+class LeadershipPhase(BaseModel):
+    starts_with_data_assessment: bool
+    identifies_primary_risk: bool
+    pilot_to_production_awareness: bool
+    concrete_mitigation_plan: bool
+    stakeholder_management: bool
+    connects_to_real_experience: bool
+    english_adequate: bool
     mensagem: str = _MENSAGEM_FIELD
     fase_completa: bool
     observacoes: str
     ingles_erros: StrList
 
 
-class MotivationInterview(BaseModel):
-    especifico_factored: bool              # item 1: references 2+ Factored attributes with understanding
-    conexao_real: bool                     # item 2: draws explicit line between background and Factored
-    nao_pode_obter_em_outro_lugar: bool    # item 3: names what he can't get in current role
-    tom_genuino: bool                      # item 4: tone feels genuine, not rehearsed
-    ingles_adequado: bool                  # item 5: English mostly fluent and natural
+class MotivationPhase(BaseModel):
+    specific_company_knowledge: bool
+    genuine_connection: bool
+    unique_fit: bool
+    authentic_tone: bool
+    english_adequate: bool
     mensagem: str = _MENSAGEM_FIELD
     fase_completa: bool
     observacoes: str
     ingles_erros: StrList
 
 
-class AvaliacaoMarcioQuestions(BaseModel):
+class CandidateQuestionsPhase(BaseModel):
     mensagem: str
     fase_completa: bool
     observacoes: str
 
 
 class Scorecard(BaseModel):
-    score_pitch: int
-    comentario_pitch: str
-    score_CAR: int
-    comentario_CAR: str
-    score_technical: int
+    score_pitch:       int
+    comentario_pitch:  str
+    score_CAR:         int
+    comentario_CAR:    str
+    score_technical:   int
     comentario_technical: str
-    score_leadership: int
+    score_leadership:  int
     comentario_leadership: str
-    score_motivation: int
+    score_motivation:  int
     comentario_motivation: str
-    oportunidades_pitch: StrList
-    oportunidades_CAR: StrList
-    oportunidades_technical: StrList
+    oportunidades_pitch:      StrList
+    oportunidades_CAR:        StrList
+    oportunidades_technical:  StrList
     oportunidades_leadership: StrList
     vocabulario_para_praticar: StrList
-    ingles_rating: str
-    ingles_padroes: StrList
-    score_total: int
-    hire_signal: str
-    forcas: StrList
-    melhorias: StrList
-    insight_chave: str
+    ingles_rating:   str
+    ingles_padroes:  StrList
+    score_total:     int
+    hire_signal:     str
+    forcas:          StrList
+    melhorias:       StrList
+    insight_chave:   str
 
 
 # ---------------------------------------------------------------------------
 # Node factories
 # ---------------------------------------------------------------------------
 
-def _make_interview_node(system_prompt, output_class, checklist_key, notas_key, report_fase):
-    """
-    Interview node: asks questions, coaches, loops until quality gate met.
-    When complete, advances to the corresponding report node — no feedback generated here.
-    """
-    def node(state: EntrevistaState) -> dict:
+def _make_interview_node(output_class, checklist_key, notas_key, report_fase, phase_name):
+    def node(state: EntrevistaState, config: RunnableConfig) -> dict:
+        interview_context = state.get("interview_context", "")
+        system_prompt = _build_interview_system(interview_context, phase_name)
         structured = model.with_structured_output(output_class)
 
         phase_msgs: list = state.get("phase_messages") or [
             HumanMessage(content="I'm ready to start this phase.")
         ]
         messages = [_cached_system(system_prompt)] + phase_msgs
-        avaliacao = structured.invoke(messages)
+        avaliacao = _invoke_with_retry(structured, messages)
 
-        # Merge checklist — fields already True stay True
         old_checklist = state[checklist_key]
         new_checklist = {
             k: old_checklist.get(k, False) or getattr(avaliacao, k, False)
             for k in old_checklist
         }
-
         old_notas = state[notas_key]
         new_notas = (old_notas + "\n" + avaliacao.observacoes).strip() if avaliacao.observacoes else old_notas
-
         old_ingles = state.get("ingles_erros_acumulados", [])
         new_ingles = old_ingles + (avaliacao.ingles_erros or [])
 
-        # Safety guard: if the LLM returned mensagem="OK" but forgot to set
-        # fase_completa=True, treat it as complete — avoids the graph getting
-        # stuck waiting for user input with a bare "OK" as the question.
+        # Safety guard: mensagem="OK" with fase_completa=False → treat as complete
         if avaliacao.mensagem.strip().lower() == "ok" and not avaliacao.fase_completa:
             return {
                 "messages": [],
@@ -384,10 +463,6 @@ def _make_interview_node(system_prompt, output_class, checklist_key, notas_key, 
         if not avaliacao.fase_completa:
             user_response = interrupt(avaliacao.mensagem)
 
-            # Skip bypass: advance directly to the report without a second LLM call.
-            # When LangGraph resumes with "skip", interrupt() returns that value here.
-            # Returning report_fase immediately avoids the extra structured-output call
-            # that would otherwise be needed to re-evaluate the gate with "skip" in context.
             if user_response.strip().lower() in ("skip", "s"):
                 return {
                     "messages": [],
@@ -398,7 +473,7 @@ def _make_interview_node(system_prompt, output_class, checklist_key, notas_key, 
                     checklist_key: new_checklist,
                     notas_key: new_notas,
                     "ingles_erros_acumulados": new_ingles,
-                    "fase": report_fase,  # go straight to report, no second LLM call
+                    "fase": report_fase,
                 }
 
             new_phase_msgs = phase_msgs + [
@@ -414,11 +489,9 @@ def _make_interview_node(system_prompt, output_class, checklist_key, notas_key, 
                 checklist_key: new_checklist,
                 notas_key: new_notas,
                 "ingles_erros_acumulados": new_ingles,
-                "fase": state["fase"],  # stay in interview phase
+                "fase": state["fase"],
             }
 
-        # Quality gate met — route to report node.
-        # phase_messages is preserved intact for the report node to read.
         return {
             "messages": [],
             "phase_messages": phase_msgs,
@@ -428,37 +501,26 @@ def _make_interview_node(system_prompt, output_class, checklist_key, notas_key, 
             "fase": report_fase,
         }
 
-    node.__name__ = f"interview_{checklist_key}"
+    node.__name__ = f"interview_{phase_name}"
     return node
 
 
-def _make_report_node(system_prompt, next_fase):
-    """
-    Report node: pauses via interrupt so api.py can stream the report with model.astream().
-    api.py resumes with the full text; this node archives it and advances.
-    This keeps report generation fast (streaming) without double-calling the LLM.
-    """
-    def node(state: EntrevistaState) -> dict:
+def _make_report_node(phase_name, next_fase):
+    def node(state: EntrevistaState, config: RunnableConfig) -> dict:
         phase_msgs: list = state.get("phase_messages") or []
-
-        # Interrupt here — api.py will stream the report using model.astream() and
-        # resume with the complete text.  We use "[report_ready]" as the signal so
-        # api.py can distinguish this from a regular interview-phase interrupt.
         feedback_text = interrupt("[report_ready]")
-
         new_archive = state.get("archive", []) + phase_msgs + [AIMessage(content=feedback_text)]
-
         return {
             "messages": [
                 AIMessage(content=feedback_text),
                 HumanMessage(content="[acknowledged — ready for next phase]"),
             ],
-            "phase_messages": [],   # fresh slate for next interview node
+            "phase_messages": [],
             "archive": new_archive,
             "fase": next_fase,
         }
 
-    node.__name__ = f"report_to_{next_fase}"
+    node.__name__ = f"report_{phase_name}_to_{next_fase}"
     return node
 
 
@@ -466,51 +528,43 @@ def _make_report_node(system_prompt, next_fase):
 # Nodes
 # ---------------------------------------------------------------------------
 
-# Interview nodes
 elevator_pitch_interview = _make_interview_node(
-    SYSTEM_PITCH_INTERVIEW, PitchInterview,
-    checklist_key="checklist_pitch", notas_key="notas_pitch",
-    report_fase="elevator_pitch_report",
+    ElevatorPitchPhase, "checklist_pitch", "notas_pitch",
+    report_fase="elevator_pitch_report", phase_name="elevator_pitch",
 )
-
 CAR_interview = _make_interview_node(
-    SYSTEM_CAR_INTERVIEW, CARInterview,
-    checklist_key="checklist_CAR", notas_key="notas_CAR",
-    report_fase="CAR_report",
+    CARPhase, "checklist_CAR", "notas_CAR",
+    report_fase="CAR_report", phase_name="CAR",
 )
-
 technical_interview = _make_interview_node(
-    SYSTEM_TECHNICAL_INTERVIEW, TechnicalInterview,
-    checklist_key="checklist_technical", notas_key="notas_technical",
-    report_fase="technical_report",
+    TechnicalPhase, "checklist_technical", "notas_technical",
+    report_fase="technical_report", phase_name="technical",
 )
-
 leadership_interview = _make_interview_node(
-    SYSTEM_LEADERSHIP_INTERVIEW, LeadershipInterview,
-    checklist_key="checklist_leadership", notas_key="notas_leadership",
-    report_fase="leadership_report",
+    LeadershipPhase, "checklist_leadership", "notas_leadership",
+    report_fase="leadership_report", phase_name="leadership",
 )
-
 motivation_interview = _make_interview_node(
-    SYSTEM_MOTIVATION_INTERVIEW, MotivationInterview,
-    checklist_key="checklist_motivation", notas_key="notas_motivation",
-    report_fase="motivation_report",
+    MotivationPhase, "checklist_motivation", "notas_motivation",
+    report_fase="motivation_report", phase_name="motivation",
 )
 
-# Report nodes
-elevator_pitch_report = _make_report_node(SYSTEM_PITCH_REPORT,      next_fase="CAR")
-CAR_report            = _make_report_node(SYSTEM_CAR_REPORT,         next_fase="technical")
-technical_report      = _make_report_node(SYSTEM_TECHNICAL_REPORT,   next_fase="leadership")
-leadership_report     = _make_report_node(SYSTEM_LEADERSHIP_REPORT,  next_fase="motivation")
-motivation_report     = _make_report_node(SYSTEM_MOTIVATION_REPORT,  next_fase="marcio_questions")
+elevator_pitch_report = _make_report_node("elevator_pitch", next_fase="CAR")
+CAR_report            = _make_report_node("CAR",            next_fase="technical")
+technical_report      = _make_report_node("technical",      next_fase="leadership")
+leadership_report     = _make_report_node("leadership",     next_fase="motivation")
+motivation_report     = _make_report_node("motivation",     next_fase="candidate_questions")
 
 
-def marcio_questions(state: EntrevistaState) -> dict:
-    structured = model.with_structured_output(AvaliacaoMarcioQuestions)
+def candidate_questions(state: EntrevistaState, config: RunnableConfig) -> dict:
+    interview_context = state.get("interview_context", "")
+    system_prompt = _build_interview_system(interview_context, "candidate_questions")
+    structured = model.with_structured_output(CandidateQuestionsPhase)
+
     phase_msgs: list = state.get("phase_messages") or [
-        HumanMessage(content="I'm ready to start this phase.")
+        HumanMessage(content="I'm ready to ask my questions.")
     ]
-    messages = [_cached_system(SYSTEM_MARCIO_Q)] + phase_msgs
+    messages = [_cached_system(system_prompt)] + phase_msgs
     avaliacao = structured.invoke(messages)
 
     if not avaliacao.fase_completa:
@@ -525,13 +579,12 @@ def marcio_questions(state: EntrevistaState) -> dict:
                 HumanMessage(content=user_response),
             ],
             "phase_messages": new_phase_msgs,
-            "fase": "marcio_questions",
+            "fase": "candidate_questions",
         }
 
-    # Phase complete — archive transcript, advance to scorecard.
-    # Only show the closing message if it's meaningful (not a bare "OK" from skip).
+    name = state.get("candidate_name") or "the candidate"
     closing_msg = avaliacao.mensagem if avaliacao.mensagem.strip().lower() != "ok" else (
-        "Thank you, Marcio. This has been a really good session. "
+        f"Thank you, {name}. This has been a really strong session. "
         "Let me put together your scorecard."
     )
     completed_transcript = phase_msgs + [AIMessage(content=closing_msg)]
@@ -544,26 +597,29 @@ def marcio_questions(state: EntrevistaState) -> dict:
     }
 
 
-def feedback(state: EntrevistaState) -> dict:
+def feedback(state: EntrevistaState, config: RunnableConfig) -> dict:
+    interview_context = state.get("interview_context", "")
+    system_prompt = _build_scorecard_system(interview_context)
     structured = model.with_structured_output(Scorecard)
+
     archive = state.get("archive", [])
     phase_msgs = state.get("phase_messages") or []
     full_context = archive + phase_msgs
 
-    # Inject the accumulated English error list as an explicit context message
-    # so the scorecard LLM can consolidate patterns across all phases.
     ingles_erros = state.get("ingles_erros_acumulados") or []
     if ingles_erros:
         erros_text = (
-            "ACCUMULATED ENGLISH ERRORS — collected across all interview phases:\n"
+            "ACCUMULATED LANGUAGE ERRORS — collected across all interview phases:\n"
             + "\n".join(f"- {e}" for e in ingles_erros)
         )
         full_context = full_context + [HumanMessage(content=erros_text)]
 
-    messages = [_cached_system(SYSTEM_SCORECARD)] + full_context
-    scorecard: Scorecard = structured.invoke(messages)
+    messages = [_cached_system(system_prompt)] + full_context
+    scorecard: Scorecard = _invoke_with_retry(structured, messages)
 
-    formatted = _format_scorecard(scorecard)
+    job_title = state.get("job_title", "")
+    company   = state.get("company", "")
+    formatted = _format_scorecard(scorecard, job_title=job_title, company=company)
     return {
         "messages": [AIMessage(content=formatted)],
         "fase": "done",
@@ -574,23 +630,29 @@ def feedback(state: EntrevistaState) -> dict:
 # Scorecard formatter
 # ---------------------------------------------------------------------------
 
-def _format_scorecard(s: Scorecard) -> str:
+def _format_scorecard(s: Scorecard, job_title: str = "", company: str = "") -> str:
     def bullets(items: list[str]) -> str:
         return "\n".join(f"  - {item}" for item in items) if items else "  (none identified)"
 
     def numbered(items: list[str]) -> str:
         return "\n".join(f"  {i+1}. {item}" for i, item in enumerate(items)) if items else "  (none identified)"
 
+    header = f"INTERVIEW SCORECARD"
+    if job_title and company:
+        header += f" — {job_title} at {company}"
+    elif job_title:
+        header += f" — {job_title}"
+
     return "\n".join([
         "",
         "============================================",
-        "🎯 INTERVIEW SCORECARD — Factored AI Residency",
+        f"🎯 {header}",
         "============================================",
         "",
         "PART 1 — Elevator Pitch",
         f"Score: {s.score_pitch}/5 | {s.comentario_pitch}",
         "",
-        "PART 2 — CAR Project",
+        "PART 2 — CAR Project Story",
         f"Score: {s.score_CAR}/5 | {s.comentario_CAR}",
         "",
         "PART 3 — Technical Questions",
@@ -623,7 +685,7 @@ def _format_scorecard(s: Scorecard) -> str:
         bullets(s.vocabulario_para_praticar),
         "",
         "--------------------------------------------",
-        "OVERALL ENGLISH PERFORMANCE",
+        "OVERALL COMMUNICATION PERFORMANCE",
         f"Rating: {s.ingles_rating}",
         "Recurring patterns to fix:",
         numbered(s.ingles_padroes),
@@ -646,12 +708,22 @@ def _format_scorecard(s: Scorecard) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Graph
+# Graph — report system prompts exposed for api.py streaming
 # ---------------------------------------------------------------------------
+
+# These are built dynamically per-session; api.py calls _build_report_system()
+# instead of using static globals. The mapping below tells api.py which phase
+# to use for each report node.
+REPORT_PHASE_MAP = {
+    "elevator_pitch_report": "elevator_pitch",
+    "CAR_report":            "CAR",
+    "technical_report":      "technical",
+    "leadership_report":     "leadership",
+    "motivation_report":     "motivation",
+}
 
 builder = StateGraph(EntrevistaState)
 
-# Register all nodes
 for name, fn in [
     ("elevator_pitch",        elevator_pitch_interview),
     ("elevator_pitch_report", elevator_pitch_report),
@@ -663,21 +735,20 @@ for name, fn in [
     ("leadership_report",     leadership_report),
     ("motivation",            motivation_interview),
     ("motivation_report",     motivation_report),
-    ("marcio_questions",      marcio_questions),
+    ("candidate_questions",   candidate_questions),
     ("feedback",              feedback),
 ]:
     builder.add_node(name, fn)
 
 builder.add_edge(START, "elevator_pitch")
 
-# Interview nodes: conditional edge — loop to self or advance to report node
 _INTERVIEW_ROUTING = [
     ("elevator_pitch",   {"elevator_pitch": "elevator_pitch", "elevator_pitch_report": "elevator_pitch_report"}),
     ("CAR",              {"CAR": "CAR", "CAR_report": "CAR_report"}),
     ("technical",        {"technical": "technical", "technical_report": "technical_report"}),
     ("leadership",       {"leadership": "leadership", "leadership_report": "leadership_report"}),
     ("motivation",       {"motivation": "motivation", "motivation_report": "motivation_report"}),
-    ("marcio_questions", {"marcio_questions": "marcio_questions", "feedback": "feedback"}),
+    ("candidate_questions", {"candidate_questions": "candidate_questions", "feedback": "feedback"}),
 ]
 
 for node_name, path_map in _INTERVIEW_ROUTING:
@@ -687,14 +758,12 @@ for node_name, path_map in _INTERVIEW_ROUTING:
         path_map,
     )
 
-# Report nodes: unconditional edge to next interview node
 builder.add_edge("elevator_pitch_report", "CAR")
 builder.add_edge("CAR_report",            "technical")
 builder.add_edge("technical_report",      "leadership")
 builder.add_edge("leadership_report",     "motivation")
-builder.add_edge("motivation_report",     "marcio_questions")
-
-builder.add_edge("feedback", END)
+builder.add_edge("motivation_report",     "candidate_questions")
+builder.add_edge("feedback",              END)
 
 checkpointer = _Checkpointer()
 graph = builder.compile(checkpointer=checkpointer)
@@ -704,58 +773,63 @@ graph = builder.compile(checkpointer=checkpointer)
 # Initial state factory
 # ---------------------------------------------------------------------------
 
-def make_initial_state() -> EntrevistaState:
+def make_initial_state(
+    interview_context: str = "",
+    candidate_name: str = "the candidate",
+    job_title: str = "",
+    company: str = "",
+) -> EntrevistaState:
     return {
         "messages": [HumanMessage(content="Hi, I'm ready to start the interview.")],
         "phase_messages": [HumanMessage(content="Hi, I'm ready to start the interview.")],
         "archive": [],
         "fase": "elevator_pitch",
+        "interview_context": interview_context,
+        "candidate_name": candidate_name,
+        "job_title": job_title,
+        "company": company,
         "checklist_pitch": {
-            "apresentacao_pessoal": False,
-            "phd_como_forca": False,
-            "pesquisa_internacional": False,
-            "software_cv": False,
-            "transicao_industria": False,
-            "venturus_milestone": False,
-            "trabalho_atual_negocio": False,
-            "closing_demo_producao": False,
-            "sem_stack_names": False,
-            "sem_metricas": False,
-            "ingles_adequado": False,
+            "personal_intro_clear": False,
+            "background_framed_as_asset": False,
+            "key_achievement_mentioned": False,
+            "career_narrative_coherent": False,
+            "current_role_in_business_terms": False,
+            "closes_with_differentiator": False,
+            "english_adequate": False,
         },
         "checklist_CAR": {
-            "contexto_negocio": False,
-            "problema_negocio": False,
-            "acoes_pessoais": False,
-            "langfuse_observability": False,
-            "token_optimization": False,
-            "resultado_negocio": False,
+            "business_context_clear": False,
+            "problem_stated_clearly": False,
+            "personal_ownership": False,
+            "specific_actions": False,
+            "deliberate_choices": False,
+            "result_in_business_terms": False,
             "production_mindset": False,
-            "ingles_adequado": False,
+            "english_adequate": False,
         },
         "checklist_technical": {
-            "q1_monitoring": False,
-            "q2_degradacao": False,
-            "q3_rag": False,
-            "producao_mindset": False,
-            "ingles_adequado": False,
+            "q1_answered": False,
+            "q2_answered": False,
+            "q3_answered": False,
+            "answers_show_depth": False,
+            "production_mindset": False,
+            "english_adequate": False,
         },
         "checklist_leadership": {
-            "data_audit": False,
-            "data_como_risco_primario": False,
-            "pilot_producao_gap": False,
-            "mitigacao_concreta": False,
-            "stakeholder_mgmt": False,
-            "data_point_usado": False,
-            "experiencia_real": False,
-            "ingles_adequado": False,
+            "starts_with_data_assessment": False,
+            "identifies_primary_risk": False,
+            "pilot_to_production_awareness": False,
+            "concrete_mitigation_plan": False,
+            "stakeholder_management": False,
+            "connects_to_real_experience": False,
+            "english_adequate": False,
         },
         "checklist_motivation": {
-            "especifico_factored": False,
-            "conexao_real": False,
-            "nao_pode_obter_em_outro_lugar": False,
-            "tom_genuino": False,
-            "ingles_adequado": False,
+            "specific_company_knowledge": False,
+            "genuine_connection": False,
+            "unique_fit": False,
+            "authentic_tone": False,
+            "english_adequate": False,
         },
         "notas_pitch": "",
         "notas_CAR": "",
