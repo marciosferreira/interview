@@ -5,7 +5,7 @@ from botocore.exceptions import ClientError
 _MOCK   = os.getenv("MOCK_EMAIL", "false").lower() == "true"
 _REGION = os.getenv("SES_REGION", "us-east-1")
 _FROM   = os.getenv("SES_FROM_EMAIL", "noreply@yourdomain.com")
-_BASE   = os.getenv("APP_BASE_URL", "http://localhost:8001").rstrip("/")
+_BASE   = os.getenv("APP_BASE_URL", "http://localhost:8000").rstrip("/")
 
 _ses = None
 

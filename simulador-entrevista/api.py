@@ -5,6 +5,9 @@ import os
 import uuid
 from pathlib import Path
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI, HTTPException, UploadFile, WebSocket, WebSocketDisconnect, Depends
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
