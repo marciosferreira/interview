@@ -8,6 +8,7 @@
     "signin": "Sign in",
     "getStarted": "Get started free",
     "settings": "⚙️ Settings",
+    "settingsLabel": "Settings",
     "signout": "Sign out"
   },
   "landing": {
@@ -61,7 +62,7 @@
   },
   "profile": {
     "pageTitle": "Profile Settings — Acing Interview",
-    "header": { "tagline": "Account settings", "backBtn": "← Back to interview" },
+    "header": { "tagline": "Account settings", "backBtn": "← Back to interview", "backBtnLabel": "Back to interview" },
     "pageHeading": "Profile Settings",
     "pageSub": "Manage your account details and password.",
     "plan": {
@@ -145,7 +146,7 @@
     "pageTitle": "Interview History — Acing Interview",
     "header": { "tagline": "Interview history" },
     "nav": {
-      "current": "← Current interview",
+      "current": "← Current interview", "currentLabel": "Current interview",
       "newInterview": "＋ New interview"
     },
     "pageHeading": "Past interviews",

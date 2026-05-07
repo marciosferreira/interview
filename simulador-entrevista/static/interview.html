@@ -126,6 +126,10 @@
     .drawer-divider { height: 1px; background: #2d3148; margin: 4px 0; }
 
     /* ── Mobile header ── */
+    /* ── Phase mobile label ── */
+    #phase-mobile-label {
+      display: none;
+    }
     @media (max-width: 768px) {
       header { padding: 10px 12px; gap: 8px; }
       .home-link > div { display: none; }
@@ -137,6 +141,17 @@
       .ps-label { display: none; }
       .phase-connector { min-width: 4px; max-width: 16px; }
       #phase-bar { padding: 0 12px; }
+      /* Current phase label below bar */
+      #phase-mobile-label {
+        display: block;
+        text-align: center;
+        font-size: 11px; font-weight: 600;
+        color: #a78bfa;
+        padding: 3px 12px 5px;
+        background: #13151f;
+        border-bottom: 1px solid #2d3148;
+        letter-spacing: 0.03em;
+      }
       /* Input area */
       #input-area { padding: 10px 12px; }
     }
@@ -608,7 +623,7 @@
       <span>Menu</span>
       <button class="drawer-close">✕</button>
     </div>
-    <a class="drawer-item" href="/profile.html"><span class="di-icon">⚙️</span> <span data-i18n="nav.settings">Settings</span></a>
+    <a class="drawer-item" href="/profile.html"><span class="di-icon">⚙️</span> <span data-i18n="nav.settingsLabel">Settings</span></a>
     <a class="drawer-item" href="/tips.html"><span class="di-icon">💡</span> <span data-i18n="nav.tipsLabel">Tips</span></a>
     <a class="drawer-item" href="/history.html"><span class="di-icon">📋</span> <span data-i18n="history.nav.current">History</span></a>
     <div class="drawer-divider"></div>
@@ -636,6 +651,7 @@
     <div class="phase-step" data-step="6"><span class="ps-dot"></span><span class="ps-label" data-i18n="interview.phases.scorecard">Scorecard</span></div>
   </div>
 </nav>
+<div id="phase-mobile-label"></div>
 
 <!-- Floating TTS player pill -->
 <div id="tts-player">
@@ -693,6 +709,7 @@
   // ── Phase progress bar + fase tracking ─────────────────────────────
   let _currentFase = '';
 
+  const _mobilePhaseLbl = document.getElementById('phase-mobile-label');
   function setPhase(fase) {
     _currentFase = fase;
     const active = FASE_TO_STEP[fase] ?? -1;
@@ -705,6 +722,10 @@
       const c = parseInt(el.dataset.conn, 10);
       el.classList.toggle('done', c < active);
     });
+    if (_mobilePhaseLbl) {
+      const activeStep = document.querySelector('.phase-step.active .ps-label');
+      _mobilePhaseLbl.textContent = activeStep ? activeStep.textContent : '';
+    }
     // Persist phase into SESSION_KEY + HISTORY_KEY
     const raw = _loadRaw();
     if (raw) {
@@ -1767,6 +1788,9 @@
     pill.textContent = t('interview.tapToEnable');
     overlay.appendChild(pill);
     document.body.appendChild(overlay);
+    document.addEventListener('i18n:ready', () => {
+      pill.textContent = t('interview.tapToEnable');
+    }, { once: true });
   }
 </script>
 <script>

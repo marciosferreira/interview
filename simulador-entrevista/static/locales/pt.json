@@ -8,6 +8,7 @@
     "signin": "Entrar",
     "getStarted": "Começar grátis",
     "settings": "⚙️ Configurações",
+    "settingsLabel": "Configurações",
     "signout": "Sair"
   },
   "landing": {
@@ -61,7 +62,7 @@
   },
   "profile": {
     "pageTitle": "Configurações — Acing Interview",
-    "header": { "tagline": "Configurações da conta", "backBtn": "← Voltar para a entrevista" },
+    "header": { "tagline": "Configurações da conta", "backBtn": "← Voltar para a entrevista", "backBtnLabel": "Voltar para a entrevista" },
     "pageHeading": "Configurações do Perfil",
     "pageSub": "Gerencie seus dados e senha.",
     "plan": {
@@ -145,7 +146,7 @@
     "pageTitle": "Histórico de Entrevistas — Acing Interview",
     "header": { "tagline": "Histórico de entrevistas" },
     "nav": {
-      "current": "← Entrevista atual",
+      "current": "← Entrevista atual", "currentLabel": "Entrevista atual",
       "newInterview": "＋ Nova entrevista"
     },
     "pageHeading": "Entrevistas anteriores",
