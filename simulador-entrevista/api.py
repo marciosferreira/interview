@@ -312,15 +312,15 @@ async def stripe_webhook(request: Request):
     except _stripe.error.SignatureVerificationError:
         raise HTTPException(status_code=400, detail="Invalid signature")
 
-    etype = event["type"]
-    data  = event["data"]["object"]
-    print(f"[Stripe] received event: {etype} id={event.get('id')}")
-
     try:
+        etype = event["type"]
+        data  = event["data"]["object"]
+        print(f"[Stripe] received event: {etype} id={event.id}")
         _handle_stripe_event(etype, data)
     except Exception:
-        print(f"[Stripe] ERROR handling {etype}:\n{traceback.format_exc()}")
-        # Still return 200 so Stripe doesn't retry — error is logged above.
+        tb = traceback.format_exc()
+        print(f"[Stripe] UNHANDLED ERROR:\n{tb}")
+        return {"ok": False, "error": tb}
 
     return {"ok": True}
 
@@ -333,7 +333,7 @@ def _find_user_for_customer(customer_id: str) -> Optional[dict]:
     # Fallback: fetch customer from Stripe and match by email.
     try:
         cus = _stripe.Customer.retrieve(customer_id)
-        email = cus.get("email") or ""
+        email = _sg(cus, "email") or ""
         if email:
             user = get_user_by_email(_conn, email)
             if user:
@@ -343,11 +343,20 @@ def _find_user_for_customer(customer_id: str) -> Optional[dict]:
     return user
 
 
+def _sg(obj, key, default=None):
+    """Safe getter for Stripe SDK v15 typed objects that lack .get()."""
+    try:
+        return getattr(obj, key, default)
+    except Exception:
+        return default
+
+
 def _handle_stripe_event(etype: str, data) -> None:
     if etype == "checkout.session.completed":
-        user_id         = data.get("client_reference_id") or (data.get("metadata") or {}).get("user_id")
-        customer_id     = data.get("customer")
-        subscription_id = data.get("subscription")
+        meta            = _sg(data, "metadata") or {}
+        user_id         = _sg(data, "client_reference_id") or meta.get("user_id")
+        customer_id     = _sg(data, "customer")
+        subscription_id = _sg(data, "subscription")
         print(f"[Stripe] checkout.session.completed user_id={user_id} customer={customer_id} sub={subscription_id}")
         if user_id and customer_id:
             upgrade_plan(_conn, user_id, "hunter")
@@ -358,17 +367,17 @@ def _handle_stripe_event(etype: str, data) -> None:
 
     elif etype in ("invoice_payment.paid", "invoice.paid"):
         # invoice_payment.paid (new API) has no customer field — must fetch invoice.
-        invoice_id      = data.get("invoice") or data.get("id")
-        customer_id     = data.get("customer")
-        subscription_id = data.get("subscription")
+        invoice_id      = _sg(data, "invoice") or _sg(data, "id")
+        customer_id     = _sg(data, "customer")
+        subscription_id = _sg(data, "subscription")
         print(f"[Stripe] {etype} invoice={invoice_id} customer={customer_id}")
 
         # Resolve customer_id and subscription_id from the invoice if missing.
         if invoice_id and (not customer_id or not subscription_id):
             try:
                 inv             = _stripe.Invoice.retrieve(invoice_id)
-                customer_id     = customer_id or inv.get("customer")
-                subscription_id = subscription_id or inv.get("subscription")
+                customer_id     = customer_id or _sg(inv, "customer")
+                subscription_id = subscription_id or _sg(inv, "subscription")
                 print(f"[Stripe] fetched invoice → customer={customer_id} sub={subscription_id}")
             except Exception as exc:
                 print(f"[Stripe] could not fetch invoice {invoice_id}: {exc}")
@@ -393,7 +402,7 @@ def _handle_stripe_event(etype: str, data) -> None:
             print(f"[Stripe] {etype} → user {user['id']} already hunter")
 
     elif etype == "customer.subscription.deleted":
-        customer_id = data.get("customer")
+        customer_id = _sg(data, "customer")
         user = _find_user_for_customer(customer_id) if customer_id else None
         if user:
             upgrade_plan(_conn, user["id"], "free")
@@ -402,16 +411,16 @@ def _handle_stripe_event(etype: str, data) -> None:
             print(f"[Stripe] subscription.deleted → downgraded user {user['id']} to free")
 
     elif etype == "customer.subscription.updated":
-        customer_id = data.get("customer")
-        status      = data.get("status")
+        customer_id = _sg(data, "customer")
+        status      = _sg(data, "status")
         user = _find_user_for_customer(customer_id) if customer_id else None
         if user and status not in ("active", "trialing"):
             upgrade_plan(_conn, user["id"], "free")
             print(f"[Stripe] subscription.updated status={status} → downgraded user {user['id']} to free")
 
     elif etype == "invoice.payment_failed":
-        customer_id = data.get("customer")
-        attempt     = data.get("attempt_count", 1)
+        customer_id = _sg(data, "customer")
+        attempt     = _sg(data, "attempt_count") or 1
         print(f"[Stripe] payment failed (attempt {attempt}) for customer {customer_id}")
 
     else:
