@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Profile Settings — Interview Coach</title>
+  <title data-i18n="profile.pageTitle">Profile Settings — Interview Coach</title>
+  <script src="/i18n.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -33,9 +34,8 @@
     .plan-pill {
       font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
       text-transform: uppercase; padding: 3px 10px; border-radius: 20px;
-      flex-shrink: 0; display: none;
+      flex-shrink: 0; display: none; position: relative; cursor: default;
     }
-    .plan-pill { position: relative; cursor: default; }
     .plan-pill.hunter  { background: #312e81; color: #a5b4fc; }
     .plan-pill.explorer { background: #1e293b; color: #64748b; }
     .plan-pill::after {
@@ -46,7 +46,7 @@
       white-space: nowrap; padding: 5px 10px; border-radius: 8px;
       pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 999;
     }
-    .plan-pill:hover::after, .plan-pill.tooltip-open::after { opacity: 1; }
+    .plan-pill:hover::after { opacity: 1; }
     .hdr-btn {
       font-size: 11px; font-weight: 500;
       padding: 5px 12px; border-radius: 20px;
@@ -63,14 +63,14 @@
     .page-title { font-size: 20px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px; }
     .page-sub { font-size: 13px; color: #475569; margin-bottom: 32px; }
 
-    /* Verification banner */
     #verify-banner {
       display: none; margin-bottom: 24px;
       background: #1c1700; border: 1px solid #854d0e;
       border-radius: 12px; padding: 14px 18px;
-      display: flex; align-items: center; gap: 12px;
+      align-items: center; gap: 12px;
     }
     #verify-banner.hidden { display: none !important; }
+    #verify-banner.show   { display: flex; }
     .banner-text { flex: 1; font-size: 13px; color: #fbbf24; line-height: 1.5; }
     .banner-text strong { display: block; margin-bottom: 2px; }
     #resend-btn {
@@ -130,6 +130,18 @@
       animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 5px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Language switcher */
+    .lang-row { display: flex; gap: 8px; }
+    .lang-btn {
+      flex: 1; padding: 10px 16px;
+      border: 1px solid #2d3148; border-radius: 8px;
+      background: transparent; color: #64748b;
+      font-size: 13px; font-weight: 500; cursor: pointer;
+      transition: all 0.2s; text-align: center;
+    }
+    .lang-btn:hover { border-color: #6366f1; color: #a78bfa; }
+    .lang-btn.lang-active { background: #312e81; border-color: #6366f1; color: #818cf8; }
   </style>
 </head>
 <body>
@@ -137,78 +149,91 @@
 <header>
   <a class="home-link" href="/">
     <div class="logo">🎯</div>
-    <div><h1>Interview Coach</h1><p>Account settings</p></div>
+    <div><h1>Interview Coach</h1><p data-i18n="profile.header.tagline">Account settings</p></div>
   </a>
   <span id="plan-pill" class="plan-pill" style="margin-left:auto"></span>
-  <a class="hdr-btn" href="/interview.html">← Back to interview</a>
+  <a class="hdr-btn" href="/interview.html" data-i18n="profile.header.backBtn">← Back to interview</a>
 </header>
 
 <main>
-  <div class="page-title">Profile Settings</div>
-  <div class="page-sub">Manage your account details and password.</div>
+  <div class="page-title" data-i18n="profile.pageHeading">Profile Settings</div>
+  <div class="page-sub" data-i18n="profile.pageSub">Manage your account details and password.</div>
 
   <!-- Plan banner -->
-  <div id="plan-banner" style="display:none;margin-bottom:24px;background:#1a1d27;border:1px solid #2d3148;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px">
+  <div id="plan-banner" style="display:none;margin-bottom:24px;background:#1a1d27;border:1px solid #2d3148;border-radius:12px;padding:14px 18px;align-items:center;gap:12px">
     <div style="flex:1">
-      <div style="font-size:12px;color:#64748b;margin-bottom:2px">Current plan</div>
+      <div id="plan-banner-label" style="font-size:12px;color:#64748b;margin-bottom:2px" data-i18n="profile.plan.currentPlan">Current plan</div>
       <div id="plan-name" style="font-size:15px;font-weight:700;color:#f1f5f9"></div>
     </div>
     <div id="plan-usage" style="font-size:12px;color:#64748b;text-align:right;margin-right:8px"></div>
-    <a id="plan-upgrade-link" href="/upgrade.html" style="display:none;font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;border:1px solid #6366f1;color:#a78bfa;text-decoration:none;white-space:nowrap;transition:all 0.2s">Upgrade →</a>
-    <button id="plan-downgrade-btn" style="display:none;font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;border:1px solid #3d1515;background:transparent;color:#f87171;cursor:pointer;white-space:nowrap;transition:all 0.2s" onmouseover="this.style.background='#3d1515'" onmouseout="this.style.background='transparent'">Downgrade</button>
+    <a id="plan-upgrade-link" href="/upgrade.html" style="display:none;font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;border:1px solid #6366f1;color:#a78bfa;text-decoration:none;white-space:nowrap" data-i18n="profile.plan.upgrade">Upgrade →</a>
+    <button id="plan-downgrade-btn" style="display:none;font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;border:1px solid #3d1515;background:transparent;color:#f87171;cursor:pointer;white-space:nowrap" onmouseover="this.style.background='#3d1515'" onmouseout="this.style.background='transparent'" data-i18n="profile.plan.downgrade">Downgrade</button>
   </div>
 
   <!-- Email verification banner -->
   <div id="verify-banner" class="hidden">
     <span style="font-size:20px">✉️</span>
     <div class="banner-text">
-      <strong>Please verify your email address</strong>
-      You must verify your email to continue past the Elevator Pitch phase.
+      <strong data-i18n="profile.verify.title">Please verify your email address</strong>
+      <span data-i18n="profile.verify.body">You must verify your email to continue past the Elevator Pitch phase.</span>
     </div>
-    <button id="resend-btn">Resend email</button>
+    <button id="resend-btn" data-i18n="profile.verify.resend">Resend email</button>
   </div>
 
   <!-- Profile section -->
   <div class="section">
-    <div class="section-title">Profile</div>
+    <div class="section-title" data-i18n="profile.sections.profile">Profile</div>
     <div class="msg" id="profile-msg"></div>
     <form id="profile-form">
-      <label for="name">Full name</label>
-      <input type="text" id="name" placeholder="Your name" autocomplete="name" />
+      <label for="name" data-i18n="profile.fields.name">Full name</label>
+      <input type="text" id="name" data-i18n-attr="placeholder:profile.fields.namePlaceholder" placeholder="Your name" autocomplete="name" />
 
-      <label for="email">Email</label>
-      <input type="email" id="email" placeholder="you@example.com" autocomplete="email" />
-      <div class="field-hint">Changing your email will require re-verification and needs your current password.</div>
+      <label for="email" data-i18n="profile.fields.email">Email</label>
+      <input type="email" id="email" data-i18n-attr="placeholder:profile.fields.emailPlaceholder" placeholder="you@example.com" autocomplete="email" />
+      <div class="field-hint" data-i18n="profile.fields.emailHint">Changing your email will require re-verification and needs your current password.</div>
 
-      <label for="cur-pw-profile">Current password <span style="color:#475569">(required only when changing email)</span></label>
-      <input type="password" id="cur-pw-profile" placeholder="••••••••" autocomplete="current-password" />
+      <label for="cur-pw-profile">
+        <span data-i18n="profile.fields.currentPw">Current password</span>
+        <span style="color:#475569"> (<span data-i18n="profile.fields.currentPwHint">required only when changing email</span>)</span>
+      </label>
+      <input type="password" id="cur-pw-profile" data-i18n-attr="placeholder:profile.fields.pwPlaceholder" placeholder="••••••••" autocomplete="current-password" />
 
-      <button class="btn" type="submit" id="profile-btn">Save changes</button>
+      <button class="btn" type="submit" id="profile-btn" data-i18n="profile.buttons.save">Save changes</button>
     </form>
   </div>
 
   <!-- Password section -->
   <div class="section">
-    <div class="section-title">Change Password</div>
+    <div class="section-title" data-i18n="profile.sections.password">Change Password</div>
     <div class="msg" id="pw-msg"></div>
     <form id="pw-form">
-      <label for="cur-pw">Current password</label>
-      <input type="password" id="cur-pw" placeholder="••••••••" autocomplete="current-password" />
+      <label for="cur-pw" data-i18n="profile.fields.currentPw">Current password</label>
+      <input type="password" id="cur-pw" data-i18n-attr="placeholder:profile.fields.pwPlaceholder" placeholder="••••••••" autocomplete="current-password" />
 
-      <label for="new-pw">New password</label>
-      <input type="password" id="new-pw" placeholder="At least 8 characters" autocomplete="new-password" />
+      <label for="new-pw" data-i18n="profile.fields.newPw">New password</label>
+      <input type="password" id="new-pw" data-i18n-attr="placeholder:profile.fields.newPwPlaceholder" placeholder="At least 8 characters" autocomplete="new-password" />
 
-      <label for="confirm-pw">Confirm new password</label>
-      <input type="password" id="confirm-pw" placeholder="Repeat new password" autocomplete="new-password" />
+      <label for="confirm-pw" data-i18n="profile.fields.confirmPw">Confirm new password</label>
+      <input type="password" id="confirm-pw" data-i18n-attr="placeholder:profile.fields.repeatPwPlaceholder" placeholder="Repeat new password" autocomplete="new-password" />
 
-      <button class="btn" type="submit" id="pw-btn">Update password</button>
+      <button class="btn" type="submit" id="pw-btn" data-i18n="profile.buttons.updatePw">Update password</button>
     </form>
+  </div>
+
+  <!-- Language section -->
+  <div class="section">
+    <div class="section-title" data-i18n="profile.sections.language">Language</div>
+    <p style="font-size:13px;color:#64748b;margin-bottom:16px" data-i18n="profile.langHint">Choose the language for the interface.</p>
+    <div class="lang-row">
+      <button class="lang-btn" data-lang="en" onclick="saveLang('en')">🇺🇸 English</button>
+      <button class="lang-btn" data-lang="pt" onclick="saveLang('pt')">🇧🇷 Português</button>
+    </div>
   </div>
 
   <!-- Logout section -->
   <div class="section">
-    <div class="section-title">Session</div>
-    <button class="logout-btn" id="logout-btn">Sign out of all devices</button>
+    <div class="section-title" data-i18n="profile.sections.session">Session</div>
+    <button class="logout-btn" id="logout-btn" data-i18n="profile.buttons.signOut">Sign out of all devices</button>
   </div>
 </main>
 
@@ -225,12 +250,28 @@
     el.style.display = 'block';
   }
 
-  // Load current user data
+  async function saveLang(lang) {
+    i18n.switchLang(lang);
+    try {
+      const res = await fetch('/auth/profile', {
+        method: 'PUT',
+        headers: _authHeader,
+        body: JSON.stringify({ language: lang }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const user = JSON.parse(localStorage.getItem('auth_user') || '{}');
+        user.language = data.language || lang;
+        localStorage.setItem('auth_user', JSON.stringify(user));
+      }
+    } catch (_) {}
+  }
+
   async function loadUser() {
     try {
       const [meRes, usageRes] = await Promise.all([
-        fetch('/auth/me',      { headers: { 'Authorization': `Bearer ${_token}` } }),
-        fetch('/auth/usage',   { headers: { 'Authorization': `Bearer ${_token}` } }),
+        fetch('/auth/me',    { headers: { 'Authorization': `Bearer ${_token}` } }),
+        fetch('/auth/usage', { headers: { 'Authorization': `Bearer ${_token}` } }),
       ]);
       if (!meRes.ok) { location.replace('/login.html'); return; }
       const user  = await meRes.json();
@@ -240,19 +281,20 @@
       document.getElementById('email').value = user.email || '';
 
       if (!user.email_verified) {
-        document.getElementById('verify-banner').classList.remove('hidden');
+        const banner = document.getElementById('verify-banner');
+        banner.classList.remove('hidden');
+        banner.classList.add('show');
       }
 
-      // Plan banner
       if (usage) {
         const planBanner = document.getElementById('plan-banner');
         planBanner.style.display = 'flex';
         const isHunter = usage.plan === 'hunter';
         document.getElementById('plan-name').innerHTML = isHunter
-          ? '🎯 Hunter <span style="font-size:11px;font-weight:500;background:#3730a3;color:#a5b4fc;padding:2px 8px;border-radius:20px;margin-left:6px">Active</span>'
-          : '🗺️ Explorer <span style="font-size:11px;font-weight:500;background:#1e293b;color:#64748b;padding:2px 8px;border-radius:20px;margin-left:6px">Free</span>';
+          ? `🎯 Hunter <span style="font-size:11px;font-weight:500;background:#3730a3;color:#a5b4fc;padding:2px 8px;border-radius:20px;margin-left:6px">${t('profile.plan.active')}</span>`
+          : `🗺️ Explorer <span style="font-size:11px;font-weight:500;background:#1e293b;color:#64748b;padding:2px 8px;border-radius:20px;margin-left:6px">${t('profile.plan.free')}</span>`;
         document.getElementById('plan-usage').textContent =
-          `${usage.used} / ${usage.limit} interviews this week`;
+          t('profile.plan.usage', { used: usage.used, limit: usage.limit });
         if (!isHunter) document.getElementById('plan-upgrade-link').style.display = '';
         if (isHunter)  document.getElementById('plan-downgrade-btn').style.display = '';
       }
@@ -260,11 +302,10 @@
   }
   loadUser();
 
-  // Resend verification
   document.getElementById('resend-btn').addEventListener('click', async () => {
     const btn = document.getElementById('resend-btn');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span>Sending…';
+    btn.innerHTML = `<span class="spinner"></span>${t('profile.verify.sending')}`;
     try {
       const res  = await fetch('/auth/send-verification', {
         method: 'POST', headers: { 'Authorization': `Bearer ${_token}` },
@@ -274,24 +315,23 @@
         const link = `${location.origin}/verify-email.html?token=${data.dev_token}`;
         alert(`[DEV] Verification link:\n${link}`);
       } else {
-        btn.textContent = '✓ Email sent';
-        setTimeout(() => { btn.disabled = false; btn.textContent = 'Resend email'; }, 5000);
+        btn.textContent = t('profile.verify.sent');
+        setTimeout(() => { btn.disabled = false; btn.textContent = t('profile.verify.resend'); }, 5000);
         return;
       }
     } catch {
-      alert('Failed to send email — please try again.');
+      alert(t('profile.msgs.errorSend'));
     }
     btn.disabled = false;
-    btn.textContent = 'Resend email';
+    btn.textContent = t('profile.verify.resend');
   });
 
-  // Profile form
   document.getElementById('profile-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     document.getElementById('profile-msg').style.display = 'none';
     const btn = document.getElementById('profile-btn');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span>Saving…';
+    btn.innerHTML = `<span class="spinner"></span>${t('profile.msgs.saving')}`;
 
     const body = {
       name:             document.getElementById('name').value.trim() || undefined,
@@ -304,14 +344,15 @@
         method: 'PUT', headers: _authHeader, body: JSON.stringify(body),
       });
       const data = await res.json();
-      if (!res.ok) { showMsg('profile-msg', data.detail || 'Update failed.', 'error'); return; }
+      if (!res.ok) { showMsg('profile-msg', data.detail || t('profile.msgs.errorDefault'), 'error'); return; }
       showMsg('profile-msg', data.email_changed
-        ? 'Profile updated. A verification email was sent to your new address.'
-        : 'Profile updated successfully.', 'success');
+        ? t('profile.msgs.savedEmailChanged')
+        : t('profile.msgs.savedProfile'), 'success');
       if (data.email_changed) {
-        document.getElementById('verify-banner').classList.remove('hidden');
+        const banner = document.getElementById('verify-banner');
+        banner.classList.remove('hidden');
+        banner.classList.add('show');
       }
-      // Update cached user
       try {
         const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
         if (u) {
@@ -322,25 +363,24 @@
         }
       } catch {}
     } catch {
-      showMsg('profile-msg', 'Network error — please try again.', 'error');
+      showMsg('profile-msg', t('profile.msgs.errorNetwork'), 'error');
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Save changes';
+      btn.textContent = t('profile.buttons.save');
     }
   });
 
-  // Password form
   document.getElementById('pw-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     document.getElementById('pw-msg').style.display = 'none';
     const newPw  = document.getElementById('new-pw').value;
     const confPw = document.getElementById('confirm-pw').value;
-    if (newPw !== confPw) { showMsg('pw-msg', 'Passwords do not match.', 'error'); return; }
-    if (newPw.length < 8) { showMsg('pw-msg', 'Password must be at least 8 characters.', 'error'); return; }
+    if (newPw !== confPw) { showMsg('pw-msg', t('profile.msgs.mismatch'), 'error'); return; }
+    if (newPw.length < 8) { showMsg('pw-msg', t('profile.msgs.tooShort'), 'error'); return; }
 
     const btn = document.getElementById('pw-btn');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span>Saving…';
+    btn.innerHTML = `<span class="spinner"></span>${t('profile.msgs.saving')}`;
 
     try {
       const res  = await fetch('/auth/profile', {
@@ -351,42 +391,40 @@
         }),
       });
       const data = await res.json();
-      if (!res.ok) { showMsg('pw-msg', data.detail || 'Update failed.', 'error'); return; }
-      showMsg('pw-msg', 'Password updated successfully.', 'success');
+      if (!res.ok) { showMsg('pw-msg', data.detail || t('profile.msgs.errorDefault'), 'error'); return; }
+      showMsg('pw-msg', t('profile.msgs.savedPw'), 'success');
       document.getElementById('pw-form').reset();
     } catch {
-      showMsg('pw-msg', 'Network error — please try again.', 'error');
+      showMsg('pw-msg', t('profile.msgs.errorNetwork'), 'error');
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Update password';
+      btn.textContent = t('profile.buttons.updatePw');
     }
   });
 
-  // Downgrade
   document.getElementById('plan-downgrade-btn').addEventListener('click', async () => {
-    if (!confirm('Downgrade to Explorer? You\'ll be limited to 3 interviews per week, effective immediately.')) return;
+    if (!confirm(t('profile.confirm.downgrade'))) return;
     const btn = document.getElementById('plan-downgrade-btn');
     btn.disabled = true;
-    btn.textContent = 'Downgrading…';
+    btn.textContent = t('profile.plan.downgrading');
     try {
       const res  = await fetch('/auth/downgrade', {
         method: 'POST', headers: { 'Authorization': `Bearer ${_token}` },
       });
       const data = await res.json();
-      if (!res.ok) { alert(data.detail || 'Downgrade failed.'); btn.disabled = false; btn.textContent = 'Downgrade'; return; }
+      if (!res.ok) { alert(data.detail || t('profile.msgs.errorDefault')); btn.disabled = false; btn.textContent = t('profile.plan.downgrade'); return; }
       try {
         const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
         if (u) { u.plan = 'free'; localStorage.setItem('auth_user', JSON.stringify(u)); }
       } catch {}
       location.reload();
     } catch {
-      alert('Network error — please try again.');
+      alert(t('profile.msgs.errorNetwork'));
       btn.disabled = false;
-      btn.textContent = 'Downgrade';
+      btn.textContent = t('profile.plan.downgrade');
     }
   });
 
-  // Logout
   document.getElementById('logout-btn').addEventListener('click', () => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
@@ -411,5 +449,6 @@
   } catch(_){}
 })();
 </script>
+<script src="/contact-widget.js"></script>
 </body>
 </html>

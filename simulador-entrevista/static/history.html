@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Interview History — Interview Coach</title>
+  <title data-i18n="history.pageTitle">Interview History — Interview Coach</title>
+  <script src="/i18n.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -225,19 +226,19 @@
     <div class="logo">🎯</div>
     <div>
       <h1>Interview Coach</h1>
-      <p>Interview history</p>
+      <p data-i18n="history.header.tagline">Interview history</p>
     </div>
   </a>
   <span id="plan-pill" class="plan-pill"></span>
-  <a id="back-btn" class="hdr-btn back" href="/interview.html">← Current interview</a>
-  <a class="hdr-btn" href="/tips.html">💡 Tips</a>
-  <a class="hdr-btn settings" href="/profile.html">⚙️ Settings</a>
-  <button id="new-btn" class="hdr-btn new" onclick="newInterview()">＋ New interview</button>
+  <a id="back-btn" class="hdr-btn back" href="/interview.html" data-i18n="history.nav.current">← Current interview</a>
+  <a class="hdr-btn" href="/tips.html" data-i18n="nav.tips">💡 Tips</a>
+  <a class="hdr-btn settings" href="/profile.html" data-i18n="nav.settings">⚙️ Settings</a>
+  <button id="new-btn" class="hdr-btn new" onclick="newInterview()" data-i18n="history.nav.newInterview">＋ New interview</button>
 </header>
 
 <main>
-  <div class="page-title">Past interviews</div>
-  <div class="page-sub" id="page-sub">Loading…</div>
+  <div class="page-title" data-i18n="history.pageHeading">Past interviews</div>
+  <div class="page-sub" id="page-sub"></div>
   <div id="session-list"></div>
 </main>
 
@@ -248,31 +249,35 @@
   const SESSION_KEY = 'interview_v1';
   let _sessionList  = [];
 
-  const FASE_LABEL = {
-    elevator_pitch:        'Elevator Pitch',
-    elevator_pitch_report: 'Elevator Pitch — review',
-    CAR:                   'CAR Story',
-    CAR_report:            'CAR Story — review',
-    technical:             'Technical Questions',
-    technical_report:      'Technical — review',
-    leadership:            'Leadership Questions',
-    leadership_report:     'Leadership — review',
-    motivation:            'Motivation Questions',
-    motivation_report:     'Motivation — review',
-    candidate_questions:   'Your Questions',
-    feedback:              'Final Scorecard',
-    done:                  'Completed',
-  };
+  function getFaseLabel(fase) {
+    const map = {
+      elevator_pitch:        t('history.phases.elevator_pitch'),
+      elevator_pitch_report: t('history.phases.elevator_pitch_report'),
+      CAR:                   t('history.phases.CAR'),
+      CAR_report:            t('history.phases.CAR_report'),
+      technical:             t('history.phases.technical'),
+      technical_report:      t('history.phases.technical_report'),
+      leadership:            t('history.phases.leadership'),
+      leadership_report:     t('history.phases.leadership_report'),
+      motivation:            t('history.phases.motivation'),
+      motivation_report:     t('history.phases.motivation_report'),
+      candidate_questions:   t('history.phases.candidate_questions'),
+      feedback:              t('history.phases.feedback'),
+      done:                  t('history.phases.done'),
+    };
+    return map[fase] || fase || t('history.phases.starting');
+  }
 
   function _fmt(ts) {
     if (!ts) return '—';
     const d = new Date(ts), now = new Date();
+    const lang = i18n.currentLang();
     const diffDays = Math.floor((now - d) / 86400000);
-    const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    if (diffDays === 0) return `Today at ${time}`;
-    if (diffDays === 1) return `Yesterday at ${time}`;
-    if (diffDays < 7)  return `${d.toLocaleDateString([], { weekday: 'long' })} at ${time}`;
-    return d.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) + ` at ${time}`;
+    const time = d.toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' });
+    if (diffDays === 0) return t('history.date.today', { time });
+    if (diffDays === 1) return t('history.date.yesterday', { time });
+    if (diffDays < 7)  return `${d.toLocaleDateString(lang, { weekday: 'long' })} ${t('history.date.at')} ${time}`;
+    return d.toLocaleDateString(lang, { month: 'short', day: 'numeric', year: 'numeric' }) + ` ${t('history.date.at')} ${time}`;
   }
 
   function _msgCount(history) {
@@ -349,7 +354,7 @@
 
   function _buildSessionCard(s) {
     const isDone    = s.fase === 'done';
-    const phaseText = FASE_LABEL[s.fase] || (s.fase || 'Starting…');
+    const phaseText = getFaseLabel(s.fase);
     const turns     = _msgCount(s.history);
 
     const card = document.createElement('div');
@@ -360,15 +365,15 @@
       <div class="session-body">
         <div class="session-row1">
           <span class="session-date">${_fmt(s.startedAt)}</span>
-          <span class="session-badge ${isDone ? 'done' : 'progress'}">${isDone ? 'Completed' : 'In progress'}</span>
+          <span class="session-badge ${isDone ? 'done' : 'progress'}">${isDone ? t('history.badges.completed') : t('history.badges.inProgress')}</span>
         </div>
         <div class="session-row2">
           <span class="session-phase">${_escHtml(phaseText)}</span>
-          <span class="session-msgs">· ${turns} answer${turns !== 1 ? 's' : ''}</span>
+          <span class="session-msgs">· ${turns} ${turns !== 1 ? t('history.session.answers') : t('history.session.answer')}</span>
         </div>
       </div>
       <div class="session-actions">
-        <span class="continue-btn">${isDone ? '📖 Review' : '▶ Continue'}</span>
+        <span class="continue-btn">${isDone ? t('history.session.review') : t('history.session.continue')}</span>
         <button class="delete-btn" title="Delete">🗑</button>
       </div>`;
 
@@ -397,16 +402,16 @@
       listEl.innerHTML = `
         <div class="empty-state">
           <div class="empty-icon">🎤</div>
-          <div class="empty-title">No interviews yet</div>
-          <div class="empty-sub">Start your first mock interview to see your history here.</div>
-          <a class="start-btn" href="/onboarding.html">Start interview</a>
+          <div class="empty-title">${t('history.empty.title')}</div>
+          <div class="empty-sub">${t('history.empty.sub')}</div>
+          <a class="start-btn" href="/onboarding.html">${t('history.empty.start')}</a>
         </div>`;
       return;
     }
 
     const groups = _groupByRole(_sessionList);
     const totalRoles = groups.filter(g => g.jobTitle).length;
-    subEl.textContent = `${_sessionList.length} interview${_sessionList.length !== 1 ? 's' : ''} across ${totalRoles} role${totalRoles !== 1 ? 's' : ''}`;
+    subEl.textContent = t('history.summary', { count: _sessionList.length, roles: totalRoles });
 
     listEl.innerHTML = '';
 
@@ -424,13 +429,13 @@
       header.innerHTML = `
         <div class="role-icon">${isUnknown ? '❓' : '💼'}</div>
         <div class="role-info">
-          <div class="role-title">${_escHtml(group.jobTitle || 'No role info')}</div>
+          <div class="role-title">${_escHtml(group.jobTitle || t('history.noRoleInfo'))}</div>
           ${group.company ? `<div class="role-company">${_escHtml(group.company)}</div>` : ''}
-          <div class="role-count">${total} session${total !== 1 ? 's' : ''} · ${completedCount} completed</div>
+          <div class="role-count">${t('history.roleCount', { total, completed: completedCount })}</div>
         </div>
         <div class="role-actions">
           ${!isUnknown && group.jobSessionId
-            ? `<button class="practice-btn" data-jid="${_escHtml(group.jobSessionId)}" data-title="${_escHtml(group.jobTitle)}" data-company="${_escHtml(group.company)}">🔄 Practice again</button>`
+            ? `<button class="practice-btn" data-jid="${_escHtml(group.jobSessionId)}" data-title="${_escHtml(group.jobTitle)}" data-company="${_escHtml(group.company)}">🔄 ${t('history.session.practiceAgain')}</button>`
             : ''}
         </div>`;
 
@@ -472,5 +477,6 @@
   } catch(_){}
 })();
 </script>
+<script src="/contact-widget.js"></script>
 </body>
 </html>

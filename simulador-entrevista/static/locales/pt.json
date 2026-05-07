@@ -1,0 +1,381 @@
+{
+  "header": {
+    "tagline": "Preparação para entrevistas com IA"
+  },
+  "nav": {
+    "tips": "💡 Dicas",
+    "signin": "Entrar",
+    "getStarted": "Começar grátis",
+    "settings": "⚙️ Configurações",
+    "signout": "Sair"
+  },
+  "landing": {
+    "hero": {
+      "badge": "Qualquer Área · Com IA · Totalmente Personalizado",
+      "title": "A etapa que <span>te elimina</span><br>antes das próximas rodadas.",
+      "sub": "A maioria dos candidatos falha antes de mostrar suas habilidades. Essa etapa — comportamental, comunicação, fit — é o filtro. Passe, e você avança. Não passe, e acabou. Treine até ficar automático.",
+      "cta": "Começar grátis →",
+      "ctaSignin": "Entrar"
+    },
+    "gate": {
+      "title": "Por que essa etapa é a que mais importa",
+      "body": "Na maioria dos processos seletivos — tecnologia, finanças, consultoria, marketing — a entrevista comportamental é o <strong style=\"color:#4ade80\">primeiro filtro</strong>. Só quem passa avança para as próximas etapas. Quem não passa nunca chega a mostrar suas habilidades técnicas. Esta ferramenta te prepara exatamente para essa etapa — para que você chegue sabendo o que dizer, como dizer, e como será avaliado."
+    },
+    "phases": {
+      "label": "Como funciona",
+      "title": "6 fases. Uma entrevista completa.",
+      "sub": "Funciona para qualquer área — tecnologia, finanças, consultoria, marketing, operações e mais. A IA adapta cada pergunta ao seu currículo e à vaga real.",
+      "p1": { "num": "FASE 1", "name": "Elevator Pitch",         "desc": "Apresente-se em 90 segundos. Receba feedback imediato sobre clareza, estrutura e como você posiciona seu background para essa vaga específica." },
+      "p2": { "num": "FASE 2", "name": "História CAR",           "desc": "Conte uma história estruturada — Contexto, Ação, Resultado — sobre um projeto real. Funciona para qualquer área: uma campanha, uma negociação, uma migração, um lançamento." },
+      "p3": { "num": "FASE 3", "name": "Perguntas da Vaga",     "desc": "3 perguntas geradas a partir da descrição real da vaga — não genéricas. Engenheiro, analista, gestor ou consultor: cada entrevista é diferente." },
+      "p4": { "num": "FASE 4", "name": "Liderança e Abordagem", "desc": "Como você lidera, lida com ambiguidade e conduz projetos até o fim — avaliado pelo que a vaga realmente exige." },
+      "p5": { "num": "FASE 5", "name": "Fit e Motivação",       "desc": "Por que essa vaga, por que essa empresa, por que agora — treinado até sua resposta soar genuína, não decorada." },
+      "p6": { "num": "FASE 6", "name": "Suas Perguntas",        "desc": "Treine fazer perguntas inteligentes e bem fundamentadas. O que você pergunta diz tanto quanto o que você responde." }
+    },
+    "features": {
+      "f1": { "title": "Qualquer área, qualquer vaga",       "desc": "Engenharia, finanças, consultoria, produto, marketing, operações — a IA se adapta à descrição da vaga que você cola. Não é um roteiro genérico." },
+      "f2": { "title": "Coaching de inglês incluído",        "desc": "Cada sessão avalia sua escolha de palavras, estrutura de frases, registro e fluência — não só o conteúdo. Valioso até para nativos que querem uma linguagem mais executiva." },
+      "f3": { "title": "Voz ou texto",                       "desc": "Responda falando ou digitando. O entrevistador responde com áudio realista — para você treinar a experiência real, não só o conteúdo." },
+      "f4": { "title": "Repita até ficar automático",        "desc": "Cada rodada é uma entrevista nova. Mesma vaga ou outra — construa fluência pela repetição até suas respostas saírem naturais sob pressão." }
+    },
+    "cta": {
+      "title": "Não deixe a primeira etapa ser a última.",
+      "sub": "Grátis. Qualquer área. Sem cartão de crédito.",
+      "btn": "Começar a praticar grátis →"
+    }
+  },
+  "dashboard": {
+    "title": "Pronto para praticar?",
+    "sub": "Cole uma descrição de vaga e seu currículo — Alex vai conduzir uma entrevista completa e personalizada com feedback em cada fase.",
+    "continueTitle": "Continuar entrevista",
+    "newTitle": "Nova entrevista",
+    "newSub": "Cole a descrição da vaga + currículo para começar uma sessão personalizada",
+    "historyTitle": "Histórico de entrevistas",
+    "historySub": "Navegue e continue sessões anteriores por vaga"
+  },
+  "footer": {
+    "plans": "Planos",
+    "tips": "Dicas de Entrevista",
+    "admin": "Admin"
+  },
+  "profile": {
+    "pageTitle": "Configurações — Interview Coach",
+    "header": { "tagline": "Configurações da conta", "backBtn": "← Voltar para a entrevista" },
+    "pageHeading": "Configurações do Perfil",
+    "pageSub": "Gerencie seus dados e senha.",
+    "plan": {
+      "currentPlan": "Plano atual",
+      "active": "Ativo",
+      "free": "Grátis",
+      "usage": "{{used}} / {{limit}} entrevistas essa semana",
+      "upgrade": "Fazer upgrade →",
+      "downgrade": "Fazer downgrade",
+      "downgrading": "Fazendo downgrade…"
+    },
+    "verify": {
+      "title": "Verifique seu endereço de e-mail",
+      "body": "É necessário verificar seu e-mail para continuar além da fase de Elevator Pitch.",
+      "resend": "Reenviar e-mail",
+      "sending": "Enviando…",
+      "sent": "✓ E-mail enviado"
+    },
+    "sections": {
+      "profile": "Perfil",
+      "password": "Alterar Senha",
+      "language": "Idioma",
+      "session": "Sessão"
+    },
+    "langHint": "Escolha o idioma da interface.",
+    "fields": {
+      "name": "Nome completo",
+      "namePlaceholder": "Seu nome",
+      "email": "E-mail",
+      "emailPlaceholder": "voce@exemplo.com",
+      "emailHint": "Alterar o e-mail exige nova verificação e requer sua senha atual.",
+      "currentPw": "Senha atual",
+      "currentPwHint": "obrigatório apenas ao alterar o e-mail",
+      "pwPlaceholder": "••••••••",
+      "newPw": "Nova senha",
+      "newPwPlaceholder": "Mínimo 8 caracteres",
+      "confirmPw": "Confirmar nova senha",
+      "repeatPwPlaceholder": "Repita a nova senha"
+    },
+    "buttons": {
+      "save": "Salvar alterações",
+      "updatePw": "Atualizar senha",
+      "signOut": "Sair de todos os dispositivos"
+    },
+    "msgs": {
+      "saving": "Salvando…",
+      "savedProfile": "Perfil atualizado com sucesso.",
+      "savedEmailChanged": "Perfil atualizado. Um e-mail de verificação foi enviado para o novo endereço.",
+      "savedPw": "Senha atualizada com sucesso.",
+      "mismatch": "As senhas não coincidem.",
+      "tooShort": "A senha deve ter no mínimo 8 caracteres.",
+      "errorDefault": "Falha na atualização.",
+      "errorNetwork": "Erro de rede — tente novamente.",
+      "errorSend": "Falha ao enviar e-mail — tente novamente."
+    },
+    "confirm": {
+      "downgrade": "Fazer downgrade para Explorer? Você ficará limitado a 3 entrevistas por semana, com efeito imediato."
+    }
+  },
+  "history": {
+    "pageTitle": "Histórico de Entrevistas — Interview Coach",
+    "header": { "tagline": "Histórico de entrevistas" },
+    "nav": {
+      "current": "← Entrevista atual",
+      "newInterview": "＋ Nova entrevista"
+    },
+    "pageHeading": "Entrevistas anteriores",
+    "summary": "{{count}} entrevistas em {{roles}} vagas",
+    "noRoleInfo": "Sem informação de vaga",
+    "roleCount": "{{total}} sessões · {{completed}} concluídas",
+    "date": {
+      "today": "Hoje às {{time}}",
+      "yesterday": "Ontem às {{time}}",
+      "at": "às"
+    },
+    "phases": {
+      "elevator_pitch": "Elevator Pitch",
+      "elevator_pitch_report": "Elevator Pitch — revisão",
+      "CAR": "História CAR",
+      "CAR_report": "História CAR — revisão",
+      "technical": "Perguntas da Vaga",
+      "technical_report": "Perguntas da Vaga — revisão",
+      "leadership": "Perguntas de Liderança",
+      "leadership_report": "Liderança — revisão",
+      "motivation": "Perguntas de Motivação",
+      "motivation_report": "Motivação — revisão",
+      "candidate_questions": "Suas Perguntas",
+      "feedback": "Scorecard Final",
+      "done": "Concluída",
+      "starting": "Iniciando…"
+    },
+    "badges": { "completed": "Concluída", "inProgress": "Em andamento" },
+    "session": {
+      "answers": "respostas",
+      "answer": "resposta",
+      "review": "📖 Revisar",
+      "continue": "▶ Continuar",
+      "practiceAgain": "Praticar novamente"
+    },
+    "empty": {
+      "title": "Nenhuma entrevista ainda",
+      "sub": "Faça sua primeira entrevista simulada para ver seu histórico aqui.",
+      "start": "Começar entrevista"
+    }
+  },
+  "onboarding": {
+    "pageTitle": "Preparar Entrevista — Interview Coach",
+    "steps": {
+      "jobDesc": "Descrição da Vaga",
+      "resume": "Seu Currículo",
+      "preparing": "Preparando"
+    },
+    "upload": "Enviar PDF ou DOCX",
+    "minChars": "Mínimo de 50 caracteres",
+    "step1": {
+      "title": "Para qual vaga você está se candidatando?",
+      "desc": "Cole a descrição da vaga abaixo. Quanto mais detalhe você fornecer, mais direcionada será sua entrevista simulada.",
+      "jobTitle": "Cargo *",
+      "jobTitlePlaceholder": "ex: Engenheiro de IA Sênior",
+      "company": "Nome da empresa",
+      "companyPlaceholder": "ex: Acme Corp",
+      "jobDescLabel": "Descrição da vaga *",
+      "jobDescPlaceholder": "Cole a descrição completa da vaga aqui — responsabilidades, requisitos, qualificações e outros detalhes…",
+      "next": "Próximo: Adicionar currículo →"
+    },
+    "step2": {
+      "title": "Cole seu currículo",
+      "desc": "Copie e cole seu currículo abaixo. Inclua experiência profissional, formação, projetos e habilidades. A IA usará isso para personalizar cada fase da entrevista.",
+      "resumeLabel": "Texto do currículo *",
+      "resumePlaceholder": "Cole seu currículo aqui — experiência, formação, projetos, habilidades, publicações, etc.…",
+      "back": "← Voltar",
+      "start": "Preparar minha entrevista →"
+    },
+    "step3": {
+      "title": "Preparando sua entrevista personalizada…",
+      "sub": "Nossa IA está analisando seu currículo e a descrição da vaga para criar uma experiência de entrevista sob medida.",
+      "item1": "Lendo seu histórico e principais conquistas",
+      "item2": "Analisando o que a vaga exige",
+      "item3": "Criando fases de entrevista específicas para você",
+      "item4": "Preparando critérios de avaliação para cada fase",
+      "time": "Isso geralmente leva de 10 a 20 segundos."
+    },
+    "errors": {
+      "noTitle": "Por favor, informe o cargo.",
+      "shortDesc": "A descrição da vaga é muito curta. Cole a descrição completa.",
+      "shortResume": "O currículo é muito curto. Cole seu currículo completo.",
+      "default": "Algo deu errado. Tente novamente.",
+      "network": "Erro de rede — verifique sua conexão e tente novamente."
+    }
+  },
+  "interview": {
+    "pageTitle": "Simulador de Entrevista — Interview Coach",
+    "phases": {
+      "elevatorPitch": "Elevator Pitch",
+      "CAR": "História CAR",
+      "technical": "Perguntas da Vaga",
+      "leadership": "Liderança",
+      "motivation": "Motivação",
+      "yourQuestions": "Suas Perguntas",
+      "scorecard": "Scorecard"
+    },
+    "tts": {
+      "speaking": "Alex está falando…",
+      "pause": "⏸ Pausar",
+      "resume": "▶ Retomar",
+      "skip": "⏭ Pular"
+    },
+    "popover": {
+      "sameRole": "Nova rodada — mesma vaga",
+      "sameRoleSub": "Pratique novamente com o mesmo currículo e vaga",
+      "newRole": "Nova vaga",
+      "newRoleSub": "Insira outra descrição de vaga e currículo"
+    },
+    "input": {
+      "placeholder": "Digite sua resposta ou pressione 🎙️ para falar…",
+      "hint": "Clique em <strong>🎙️</strong> para gravar/parar · <strong>Enter</strong> para enviar · <strong>Shift+Enter</strong> para nova linha"
+    },
+    "audio": { "discard": "✕ Descartar", "send": "➤ Enviar" },
+    "doneBanner": "Entrevista concluída — role para baixo para ver seu scorecard ↓",
+    "sessionRestored": "— sessão restaurada —",
+    "tapToEnable": "Toque em qualquer lugar para ativar o áudio",
+    "scorecard": {
+      "loading": "Carregando scorecard…",
+      "readAloud": "Ouvir",
+      "upgradeTitle": "Seu scorecard está pronto",
+      "upgradeBody": "Pontuações por fase, dicas de vocabulário e seu sinal geral de contratação estão esperando por você.",
+      "upgradeBtn": "Fazer upgrade para Hunter — grátis durante o beta →"
+    }
+  },
+  "forgot": {
+    "pageTitle": "Esqueci a Senha — Interview Coach",
+    "title": "Esqueceu a senha?",
+    "subtitle": "Informe seu e-mail e enviaremos um link de redefinição",
+    "email": "E-mail",
+    "emailPlaceholder": "voce@exemplo.com",
+    "submit": "Enviar link de redefinição",
+    "sending": "Enviando…",
+    "backToSignIn": "← Voltar para o login",
+    "successMsg": "Se esse e-mail estiver cadastrado, você receberá o link em breve.",
+    "errorNetwork": "Erro de rede — tente novamente."
+  },
+  "reset": {
+    "pageTitle": "Redefinir Senha — Interview Coach",
+    "title": "Definir nova senha",
+    "subtitle": "Digite e confirme sua nova senha",
+    "newPassword": "Nova senha",
+    "passwordPlaceholder": "Mínimo 8 caracteres",
+    "confirmPassword": "Confirmar senha",
+    "confirmPlaceholder": "Repita a senha",
+    "submit": "Definir nova senha",
+    "saving": "Salvando…",
+    "backToSignIn": "← Voltar para o login",
+    "successMsg": "Senha atualizada! Redirecionando para o login…",
+    "errorMismatch": "As senhas não coincidem.",
+    "errorTooShort": "A senha deve ter no mínimo 8 caracteres.",
+    "errorExpired": "Falha. O link pode ter expirado.",
+    "errorInvalidLink": "Link de redefinição inválido. Solicite um novo.",
+    "errorNetwork": "Erro de rede — tente novamente."
+  },
+  "login": {
+    "pageTitle": "Entrar — Interview Coach",
+    "title": "Bem-vindo de volta",
+    "subtitle": "Entre na sua conta do interview coach",
+    "email": "E-mail",
+    "emailPlaceholder": "voce@exemplo.com",
+    "password": "Senha",
+    "passwordPlaceholder": "••••••••",
+    "submit": "Entrar",
+    "signingIn": "Entrando…",
+    "forgotPassword": "Esqueceu sua senha?",
+    "noAccount": "Não tem uma conta?",
+    "createOne": "Crie uma →",
+    "errorCredentials": "Falha no login. Verifique suas credenciais.",
+    "errorNetwork": "Erro de rede — tente novamente."
+  },
+  "register": {
+    "pageTitle": "Criar Conta — Interview Coach",
+    "title": "Crie sua conta",
+    "subtitle": "Pratique entrevistas personalizadas para seu currículo e vaga",
+    "name": "Nome completo",
+    "namePlaceholder": "Alex Johnson",
+    "email": "E-mail",
+    "emailPlaceholder": "voce@exemplo.com",
+    "password": "Senha",
+    "passwordPlaceholder": "Mínimo 8 caracteres",
+    "passwordHint": "Mínimo 8 caracteres",
+    "language": "Idioma das entrevistas",
+    "langEn": "Inglês",
+    "langPt": "Português (em breve)",
+    "submit": "Criar conta",
+    "creating": "Criando conta…",
+    "haveAccount": "Já tem uma conta?",
+    "signIn": "Entrar →",
+    "errorName": "Nome é obrigatório.",
+    "errorPassword": "A senha deve ter no mínimo 8 caracteres.",
+    "errorDefault": "Falha no cadastro. Tente novamente.",
+    "errorNetwork": "Erro de rede — tente novamente."
+  },
+  "tips": {
+    "pageTitle": "Dicas de Entrevista — Interview Coach",
+    "header": {
+      "tagline": "Dicas &amp; Frameworks para Entrevistas"
+    },
+    "nav": {
+      "history": "📋 Histórico",
+      "practice": "▶ Praticar"
+    },
+    "hero": {
+      "badge": "Guia de Entrevistas",
+      "title": "Como Passar em Qualquer Entrevista",
+      "sub": "Frameworks, estruturas e dicas usados pelos melhores candidatos — da primeira impressão à pergunta final."
+    },
+    "cards": {
+      "elevator": {
+        "title": "O Elevator Pitch",
+        "sub": "Seus primeiros 90 segundos — faça valer",
+        "body": "<p>O elevator pitch é sua resposta para <strong>\"Fale sobre você.\"</strong> Não é sua biografia — é um resumo curado projetado para fazer o entrevistador querer continuar ouvindo.</p><div class=\"structure\"><div class=\"structure-row\"><span class=\"structure-label indigo\">Quem</span><p>Quem você é e seu papel hoje. Uma ou duas frases no máximo. Pule o ano de formatura.</p></div><div class=\"structure-row\"><span class=\"structure-label green\">O quê</span><p>Que tipo de problemas você resolve. Seja específico — <strong>\"construo pipelines de ML em produção\"</strong> é melhor que <strong>\"trabalho com IA.\"</strong></p></div><div class=\"structure-row\"><span class=\"structure-label amber\">Destaque</span><p>Uma conquista concreta com número ou resultado. Esse é o gancho que te diferencia.</p></div><div class=\"structure-row\"><span class=\"structure-label teal\">Por quê</span><p>Por que <em>essa vaga</em>. Conecte algo real do seu histórico a algo real da empresa.</p></div></div><div class=\"do-dont\"><div class=\"do-block\"><div class=\"dd-label\">Diga</div><ul><li>Use \"eu construí\", \"eu liderei\", \"eu projetei\"</li><li>Inclua uma métrica específica</li><li>Termine com um gancho forte</li><li>Pratique até soar natural</li></ul></div><div class=\"dont-block\"><div class=\"dd-label\">Evite</div><ul><li>Ler seu currículo cronologicamente</li><li>Passar de 2 minutos</li><li>Frases vagas como \"sou apaixonado por tecnologia\"</li><li>Terminar sem conectar à vaga</li></ul></div></div>"
+      },
+      "car": {
+        "title": "O Framework CAR",
+        "sub": "Contexto → Ação → Resultado",
+        "body": "<p>Use CAR para toda pergunta comportamental: <strong>\"Me conte sobre uma vez que você…\"</strong>, <strong>\"Descreva um desafio…\"</strong>, <strong>\"Me dê um exemplo de…\"</strong></p><p>Também é chamado de STAR (Situação, Tarefa, Ação, Resultado) — mesma ideia, CAR é mais compacto. Pense nisso como uma história de 2 minutos onde você é o protagonista que resolve um problema real.</p><div class=\"structure\"><div class=\"structure-row\"><span class=\"structure-label indigo\">C — Contexto</span><p>Monte a cena em 2–3 frases. Qual era o problema, a restrição ou o que estava em jogo? Faça o entrevistador entender <em>por que era difícil</em>.</p></div><div class=\"structure-row\"><span class=\"structure-label green\">A — Ação</span><p>Essa é a maior parte da sua resposta. O que <strong>você</strong> especificamente decidiu e fez? Use \"eu\", não \"nós.\"</p></div><div class=\"structure-row\"><span class=\"structure-label amber\">R — Resultado</span><p>O que aconteceu? Quantifique quando possível. Mencione também o que aprendeu se o resultado foi misto.</p></div></div><p style=\"margin-top:16px\">O erro mais comum é gastar tempo demais no Contexto e acelerar o Resultado. Os entrevistadores se importam mais com a Ação — seu raciocínio e suas decisões.</p><div class=\"example-block\"><div class=\"example-label\">Resposta fraca</div><div class=\"example-text red\">\"Tínhamos problemas de desempenho então o time corrigiu as queries do banco e as coisas ficaram mais rápidas.\"</div></div><div class=\"example-block\"><div class=\"example-label\">Resposta forte (CAR)</div><div class=\"example-text green\">\"A latência da nossa API estava aumentando sob carga, causando timeouts para 8% dos usuários. Analisei os endpoints mais lentos e encontrei padrões N+1 em três caminhos críticos. Refatorei para usar batch fetching e adicionei uma camada de cache Redis. A latência caiu de 1,4s para 180ms e a taxa de timeout foi a zero.\"</div></div>"
+      },
+      "behavioral": {
+        "title": "Perguntas Comportamentais",
+        "sub": "Prepare histórias, não respostas",
+        "body": "<p>Perguntas comportamentais investigam como você lidou com situações reais. São previsíveis — a maioria se encaixa em 6 temas. Prepare <strong>2–3 histórias CAR fortes</strong> por tema e você consegue responder quase qualquer coisa.</p><div class=\"tip-list\"><div class=\"tip-item\"><span><strong>Liderança &amp; influência</strong> — Uma vez em que você liderou sem autoridade formal, mudou a opinião de alguém ou mobilizou um time.</span></div><div class=\"tip-item\"><span><strong>Conflito &amp; discordância</strong> — Uma vez em que você lidou com um colega difícil, resistência de um gestor ou um desentendimento no time.</span></div><div class=\"tip-item\"><span><strong>Fracasso &amp; aprendizado</strong> — Uma vez em que algo deu errado. Assuma, explique o que aprendeu, mostre que cresceu.</span></div><div class=\"tip-item\"><span><strong>Ambiguidade &amp; resolução de problemas</strong> — Uma vez em que você navegou por um requisito vago ou em constante mudança.</span></div><div class=\"tip-item\"><span><strong>Priorização &amp; trade-offs</strong> — Uma vez em que você tinha mais a fazer do que tempo e precisou escolher.</span></div><div class=\"tip-item\"><span><strong>Impacto &amp; responsabilidade</strong> — Uma vez em que você foi além do seu papel e entregou resultados que importaram.</span></div></div><p style=\"margin-top:16px\"><em>Dica profissional:</em> Suas melhores histórias podem ser adaptadas para vários temas. Uma história sobre uma falha de sistema pode responder perguntas de liderança, resolução de problemas e fracasso. Pratique contar a mesma história com um ângulo diferente.</p>"
+      },
+      "rolespecific": {
+        "title": "Perguntas Específicas da Vaga",
+        "sub": "Mostre seu raciocínio, não só a resposta",
+        "body": "<p>Perguntas específicas da vaga testam como você pensa sob pressão tanto quanto o que você sabe. Esta estrutura funciona em qualquer área — técnica, analítica ou estratégica:</p><div class=\"tip-list\"><div class=\"tip-item\"><span><strong>Clarifique primeiro.</strong> Antes de responder, faça uma ou duas perguntas de esclarecimento. Isso mostra que você não pula para soluções sem entender o problema.</span></div><div class=\"tip-item\"><span><strong>Pense em voz alta.</strong> Narre seu raciocínio enquanto avança. Silêncio é pior do que um pensamento imperfeito.</span></div><div class=\"tip-item\"><span><strong>Comece simples, depois aprofunde.</strong> Dê uma resposta direta primeiro, depois adicione nuances e trade-offs. Nunca comece complicando.</span></div><div class=\"tip-item\"><span><strong>Reconheça casos extremos.</strong> Após sua resposta, mencione proativamente o que poderia quebrá-la ou o que você gostaria de validar. Isso sinaliza maturidade.</span></div><div class=\"tip-item\"><span><strong>Quando não souber, diga — e raciocine.</strong> \"Não lidei diretamente com isso, mas com base em como X funciona, eu esperaria…\" é muito melhor que silêncio ou chute.</span></div></div>"
+      },
+      "motivation": {
+        "title": "Motivação &amp; Fit Cultural",
+        "sub": "Por que essa empresa, por que essa vaga, por que agora",
+        "body": "<p>\"Por que você quer trabalhar aqui?\" é enganosamente simples. Respostas genéricas (\"Admiro a missão\") são esquecíveis. O que faz uma ótima resposta: <strong>especificidade + conexão pessoal.</strong></p><div class=\"structure\"><div class=\"structure-row\"><span class=\"structure-label indigo\">Empresa</span><p>Nomeie algo específico — um produto, um desafio que a empresa está resolvendo, um valor cultural — e explique por que ressoa com sua experiência.</p></div><div class=\"structure-row\"><span class=\"structure-label green\">Vaga</span><p>Mostre que você leu a descrição da vaga. Conecte responsabilidades específicas a coisas específicas que você já fez e quer continuar fazendo.</p></div><div class=\"structure-row\"><span class=\"structure-label amber\">Momento</span><p>Por que agora? O que mudou na sua trajetória ou objetivos de carreira que faz esse ser o movimento certo neste momento?</p></div></div><div class=\"example-block\"><div class=\"example-label\">Genérico (esquecível)</div><div class=\"example-text red\">\"Quero crescer na carreira e acho que essa empresa faz um ótimo trabalho.\"</div></div><div class=\"example-block\"><div class=\"example-label\">Específico (memorável)</div><div class=\"example-text green\">\"Tenho construído sistemas que vão para produção, e a parte mais difícil sempre foi a lacuna entre um demo e um sistema confiável em escala — esse é o problema que acho mais interessante. Quando li sobre o que o time de vocês está fazendo com [X], é exatamente esse problema. Por isso essa vaga chamou minha atenção.\"</div></div>"
+      },
+      "questions": {
+        "title": "Perguntas para o Entrevistador",
+        "sub": "Boas perguntas mostram curiosidade e seriedade",
+        "body": "<p>Sempre tenha 3–4 perguntas prontas. \"Não tenho perguntas\" é um sinal de alerta. Estas funcionam consistentemente bem:</p><div class=\"tip-list\"><div class=\"tip-item\"><span>\"Como é o sucesso nos primeiros 90 dias nessa vaga?\"</span></div><div class=\"tip-item\"><span>\"Qual é o maior desafio que o time está enfrentando atualmente?\"</span></div><div class=\"tip-item\"><span>\"Como o time lida com prioridades concorrentes e trade-offs?\"</span></div><div class=\"tip-item\"><span>\"Você pode me contar sobre uma vez em que alguém no time cresceu significativamente — como foi?\"</span></div><div class=\"tip-item\"><span>\"O que você pessoalmente mais gosta de trabalhar aqui?\"</span></div><div class=\"tip-item\"><span>\"Há algo no meu histórico que você gostaria que eu expandisse?\"</span></div></div><p style=\"margin-top:14px\"><em>Evite:</em> perguntas facilmente respondidas pelo site da empresa, perguntas sobre salário antes de uma oferta, e perguntas que façam parecer que você já está negociando.</p>"
+      },
+      "mistakes": {
+        "title": "Erros Comuns que Eliminam Candidatos",
+        "sub": "Até candidatos fortes cometem esses erros",
+        "body": "<div class=\"tip-list\"><div class=\"tip-item\" style=\"color:#fca5a5\"><span><strong style=\"color:#f1f5f9\">Usar \"nós\" em vez de \"eu\"</strong> em respostas comportamentais. Os entrevistadores querem saber o que <em>você</em> fez. \"Nós construímos o sistema\" levanta a dúvida se você contribuiu de forma significativa.</span></div><div class=\"tip-item\" style=\"color:#fca5a5\"><span><strong style=\"color:#f1f5f9\">Sem resultados quantificados.</strong> \"As coisas melhoraram\" é esquecível. \"A latência caiu 60%, a taxa de erro foi a zero\" é memorável. Sempre tente colocar um número no resultado.</span></div><div class=\"tip-item\" style=\"color:#fca5a5\"><span><strong style=\"color:#f1f5f9\">Enrolação.</strong> Respostas com mais de 3 minutos perdem o entrevistador. Pratique cronometrar suas respostas. 90 segundos para o pitch, 2 minutos para histórias CAR.</span></div><div class=\"tip-item\" style=\"color:#fca5a5\"><span><strong style=\"color:#f1f5f9\">Criticar ex-empregadores.</strong> Mesmo que justificado, levanta dúvidas sobre como você falará sobre <em>essa</em> empresa algum dia. Mantenha neutro e foque no que aprendeu.</span></div><div class=\"tip-item\" style=\"color:#fca5a5\"><span><strong style=\"color:#f1f5f9\">Não pedir esclarecimento.</strong> Pular para uma resposta sem entender o problema sinaliza julgamento ruim.</span></div><div class=\"tip-item\" style=\"color:#fca5a5\"><span><strong style=\"color:#f1f5f9\">Fluência sob pressão.</strong> O conteúdo pode ser excelente, mas se hesitação, vícios de linguagem ou estrutura confusa dificultam o acompanhamento, isso afeta a impressão. Gravar-se para revisar é doloroso mas eficaz.</span></div></div>"
+      }
+    },
+    "cta": {
+      "title": "Pronto para colocar em prática?",
+      "body_loggedin": "A melhor forma de internalizar esses frameworks é praticá-los em voz alta. Nosso entrevistador IA dá feedback em tempo real sobre estrutura, linguagem e confiança.",
+      "btn_loggedin": "Começar a Praticar →",
+      "body_loggedout": "A melhor forma de internalizar esses frameworks é praticá-los em voz alta. Cadastre-se grátis — sem cartão de crédito.",
+      "btn_loggedout": "Começar grátis →"
+    }
+  }
+}

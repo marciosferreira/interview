@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sign In — Interview Coach</title>
+  <title data-i18n="login.pageTitle">Sign In — Interview Coach</title>
+  <script src="/i18n.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -84,44 +85,60 @@
       vertical-align: middle; margin-right: 6px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+    .lang-switcher {
+      display: flex; align-items: center; justify-content: center; gap: 2px;
+      margin-top: 20px;
+    }
+    .lang-btn {
+      font-size: 11px; font-weight: 600; padding: 3px 10px;
+      border-radius: 6px; border: 1px solid #2d3148;
+      background: transparent; color: #475569;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .lang-btn:hover { color: #94a3b8; }
+    .lang-btn.lang-active { background: #2d3148; color: #e2e8f0; border-color: #2d3148; }
   </style>
 </head>
 <body>
 <div class="card">
   <div class="logo">🎯</div>
-  <h1>Welcome back</h1>
-  <p class="subtitle">Sign in to your interview coach account</p>
+  <h1 data-i18n="login.title">Welcome back</h1>
+  <p class="subtitle" data-i18n="login.subtitle">Sign in to your interview coach account</p>
 
   <div class="error" id="error-msg"></div>
 
   <form id="login-form" autocomplete="on">
-    <label for="email">Email</label>
-    <input type="email" id="email" name="email" placeholder="you@example.com" required autocomplete="email" />
+    <label for="email" data-i18n="login.email">Email</label>
+    <input type="email" id="email" name="email" data-i18n-attr="placeholder:login.emailPlaceholder" placeholder="you@example.com" required autocomplete="email" />
 
-    <label for="password">Password</label>
-    <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password" />
+    <label for="password" data-i18n="login.password">Password</label>
+    <input type="password" id="password" name="password" data-i18n-attr="placeholder:login.passwordPlaceholder" placeholder="••••••••" required autocomplete="current-password" />
 
-    <button class="btn" type="submit" id="submit-btn">Sign in</button>
+    <button class="btn" type="submit" id="submit-btn" data-i18n="login.submit">Sign in</button>
   </form>
 
   <div class="footer" style="margin-bottom:12px">
-    <a href="/forgot-password.html">Forgot your password?</a>
+    <a href="/forgot-password.html" data-i18n="login.forgotPassword">Forgot your password?</a>
   </div>
   <div class="footer">
-    Don't have an account? <a href="/register.html">Create one →</a>
+    <span data-i18n="login.noAccount">Don't have an account?</span> <a href="/register.html" data-i18n="login.createOne">Create one →</a>
+  </div>
+
+  <div class="lang-switcher">
+    <button class="lang-btn" data-lang="en" onclick="i18n.switchLang('en')">EN</button>
+    <button class="lang-btn" data-lang="pt" onclick="i18n.switchLang('pt')">PT</button>
   </div>
 </div>
 
 <script>
-  // If already logged in, redirect
   const token = localStorage.getItem('auth_token');
   if (token) {
     const returnTo = new URLSearchParams(location.search).get('next') || '/index.html';
     location.replace(returnTo);
   }
 
-  const form     = document.getElementById('login-form');
-  const errorMsg = document.getElementById('error-msg');
+  const form      = document.getElementById('login-form');
+  const errorMsg  = document.getElementById('error-msg');
   const submitBtn = document.getElementById('submit-btn');
 
   function showError(msg) {
@@ -133,7 +150,7 @@
     e.preventDefault();
     errorMsg.style.display = 'none';
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="spinner"></span>Signing in…';
+    submitBtn.innerHTML = '<span class="spinner"></span>' + t('login.signingIn');
 
     const email    = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
@@ -146,20 +163,22 @@
       });
       const data = await res.json();
       if (!res.ok) {
-        showError(data.detail || 'Login failed. Please check your credentials.');
+        showError(data.detail || t('login.errorCredentials'));
         return;
       }
       localStorage.setItem('auth_token', data.access_token);
       localStorage.setItem('auth_user', JSON.stringify(data.user));
+      if (data.user.language) localStorage.setItem('preferred_lang', data.user.language);
       const returnTo = new URLSearchParams(location.search).get('next') || '/index.html';
       location.replace(returnTo);
     } catch (err) {
-      showError('Network error — please try again.');
+      showError(t('login.errorNetwork'));
     } finally {
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Sign in';
+      submitBtn.textContent = t('login.submit');
     }
   });
 </script>
+<script src="/contact-widget.js"></script>
 </body>
 </html>

@@ -1,0 +1,381 @@
+{
+  "header": {
+    "tagline": "AI-powered mock interview preparation"
+  },
+  "nav": {
+    "tips": "💡 Tips",
+    "signin": "Sign in",
+    "getStarted": "Get started free",
+    "settings": "⚙️ Settings",
+    "signout": "Sign out"
+  },
+  "landing": {
+    "hero": {
+      "badge": "Any Industry · AI-Powered · Fully Personalized",
+      "title": "The interview round that <span>filters you out</span><br>before the next rounds.",
+      "sub": "Most candidates fail before showing their skills. This round — behavioral, communication, fit — is the gate. Pass it, and you move to the next rounds. Don't, and it's over. Practice it until it's automatic.",
+      "cta": "Start for free →",
+      "ctaSignin": "Sign in"
+    },
+    "gate": {
+      "title": "Why this round is the one that matters most",
+      "body": "In most hiring processes — tech, finance, consulting, marketing — the behavioral interview is the <strong style=\"color:#4ade80\">first filter</strong>. Only candidates who clear it move on to the next rounds. Failing here means your skills never even get evaluated. This tool prepares you for exactly that round — so you arrive knowing what to say, how to say it, and how you'll be judged."
+    },
+    "phases": {
+      "label": "How it works",
+      "title": "6 phases. One complete interview.",
+      "sub": "Works for any field — tech, finance, consulting, marketing, operations, and more. The AI adapts every question to your resume and the actual job description.",
+      "p1": { "num": "PHASE 1", "name": "Elevator Pitch",          "desc": "Introduce yourself in 90 seconds. Get instant feedback on clarity, structure, and how well you frame your background for this specific role." },
+      "p2": { "num": "PHASE 2", "name": "CAR Story",               "desc": "Tell a structured story — Challenge, Action, Result — about a real project. Works for any industry: a campaign, a deal, a migration, a product launch." },
+      "p3": { "num": "PHASE 3", "name": "Role-Specific Questions",  "desc": "3 targeted questions generated from the actual job description — not generic. Engineer, analyst, manager, or consultant: each interview is different." },
+      "p4": { "num": "PHASE 4", "name": "Leadership & Approach",    "desc": "How you lead, handle ambiguity, and drive work to completion — assessed against what the role actually requires." },
+      "p5": { "num": "PHASE 5", "name": "Fit & Motivation",         "desc": "Why this role, why this company, why now — coached until your answer sounds genuine, not rehearsed." },
+      "p6": { "num": "PHASE 6", "name": "Your Questions",           "desc": "Practice asking smart, well-researched questions. The questions you ask signal as much as the answers you give." }
+    },
+    "features": {
+      "f1": { "title": "Any field, any role",            "desc": "Engineering, finance, consulting, product, marketing, operations — the AI adapts to the job description you paste. Not a generic script." },
+      "f2": { "title": "English coaching included",      "desc": "Every session evaluates your word choice, sentence structure, register, and fluency — not just your content. Valuable even for native speakers who want sharper, more executive language." },
+      "f3": { "title": "Voice or text",                  "desc": "Answer by speaking or typing. The interviewer responds with realistic audio — so you practice the actual experience, not just the content." },
+      "f4": { "title": "Repeat until it's automatic",   "desc": "Each round is a fresh interview. Same role, different role — build fluency through repetition until your answers feel natural under pressure." }
+    },
+    "cta": {
+      "title": "Don't let the first round be the last.",
+      "sub": "Free to use. Any industry. No credit card required.",
+      "btn": "Start practicing for free →"
+    }
+  },
+  "dashboard": {
+    "title": "Ready to practice?",
+    "sub": "Paste a job description and your resume — Alex will run a personalized full-length mock interview with feedback on every phase.",
+    "continueTitle": "Continue interview",
+    "newTitle": "New interview",
+    "newSub": "Paste a job description + resume to start a personalized session",
+    "historyTitle": "Interview history",
+    "historySub": "Browse and continue past sessions by role"
+  },
+  "footer": {
+    "plans": "Plans",
+    "tips": "Interview Tips",
+    "admin": "Admin"
+  },
+  "profile": {
+    "pageTitle": "Profile Settings — Interview Coach",
+    "header": { "tagline": "Account settings", "backBtn": "← Back to interview" },
+    "pageHeading": "Profile Settings",
+    "pageSub": "Manage your account details and password.",
+    "plan": {
+      "currentPlan": "Current plan",
+      "active": "Active",
+      "free": "Free",
+      "usage": "{{used}} / {{limit}} interviews this week",
+      "upgrade": "Upgrade →",
+      "downgrade": "Downgrade",
+      "downgrading": "Downgrading…"
+    },
+    "verify": {
+      "title": "Please verify your email address",
+      "body": "You must verify your email to continue past the Elevator Pitch phase.",
+      "resend": "Resend email",
+      "sending": "Sending…",
+      "sent": "✓ Email sent"
+    },
+    "sections": {
+      "profile": "Profile",
+      "password": "Change Password",
+      "language": "Language",
+      "session": "Session"
+    },
+    "langHint": "Choose the language for the interface.",
+    "fields": {
+      "name": "Full name",
+      "namePlaceholder": "Your name",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "emailHint": "Changing your email will require re-verification and needs your current password.",
+      "currentPw": "Current password",
+      "currentPwHint": "required only when changing email",
+      "pwPlaceholder": "••••••••",
+      "newPw": "New password",
+      "newPwPlaceholder": "At least 8 characters",
+      "confirmPw": "Confirm new password",
+      "repeatPwPlaceholder": "Repeat new password"
+    },
+    "buttons": {
+      "save": "Save changes",
+      "updatePw": "Update password",
+      "signOut": "Sign out of all devices"
+    },
+    "msgs": {
+      "saving": "Saving…",
+      "savedProfile": "Profile updated successfully.",
+      "savedEmailChanged": "Profile updated. A verification email was sent to your new address.",
+      "savedPw": "Password updated successfully.",
+      "mismatch": "Passwords do not match.",
+      "tooShort": "Password must be at least 8 characters.",
+      "errorDefault": "Update failed.",
+      "errorNetwork": "Network error — please try again.",
+      "errorSend": "Failed to send email — please try again."
+    },
+    "confirm": {
+      "downgrade": "Downgrade to Explorer? You'll be limited to 3 interviews per week, effective immediately."
+    }
+  },
+  "history": {
+    "pageTitle": "Interview History — Interview Coach",
+    "header": { "tagline": "Interview history" },
+    "nav": {
+      "current": "← Current interview",
+      "newInterview": "＋ New interview"
+    },
+    "pageHeading": "Past interviews",
+    "summary": "{{count}} interviews across {{roles}} roles",
+    "noRoleInfo": "No role info",
+    "roleCount": "{{total}} sessions · {{completed}} completed",
+    "date": {
+      "today": "Today at {{time}}",
+      "yesterday": "Yesterday at {{time}}",
+      "at": "at"
+    },
+    "phases": {
+      "elevator_pitch": "Elevator Pitch",
+      "elevator_pitch_report": "Elevator Pitch — review",
+      "CAR": "CAR Story",
+      "CAR_report": "CAR Story — review",
+      "technical": "Role-Specific Questions",
+      "technical_report": "Role-Specific — review",
+      "leadership": "Leadership Questions",
+      "leadership_report": "Leadership — review",
+      "motivation": "Motivation Questions",
+      "motivation_report": "Motivation — review",
+      "candidate_questions": "Your Questions",
+      "feedback": "Final Scorecard",
+      "done": "Completed",
+      "starting": "Starting…"
+    },
+    "badges": { "completed": "Completed", "inProgress": "In progress" },
+    "session": {
+      "answers": "answers",
+      "answer": "answer",
+      "review": "📖 Review",
+      "continue": "▶ Continue",
+      "practiceAgain": "Practice again"
+    },
+    "empty": {
+      "title": "No interviews yet",
+      "sub": "Start your first mock interview to see your history here.",
+      "start": "Start interview"
+    }
+  },
+  "onboarding": {
+    "pageTitle": "Prepare Your Interview — Interview Coach",
+    "steps": {
+      "jobDesc": "Job Description",
+      "resume": "Your Resume",
+      "preparing": "Preparing"
+    },
+    "upload": "Upload PDF or DOCX",
+    "minChars": "Minimum 50 characters required",
+    "step1": {
+      "title": "What role are you interviewing for?",
+      "desc": "Paste the job description below. The more detail you provide, the more targeted your mock interview will be.",
+      "jobTitle": "Job title *",
+      "jobTitlePlaceholder": "e.g. Senior AI Engineer",
+      "company": "Company name",
+      "companyPlaceholder": "e.g. Acme Corp",
+      "jobDescLabel": "Job description *",
+      "jobDescPlaceholder": "Paste the full job description here — responsibilities, requirements, qualifications, and any other relevant details…",
+      "next": "Next: Add your resume →"
+    },
+    "step2": {
+      "title": "Paste your resume",
+      "desc": "Copy and paste your resume below. Include your work experience, education, projects, and skills. The AI will use this to personalize every phase of your mock interview.",
+      "resumeLabel": "Resume text *",
+      "resumePlaceholder": "Paste your resume here — work experience, education, projects, skills, publications, etc.…",
+      "back": "← Back",
+      "start": "Prepare my interview →"
+    },
+    "step3": {
+      "title": "Preparing your personalized interview…",
+      "sub": "Our AI is analyzing your resume and the job description to create a tailored mock interview experience.",
+      "item1": "Reading your background and key achievements",
+      "item2": "Analyzing what the role requires",
+      "item3": "Crafting interview phases specific to you",
+      "item4": "Preparing evaluation criteria for each phase",
+      "time": "This usually takes 10–20 seconds."
+    },
+    "errors": {
+      "noTitle": "Please enter the job title.",
+      "shortDesc": "Job description is too short. Please paste the full description.",
+      "shortResume": "Resume is too short. Please paste your full resume.",
+      "default": "Something went wrong. Please try again.",
+      "network": "Network error — please check your connection and try again."
+    }
+  },
+  "interview": {
+    "pageTitle": "Mock Interview Simulator — Interview Coach",
+    "phases": {
+      "elevatorPitch": "Elevator Pitch",
+      "CAR": "CAR Story",
+      "technical": "Role-Specific",
+      "leadership": "Leadership",
+      "motivation": "Motivation",
+      "yourQuestions": "Your Questions",
+      "scorecard": "Scorecard"
+    },
+    "tts": {
+      "speaking": "Alex is speaking…",
+      "pause": "⏸ Pause",
+      "resume": "▶ Resume",
+      "skip": "⏭ Skip"
+    },
+    "popover": {
+      "sameRole": "New round — same role",
+      "sameRoleSub": "Practice again with the same job & resume",
+      "newRole": "New role",
+      "newRoleSub": "Enter a different job description & resume"
+    },
+    "input": {
+      "placeholder": "Type your answer or press 🎙️ to speak…",
+      "hint": "Click <strong>🎙️</strong> to start/stop recording · <strong>Enter</strong> to send text · <strong>Shift+Enter</strong> for new line"
+    },
+    "audio": { "discard": "✕ Discard", "send": "➤ Send" },
+    "doneBanner": "Interview complete — scroll down to see your scorecard ↓",
+    "sessionRestored": "— session restored —",
+    "tapToEnable": "Tap anywhere to enable audio",
+    "scorecard": {
+      "loading": "Loading scorecard…",
+      "readAloud": "Read aloud",
+      "upgradeTitle": "Your scorecard is ready",
+      "upgradeBody": "Phase-by-phase scores, vocabulary tips, and your overall hire signal are waiting for you.",
+      "upgradeBtn": "Upgrade to Hunter — free during beta →"
+    }
+  },
+  "forgot": {
+    "pageTitle": "Forgot Password — Interview Coach",
+    "title": "Forgot password?",
+    "subtitle": "Enter your email and we'll send a reset link",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "submit": "Send reset link",
+    "sending": "Sending…",
+    "backToSignIn": "← Back to sign in",
+    "successMsg": "If that email is registered, you'll receive a reset link shortly.",
+    "errorNetwork": "Network error — please try again."
+  },
+  "reset": {
+    "pageTitle": "Reset Password — Interview Coach",
+    "title": "Set new password",
+    "subtitle": "Enter and confirm your new password",
+    "newPassword": "New password",
+    "passwordPlaceholder": "At least 8 characters",
+    "confirmPassword": "Confirm password",
+    "confirmPlaceholder": "Repeat password",
+    "submit": "Set new password",
+    "saving": "Saving…",
+    "backToSignIn": "← Back to sign in",
+    "successMsg": "Password updated! Redirecting to sign in…",
+    "errorMismatch": "Passwords do not match.",
+    "errorTooShort": "Password must be at least 8 characters.",
+    "errorExpired": "Failed. The link may have expired.",
+    "errorInvalidLink": "Invalid reset link. Please request a new one.",
+    "errorNetwork": "Network error — please try again."
+  },
+  "login": {
+    "pageTitle": "Sign In — Interview Coach",
+    "title": "Welcome back",
+    "subtitle": "Sign in to your interview coach account",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "••••••••",
+    "submit": "Sign in",
+    "signingIn": "Signing in…",
+    "forgotPassword": "Forgot your password?",
+    "noAccount": "Don't have an account?",
+    "createOne": "Create one →",
+    "errorCredentials": "Login failed. Please check your credentials.",
+    "errorNetwork": "Network error — please try again."
+  },
+  "register": {
+    "pageTitle": "Create Account — Interview Coach",
+    "title": "Create your account",
+    "subtitle": "Practice interviews personalized to your resume and target role",
+    "name": "Full name",
+    "namePlaceholder": "Alex Johnson",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "At least 8 characters",
+    "passwordHint": "Minimum 8 characters",
+    "language": "Interview language",
+    "langEn": "English",
+    "langPt": "Portuguese (coming soon)",
+    "submit": "Create account",
+    "creating": "Creating account…",
+    "haveAccount": "Already have an account?",
+    "signIn": "Sign in →",
+    "errorName": "Name is required.",
+    "errorPassword": "Password must be at least 8 characters.",
+    "errorDefault": "Registration failed. Please try again.",
+    "errorNetwork": "Network error — please try again."
+  },
+  "tips": {
+    "pageTitle": "Interview Tips — Interview Coach",
+    "header": {
+      "tagline": "Interview Tips &amp; Frameworks"
+    },
+    "nav": {
+      "history": "📋 History",
+      "practice": "▶ Practice"
+    },
+    "hero": {
+      "badge": "Interview Playbook",
+      "title": "How to Ace Any Interview",
+      "sub": "Frameworks, structures, and tips used by top candidates — from the first impression to the final question."
+    },
+    "cards": {
+      "elevator": {
+        "title": "The Elevator Pitch",
+        "sub": "Your first 90 seconds — make them count",
+        "body": "<p>The elevator pitch is your answer to <strong>\"Tell me about yourself.\"</strong> It's not your biography — it's a curated highlight reel designed to make the interviewer want to keep listening.</p><div class=\"structure\"><div class=\"structure-row\"><span class=\"structure-label indigo\">Who</span><p>Who you are and your role today. One or two sentences max. Skip the graduation year.</p></div><div class=\"structure-row\"><span class=\"structure-label green\">What</span><p>What kind of problems you solve. Be specific — <strong>\"I build production ML pipelines\"</strong> beats <strong>\"I work in AI.\"</strong></p></div><div class=\"structure-row\"><span class=\"structure-label amber\">Highlight</span><p>One concrete achievement with a number or outcome. This is the hook that differentiates you.</p></div><div class=\"structure-row\"><span class=\"structure-label teal\">Why</span><p>Why <em>this role</em>. Connect something real in your background to something real about the company.</p></div></div><div class=\"do-dont\"><div class=\"do-block\"><div class=\"dd-label\">Do say</div><ul><li>Use \"I built\", \"I led\", \"I designed\"</li><li>Include one specific metric</li><li>End with a strong hook</li><li>Practice until it sounds natural</li></ul></div><div class=\"dont-block\"><div class=\"dd-label\">Avoid</div><ul><li>Reading your resume chronologically</li><li>Going over 2 minutes</li><li>Vague phrases like \"passionate about tech\"</li><li>Ending without connecting to the role</li></ul></div></div>"
+      },
+      "car": {
+        "title": "The CAR Framework",
+        "sub": "Challenge → Action → Result",
+        "body": "<p>Use CAR for every behavioral question: <strong>\"Tell me about a time you…\"</strong>, <strong>\"Describe a challenge…\"</strong>, <strong>\"Give me an example of…\"</strong></p><p>It's also called STAR (Situation, Task, Action, Result) — same idea, CAR is tighter. Think of it as a 2-minute story where you're the protagonist who solves a real problem.</p><div class=\"structure\"><div class=\"structure-row\"><span class=\"structure-label indigo\">C — Challenge</span><p>Set the scene in 2–3 sentences. What was the problem, the constraint, or the stakes? Make the interviewer understand <em>why it was hard</em>.</p></div><div class=\"structure-row\"><span class=\"structure-label green\">A — Action</span><p>This is the bulk of your answer. What did <strong>you</strong> specifically decide and do? Use \"I\", not \"we.\"</p></div><div class=\"structure-row\"><span class=\"structure-label amber\">R — Result</span><p>What happened? Quantify where you can. Also mention what you learned if the outcome was mixed.</p></div></div><p style=\"margin-top:16px\">The most common mistake is spending too long on the Challenge and rushing the Result. Interviewers care most about the Action — your thinking and your decisions.</p><div class=\"example-block\"><div class=\"example-label\">Weak answer</div><div class=\"example-text red\">\"We had performance issues so the team fixed the database queries and things got faster.\"</div></div><div class=\"example-block\"><div class=\"example-label\">Strong CAR answer</div><div class=\"example-text green\">\"Our API latency was spiking under load, causing timeouts for 8% of users. I profiled the slowest endpoints and found N+1 query patterns in three critical paths. I refactored them to use batch fetching and added a Redis cache layer. Latency dropped from 1.4s to 180ms and the timeout rate went to zero.\"</div></div>"
+      },
+      "behavioral": {
+        "title": "Behavioral Questions",
+        "sub": "Prepare stories, not answers",
+        "body": "<p>Behavioral questions probe how you've handled real situations. They're predictable — most fall into 6 themes. Prepare <strong>2–3 strong CAR stories</strong> per theme and you can answer almost anything.</p><div class=\"tip-list\"><div class=\"tip-item\"><span><strong>Leadership &amp; influence</strong> — A time you led without authority, changed someone's mind, or rallied a team.</span></div><div class=\"tip-item\"><span><strong>Conflict &amp; disagreement</strong> — A time you handled a difficult colleague, pushback from a manager, or a team dispute.</span></div><div class=\"tip-item\"><span><strong>Failure &amp; learning</strong> — A time something went wrong. Own it, explain what you learned, show you grew.</span></div><div class=\"tip-item\"><span><strong>Ambiguity &amp; problem-solving</strong> — A time you navigated a vague or changing requirement.</span></div><div class=\"tip-item\"><span><strong>Prioritization &amp; trade-offs</strong> — A time you had too much to do and had to choose.</span></div><div class=\"tip-item\"><span><strong>Impact &amp; ownership</strong> — A time you went beyond your role and delivered results that mattered.</span></div></div><p style=\"margin-top:16px\"><em>Pro tip:</em> Your best stories can flex across themes. A story about a system failure can answer leadership, problem-solving, and failure questions. Practice telling the same story with a different lens.</p>"
+      },
+      "rolespecific": {
+        "title": "Role-Specific Questions",
+        "sub": "Show your thinking, not just your answer",
+        "body": "<p>Role-specific questions test how you think under pressure as much as what you know. This structure works across any field — technical, analytical, or strategic:</p><div class=\"tip-list\"><div class=\"tip-item\"><span><strong>Clarify first.</strong> Before answering, ask one or two clarifying questions. This shows you don't jump to solutions without understanding the problem.</span></div><div class=\"tip-item\"><span><strong>Think aloud.</strong> Narrate your reasoning as you go. Silence is worse than imperfect thinking.</span></div><div class=\"tip-item\"><span><strong>Start simple, then build.</strong> Give a direct answer first, then add nuance and trade-offs. Never start by overcomplicating.</span></div><div class=\"tip-item\"><span><strong>Acknowledge edge cases.</strong> After your answer, proactively mention what could break it or what you'd want to validate. This signals maturity.</span></div><div class=\"tip-item\"><span><strong>When you don't know, say so — then reason.</strong> \"I haven't dealt with this directly, but based on how X works, I'd expect…\" is far better than silence or guessing.</span></div></div>"
+      },
+      "motivation": {
+        "title": "Motivation &amp; Culture Fit",
+        "sub": "Why this company, why this role, why now",
+        "body": "<p>\"Why do you want to work here?\" is deceptively simple. Generic answers (\"I admire the mission\") are forgettable. What makes a great answer: <strong>specificity + personal connection.</strong></p><div class=\"structure\"><div class=\"structure-row\"><span class=\"structure-label indigo\">Company</span><p>Name something specific — a product, a challenge the company is solving, a cultural value — and explain why it resonates with your experience.</p></div><div class=\"structure-row\"><span class=\"structure-label green\">Role</span><p>Show you've read the job description. Connect specific responsibilities to specific things you've done and want to do more of.</p></div><div class=\"structure-row\"><span class=\"structure-label amber\">Timing</span><p>Why now? What's changed in your trajectory or career goals that makes this the right move at this moment?</p></div></div><div class=\"example-block\"><div class=\"example-label\">Generic (forgettable)</div><div class=\"example-text red\">\"I want to grow my career and I think this company does great work.\"</div></div><div class=\"example-block\"><div class=\"example-label\">Specific (memorable)</div><div class=\"example-text green\">\"I've been building systems that go to production, and the hardest part has always been the gap between a demo and a reliable system at scale — that's the problem I find most interesting. When I read about what your team is doing with [X], it's exactly that problem. That's why this role caught my attention.\"</div></div>"
+      },
+      "questions": {
+        "title": "Questions to Ask the Interviewer",
+        "sub": "Good questions show curiosity and seriousness",
+        "body": "<p>Always have 3–4 questions ready. \"I don't have any questions\" is a red flag. These are consistently strong:</p><div class=\"tip-list\"><div class=\"tip-item\"><span>\"What does success look like in the first 90 days in this role?\"</span></div><div class=\"tip-item\"><span>\"What's the biggest challenge the team is currently facing?\"</span></div><div class=\"tip-item\"><span>\"How does the team handle competing priorities and trade-offs?\"</span></div><div class=\"tip-item\"><span>\"Can you tell me about a time someone on this team grew significantly — what did that look like?\"</span></div><div class=\"tip-item\"><span>\"What do you personally enjoy most about working here?\"</span></div><div class=\"tip-item\"><span>\"Is there anything in my background you'd like me to expand on?\"</span></div></div><p style=\"margin-top:14px\"><em>Avoid:</em> questions easily answered by the company website, questions about salary before an offer, and questions that make you sound like you're already negotiating.</p>"
+      },
+      "mistakes": {
+        "title": "Common Mistakes That Sink Candidates",
+        "sub": "Even strong candidates make these",
+        "body": "<div class=\"tip-list\"><div class=\"tip-item\" style=\"color:#fca5a5\"><span><strong style=\"color:#f1f5f9\">Using \"we\" instead of \"I\"</strong> in behavioral answers. Interviewers want to know what <em>you</em> did. \"We built the system\" raises the question of whether you contributed meaningfully.</span></div><div class=\"tip-item\" style=\"color:#fca5a5\"><span><strong style=\"color:#f1f5f9\">No quantified results.</strong> \"Things improved\" is forgettable. \"Latency dropped by 60%, error rate went to zero\" is memorable. Always try to put a number on the outcome.</span></div><div class=\"tip-item\" style=\"color:#fca5a5\"><span><strong style=\"color:#f1f5f9\">Rambling.</strong> Answers over 3 minutes lose the interviewer. Practice timing your answers. 90 seconds for the pitch, 2 minutes for CAR stories.</span></div><div class=\"tip-item\" style=\"color:#fca5a5\"><span><strong style=\"color:#f1f5f9\">Criticizing past employers.</strong> Even if justified, it raises doubts about how you'll talk about <em>this</em> company someday. Keep it neutral and focus on what you learned.</span></div><div class=\"tip-item\" style=\"color:#fca5a5\"><span><strong style=\"color:#f1f5f9\">Not asking for clarification.</strong> Jumping to an answer before understanding the problem signals poor judgment.</span></div><div class=\"tip-item\" style=\"color:#fca5a5\"><span><strong style=\"color:#f1f5f9\">Fluency under pressure.</strong> Content can be excellent but if hesitation, filler words, or unclear structure make you hard to follow, it affects the impression. Recording yourself to review is painful but effective.</span></div></div>"
+      }
+    },
+    "cta": {
+      "title": "Ready to put it into practice?",
+      "body_loggedin": "The best way to internalize these frameworks is to practice them out loud. Our AI interviewer gives you real-time feedback on structure, language, and confidence.",
+      "btn_loggedin": "Start Practicing →",
+      "body_loggedout": "The best way to internalize these frameworks is to practice them out loud. Sign up free — no credit card required.",
+      "btn_loggedout": "Get started free →"
+    }
+  }
+}

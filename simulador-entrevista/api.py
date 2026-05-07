@@ -28,8 +28,9 @@ from auth import (
     upgrade_plan, count_interviews_this_week, PLAN_WEEKLY_LIMITS,
     create_job_session, update_job_session_context, get_job_session, list_job_sessions,
     create_access_token, get_current_user, decode_token_raw,
+    create_contact_message, list_contact_messages, save_contact_reply, get_contact_message, delete_contact_message,
 )
-from email_service import send_verification_email, send_reset_email
+from email_service import send_verification_email, send_reset_email, send_contact_notification, send_contact_reply
 from prompt_generator import generate_interview_context, extract_candidate_name
 
 openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -62,7 +63,7 @@ async def register(body: UserCreate):
         None, lambda: create_verification_token(_conn, user["id"])
     )
     try:
-        await loop.run_in_executor(None, lambda: send_verification_email(user["email"], token))
+        await loop.run_in_executor(None, lambda: send_verification_email(user["email"], token, user.get("language", "en")))
     except Exception as exc:
         print(f"[register] Failed to send verification email: {exc}")
     access_token = create_access_token(user["id"], user["email"])
@@ -101,6 +102,7 @@ async def update_user_profile(body: ProfileUpdate, current_user: dict = Depends(
         lambda: update_profile(
             _conn, current_user["id"],
             body.name, body.email, body.current_password, body.new_password,
+            body.language,
         ),
     )
     # If email changed, send new verification email
@@ -110,7 +112,7 @@ async def update_user_profile(body: ProfileUpdate, current_user: dict = Depends(
         )
         try:
             await loop.run_in_executor(
-                None, lambda: send_verification_email(result["email"], token)
+                None, lambda: send_verification_email(result["email"], token, result.get("language", "en"))
             )
         except Exception as exc:
             print(f"[profile] Failed to send verification email: {exc}")
@@ -130,7 +132,7 @@ async def send_verification(current_user: dict = Depends(get_current_user)):
     )
     mock = os.getenv("MOCK_EMAIL", "false").lower() == "true"
     try:
-        await loop.run_in_executor(None, lambda: send_verification_email(user["email"], token))
+        await loop.run_in_executor(None, lambda: send_verification_email(user["email"], token, user.get("language", "en")))
     except Exception as exc:
         print(f"[send-verification] Failed: {exc}")
         raise HTTPException(status_code=503, detail="Failed to send email — please try again")
@@ -167,9 +169,9 @@ async def forgot_password(body: ForgotPasswordRequest):
     mock = os.getenv("MOCK_EMAIL", "false").lower() == "true"
     response = {"ok": True}  # always return ok to avoid email enumeration
     if result:
-        _, token = result
+        _, token, lang = result
         try:
-            await loop.run_in_executor(None, lambda: send_reset_email(body.email, token))
+            await loop.run_in_executor(None, lambda: send_reset_email(body.email, token, lang))
         except Exception as exc:
             print(f"[forgot-password] Failed to send email: {exc}")
         if mock:
@@ -449,25 +451,62 @@ async def get_scorecard(thread_id: str, current_user: dict = Depends(get_current
 
 # ── Audio endpoints ───────────────────────────────────────────────────────────
 
+@app.post("/parse-document")
+async def parse_document(file: UploadFile):
+    data = await file.read()
+    name = (file.filename or "").lower()
+    text = ""
+    try:
+        if name.endswith(".pdf"):
+            import pdfplumber, io
+            with pdfplumber.open(io.BytesIO(data)) as pdf:
+                text = "\n".join(p.extract_text() or "" for p in pdf.pages)
+        elif name.endswith(".docx"):
+            import docx, io
+            doc = docx.Document(io.BytesIO(data))
+            text = "\n".join(p.text for p in doc.paragraphs)
+        else:
+            raise HTTPException(status_code=415, detail="Only PDF and DOCX files are supported.")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail=f"Could not parse file: {exc}")
+    text = text.strip()
+    if not text:
+        raise HTTPException(status_code=422, detail="No text found in the file.")
+    return {"text": text}
+
+
 @app.post("/stt")
-async def stt(audio: UploadFile):
+async def stt(audio: UploadFile, lang: str = "en"):
     audio_bytes = await audio.read()
+    whisper_lang = "pt" if lang == "pt" else "en"
     transcript = await openai_client.audio.transcriptions.create(
         model="whisper-1",
         file=(audio.filename or "audio.webm", audio_bytes, audio.content_type or "audio/webm"),
-        language="en",
+        language=whisper_lang,
     )
     return {"text": transcript.text}
 
 
+_TTS_LANG_INSTRUCTIONS = {
+    "pt": "Fale em Português do Brasil com sotaque brasileiro natural e claro.",
+    "en": "",
+}
+
 @app.get("/tts")
-async def tts(text: str, voice: str = "nova", nocache: bool = False):
+async def tts(text: str, voice: str = "nova", lang: str = "en", nocache: bool = False):
     allowed = {"alloy", "echo", "fable", "onyx", "nova", "shimmer"}
     if voice not in allowed:
         voice = "nova"
 
+    instructions = _TTS_LANG_INSTRUCTIONS.get(lang, "")
+    use_mini = bool(instructions)  # gpt-4o-mini-tts only needed when we have instructions
+    tts_model = "gpt-4o-mini-tts" if use_mini else "tts-1"
+    cache_key_str = f"{tts_model}:{voice}:{lang}:{text}"
+
     if not nocache:
-        cache_key  = hashlib.md5(f"{voice}:{text}".encode()).hexdigest()
+        cache_key  = hashlib.md5(cache_key_str.encode()).hexdigest()
         cache_file = TTS_CACHE_DIR / f"{cache_key}.mp3"
         if cache_file.exists():
             return Response(content=cache_file.read_bytes(), media_type="audio/mpeg",
@@ -478,9 +517,10 @@ async def tts(text: str, voice: str = "nova", nocache: bool = False):
     last_exc: Exception | None = None
     for attempt in range(3):
         try:
-            response = await openai_client.audio.speech.create(
-                model="tts-1", voice=voice, input=text,
-            )
+            kwargs = dict(model=tts_model, voice=voice, input=text)
+            if instructions:
+                kwargs["instructions"] = instructions
+            response = await openai_client.audio.speech.create(**kwargs)
             audio_bytes = response.content
             if cache_file is not None:
                 cache_file.write_bytes(audio_bytes)
@@ -498,7 +538,7 @@ async def tts(text: str, voice: str = "nova", nocache: bool = False):
 # ── WebSocket streaming helper ────────────────────────────────────────────────
 
 async def _stream_to_client(ws: WebSocket, messages: list, system_prompt: str,
-                             voice: str = "nova", max_retries: int = 5) -> str:
+                             voice: str = "nova", lang: str = "en", max_retries: int = 5) -> str:
     from anthropic import APIStatusError
     full_msg = [SystemMessage(content=[{
         "type": "text",
@@ -511,7 +551,7 @@ async def _stream_to_client(ws: WebSocket, messages: list, system_prompt: str,
             async for chunk in model.astream(full_msg):
                 if chunk.content:
                     full_text += chunk.content
-                    await ws.send_json({"type": "stream_chunk", "text": chunk.content, "voice": voice})
+                    await ws.send_json({"type": "stream_chunk", "text": chunk.content, "voice": voice, "lang": lang})
             await ws.send_json({"type": "stream_done"})
             return full_text
         except APIStatusError as exc:
@@ -567,7 +607,8 @@ async def interview_ws(ws: WebSocket):
     # Load user status — email_verified gates phase 2+; plan gates scorecard
     user_db = await loop.run_in_executor(None, lambda: get_user_by_id(_conn, user_id))
     email_verified: bool = bool(user_db.get("email_verified")) if user_db else False
-    user_plan: str = user_db.get("plan", "free") if user_db else "free"
+    user_plan: str     = user_db.get("plan", "free")     if user_db else "free"
+    user_language: str = user_db.get("language", "en")   if user_db else "en"
 
     # Load interview context from the job session
     if job_session_id:
@@ -620,6 +661,7 @@ async def interview_ws(ws: WebSocket):
                 candidate_name=candidate_name,
                 job_title=job_title,
                 company=company,
+                language=user_language,
             )
             result = await loop.run_in_executor(
                 None, functools.partial(graph.invoke, initial_state, config)
@@ -729,9 +771,10 @@ async def interview_ws(ws: WebSocket):
                 elif phase_key:
                     # Build dynamic report system prompt with per-session context
                     ctx = result.get("interview_context") or interview_context
-                    report_system = _build_report_system(ctx, phase_key)
+                    lang = result.get("language") or user_language
+                    report_system = _build_report_system(ctx, phase_key, lang)
                     full_text = await _stream_to_client(
-                        ws, phase_messages, report_system, voice="onyx"
+                        ws, phase_messages, report_system, voice="onyx", lang=lang
                     )
                     await ws.send_json({
                         "type": "ai",
@@ -824,6 +867,93 @@ async def interview_ws(ws: WebSocket):
             })
         except Exception:
             pass
+
+
+# ── Contact endpoints ─────────────────────────────────────────────────────────
+
+class ContactRequest(BaseModel):
+    name:    str
+    email:   str
+    subject: str
+    body:    str
+
+
+@app.post("/contact")
+async def submit_contact(body: ContactRequest):
+    if not body.name.strip():
+        raise HTTPException(status_code=422, detail="Name is required")
+    if not body.email.strip() or "@" not in body.email:
+        raise HTTPException(status_code=422, detail="Valid email is required")
+    if not body.subject.strip():
+        raise HTTPException(status_code=422, detail="Subject is required")
+    if len(body.body.strip()) < 10:
+        raise HTTPException(status_code=422, detail="Message is too short")
+
+    loop = asyncio.get_running_loop()
+    msg_id = await loop.run_in_executor(
+        None,
+        lambda: create_contact_message(_conn, body.name, body.email, body.subject, body.body),
+    )
+    try:
+        await loop.run_in_executor(
+            None,
+            lambda: send_contact_notification(body.name, body.email, body.subject, body.body),
+        )
+    except Exception as exc:
+        print(f"[contact] Failed to send notification: {exc}")
+    return {"ok": True, "id": msg_id}
+
+
+@app.get("/admin/contact")
+async def admin_list_contact(current_user: dict = Depends(get_current_user)):
+    if current_user.get("email") != ADMIN_EMAIL:
+        raise HTTPException(status_code=403, detail="Admin only")
+    loop = asyncio.get_running_loop()
+    messages = await loop.run_in_executor(None, lambda: list_contact_messages(_conn))
+    return {"messages": messages}
+
+
+class ContactReplyRequest(BaseModel):
+    reply_text: str
+
+
+@app.post("/admin/contact/{msg_id}/reply")
+async def admin_reply_contact(msg_id: str, body: ContactReplyRequest,
+                              current_user: dict = Depends(get_current_user)):
+    if current_user.get("email") != ADMIN_EMAIL:
+        raise HTTPException(status_code=403, detail="Admin only")
+    if not body.reply_text.strip():
+        raise HTTPException(status_code=422, detail="Reply text is required")
+
+    loop = asyncio.get_running_loop()
+    msg = await loop.run_in_executor(None, lambda: get_contact_message(_conn, msg_id))
+    if not msg:
+        raise HTTPException(status_code=404, detail="Message not found")
+
+    await loop.run_in_executor(
+        None, lambda: save_contact_reply(_conn, msg_id, body.reply_text)
+    )
+    try:
+        await loop.run_in_executor(
+            None,
+            lambda: send_contact_reply(msg["email"], msg["name"], msg["subject"], body.reply_text),
+        )
+    except Exception as exc:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=503, detail=f"Reply saved but email failed: {exc}")
+    return {"ok": True}
+
+
+@app.delete("/admin/contact/{msg_id}")
+async def admin_delete_contact(msg_id: str, current_user: dict = Depends(get_current_user)):
+    if current_user.get("email") != ADMIN_EMAIL:
+        raise HTTPException(status_code=403, detail="Admin only")
+    loop = asyncio.get_running_loop()
+    deleted = await loop.run_in_executor(None, lambda: delete_contact_message(_conn, msg_id))
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Message not found")
+    return {"ok": True}
 
 
 # Serve the frontend — mount last so API routes are registered first

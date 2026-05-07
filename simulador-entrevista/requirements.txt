@@ -11,3 +11,5 @@ python-multipart
 bcrypt
 python-jose[cryptography]
 boto3
+pdfplumber
+python-docx

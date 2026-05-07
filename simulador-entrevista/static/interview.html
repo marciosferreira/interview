@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mock Interview Simulator</title>
+  <title data-i18n="interview.pageTitle">Mock Interview Simulator</title>
+  <script src="/i18n.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -511,15 +512,15 @@
       <div class="pop-item" id="pop-same-role">
         <div class="pop-item-icon">🔄</div>
         <div class="pop-item-text">
-          <strong>New round — same role</strong>
-          <span>Practice again with the same job &amp; resume</span>
+          <strong data-i18n="interview.popover.sameRole">New round — same role</strong>
+          <span data-i18n="interview.popover.sameRoleSub">Practice again with the same job &amp; resume</span>
         </div>
       </div>
       <div class="pop-item" id="pop-new-role">
         <div class="pop-item-icon">📝</div>
         <div class="pop-item-text">
-          <strong>New role</strong>
-          <span>Enter a different job description &amp; resume</span>
+          <strong data-i18n="interview.popover.newRole">New role</strong>
+          <span data-i18n="interview.popover.newRoleSub">Enter a different job description &amp; resume</span>
         </div>
       </div>
     </div>
@@ -528,27 +529,27 @@
 
 <nav id="phase-bar">
   <div class="phase-steps">
-    <div class="phase-step" data-step="0"><span class="ps-dot"></span><span class="ps-label">Elevator Pitch</span></div>
+    <div class="phase-step" data-step="0"><span class="ps-dot"></span><span class="ps-label" data-i18n="interview.phases.elevatorPitch">Elevator Pitch</span></div>
     <div class="phase-connector" data-conn="0"></div>
-    <div class="phase-step" data-step="1"><span class="ps-dot"></span><span class="ps-label">CAR Story</span></div>
+    <div class="phase-step" data-step="1"><span class="ps-dot"></span><span class="ps-label" data-i18n="interview.phases.CAR">CAR Story</span></div>
     <div class="phase-connector" data-conn="1"></div>
-    <div class="phase-step" data-step="2"><span class="ps-dot"></span><span class="ps-label">Technical</span></div>
+    <div class="phase-step" data-step="2"><span class="ps-dot"></span><span class="ps-label" data-i18n="interview.phases.technical">Role-Specific</span></div>
     <div class="phase-connector" data-conn="2"></div>
-    <div class="phase-step" data-step="3"><span class="ps-dot"></span><span class="ps-label">Leadership</span></div>
+    <div class="phase-step" data-step="3"><span class="ps-dot"></span><span class="ps-label" data-i18n="interview.phases.leadership">Leadership</span></div>
     <div class="phase-connector" data-conn="3"></div>
-    <div class="phase-step" data-step="4"><span class="ps-dot"></span><span class="ps-label">Motivation</span></div>
+    <div class="phase-step" data-step="4"><span class="ps-dot"></span><span class="ps-label" data-i18n="interview.phases.motivation">Motivation</span></div>
     <div class="phase-connector" data-conn="4"></div>
-    <div class="phase-step" data-step="5"><span class="ps-dot"></span><span class="ps-label">Your Questions</span></div>
+    <div class="phase-step" data-step="5"><span class="ps-dot"></span><span class="ps-label" data-i18n="interview.phases.yourQuestions">Your Questions</span></div>
     <div class="phase-connector" data-conn="5"></div>
-    <div class="phase-step" data-step="6"><span class="ps-dot"></span><span class="ps-label">Scorecard</span></div>
+    <div class="phase-step" data-step="6"><span class="ps-dot"></span><span class="ps-label" data-i18n="interview.phases.scorecard">Scorecard</span></div>
   </div>
 </nav>
 
 <!-- Floating TTS player pill -->
 <div id="tts-player">
-  <span id="tts-label"><span class="tts-dot"></span>Alex is speaking…</span>
-  <button id="pause-btn" title="Pause / Resume audio">⏸ Pause</button>
-  <button id="skip-btn" title="Skip audio">⏭ Skip</button>
+  <span id="tts-label"><span class="tts-dot"></span><span data-i18n="interview.tts.speaking">Alex is speaking…</span></span>
+  <button id="pause-btn" title="Pause / Resume audio" data-i18n="interview.tts.pause">⏸ Pause</button>
+  <button id="skip-btn" title="Skip audio" data-i18n="interview.tts.skip">⏭ Skip</button>
 </div>
 
 <div id="chat">
@@ -557,11 +558,11 @@
 </div>
 
 <div id="input-area">
-  <div id="done-banner" onclick="document.getElementById('scorecard-panel').scrollIntoView({behavior:'smooth',block:'start'})" style="cursor:pointer" title="Click to scroll to scorecard">Interview complete — scroll down to see your scorecard ↓</div>
+  <div id="done-banner" onclick="document.getElementById('scorecard-panel').scrollIntoView({behavior:'smooth',block:'start'})" style="cursor:pointer" title="Click to scroll to scorecard" data-i18n="interview.doneBanner">Interview complete — scroll down to see your scorecard ↓</div>
   <div id="input-row">
     <button id="mic-btn" class="icon-btn" disabled title="Click to start/stop recording">🎙️</button>
     <button id="cancel-rec-btn" class="icon-btn" title="Cancel recording">✕</button>
-    <textarea id="text-input" placeholder="Type your answer or press 🎙️ to speak…"
+    <textarea id="text-input" data-i18n-attr="placeholder:interview.input.placeholder" placeholder="Type your answer or press 🎙️ to speak…"
               rows="1" disabled></textarea>
     <button id="send-btn" class="icon-btn" disabled title="Send (Enter)">➤</button>
   </div>
@@ -571,10 +572,10 @@
       <input id="ap-progress" type="range" min="0" max="100" value="0" step="0.1">
       <div id="ap-times"><span id="ap-cur">0:00</span><span id="ap-dur">0:00</span></div>
     </div>
-    <button id="ap-discard">✕ Discard</button>
-    <button id="ap-send">➤ Send</button>
+    <button id="ap-discard" data-i18n="interview.audio.discard">✕ Discard</button>
+    <button id="ap-send" data-i18n="interview.audio.send">➤ Send</button>
   </div>
-  <p id="hint">Click <strong>🎙️</strong> to start/stop recording · <strong>Enter</strong> to send text · <strong>Shift+Enter</strong> for new line</p>
+  <p id="hint" data-i18n-html="interview.input.hint">Click <strong>🎙️</strong> to start/stop recording · <strong>Enter</strong> to send text · <strong>Shift+Enter</strong> for new line</p>
 </div>
 
 <script>
@@ -627,6 +628,7 @@
   // ── Auth check ─────────────────────────────────────────────────────
   const _authToken = localStorage.getItem('auth_token');
   if (!_authToken) { location.replace('/login.html?next=/interview.html'); }
+  const _lang = localStorage.getItem('preferred_lang') || 'en';
 
   // Load pending job session (set by onboarding.html)
   let _pendingJobSession = null;
@@ -752,6 +754,7 @@
   let streamRawText  = '';     // full raw text accumulated so far (for bubble rendering)
   let streamTTSBuf   = '';     // text not yet dispatched to TTS
   let streamVoice    = 'nova'; // TTS voice for the current streaming session
+  let streamLang     = _lang;  // TTS lang for the current streaming session
 
   // ── Mobile audio unlock ──────────────────────────────────────────────
   // iOS and Android block autoplay until after a user gesture.
@@ -770,9 +773,9 @@
     if (overlay) overlay.remove();
     // Play whatever was queued before the first gesture
     if (pendingSpeakArgs) {
-      const { text, voice } = pendingSpeakArgs;
+      const { text, voice, lang } = pendingSpeakArgs;
       pendingSpeakArgs = null;
-      speak(text, voice);
+      speak(text, voice, lang);
     }
   }
   document.addEventListener('click',      _unlockAudio, { capture: true });
@@ -822,17 +825,17 @@
 
   async function _fetchAudioUrl(text, voice = 'nova') {
     try {
-      const res = await fetch(`/tts?text=${encodeURIComponent(text)}&voice=${voice}&nocache=1`);
+      const res = await fetch(`/tts?text=${encodeURIComponent(text)}&voice=${voice}&lang=${_lang}&nocache=1`);
       if (!res.ok) return null;
       return URL.createObjectURL(await res.blob());
     } catch { return null; }
   }
 
-  function speak(text, voice = 'nova') {
+  function speak(text, voice = 'nova', lang = _lang) {
     // On mobile, audio is blocked until after a user gesture.
     // Queue the most recent speak() call and play it once unlocked.
     if (!audioUnlocked) {
-      pendingSpeakArgs = { text, voice };
+      pendingSpeakArgs = { text, voice, lang };
       return ttsChain;   // caller gets the existing (resolved) chain
     }
 
@@ -840,7 +843,7 @@
     const chunks  = _splitChunks(text);
 
     // Fire ALL fetches NOW in parallel — they complete while earlier chunks play
-    const fetches = chunks.map(c => _fetchAudioUrl(c, voice));
+    const fetches = chunks.map(c => _fetchAudioUrl(c, voice, lang));
     ttsPlayer.style.display = 'flex';
     ttsPaused = false;
     pauseBtn.textContent = '⏸ Pause';
@@ -887,11 +890,11 @@
     if (ttsPaused) {
       currentAudio.play().catch(() => {});
       ttsPaused = false;
-      pauseBtn.textContent = '⏸ Pause';
+      pauseBtn.textContent = t('interview.tts.pause');
     } else {
       currentAudio.pause();
       ttsPaused = true;
-      pauseBtn.textContent = '▶ Resume';
+      pauseBtn.textContent = t('interview.tts.resume');
     }
   }
 
@@ -932,18 +935,19 @@
     if (parts.length > 1) {
       for (let i = 0; i < parts.length - 1; i++) {
         const s = _stripMarkdown(parts[i]).trim();
-        if (s) speak(s, streamVoice);
+        if (s) speak(s, streamVoice, streamLang);
       }
       streamTTSBuf = parts[parts.length - 1];
     }
     if (flush && streamTTSBuf.trim()) {
-      speak(_stripMarkdown(streamTTSBuf).trim(), streamVoice);
+      speak(_stripMarkdown(streamTTSBuf).trim(), streamVoice, streamLang);
       streamTTSBuf = '';
     }
   }
 
-  function _appendStreamChunk(text, voice = 'nova') {
+  function _appendStreamChunk(text, voice = 'nova', lang = _lang) {
     streamVoice   = voice;   // all chunks in a session share the same voice
+    streamLang    = lang;
     streamRawText += text;
     streamTTSBuf  += text;
 
@@ -984,13 +988,14 @@
     if (streamWrapperEl && streamRawText) {
       const finalText  = streamRawText;
       const finalVoice = streamVoice;   // capture before reset
+      const finalLang  = streamLang;
       const btn = document.createElement('button');
       btn.className = 'replay-btn';
       btn.innerHTML = '🔊 replay';
       btn.title = 'Replay audio';
       btn.addEventListener('click', () => {
         stopTTS();
-        speak(_stripMarkdown(finalText), finalVoice);
+        speak(_stripMarkdown(finalText), finalVoice, finalLang);
       });
       streamWrapperEl.appendChild(btn);
       // Persist the streamed report so it reappears in history on resume.
@@ -1002,6 +1007,7 @@
     streamRawText   = '';
     streamTTSBuf    = '';
     streamVoice     = 'nova';  // reset to default for next streaming session
+    streamLang      = _lang;
   }
 
   // ── STT via MediaRecorder + Whisper ──────────────────────────────────
@@ -1110,7 +1116,7 @@
     const form = new FormData();
     form.append('audio', blob, 'recording.webm');
     try {
-      const res  = await fetch('/stt', { method: 'POST', body: form });
+      const res  = await fetch(`/stt?lang=${_lang}`, { method: 'POST', body: form });
       const data = await res.json();
       input.value = data.text || '';
       autoResize();
@@ -1236,7 +1242,7 @@
             removeTyping();
             const notice = document.createElement('div');
             notice.style.cssText = 'text-align:center;font-size:11px;color:#475569;padding:6px 0 2px';
-            notice.textContent = '— session restored —';
+            notice.textContent = t('interview.sessionRestored');
             chat.appendChild(notice);
             // Drop the last 'ai' entry — the server is about to re-send the
             // current pending question.  We also write the trimmed history back
@@ -1263,7 +1269,7 @@
           break;
 
         case 'stream_chunk':
-          _appendStreamChunk(msg.text, msg.voice || 'nova');
+          _appendStreamChunk(msg.text, msg.voice || 'nova', msg.lang || _lang);
           break;
 
         case 'stream_done':
@@ -1453,7 +1459,7 @@
   function _fetchAndRenderScorecard(threadId) {
     if (!threadId || !_authToken) return;
     scorecardPanel.style.display = 'block';
-    scorecardPanel.innerHTML = '<div class="sc-loading">Loading scorecard…</div>';
+    scorecardPanel.innerHTML = `<div class="sc-loading">${t('interview.scorecard.loading')}</div>`;
     fetch(`/sessions/${encodeURIComponent(threadId)}/scorecard`, {
       headers: { 'Authorization': `Bearer ${_authToken}` },
     })
@@ -1461,16 +1467,26 @@
       .then(async ({ ok, status, json }) => {
         const data = await json.catch(() => null);
         if (ok && data?.scorecard) {
-          scorecardPanel.innerHTML = `<div class="sc-inner">${renderMd(data.scorecard)}</div>`;
+          scorecardPanel.innerHTML = `
+            <div class="sc-inner">
+              <div style="text-align:right;margin-bottom:12px">
+                <button class="replay-btn" id="sc-tts-btn" title="Read scorecard aloud">🔊 ${t('interview.scorecard.readAloud')}</button>
+              </div>
+              ${renderMd(data.scorecard)}
+            </div>`;
+          document.getElementById('sc-tts-btn').addEventListener('click', () => {
+            stopTTS();
+            speak(data.scorecard, 'nova');
+          });
         } else if (status === 403) {
           scorecardPanel.innerHTML = `<div class="sc-inner" style="border-color:#3d4160;text-align:center;padding:32px 24px">
             <div style="font-size:28px;margin-bottom:12px">📄</div>
-            <h2 style="font-size:15px;color:#f1f5f9;margin-bottom:8px">Your scorecard is ready</h2>
+            <h2 style="font-size:15px;color:#f1f5f9;margin-bottom:8px">${t('interview.scorecard.upgradeTitle')}</h2>
             <p style="color:#64748b;font-size:13px;max-width:380px;margin:0 auto 20px">
-              Phase-by-phase scores, vocabulary tips, and your overall hire signal are waiting for you.
+              ${t('interview.scorecard.upgradeBody')}
             </p>
             <a href="/upgrade.html" style="display:inline-block;padding:10px 24px;border-radius:20px;background:linear-gradient(135deg,#6366f1,#7c3aed);color:#fff;font-size:13px;font-weight:600;text-decoration:none">
-              Upgrade to Hunter — free during beta →
+              ${t('interview.scorecard.upgradeBtn')}
             </a>
           </div>`;
         } else {
@@ -1646,7 +1662,7 @@
       'font-size:13px', 'padding:8px 20px', 'border-radius:99px',
       'backdrop-filter:blur(6px)', '-webkit-backdrop-filter:blur(6px)',
     ].join(';');
-    pill.textContent = 'Tap anywhere to enable audio';
+    pill.textContent = t('interview.tapToEnable');
     overlay.appendChild(pill);
     document.body.appendChild(overlay);
   }
@@ -1668,5 +1684,6 @@
   } catch(_){}
 })();
 </script>
+<script src="/contact-widget.js"></script>
 </body>
 </html>

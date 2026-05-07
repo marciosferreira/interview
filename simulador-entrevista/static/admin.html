@@ -138,6 +138,7 @@
     <div><h1>Interview Coach</h1><p>Admin panel</p></div>
   </a>
   <span class="hdr-spacer"></span>
+  <a class="hdr-btn" href="/admin-contact.html" id="contact-link">✉ Messages</a>
   <a class="hdr-btn" href="/history.html">📋 History</a>
   <a class="hdr-btn" href="/profile.html">⚙️ Settings</a>
 </header>
@@ -186,6 +187,21 @@
 <script>
   const _token = localStorage.getItem('auth_token');
   if (!_token) location.replace('/login.html?next=/admin.html');
+
+  // Badge: unread contact messages
+  (async () => {
+    try {
+      const res = await fetch('/admin/contact', { headers: { 'Authorization': `Bearer ${_token}` } });
+      if (res.ok) {
+        const data = await res.json();
+        const pending = (data.messages || []).filter(m => !m.replied_at).length;
+        if (pending > 0) {
+          const link = document.getElementById('contact-link');
+          link.innerHTML = `✉ Messages <span style="background:#6366f1;color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">${pending}</span>`;
+        }
+      }
+    } catch (_) {}
+  })();
 
   let _users = [];
   let _filter = 'all';

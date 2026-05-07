@@ -238,35 +238,68 @@ _PHASE_FILES  = {
 }
 
 
-def _build_interview_system(interview_context: str, phase: str) -> str:
+def _build_interview_system(interview_context: str, phase: str, language: str = "en") -> str:
     """Compose: persona + candidate context + phase guide."""
     phase_guide = _PHASE_FILES.get(phase, "")
+    lang_block = "\n\n---\n\n" + _LANG_DIRECTIVE.get(language, _LANG_DIRECTIVE["en"])
     context_block = (
         "\n\n---\n\n## CANDIDATE & JOB CONTEXT\n\n"
         + interview_context
         + "\n\n---\n\n"
     ) if interview_context else "\n\n---\n\n"
-    return _PERSONA + context_block + phase_guide
+    return _PERSONA + lang_block + context_block + phase_guide
 
 
-def _build_report_system(interview_context: str, phase: str) -> str:
-    """Compose: report format + candidate context + phase guide."""
+_REPORT_PHASE_SECTIONS = {
+    "elevator_pitch": "# ELEVATOR PITCH GUIDANCE",
+    "CAR":            "# CAR PROJECT GUIDANCE",
+    "technical":      "# TECHNICAL EVALUATION FOCUS",
+    "leadership":     "# LEADERSHIP & APPROACH EVALUATION",
+    "motivation":     "# FIT & MOTIVATION EVALUATION",
+}
+
+_ALWAYS_INCLUDE_SECTIONS = {"# CANDIDATE PROFILE", "# LANGUAGE & COMMUNICATION NOTES"}
+
+
+def _extract_context_for_report(interview_context: str, phase: str) -> str:
+    """Return only the sections of interview_context relevant to this phase's report."""
+    if not interview_context:
+        return ""
+    phase_section = _REPORT_PHASE_SECTIONS.get(phase, "")
+    keep = _ALWAYS_INCLUDE_SECTIONS | ({phase_section} if phase_section else set())
+
+    # Split on markdown H1 headings
+    import re
+    parts = re.split(r'(?=^# )', interview_context, flags=re.MULTILINE)
+    selected = []
+    for part in parts:
+        heading = part.split('\n', 1)[0].strip()
+        if not heading or any(heading.startswith(h) for h in keep):
+            selected.append(part)
+    return "\n\n".join(selected).strip()
+
+
+def _build_report_system(interview_context: str, phase: str, language: str = "en") -> str:
+    """Compose: report format + phase-relevant context slice + phase guide."""
     phase_guide = _PHASE_FILES.get(phase, "")
+    slim_context = _extract_context_for_report(interview_context, phase)
+    lang_block = "\n\n---\n\n" + _LANG_DIRECTIVE.get(language, _LANG_DIRECTIVE["en"])
+    context_block = (
+        "\n\n---\n\n## CANDIDATE & JOB CONTEXT\n\n"
+        + slim_context
+        + "\n\n---\n\n"
+    ) if slim_context else "\n\n---\n\n"
+    return _REPORT_BASE + lang_block + context_block + phase_guide
+
+
+def _build_scorecard_system(interview_context: str, language: str = "en") -> str:
+    lang_block = "\n\n---\n\n" + _LANG_DIRECTIVE.get(language, _LANG_DIRECTIVE["en"])
     context_block = (
         "\n\n---\n\n## CANDIDATE & JOB CONTEXT\n\n"
         + interview_context
         + "\n\n---\n\n"
     ) if interview_context else "\n\n---\n\n"
-    return _REPORT_BASE + context_block + phase_guide
-
-
-def _build_scorecard_system(interview_context: str) -> str:
-    context_block = (
-        "\n\n---\n\n## CANDIDATE & JOB CONTEXT\n\n"
-        + interview_context
-        + "\n\n---\n\n"
-    ) if interview_context else "\n\n---\n\n"
-    return _SCORECARD + context_block
+    return _SCORECARD + lang_block + context_block
 
 
 def _cached_system(prompt: str) -> SystemMessage:
@@ -281,11 +314,25 @@ def _cached_system(prompt: str) -> SystemMessage:
 # State
 # ---------------------------------------------------------------------------
 
+_LANG_DIRECTIVE = {
+    "en": (
+        "**Language:** Conduct the entire interview in English. "
+        "All your messages must be in English."
+    ),
+    "pt": (
+        "**Idioma:** Conduza toda a entrevista em Português do Brasil. "
+        "Todas as suas mensagens devem estar em Português do Brasil. "
+        "O campo `english_adequate` deve avaliar a qualidade da comunicação em Português do candidato."
+    ),
+}
+
+
 class EntrevistaState(TypedDict):
     messages:       Annotated[list, add_messages]
     phase_messages: list
     archive:        list
     fase:           str
+    language:       str      # user's preferred language ("en" or "pt")
     interview_context: str   # generated per-session from CV + job description
     candidate_name: str      # extracted from interview_context
     job_title:      str
@@ -430,7 +477,8 @@ class Scorecard(BaseModel):
 def _make_interview_node(output_class, checklist_key, notas_key, report_fase, phase_name):
     def node(state: EntrevistaState, config: RunnableConfig) -> dict:
         interview_context = state.get("interview_context", "")
-        system_prompt = _build_interview_system(interview_context, phase_name)
+        language = state.get("language", "en")
+        system_prompt = _build_interview_system(interview_context, phase_name, language)
         structured = model.with_structured_output(output_class)
 
         phase_msgs: list = state.get("phase_messages") or [
@@ -507,9 +555,11 @@ def _make_interview_node(output_class, checklist_key, notas_key, report_fase, ph
 
 def _make_report_node(phase_name, next_fase):
     def node(state: EntrevistaState, config: RunnableConfig) -> dict:
-        phase_msgs: list = state.get("phase_messages") or []
         feedback_text = interrupt("[report_ready]")
-        new_archive = state.get("archive", []) + phase_msgs + [AIMessage(content=feedback_text)]
+        # Archive only the distilled report — raw phase messages are discarded
+        phase_label = phase_name.replace("_", " ").title()
+        summary = f"=== Phase Report: {phase_label} ===\n{feedback_text}"
+        new_archive = state.get("archive", []) + [HumanMessage(content=summary)]
         return {
             "messages": [
                 AIMessage(content=feedback_text),
@@ -558,7 +608,8 @@ motivation_report     = _make_report_node("motivation",     next_fase="candidate
 
 def candidate_questions(state: EntrevistaState, config: RunnableConfig) -> dict:
     interview_context = state.get("interview_context", "")
-    system_prompt = _build_interview_system(interview_context, "candidate_questions")
+    language = state.get("language", "en")
+    system_prompt = _build_interview_system(interview_context, "candidate_questions", language)
     structured = model.with_structured_output(CandidateQuestionsPhase)
 
     phase_msgs: list = state.get("phase_messages") or [
@@ -587,8 +638,8 @@ def candidate_questions(state: EntrevistaState, config: RunnableConfig) -> dict:
         f"Thank you, {name}. This has been a really strong session. "
         "Let me put together your scorecard."
     )
-    completed_transcript = phase_msgs + [AIMessage(content=closing_msg)]
-    new_archive = state.get("archive", []) + completed_transcript
+    # Archive only the closing — raw candidate_questions messages discarded
+    new_archive = state.get("archive", [])
     return {
         "messages": [AIMessage(content=closing_msg)],
         "phase_messages": [],
@@ -599,22 +650,63 @@ def candidate_questions(state: EntrevistaState, config: RunnableConfig) -> dict:
 
 def feedback(state: EntrevistaState, config: RunnableConfig) -> dict:
     interview_context = state.get("interview_context", "")
-    system_prompt = _build_scorecard_system(interview_context)
+    language = state.get("language", "en")
+    system_prompt = _build_scorecard_system(interview_context, language)
     structured = model.with_structured_output(Scorecard)
 
-    archive = state.get("archive", [])
-    phase_msgs = state.get("phase_messages") or []
-    full_context = archive + phase_msgs
+    # Build compact context from distilled phase reports + structured notes
+    parts = []
 
+    # Phase reports (already distilled — one per phase)
+    archive = state.get("archive", [])
+    if archive:
+        parts.append("## Per-Phase Reports\n")
+        for msg in archive:
+            parts.append(msg.content)
+
+    # Structured observer notes accumulated during each phase
+    note_map = [
+        ("Elevator Pitch",        state.get("notas_pitch", "")),
+        ("CAR Project Story",     state.get("notas_CAR", "")),
+        ("Technical Questions",   state.get("notas_technical", "")),
+        ("Leadership",            state.get("notas_leadership", "")),
+        ("Fit & Motivation",      state.get("notas_motivation", "")),
+    ]
+    notes_block = "\n".join(
+        f"**{label}:** {note}" for label, note in note_map if note and note.strip()
+    )
+    if notes_block:
+        parts.append("\n## Observer Notes (structured)\n" + notes_block)
+
+    # Checklist summaries
+    checklist_map = [
+        ("Elevator Pitch",  state.get("checklist_pitch", {})),
+        ("CAR",             state.get("checklist_CAR", {})),
+        ("Technical",       state.get("checklist_technical", {})),
+        ("Leadership",      state.get("checklist_leadership", {})),
+        ("Motivation",      state.get("checklist_motivation", {})),
+    ]
+    checklist_lines = []
+    for label, cl in checklist_map:
+        if cl:
+            passed = [k for k, v in cl.items() if v]
+            failed = [k for k, v in cl.items() if not v]
+            checklist_lines.append(
+                f"**{label}** — ✓ {', '.join(passed) or 'none'} | ✗ {', '.join(failed) or 'none'}"
+            )
+    if checklist_lines:
+        parts.append("\n## Evaluation Checklists\n" + "\n".join(checklist_lines))
+
+    # Accumulated language errors
     ingles_erros = state.get("ingles_erros_acumulados") or []
     if ingles_erros:
-        erros_text = (
-            "ACCUMULATED LANGUAGE ERRORS — collected across all interview phases:\n"
+        parts.append(
+            "\n## Accumulated Language Errors\n"
             + "\n".join(f"- {e}" for e in ingles_erros)
         )
-        full_context = full_context + [HumanMessage(content=erros_text)]
 
-    messages = [_cached_system(system_prompt)] + full_context
+    context_text = "\n".join(parts)
+    messages = [_cached_system(system_prompt), HumanMessage(content=context_text)]
     scorecard: Scorecard = _invoke_with_retry(structured, messages)
 
     job_title = state.get("job_title", "")
@@ -778,12 +870,15 @@ def make_initial_state(
     candidate_name: str = "the candidate",
     job_title: str = "",
     company: str = "",
+    language: str = "en",
 ) -> EntrevistaState:
+    opening = "Olá, estou pronto para começar a entrevista." if language == "pt" else "Hi, I'm ready to start the interview."
     return {
-        "messages": [HumanMessage(content="Hi, I'm ready to start the interview.")],
-        "phase_messages": [HumanMessage(content="Hi, I'm ready to start the interview.")],
+        "messages": [HumanMessage(content=opening)],
+        "phase_messages": [HumanMessage(content=opening)],
         "archive": [],
         "fase": "elevator_pitch",
+        "language": language,
         "interview_context": interview_context,
         "candidate_name": candidate_name,
         "job_title": job_title,

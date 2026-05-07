@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Prepare Your Interview — Interview Coach</title>
+  <title data-i18n="onboarding.pageTitle">Prepare Your Interview — Interview Coach</title>
+  <script src="/i18n.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -127,6 +128,23 @@
       margin-bottom: 16px; display: none;
     }
 
+    .upload-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 500; padding: 5px 12px;
+      border-radius: 8px; background: transparent;
+      border: 1px solid #2d3148; color: #64748b;
+      cursor: pointer; transition: all 0.15s; margin-bottom: 8px;
+    }
+    .upload-btn:hover { border-color: #6366f1; color: #a78bfa; }
+    .upload-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .upload-btn .up-spinner {
+      display: none; width: 10px; height: 10px;
+      border: 2px solid rgba(99,102,241,0.3); border-top-color: #6366f1;
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+    }
+    .upload-btn.loading .up-spinner { display: inline-block; }
+    .upload-btn.loading .up-icon { display: none; }
+
     /* Step 3 — generating */
     .generating-card {
       text-align: center; padding: 48px 32px;
@@ -170,7 +188,7 @@
     <div class="logo">🎯</div>
     <div>
       <h1>Interview Coach</h1>
-      <p>AI-powered mock interview preparation</p>
+      <p data-i18n="header.tagline">AI-powered mock interview preparation</p>
     </div>
   </a>
   <div class="user-pill">
@@ -186,17 +204,17 @@
   <div class="steps">
     <div class="step-item active" id="step-indicator-1">
       <div class="step-dot">1</div>
-      <span>Job Description</span>
+      <span data-i18n="onboarding.steps.jobDesc">Job Description</span>
     </div>
     <div class="step-line"></div>
     <div class="step-item" id="step-indicator-2">
       <div class="step-dot">2</div>
-      <span>Your Resume</span>
+      <span data-i18n="onboarding.steps.resume">Your Resume</span>
     </div>
     <div class="step-line"></div>
     <div class="step-item" id="step-indicator-3">
       <div class="step-dot">3</div>
-      <span>Preparing</span>
+      <span data-i18n="onboarding.steps.preparing">Preparing</span>
     </div>
   </div>
 
@@ -205,47 +223,59 @@
 
     <!-- Step 1: Job Description -->
     <div class="step-panel active" id="panel-1">
-      <h2>What role are you interviewing for?</h2>
-      <p class="desc">Paste the job description below. The more detail you provide, the more targeted your mock interview will be.</p>
+      <h2 data-i18n="onboarding.step1.title">What role are you interviewing for?</h2>
+      <p class="desc" data-i18n="onboarding.step1.desc">Paste the job description below. The more detail you provide, the more targeted your mock interview will be.</p>
 
       <div class="row-2">
         <div class="field">
-          <label for="job-title">Job title *</label>
-          <input type="text" id="job-title" placeholder="e.g. Senior AI Engineer" />
+          <label for="job-title" data-i18n="onboarding.step1.jobTitle">Job title *</label>
+          <input type="text" id="job-title" data-i18n-attr="placeholder:onboarding.step1.jobTitlePlaceholder" placeholder="e.g. Senior AI Engineer" />
         </div>
         <div class="field">
-          <label for="company">Company name</label>
-          <input type="text" id="company" placeholder="e.g. Acme Corp" />
+          <label for="company" data-i18n="onboarding.step1.company">Company name</label>
+          <input type="text" id="company" data-i18n-attr="placeholder:onboarding.step1.companyPlaceholder" placeholder="e.g. Acme Corp" />
         </div>
       </div>
 
       <div class="field">
-        <label for="job-description">Job description *</label>
+        <label for="job-description" data-i18n="onboarding.step1.jobDescLabel">Job description *</label>
+        <button type="button" class="upload-btn" onclick="triggerUpload('job-description')">
+          <span class="up-icon">📎</span>
+          <span class="up-spinner"></span>
+          <span data-i18n="onboarding.upload">Upload PDF or DOCX</span>
+        </button>
         <textarea id="job-description" rows="12"
+          data-i18n-attr="placeholder:onboarding.step1.jobDescPlaceholder"
           placeholder="Paste the full job description here — responsibilities, requirements, qualifications, and any other relevant details…"></textarea>
-        <p class="field-hint">Minimum 50 characters required</p>
+        <p class="field-hint" data-i18n="onboarding.minChars">Minimum 50 characters required</p>
       </div>
 
       <div class="btn-row">
-        <button class="btn-next" onclick="goToStep2()">Next: Add your resume →</button>
+        <button class="btn-next" onclick="goToStep2()" data-i18n="onboarding.step1.next">Next: Add your resume →</button>
       </div>
     </div>
 
     <!-- Step 2: Resume -->
     <div class="step-panel" id="panel-2">
-      <h2>Paste your resume</h2>
-      <p class="desc">Copy and paste your resume below. Include your work experience, education, projects, and skills. The AI will use this to personalize every phase of your mock interview.</p>
+      <h2 data-i18n="onboarding.step2.title">Paste your resume</h2>
+      <p class="desc" data-i18n="onboarding.step2.desc">Copy and paste your resume below. Include your work experience, education, projects, and skills. The AI will use this to personalize every phase of your mock interview.</p>
 
       <div class="field">
-        <label for="resume-text">Resume text *</label>
+        <label for="resume-text" data-i18n="onboarding.step2.resumeLabel">Resume text *</label>
+        <button type="button" class="upload-btn" onclick="triggerUpload('resume-text')">
+          <span class="up-icon">📎</span>
+          <span class="up-spinner"></span>
+          <span data-i18n="onboarding.upload">Upload PDF or DOCX</span>
+        </button>
         <textarea id="resume-text" rows="16"
+          data-i18n-attr="placeholder:onboarding.step2.resumePlaceholder"
           placeholder="Paste your resume here — work experience, education, projects, skills, publications, etc.…"></textarea>
-        <p class="field-hint">Minimum 50 characters required</p>
+        <p class="field-hint" data-i18n="onboarding.minChars">Minimum 50 characters required</p>
       </div>
 
       <div class="btn-row">
-        <button class="btn-back" onclick="goToStep1()">← Back</button>
-        <button class="btn-next" onclick="startPreparing()">Prepare my interview →</button>
+        <button class="btn-back" onclick="goToStep1()" data-i18n="onboarding.step2.back">← Back</button>
+        <button class="btn-next" onclick="startPreparing()" data-i18n="onboarding.step2.start">Prepare my interview →</button>
       </div>
     </div>
 
@@ -253,15 +283,15 @@
     <div class="step-panel" id="panel-3">
       <div class="generating-card">
         <div class="big-spinner"></div>
-        <h3>Preparing your personalized interview…</h3>
-        <p>Our AI is analyzing your resume and the job description to create a tailored mock interview experience.</p>
+        <h3 data-i18n="onboarding.step3.title">Preparing your personalized interview…</h3>
+        <p data-i18n="onboarding.step3.sub">Our AI is analyzing your resume and the job description to create a tailored mock interview experience.</p>
         <ul class="tip-list">
-          <li>Reading your background and key achievements</li>
-          <li>Analyzing what the role requires</li>
-          <li>Crafting interview phases specific to you</li>
-          <li>Preparing evaluation criteria for each phase</li>
+          <li data-i18n="onboarding.step3.item1">Reading your background and key achievements</li>
+          <li data-i18n="onboarding.step3.item2">Analyzing what the role requires</li>
+          <li data-i18n="onboarding.step3.item3">Crafting interview phases specific to you</li>
+          <li data-i18n="onboarding.step3.item4">Preparing evaluation criteria for each phase</li>
         </ul>
-        <p style="margin-top: 20px; font-size: 12px; color: #334155;">This usually takes 10–20 seconds.</p>
+        <p style="margin-top: 20px; font-size: 12px; color: #334155;" data-i18n="onboarding.step3.time">This usually takes 10–20 seconds.</p>
       </div>
     </div>
   </div>
@@ -284,6 +314,45 @@
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
     location.replace('/login.html');
+  }
+
+  // ── Document upload ───────────────────────────────────────────────────────
+  const _fileInput = document.createElement('input');
+  _fileInput.type = 'file';
+  _fileInput.accept = '.pdf,.docx';
+  _fileInput.style.display = 'none';
+  document.body.appendChild(_fileInput);
+
+  let _uploadTarget = null;
+  let _uploadBtn = null;
+
+  _fileInput.addEventListener('change', async () => {
+    const file = _fileInput.files[0];
+    _fileInput.value = '';
+    if (!file || !_uploadTarget) return;
+
+    _uploadBtn.disabled = true;
+    _uploadBtn.classList.add('loading');
+
+    const form = new FormData();
+    form.append('file', file);
+    try {
+      const res  = await fetch('/parse-document', { method: 'POST', body: form });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Upload failed');
+      document.getElementById(_uploadTarget).value = data.text;
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      _uploadBtn.disabled = false;
+      _uploadBtn.classList.remove('loading');
+    }
+  });
+
+  function triggerUpload(targetId) {
+    _uploadTarget = targetId;
+    _uploadBtn = event.currentTarget;
+    _fileInput.click();
   }
 
   // ── Step navigation ───────────────────────────────────────────────────────
@@ -313,8 +382,8 @@
     hideError();
     const title = document.getElementById('job-title').value.trim();
     const desc  = document.getElementById('job-description').value.trim();
-    if (!title) { showError('Please enter the job title.'); return; }
-    if (desc.length < 50) { showError('Job description is too short. Please paste the full description.'); return; }
+    if (!title) { showError(t('onboarding.errors.noTitle')); return; }
+    if (desc.length < 50) { showError(t('onboarding.errors.shortDesc')); return; }
     setStep(2);
   }
 
@@ -325,7 +394,7 @@
     const desc   = document.getElementById('job-description').value.trim();
     const resume = document.getElementById('resume-text').value.trim();
 
-    if (resume.length < 50) { showError('Resume is too short. Please paste your full resume.'); return; }
+    if (resume.length < 50) { showError(t('onboarding.errors.shortResume')); return; }
 
     setStep(3);
 
@@ -365,7 +434,7 @@
               : `Your limit resets every 7 days.`)
           );
         } else {
-          showError(data.detail || 'Something went wrong. Please try again.');
+          showError(data.detail || t('onboarding.errors.default'));
         }
         return;
       }
@@ -384,7 +453,7 @@
       location.replace('/interview.html');
     } catch (err) {
       setStep(2);
-      showError('Network error — please check your connection and try again.');
+      showError(t('onboarding.errors.network'));
     }
   }
 </script>
@@ -405,5 +474,6 @@
   } catch(_){}
 })();
 </script>
+<script src="/contact-widget.js"></script>
 </body>
 </html>

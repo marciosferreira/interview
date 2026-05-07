@@ -61,6 +61,7 @@ class ProfileUpdate(BaseModel):
     email: Optional[str] = None
     current_password: Optional[str] = None
     new_password: Optional[str] = None
+    language: Optional[str] = None
 
 
 # ── DB setup (with migrations for existing DBs) ──────────────────────────────
@@ -107,6 +108,18 @@ def setup_user_tables(conn: sqlite3.Connection) -> None:
             interview_context TEXT NOT NULL DEFAULT '',
             created_at        INTEGER NOT NULL,
             FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS contact_messages (
+            id          TEXT PRIMARY KEY,
+            name        TEXT NOT NULL,
+            email       TEXT NOT NULL,
+            subject     TEXT NOT NULL,
+            body        TEXT NOT NULL,
+            created_at  INTEGER NOT NULL,
+            replied_at  INTEGER,
+            reply_text  TEXT
         )
     """)
     conn.commit()
@@ -182,7 +195,8 @@ def count_interviews_this_week(conn: sqlite3.Connection, user_id: str) -> int:
 
 def update_profile(conn: sqlite3.Connection, user_id: str,
                    name: Optional[str], email: Optional[str],
-                   current_password: Optional[str], new_password: Optional[str]) -> dict:
+                   current_password: Optional[str], new_password: Optional[str],
+                   language: Optional[str] = None) -> dict:
     row = conn.execute(
         "SELECT name, email, password_hash, language, email_verified FROM users WHERE id = ?",
         (user_id,),
@@ -190,7 +204,7 @@ def update_profile(conn: sqlite3.Connection, user_id: str,
     if not row:
         raise HTTPException(status_code=404, detail="User not found")
 
-    cur_name, cur_email, cur_hash, language, email_verified = row
+    cur_name, cur_email, cur_hash, cur_language, email_verified = row
 
     updates = {}
     email_changed = False
@@ -223,6 +237,9 @@ def update_profile(conn: sqlite3.Connection, user_id: str,
             raise HTTPException(status_code=401, detail="Current password is incorrect")
         updates["password_hash"] = _hash_password(new_password)
 
+    if language and language in ("en", "pt"):
+        updates["language"] = language
+
     if not updates:
         raise HTTPException(status_code=422, detail="Nothing to update")
 
@@ -236,6 +253,7 @@ def update_profile(conn: sqlite3.Connection, user_id: str,
     return {
         "name": updates.get("name", cur_name),
         "email": updates.get("email", cur_email),
+        "language": updates.get("language", cur_language),
         "email_verified": False if email_changed else bool(email_verified),
         "email_changed": email_changed,
     }
@@ -274,12 +292,12 @@ def verify_email_token(conn: sqlite3.Connection, token: str) -> Optional[dict]:
 
 # ── Password reset ────────────────────────────────────────────────────────────
 
-def create_reset_token(conn: sqlite3.Connection, email: str) -> Optional[tuple[str, str]]:
-    """Returns (user_id, token) or None if email not found."""
-    row = conn.execute("SELECT id FROM users WHERE email = ?", (email.lower().strip(),)).fetchone()
+def create_reset_token(conn: sqlite3.Connection, email: str) -> Optional[tuple[str, str, str]]:
+    """Returns (user_id, token, language) or None if email not found."""
+    row = conn.execute("SELECT id, language FROM users WHERE email = ?", (email.lower().strip(),)).fetchone()
     if not row:
         return None
-    user_id = row[0]
+    user_id, language = row
     token = secrets.token_urlsafe(32)
     expires = _now_ms() + RESET_TOKEN_EXPIRES_MINUTES * 60_000
     conn.execute(
@@ -287,7 +305,7 @@ def create_reset_token(conn: sqlite3.Connection, email: str) -> Optional[tuple[s
         (token, expires, user_id),
     )
     conn.commit()
-    return user_id, token
+    return user_id, token, language
 
 
 def reset_password_with_token(conn: sqlite3.Connection, token: str, new_password: str) -> bool:
@@ -403,3 +421,79 @@ def decode_token_raw(token: str) -> Optional[dict]:
         return {"id": payload["sub"], "email": payload["email"]}
     except JWTError:
         return None
+
+
+# ── Contact messages ──────────────────────────────────────────────────────────
+
+def create_contact_message(conn: sqlite3.Connection, name: str, email: str,
+                            subject: str, body: str) -> str:
+    msg_id = str(uuid.uuid4())
+    conn.execute(
+        "INSERT INTO contact_messages (id, name, email, subject, body, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+        (msg_id, name.strip(), email.strip().lower(), subject.strip(), body.strip(), _now_ms()),
+    )
+    conn.commit()
+    return msg_id
+
+
+def list_contact_messages(conn: sqlite3.Connection) -> list:
+    rows = conn.execute(
+        "SELECT id, name, email, subject, body, created_at, replied_at, reply_text "
+        "FROM contact_messages ORDER BY created_at DESC"
+    ).fetchall()
+    return [
+        {
+            "id":         r[0],
+            "name":       r[1],
+            "email":      r[2],
+            "subject":    r[3],
+            "body":       r[4],
+            "created_at": r[5],
+            "replied_at": r[6],
+            "reply_text": r[7],
+        }
+        for r in rows
+    ]
+
+
+def save_contact_reply(conn: sqlite3.Connection, msg_id: str, reply_text: str) -> bool:
+    existing = conn.execute(
+        "SELECT reply_text FROM contact_messages WHERE id = ?", (msg_id,)
+    ).fetchone()
+    if existing and existing[0]:
+        now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+        combined = existing[0] + f"\n\n--- Reply on {now_str} ---\n" + reply_text.strip()
+    else:
+        combined = reply_text.strip()
+    cur = conn.execute(
+        "UPDATE contact_messages SET replied_at = ?, reply_text = ? WHERE id = ?",
+        (_now_ms(), combined, msg_id),
+    )
+    conn.commit()
+    return cur.rowcount > 0
+
+
+def delete_contact_message(conn: sqlite3.Connection, msg_id: str) -> bool:
+    cur = conn.execute("DELETE FROM contact_messages WHERE id = ?", (msg_id,))
+    conn.commit()
+    return cur.rowcount > 0
+
+
+def get_contact_message(conn: sqlite3.Connection, msg_id: str) -> Optional[dict]:
+    row = conn.execute(
+        "SELECT id, name, email, subject, body, created_at, replied_at, reply_text "
+        "FROM contact_messages WHERE id = ?",
+        (msg_id,),
+    ).fetchone()
+    if not row:
+        return None
+    return {
+        "id":         row[0],
+        "name":       row[1],
+        "email":      row[2],
+        "subject":    row[3],
+        "body":       row[4],
+        "created_at": row[5],
+        "replied_at": row[6],
+        "reply_text": row[7],
+    }
