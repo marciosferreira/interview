@@ -675,10 +675,11 @@ async def admin_list_users(current_user: dict = Depends(get_current_user)):
                 COUNT(sm.thread_id)                                          AS total_sessions,
                 SUM(CASE WHEN sm.fase = 'done' THEN 1 ELSE 0 END)           AS completed,
                 SUM(CASE WHEN sm.started_at >= {_ph} THEN 1 ELSE 0 END)     AS sessions_week,
-                MAX(sm.last_active_at)                                       AS last_active
+                MAX(sm.last_active_at)                                       AS last_active,
+                u.stripe_subscription_id
             FROM users u
             LEFT JOIN session_meta sm ON u.id = sm.user_id
-            GROUP BY u.id
+            GROUP BY u.id, u.stripe_subscription_id
             ORDER BY u.created_at DESC
         """, (week_ago_ms,)).fetchall()
         return [
@@ -688,6 +689,7 @@ async def admin_list_users(current_user: dict = Depends(get_current_user)):
                 "created_at": r[5],
                 "total_sessions": r[6] or 0, "completed": r[7] or 0,
                 "sessions_week": r[8] or 0, "last_active": r[9],
+                "stripe_subscription_id": r[10] or "",
             }
             for r in rows
         ]

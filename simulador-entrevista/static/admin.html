@@ -93,6 +93,7 @@
     .badge.explorer { background: #1e293b; color: #64748b; }
     .badge.verified   { background: #052e16; color: #4ade80; }
     .badge.unverified { background: #1a0f0f; color: #f87171; }
+    .badge.no-stripe  { background: #431407; color: #fb923c; margin-left: 4px; font-size: 9px; }
 
     .plan-btn {
       font-size: 11px; font-weight: 600; padding: 4px 10px;
@@ -157,10 +158,11 @@
 
     <div class="toolbar">
       <input id="search" type="text" placeholder="Search name or email…" oninput="applyFilters()" />
-      <button class="filter-btn active" data-filter="all"     onclick="setFilter('all',this)">All</button>
-      <button class="filter-btn"        data-filter="hunter"  onclick="setFilter('hunter',this)">🎯 Hunter</button>
-      <button class="filter-btn"        data-filter="explorer" onclick="setFilter('explorer',this)">🗺️ Explorer</button>
-      <button class="filter-btn"        data-filter="verified" onclick="setFilter('verified',this)">Verified</button>
+      <button class="filter-btn active" data-filter="all"       onclick="setFilter('all',this)">All</button>
+      <button class="filter-btn"        data-filter="hunter"   onclick="setFilter('hunter',this)">🎯 Hunter</button>
+      <button class="filter-btn"        data-filter="explorer"  onclick="setFilter('explorer',this)">🗺️ Explorer</button>
+      <button class="filter-btn"        data-filter="verified"  onclick="setFilter('verified',this)">Verified</button>
+      <button class="filter-btn"        data-filter="no-stripe" onclick="setFilter('no-stripe',this)" title="Hunter without Stripe subscription">⚠️ No subscription</button>
       <span id="row-count"></span>
     </div>
 
@@ -279,9 +281,10 @@
   function applyFilters() {
     const q = document.getElementById('search').value.trim().toLowerCase();
     let rows = _users.filter(u => {
-      if (_filter === 'hunter'   && u.plan !== 'hunter') return false;
-      if (_filter === 'explorer' && u.plan !== 'free')   return false;
-      if (_filter === 'verified' && !u.email_verified)   return false;
+      if (_filter === 'hunter'    && u.plan !== 'hunter') return false;
+      if (_filter === 'explorer'  && u.plan !== 'free')   return false;
+      if (_filter === 'verified'  && !u.email_verified)   return false;
+      if (_filter === 'no-stripe' && !(u.plan === 'hunter' && !u.stripe_subscription_id)) return false;
       if (q && !u.name.toLowerCase().includes(q) && !u.email.toLowerCase().includes(q)) return false;
       return true;
     });
@@ -302,7 +305,10 @@
       tr.innerHTML = `
         <td class="name">${esc(u.name)}</td>
         <td class="email">${esc(u.email)}</td>
-        <td><span class="badge ${isHunter ? 'hunter' : 'explorer'}">${isHunter ? '🎯 Hunter' : '🗺️ Explorer'}</span></td>
+        <td>
+          <span class="badge ${isHunter ? 'hunter' : 'explorer'}">${isHunter ? '🎯 Hunter' : '🗺️ Explorer'}</span>
+          ${isHunter && !u.stripe_subscription_id ? '<span class="badge no-stripe" title="No Stripe subscription">⚠️ manual</span>' : ''}
+        </td>
         <td><span class="badge ${u.email_verified ? 'verified' : 'unverified'}">${u.email_verified ? '✓ Yes' : '✕ No'}</span></td>
         <td>${_fmt(u.created_at)}</td>
         <td>${u.total_sessions}</td>
