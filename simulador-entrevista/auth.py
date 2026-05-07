@@ -531,6 +531,16 @@ def get_user_by_stripe_customer(conn: sqlite3.Connection, customer_id: str) -> O
     return {"id": row[0], "email": row[1], "name": row[2], "plan": row[3]}
 
 
+def get_user_by_email(conn: sqlite3.Connection, email: str) -> Optional[dict]:
+    row = conn.execute(
+        "SELECT id, email, name, plan FROM users WHERE email = ?",
+        (email.lower(),),
+    ).fetchone()
+    if not row:
+        return None
+    return {"id": row[0], "email": row[1], "name": row[2], "plan": row[3]}
+
+
 def get_stripe_info(conn: sqlite3.Connection, user_id: str) -> dict:
     row = conn.execute(
         "SELECT stripe_customer_id, stripe_subscription_id, stripe_cancel_at FROM users WHERE id = ?",

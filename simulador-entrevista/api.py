@@ -2,8 +2,10 @@ import asyncio
 import functools
 import hashlib
 import os
+import traceback
 import uuid
 from pathlib import Path
+from typing import Optional
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -33,7 +35,8 @@ from auth import (
     create_job_session, update_job_session_context, get_job_session, list_job_sessions,
     create_access_token, get_current_user, decode_token_raw,
     create_contact_message, list_contact_messages, save_contact_reply, get_contact_message, delete_contact_message,
-    set_stripe_info, clear_stripe_subscription, get_user_by_stripe_customer, get_stripe_info, set_stripe_cancel_at,
+    set_stripe_info, clear_stripe_subscription, get_user_by_stripe_customer, get_user_by_email,
+    get_stripe_info, set_stripe_cancel_at,
 )
 from email_service import send_verification_email, send_reset_email, send_contact_notification, send_contact_reply
 from prompt_generator import generate_interview_context, extract_candidate_name
@@ -311,43 +314,87 @@ async def stripe_webhook(request: Request):
 
     etype = event["type"]
     data  = event["data"]["object"]
+    print(f"[Stripe] received event: {etype} id={event.get('id')}")
 
+    try:
+        _handle_stripe_event(etype, data)
+    except Exception:
+        print(f"[Stripe] ERROR handling {etype}:\n{traceback.format_exc()}")
+        # Still return 200 so Stripe doesn't retry — error is logged above.
+
+    return {"ok": True}
+
+
+def _find_user_for_customer(customer_id: str) -> Optional[dict]:
+    """Look up local user by Stripe customer ID, falling back to customer email."""
+    user = get_user_by_stripe_customer(_conn, customer_id)
+    if user:
+        return user
+    # Fallback: fetch customer from Stripe and match by email.
+    try:
+        cus = _stripe.Customer.retrieve(customer_id)
+        email = cus.get("email") or ""
+        if email:
+            user = get_user_by_email(_conn, email)
+            if user:
+                print(f"[Stripe] found user {user['id']} via email fallback for customer {customer_id}")
+    except Exception as exc:
+        print(f"[Stripe] could not fetch customer {customer_id}: {exc}")
+    return user
+
+
+def _handle_stripe_event(etype: str, data) -> None:
     if etype == "checkout.session.completed":
         user_id         = data.get("client_reference_id") or (data.get("metadata") or {}).get("user_id")
         customer_id     = data.get("customer")
         subscription_id = data.get("subscription")
+        print(f"[Stripe] checkout.session.completed user_id={user_id} customer={customer_id} sub={subscription_id}")
         if user_id and customer_id:
             upgrade_plan(_conn, user_id, "hunter")
             set_stripe_info(_conn, user_id, customer_id, subscription_id or "")
-            print(f"[Stripe] checkout.session.completed → upgraded user {user_id} (sub {subscription_id})")
+            print(f"[Stripe] → upgraded user {user_id}")
+        else:
+            print(f"[Stripe] → missing user_id or customer_id, cannot upgrade")
 
     elif etype in ("invoice_payment.paid", "invoice.paid"):
-        # Fired on every successful charge (first and recurring).
-        # For invoice_payment.paid the customer is on the invoice, so fetch it.
-        invoice_id  = data.get("invoice") or data.get("id")
-        customer_id = data.get("customer")
+        # invoice_payment.paid (new API) has no customer field — must fetch invoice.
+        invoice_id      = data.get("invoice") or data.get("id")
+        customer_id     = data.get("customer")
+        subscription_id = data.get("subscription")
+        print(f"[Stripe] {etype} invoice={invoice_id} customer={customer_id}")
 
-        if not customer_id and invoice_id:
+        # Resolve customer_id and subscription_id from the invoice if missing.
+        if invoice_id and (not customer_id or not subscription_id):
             try:
-                inv = _stripe.Invoice.retrieve(invoice_id)
-                customer_id = inv.get("customer")
+                inv             = _stripe.Invoice.retrieve(invoice_id)
+                customer_id     = customer_id or inv.get("customer")
+                subscription_id = subscription_id or inv.get("subscription")
+                print(f"[Stripe] fetched invoice → customer={customer_id} sub={subscription_id}")
             except Exception as exc:
-                print(f"[Stripe] Could not fetch invoice {invoice_id}: {exc}")
+                print(f"[Stripe] could not fetch invoice {invoice_id}: {exc}")
 
-        if customer_id:
-            user = get_user_by_stripe_customer(_conn, customer_id)
-            if user:
-                if user.get("plan") != "hunter":
-                    upgrade_plan(_conn, user["id"], "hunter")
-                    print(f"[Stripe] {etype} → upgraded user {user['id']} to hunter")
-                else:
-                    print(f"[Stripe] {etype} → user {user['id']} already hunter, skipped")
-            else:
-                print(f"[Stripe] {etype} → no user found for customer {customer_id} — checkout.session.completed may have failed earlier")
+        if not customer_id:
+            print(f"[Stripe] {etype} → no customer_id resolved, skipping")
+            return
+
+        user = _find_user_for_customer(customer_id)
+        if not user:
+            print(f"[Stripe] {etype} → no local user for customer {customer_id}")
+            return
+
+        # Always ensure customer mapping is stored (may be missing if checkout event failed).
+        if subscription_id:
+            set_stripe_info(_conn, user["id"], customer_id, subscription_id)
+
+        if user.get("plan") != "hunter":
+            upgrade_plan(_conn, user["id"], "hunter")
+            print(f"[Stripe] {etype} → upgraded user {user['id']} to hunter")
+        else:
+            print(f"[Stripe] {etype} → user {user['id']} already hunter")
 
     elif etype == "customer.subscription.deleted":
         customer_id = data.get("customer")
-        user = get_user_by_stripe_customer(_conn, customer_id)
+        user = _find_user_for_customer(customer_id) if customer_id else None
         if user:
             upgrade_plan(_conn, user["id"], "free")
             clear_stripe_subscription(_conn, user["id"])
@@ -357,7 +404,7 @@ async def stripe_webhook(request: Request):
     elif etype == "customer.subscription.updated":
         customer_id = data.get("customer")
         status      = data.get("status")
-        user = get_user_by_stripe_customer(_conn, customer_id)
+        user = _find_user_for_customer(customer_id) if customer_id else None
         if user and status not in ("active", "trialing"):
             upgrade_plan(_conn, user["id"], "free")
             print(f"[Stripe] subscription.updated status={status} → downgraded user {user['id']} to free")
@@ -366,18 +413,9 @@ async def stripe_webhook(request: Request):
         customer_id = data.get("customer")
         attempt     = data.get("attempt_count", 1)
         print(f"[Stripe] payment failed (attempt {attempt}) for customer {customer_id}")
-        # Downgrade only after the final attempt — Stripe cancels the subscription
-        # automatically after retries are exhausted, which fires subscription.deleted.
-        # Uncomment below to downgrade immediately on first failure instead:
-        # user = get_user_by_stripe_customer(_conn, customer_id)
-        # if user:
-        #     upgrade_plan(_conn, user["id"], "free")
-        #     print(f"[Stripe] payment failed → downgraded user {user['id']} to free")
 
     else:
         print(f"[Stripe] unhandled event type: {etype}")
-
-    return {"ok": True}
 
 
 @app.get("/stripe/invoices")
