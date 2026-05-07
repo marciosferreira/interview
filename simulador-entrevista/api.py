@@ -41,6 +41,17 @@ from auth import (
 from email_service import send_verification_email, send_reset_email, send_contact_notification, send_contact_reply
 from prompt_generator import generate_interview_context, extract_candidate_name
 
+# DB helper — works for both psycopg2 (Postgres) and sqlite3
+_is_pg = hasattr(_conn, 'server_version')
+_ph = "%s" if _is_pg else "?"
+
+def _db_exec(sql: str, params=()):
+    if _is_pg:
+        cur = _conn.cursor()
+        cur.execute(sql, params)
+        return cur
+    return _conn.execute(sql, params)
+
 openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 _stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
@@ -638,12 +649,12 @@ async def admin_list_users(current_user: dict = Depends(get_current_user)):
     week_ago_ms = int((__import__("time").time() - 7 * 24 * 3600) * 1000)
 
     def _query():
-        rows = _conn.execute("""
+        rows = _db_exec(f"""
             SELECT
                 u.id, u.name, u.email, u.plan, u.email_verified, u.created_at,
                 COUNT(sm.thread_id)                                          AS total_sessions,
                 SUM(CASE WHEN sm.fase = 'done' THEN 1 ELSE 0 END)           AS completed,
-                SUM(CASE WHEN sm.started_at >= ? THEN 1 ELSE 0 END)         AS sessions_week,
+                SUM(CASE WHEN sm.started_at >= {_ph} THEN 1 ELSE 0 END)     AS sessions_week,
                 MAX(sm.last_active_at)                                       AS last_active
             FROM users u
             LEFT JOIN session_meta sm ON u.id = sm.user_id
@@ -684,21 +695,22 @@ async def admin_delete_user(user_id: str, current_user: dict = Depends(get_curre
 
     def _delete():
         # Guard: never delete the admin account
-        row = _conn.execute("SELECT email FROM users WHERE id = ?", (user_id,)).fetchone()
+        row = _db_exec(f"SELECT email FROM users WHERE id = {_ph}", (user_id,)).fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="User not found")
         if row[0] == ADMIN_EMAIL:
             raise HTTPException(status_code=403, detail="Cannot delete the admin account")
         # Delete all interview data, then the user
-        thread_ids = [r[0] for r in _conn.execute(
-            "SELECT thread_id FROM session_meta WHERE user_id = ?", (user_id,)
+        thread_ids = [r[0] for r in _db_exec(
+            f"SELECT thread_id FROM session_meta WHERE user_id = {_ph}", (user_id,)
         ).fetchall()]
         if thread_ids:
-            placeholders = ",".join("?" * len(thread_ids))
-            _conn.execute(f"DELETE FROM session_meta WHERE thread_id IN ({placeholders})", thread_ids)
-        _conn.execute("DELETE FROM job_sessions WHERE user_id = ?", (user_id,))
-        _conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
-        _conn.commit()
+            placeholders = ",".join([_ph] * len(thread_ids))
+            _db_exec(f"DELETE FROM session_meta WHERE thread_id IN ({placeholders})", thread_ids)
+        _db_exec(f"DELETE FROM job_sessions WHERE user_id = {_ph}", (user_id,))
+        _db_exec(f"DELETE FROM users WHERE id = {_ph}", (user_id,))
+        if not _is_pg:
+            _conn.commit()
 
     loop = asyncio.get_running_loop()
     await loop.run_in_executor(None, _delete)
