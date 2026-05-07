@@ -241,10 +241,14 @@ async def downgrade_to_free(current_user: dict = Depends(get_current_user)):
 
 @app.post("/stripe/create-checkout-session")
 async def stripe_create_checkout(current_user: dict = Depends(get_current_user)):
-    price_id = _stripe_price_for(current_user.get("language", "en"))
+    loop = asyncio.get_running_loop()
+    user = await loop.run_in_executor(None, lambda: get_user_by_id(_conn, current_user["id"]))
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    price_id = _stripe_price_for(user.get("language", "en"))
     if not price_id:
         raise HTTPException(status_code=503, detail="Stripe not configured")
-    if current_user.get("plan") == "hunter":
+    if user.get("plan") == "hunter":
         raise HTTPException(status_code=400, detail="Already on Hunter plan")
     try:
         session = _stripe.checkout.Session.create(
@@ -253,9 +257,9 @@ async def stripe_create_checkout(current_user: dict = Depends(get_current_user))
             line_items=[{"price": price_id, "quantity": 1}],
             success_url=f"{_APP_BASE_URL}/upgrade-success.html?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"{_APP_BASE_URL}/upgrade.html",
-            client_reference_id=current_user["id"],
-            customer_email=current_user.get("email"),
-            metadata={"user_id": current_user["id"]},
+            client_reference_id=user["id"],
+            customer_email=user.get("email"),
+            metadata={"user_id": user["id"]},
         )
         return {"url": session.url}
     except _stripe.error.StripeError as exc:
