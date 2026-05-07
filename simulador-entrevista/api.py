@@ -436,16 +436,18 @@ async def stripe_invoices(current_user: dict = Depends(get_current_user)):
         return {"invoices": []}
     try:
         result = _stripe.Invoice.list(customer=customer_id, limit=24, status="paid")
+        data_list = list(result.auto_paging_iter()) if hasattr(result, "auto_paging_iter") else (_sg(result, "data") or [])
         invoices = [
             {
-                "id":                  inv["id"],
-                "created":             inv["created"],
-                "amount_paid":         inv["amount_paid"],
-                "currency":            inv["currency"],
-                "invoice_pdf":         inv.get("invoice_pdf"),
-                "hosted_invoice_url":  inv.get("hosted_invoice_url"),
+                "id":                  _sg(inv, "id"),
+                "created":             _sg(inv, "created"),
+                "amount_paid":         _sg(inv, "amount_paid"),
+                "currency":            _sg(inv, "currency"),
+                "invoice_pdf":         _sg(inv, "invoice_pdf"),
+                "hosted_invoice_url":  _sg(inv, "hosted_invoice_url"),
             }
-            for inv in result.get("data", [])
+            for inv in data_list
+            if _sg(inv, "id")
         ]
         return {"invoices": invoices}
     except _stripe.error.StripeError as exc:
@@ -461,7 +463,7 @@ async def stripe_cancel_subscription(current_user: dict = Depends(get_current_us
         raise HTTPException(status_code=400, detail="No active Stripe subscription found")
     try:
         sub = _stripe.Subscription.modify(subscription_id, cancel_at_period_end=True)
-        period_end = sub.get("current_period_end")
+        period_end = _sg(sub, "current_period_end")
         set_stripe_cancel_at(_conn, current_user["id"], period_end)
         return {"ok": True, "period_end": period_end}
     except _stripe.error.StripeError as exc:
