@@ -40,8 +40,15 @@ openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 _stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 _STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
-_STRIPE_PRICE_ID       = os.getenv("STRIPE_PRICE_ID", "")
+_STRIPE_PRICE_ID_USD   = os.getenv("STRIPE_PRICE_ID_USD", os.getenv("STRIPE_PRICE_ID", ""))
+_STRIPE_PRICE_ID_BRL   = os.getenv("STRIPE_PRICE_ID_BRL", "")
 _APP_BASE_URL          = os.getenv("APP_BASE_URL", "http://localhost:8001").rstrip("/")
+
+
+def _stripe_price_for(language: str) -> str:
+    if language == "pt" and _STRIPE_PRICE_ID_BRL:
+        return _STRIPE_PRICE_ID_BRL
+    return _STRIPE_PRICE_ID_USD
 
 TTS_CACHE_DIR = Path(__file__).parent / "static" / "tts_cache"
 TTS_CACHE_DIR.mkdir(exist_ok=True)
@@ -234,7 +241,8 @@ async def downgrade_to_free(current_user: dict = Depends(get_current_user)):
 
 @app.post("/stripe/create-checkout-session")
 async def stripe_create_checkout(current_user: dict = Depends(get_current_user)):
-    if not _STRIPE_PRICE_ID:
+    price_id = _stripe_price_for(current_user.get("language", "en"))
+    if not price_id:
         raise HTTPException(status_code=503, detail="Stripe not configured")
     if current_user.get("plan") == "hunter":
         raise HTTPException(status_code=400, detail="Already on Hunter plan")
@@ -242,7 +250,7 @@ async def stripe_create_checkout(current_user: dict = Depends(get_current_user))
         session = _stripe.checkout.Session.create(
             payment_method_types=["card"],
             mode="subscription",
-            line_items=[{"price": _STRIPE_PRICE_ID, "quantity": 1}],
+            line_items=[{"price": price_id, "quantity": 1}],
             success_url=f"{_APP_BASE_URL}/upgrade-success.html?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"{_APP_BASE_URL}/upgrade.html",
             client_reference_id=current_user["id"],

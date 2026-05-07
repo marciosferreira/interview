@@ -250,7 +250,7 @@
       <div class="plan-badge hunter">🎯 Hunter</div>
       <div class="plan-name">Hunter</div>
       <div class="plan-tagline">For serious job seekers</div>
-      <div class="plan-price">$9<span style="font-size:22px;font-weight:700">.99</span> <span>/ month</span></div>
+      <div class="plan-price" id="hunter-price">$9<span style="font-size:22px;font-weight:700">.99</span> <span>/ month</span></div>
       <div class="plan-price-note" id="hunter-price-note">Cancel anytime</div>
       <ul class="plan-features">
         <li><span class="check">✓</span> <strong style="color:#e2e8f0">15 interviews per week</strong></li>
@@ -328,6 +328,19 @@
       } catch {}
     } catch {}
   }
+  // Show price in user's currency
+  (function() {
+    try {
+      const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
+      const lang = (u && u.language) || localStorage.getItem('preferred_lang') || 'en';
+      if (lang === 'pt') {
+        document.getElementById('hunter-price').innerHTML =
+          'R$49<span style="font-size:22px;font-weight:700">,90</span> <span>/ mês</span>';
+        document.getElementById('hunter-btn').textContent = 'Assinar o Hunter →';
+      }
+    } catch(_) {}
+  })();
+
   loadUsage();
 
   document.getElementById('hunter-btn').addEventListener('click', async () => {
