@@ -57,6 +57,20 @@
     }
     .nav-cta:hover { opacity: 0.88; }
 
+    /* ── Mobile header ── */
+    @media (max-width: 600px) {
+      header { padding: 10px 12px; gap: 6px; }
+      .home-link > div { display: none; }
+      .plan-pill { display: none !important; }
+      #user-name-display { display: none; }
+      .nav-link-tips { display: none; }
+      .nav-link-settings {
+        overflow: hidden; white-space: nowrap; max-width: 26px;
+        padding-left: 4px; padding-right: 4px;
+      }
+      .nav-cta { font-size: 11px; padding: 6px 10px; }
+    }
+
     /* ── Language switcher ── */
     .lang-switcher {
       display: flex; align-items: center; gap: 2px;
@@ -273,8 +287,8 @@
       <button class="lang-btn" data-lang="en" onclick="i18n.switchLang('en')">EN</button>
       <button class="lang-btn" data-lang="pt" onclick="i18n.switchLang('pt')">PT</button>
     </div>
-    <a href="/tips.html" class="nav-link" data-i18n="nav.tips">💡 Tips</a>
-    <a href="/profile.html" class="nav-link" data-i18n="nav.settings">⚙️ Settings</a>
+    <a href="/tips.html" class="nav-link nav-link-tips" data-i18n="nav.tips">💡 Tips</a>
+    <a href="/profile.html" class="nav-link nav-link-settings" data-i18n="nav.settings">⚙️ Settings</a>
     <span id="user-name-display"></span>
     <button class="logout-btn" onclick="logout()" data-i18n="nav.signout">Sign out</button>
   </div>
@@ -528,6 +542,22 @@
     el.style.display = 'inline-block';
     el.style.cursor = 'pointer';
     el.addEventListener('click', () => location.href = '/upgrade.html');
+  } catch(_){}
+})();
+(async function(){
+  try {
+    const tok = localStorage.getItem('auth_token');
+    if (!tok) return;
+    const res = await fetch('/auth/usage', { headers: { 'Authorization': 'Bearer ' + tok } });
+    if (!res.ok) return;
+    const usage = await res.json();
+    const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
+    if (u && u.plan !== usage.plan) { u.plan = usage.plan; localStorage.setItem('auth_user', JSON.stringify(u)); }
+    const el = document.getElementById('plan-pill');
+    if (!el) return;
+    const isHunter = usage.plan === 'hunter';
+    el.className = 'plan-pill ' + (isHunter ? 'hunter' : 'explorer');
+    el.textContent = isHunter ? '🎯 Hunter' : '🗺️ Explorer';
   } catch(_){}
 })();
 </script>

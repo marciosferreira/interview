@@ -76,6 +76,21 @@
     .hdr-btn:hover { border-color: #6366f1; color: #a78bfa; }
     .hdr-spacer { margin-left: auto; }
 
+    /* ── Mobile header ── */
+    @media (max-width: 600px) {
+      header { padding: 10px 12px; gap: 6px; }
+      .home-link > div { display: none; }
+      .plan-pill { display: none !important; }
+      #hdr-history {
+        overflow: hidden; white-space: nowrap;
+        padding: 5px 8px; max-width: 34px;
+      }
+      #hdr-practice {
+        overflow: hidden; white-space: nowrap;
+        padding: 5px 8px; max-width: 34px;
+      }
+    }
+
     /* ── Language switcher ── */
     .lang-switcher {
       display: flex; align-items: center; gap: 2px;
@@ -450,6 +465,18 @@
       planPill.style.display = 'inline-block';
       planPill.style.cursor = 'pointer';
       planPill.addEventListener('click', () => location.href = '/upgrade.html');
+      // Background refresh: sync plan from server in case webhook updated it after login
+      (async function(){
+        try {
+          const res = await fetch('/auth/usage', { headers: { 'Authorization': 'Bearer ' + token } });
+          if (!res.ok) return;
+          const usage = await res.json();
+          if (user && user.plan !== usage.plan) { user.plan = usage.plan; localStorage.setItem('auth_user', JSON.stringify(user)); }
+          const isH = usage.plan === 'hunter';
+          planPill.className = 'plan-pill ' + (isH ? 'hunter' : 'explorer');
+          planPill.textContent = isH ? '🎯 Hunter' : '🗺️ Explorer';
+        } catch(_){}
+      })();
     } else {
       hdrLogin.style.display = '';
       // Swap CTA for logged-out version once i18n is ready

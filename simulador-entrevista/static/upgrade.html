@@ -55,6 +55,17 @@
     }
     .hdr-back:hover { border-color: #6366f1; color: #a78bfa; }
 
+    /* ── Mobile header ── */
+    @media (max-width: 600px) {
+      header { padding: 10px 12px; gap: 6px; }
+      .home-link > div { display: none; }
+      .plan-pill { display: none !important; }
+      .hdr-back {
+        overflow: hidden; white-space: nowrap;
+        padding: 5px 8px; max-width: 34px;
+      }
+    }
+
     main {
       flex: 1; padding: 48px 24px;
       display: flex; flex-direction: column; align-items: center;

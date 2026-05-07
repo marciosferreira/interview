@@ -14,3 +14,4 @@ boto3
 pdfplumber
 python-docx
 stripe
+psycopg2-binary

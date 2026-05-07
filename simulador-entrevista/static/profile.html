@@ -56,6 +56,17 @@
     }
     .hdr-btn:hover { border-color: #6366f1; color: #a78bfa; }
 
+    /* ── Mobile header ── */
+    @media (max-width: 600px) {
+      header { padding: 10px 12px; gap: 6px; }
+      .home-link > div { display: none; }
+      .plan-pill { display: none !important; }
+      .hdr-btn {
+        overflow: hidden; white-space: nowrap;
+        padding: 5px 8px; max-width: 34px;
+      }
+    }
+
     main {
       flex: 1; padding: 32px 24px;
       max-width: 600px; width: 100%; margin: 0 auto;
@@ -310,8 +321,22 @@
       }
 
       if (usage) {
+        // Sync plan to localStorage so other pages (interview, history…) show the correct badge
+        try {
+          const _lu = JSON.parse(localStorage.getItem('auth_user') || 'null');
+          if (_lu && _lu.plan !== usage.plan) {
+            _lu.plan = usage.plan;
+            localStorage.setItem('auth_user', JSON.stringify(_lu));
+          }
+        } catch {}
         const planBanner = document.getElementById('plan-banner');
         planBanner.style.display = 'flex';
+        // Reset all conditional elements before re-rendering (handles language changes)
+        document.getElementById('plan-upgrade-link').style.display = 'none';
+        document.getElementById('plan-cancel-btn').style.display = 'none';
+        document.getElementById('plan-downgrade-btn').style.display = 'none';
+        const bannerLabel = document.getElementById('plan-banner-label');
+        if (bannerLabel) { bannerLabel.innerHTML = ''; bannerLabel.style.color = ''; }
         const isHunter = usage.plan === 'hunter';
         document.getElementById('plan-name').innerHTML = isHunter
           ? `🎯 Hunter <span style="font-size:11px;font-weight:500;background:#3730a3;color:#a5b4fc;padding:2px 8px;border-radius:20px;margin-left:6px">${t('profile.plan.active')}</span>`
@@ -322,7 +347,8 @@
           document.getElementById('plan-upgrade-link').style.display = '';
         } else if (usage.stripe_cancel_at) {
           // Cancellation already requested — show persistent notice
-          const endDate = new Date(usage.stripe_cancel_at * 1000).toLocaleDateString();
+          const _locale = window.i18n?.currentLang() === 'pt' ? 'pt-BR' : 'en-US';
+          const endDate = new Date(usage.stripe_cancel_at * 1000).toLocaleDateString(_locale);
           const banner = document.getElementById('plan-banner-label');
           banner.innerHTML = `⚠️ ${t('profile.plan.canceledUntil', { date: endDate })}`;
           banner.style.color = '#f59e0b';
@@ -336,7 +362,7 @@
       }
     } catch {}
   }
-  document.addEventListener('i18n:ready', loadUser, { once: true });
+  document.addEventListener('i18n:ready', loadUser);
 
   document.getElementById('resend-btn').addEventListener('click', async () => {
     const btn = document.getElementById('resend-btn');
@@ -491,7 +517,8 @@
       document.getElementById('invoices-section').style.display = '';
       const fmt = new Intl.NumberFormat(undefined, { minimumFractionDigits: 2 });
       const rows = invoices.map(inv => {
-        const date   = new Date(inv.created * 1000).toLocaleDateString();
+        const _locale = window.i18n?.currentLang() === 'pt' ? 'pt-BR' : 'en-US';
+        const date   = new Date(inv.created * 1000).toLocaleDateString(_locale);
         const amount = fmt.format(inv.amount_paid / 100);
         const curr   = inv.currency.toUpperCase();
         const pdfLink  = inv.invoice_pdf
@@ -517,7 +544,7 @@
         </table>`;
     } catch {}
   }
-  document.addEventListener('i18n:ready', loadInvoices, { once: true });
+  document.addEventListener('i18n:ready', loadInvoices);
 
   document.getElementById('logout-btn').addEventListener('click', () => {
     localStorage.removeItem('auth_token');

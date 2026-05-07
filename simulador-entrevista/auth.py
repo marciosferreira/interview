@@ -1,9 +1,8 @@
 import os
 import secrets
 import uuid
-import sqlite3
 from datetime import datetime, timedelta, timezone
-from typing import Optional
+from typing import Any, Optional
 
 import bcrypt as _bcrypt
 from fastapi import HTTPException, Depends
@@ -66,41 +65,39 @@ class ProfileUpdate(BaseModel):
 
 # ── DB setup (with migrations for existing DBs) ──────────────────────────────
 
-def setup_user_tables(conn: sqlite3.Connection) -> None:
-    conn.execute("""
+def setup_user_tables(conn: Any) -> None:
+    cur = conn.cursor()
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id                   TEXT PRIMARY KEY,
             email                TEXT UNIQUE NOT NULL,
             name                 TEXT NOT NULL,
             password_hash        TEXT NOT NULL,
             language             TEXT NOT NULL DEFAULT 'en',
-            created_at           INTEGER NOT NULL,
+            created_at           BIGINT NOT NULL,
             email_verified       INTEGER NOT NULL DEFAULT 0,
             verification_token   TEXT,
-            verification_expires INTEGER,
+            verification_expires BIGINT,
             reset_token          TEXT,
-            reset_token_expires  INTEGER,
+            reset_token_expires  BIGINT,
             plan                 TEXT NOT NULL DEFAULT 'free'
         )
     """)
-    # Migrate existing DBs that lack the new columns
+    # Migrate existing DBs — Postgres suporta ADD COLUMN IF NOT EXISTS
     for col, defn in [
         ("email_verified",       "INTEGER NOT NULL DEFAULT 0"),
         ("verification_token",   "TEXT"),
-        ("verification_expires", "INTEGER"),
+        ("verification_expires", "BIGINT"),
         ("reset_token",          "TEXT"),
-        ("reset_token_expires",  "INTEGER"),
-        ("plan",                   "TEXT NOT NULL DEFAULT 'free'"),
+        ("reset_token_expires",  "BIGINT"),
+        ("plan",                 "TEXT NOT NULL DEFAULT 'free'"),
         ("stripe_customer_id",     "TEXT"),
         ("stripe_subscription_id", "TEXT"),
-        ("stripe_cancel_at",       "INTEGER"),
+        ("stripe_cancel_at",       "BIGINT"),
     ]:
-        try:
-            conn.execute(f"ALTER TABLE users ADD COLUMN {col} {defn}")
-        except sqlite3.OperationalError:
-            pass  # column already exists
+        cur.execute(f"ALTER TABLE users ADD COLUMN IF NOT EXISTS {col} {defn}")
 
-    conn.execute("""
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS job_sessions (
             id                TEXT PRIMARY KEY,
             user_id           TEXT NOT NULL,
@@ -109,40 +106,45 @@ def setup_user_tables(conn: sqlite3.Connection) -> None:
             job_description   TEXT NOT NULL,
             resume_text       TEXT NOT NULL,
             interview_context TEXT NOT NULL DEFAULT '',
-            created_at        INTEGER NOT NULL,
+            created_at        BIGINT NOT NULL,
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
     """)
-    conn.execute("""
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS contact_messages (
             id          TEXT PRIMARY KEY,
             name        TEXT NOT NULL,
             email       TEXT NOT NULL,
             subject     TEXT NOT NULL,
             body        TEXT NOT NULL,
-            created_at  INTEGER NOT NULL,
-            replied_at  INTEGER,
+            created_at  BIGINT NOT NULL,
+            replied_at  BIGINT,
             reply_text  TEXT
         )
     """)
+    cur.close()
     conn.commit()
 
 
 # ── User CRUD ────────────────────────────────────────────────────────────────
 
-def create_user(conn: sqlite3.Connection, name: str, email: str,
+def create_user(conn: Any, name: str, email: str,
                 password: str, language: str = "en") -> dict:
+    import psycopg2
     user_id = str(uuid.uuid4())
     password_hash = _hash_password(password)
     now = _now_ms()
     try:
-        conn.execute(
+        cur = conn.cursor()
+        cur.execute(
             """INSERT INTO users (id, name, email, password_hash, language, created_at, email_verified)
-               VALUES (?, ?, ?, ?, ?, ?, 0)""",
+               VALUES (%s, %s, %s, %s, %s, %s, 0)""",
             (user_id, name, email.lower().strip(), password_hash, language, now),
         )
+        cur.close()
         conn.commit()
-    except sqlite3.IntegrityError:
+    except psycopg2.errors.UniqueViolation:
+        conn.rollback()
         raise HTTPException(status_code=409, detail="Email already registered")
     return {
         "id": user_id, "name": name,
@@ -154,11 +156,14 @@ def create_user(conn: sqlite3.Connection, name: str, email: str,
 PLAN_WEEKLY_LIMITS = {"free": 3, "hunter": 15}
 
 
-def authenticate_user(conn: sqlite3.Connection, email: str, password: str) -> Optional[dict]:
-    row = conn.execute(
-        "SELECT id, name, email, password_hash, language, email_verified, plan FROM users WHERE email = ?",
+def authenticate_user(conn: Any, email: str, password: str) -> Optional[dict]:
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT id, name, email, password_hash, language, email_verified, plan FROM users WHERE email = %s",
         (email.lower().strip(),),
-    ).fetchone()
+    )
+    row = cur.fetchone()
+    cur.close()
     if not row:
         return None
     if not _verify_password(password, row[3]):
@@ -169,11 +174,14 @@ def authenticate_user(conn: sqlite3.Connection, email: str, password: str) -> Op
     }
 
 
-def get_user_by_id(conn: sqlite3.Connection, user_id: str) -> Optional[dict]:
-    row = conn.execute(
-        "SELECT id, name, email, language, created_at, email_verified, plan FROM users WHERE id = ?",
+def get_user_by_id(conn: Any, user_id: str) -> Optional[dict]:
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT id, name, email, language, created_at, email_verified, plan FROM users WHERE id = %s",
         (user_id,),
-    ).fetchone()
+    )
+    row = cur.fetchone()
+    cur.close()
     if not row:
         return None
     return {
@@ -182,28 +190,36 @@ def get_user_by_id(conn: sqlite3.Connection, user_id: str) -> Optional[dict]:
     }
 
 
-def upgrade_plan(conn: sqlite3.Connection, user_id: str, plan: str = "hunter") -> None:
-    conn.execute("UPDATE users SET plan = ? WHERE id = ?", (plan, user_id))
+def upgrade_plan(conn: Any, user_id: str, plan: str = "hunter") -> None:
+    cur = conn.cursor()
+    cur.execute("UPDATE users SET plan = %s WHERE id = %s", (plan, user_id))
+    cur.close()
     conn.commit()
 
 
-def count_interviews_this_week(conn: sqlite3.Connection, user_id: str) -> int:
+def count_interviews_this_week(conn: Any, user_id: str) -> int:
     week_ago_ms = _now_ms() - 7 * 24 * 3_600_000
-    row = conn.execute(
-        "SELECT COUNT(*) FROM job_sessions WHERE user_id = ? AND created_at >= ?",
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT COUNT(*) FROM job_sessions WHERE user_id = %s AND created_at >= %s",
         (user_id, week_ago_ms),
-    ).fetchone()
+    )
+    row = cur.fetchone()
+    cur.close()
     return row[0] if row else 0
 
 
-def update_profile(conn: sqlite3.Connection, user_id: str,
+def update_profile(conn: Any, user_id: str,
                    name: Optional[str], email: Optional[str],
                    current_password: Optional[str], new_password: Optional[str],
                    language: Optional[str] = None) -> dict:
-    row = conn.execute(
-        "SELECT name, email, password_hash, language, email_verified FROM users WHERE id = ?",
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT name, email, password_hash, language, email_verified FROM users WHERE id = %s",
         (user_id,),
-    ).fetchone()
+    )
+    row = cur.fetchone()
+    cur.close()
     if not row:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -222,7 +238,10 @@ def update_profile(conn: sqlite3.Connection, user_id: str,
         if not _verify_password(current_password, cur_hash):
             raise HTTPException(status_code=401, detail="Current password is incorrect")
         new_email = email.strip().lower()
-        existing = conn.execute("SELECT id FROM users WHERE email = ? AND id != ?", (new_email, user_id)).fetchone()
+        cur2 = conn.cursor()
+        cur2.execute("SELECT id FROM users WHERE email = %s AND id != %s", (new_email, user_id))
+        existing = cur2.fetchone()
+        cur2.close()
         if existing:
             raise HTTPException(status_code=409, detail="Email already in use")
         updates["email"] = new_email
@@ -246,11 +265,13 @@ def update_profile(conn: sqlite3.Connection, user_id: str,
     if not updates:
         raise HTTPException(status_code=422, detail="Nothing to update")
 
-    set_clause = ", ".join(f"{k} = ?" for k in updates)
-    conn.execute(
-        f"UPDATE users SET {set_clause} WHERE id = ?",
+    set_clause = ", ".join(f"{k} = %s" for k in updates)
+    cur3 = conn.cursor()
+    cur3.execute(
+        f"UPDATE users SET {set_clause} WHERE id = %s",
         (*updates.values(), user_id),
     )
+    cur3.close()
     conn.commit()
 
     return {
@@ -264,58 +285,73 @@ def update_profile(conn: sqlite3.Connection, user_id: str,
 
 # ── Email verification ────────────────────────────────────────────────────────
 
-def create_verification_token(conn: sqlite3.Connection, user_id: str) -> str:
+def create_verification_token(conn: Any, user_id: str) -> str:
     token = secrets.token_urlsafe(32)
     expires = _now_ms() + VERIFICATION_TOKEN_EXPIRES_HOURS * 3_600_000
-    conn.execute(
-        "UPDATE users SET verification_token = ?, verification_expires = ? WHERE id = ?",
+    cur = conn.cursor()
+    cur.execute(
+        "UPDATE users SET verification_token = %s, verification_expires = %s WHERE id = %s",
         (token, expires, user_id),
     )
+    cur.close()
     conn.commit()
     return token
 
 
-def verify_email_token(conn: sqlite3.Connection, token: str) -> Optional[dict]:
-    row = conn.execute(
-        "SELECT id, email, verification_expires FROM users WHERE verification_token = ?",
+def verify_email_token(conn: Any, token: str) -> Optional[dict]:
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT id, email, verification_expires FROM users WHERE verification_token = %s",
         (token,),
-    ).fetchone()
+    )
+    row = cur.fetchone()
+    cur.close()
     if not row:
         return None
     user_id, email, expires = row
     if expires and _now_ms() > expires:
         return None  # expired
-    conn.execute(
-        "UPDATE users SET email_verified = 1, verification_token = NULL, verification_expires = NULL WHERE id = ?",
+    cur2 = conn.cursor()
+    cur2.execute(
+        "UPDATE users SET email_verified = 1, verification_token = NULL, verification_expires = NULL WHERE id = %s",
         (user_id,),
     )
+    cur2.close()
     conn.commit()
     return {"id": user_id, "email": email}
 
 
 # ── Password reset ────────────────────────────────────────────────────────────
 
-def create_reset_token(conn: sqlite3.Connection, email: str) -> Optional[tuple[str, str, str]]:
+def create_reset_token(conn: Any, email: str) -> Optional[tuple[str, str, str]]:
     """Returns (user_id, token, language) or None if email not found."""
-    row = conn.execute("SELECT id, language FROM users WHERE email = ?", (email.lower().strip(),)).fetchone()
+    cur = conn.cursor()
+    cur.execute("SELECT id, language FROM users WHERE email = %s", (email.lower().strip(),))
+    row = cur.fetchone()
+    cur.close()
     if not row:
         return None
     user_id, language = row
     token = secrets.token_urlsafe(32)
     expires = _now_ms() + RESET_TOKEN_EXPIRES_MINUTES * 60_000
-    conn.execute(
-        "UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?",
+    cur2 = conn.cursor()
+    cur2.execute(
+        "UPDATE users SET reset_token = %s, reset_token_expires = %s WHERE id = %s",
         (token, expires, user_id),
     )
+    cur2.close()
     conn.commit()
     return user_id, token, language
 
 
-def reset_password_with_token(conn: sqlite3.Connection, token: str, new_password: str) -> bool:
-    row = conn.execute(
-        "SELECT id, reset_token_expires FROM users WHERE reset_token = ?",
+def reset_password_with_token(conn: Any, token: str, new_password: str) -> bool:
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT id, reset_token_expires FROM users WHERE reset_token = %s",
         (token,),
-    ).fetchone()
+    )
+    row = cur.fetchone()
+    cur.close()
     if not row:
         return False
     user_id, expires = row
@@ -323,45 +359,54 @@ def reset_password_with_token(conn: sqlite3.Connection, token: str, new_password
         return False
     if len(new_password) < 8:
         raise HTTPException(status_code=422, detail="Password must be at least 8 characters")
-    conn.execute(
-        "UPDATE users SET password_hash = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?",
+    cur2 = conn.cursor()
+    cur2.execute(
+        "UPDATE users SET password_hash = %s, reset_token = NULL, reset_token_expires = NULL WHERE id = %s",
         (_hash_password(new_password), user_id),
     )
+    cur2.close()
     conn.commit()
     return True
 
 
 # ── Job session helpers ──────────────────────────────────────────────────────
 
-def create_job_session(conn: sqlite3.Connection, user_id: str, job_title: str,
+def create_job_session(conn: Any, user_id: str, job_title: str,
                        company: str, job_description: str, resume_text: str,
                        interview_context: str = "") -> str:
     session_id = str(uuid.uuid4())
     now = _now_ms()
-    conn.execute(
+    cur = conn.cursor()
+    cur.execute(
         """INSERT INTO job_sessions
                (id, user_id, job_title, company, job_description, resume_text, interview_context, created_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+           VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
         (session_id, user_id, job_title, company, job_description, resume_text, interview_context, now),
     )
+    cur.close()
     conn.commit()
     return session_id
 
 
-def update_job_session_context(conn: sqlite3.Connection, session_id: str, interview_context: str) -> None:
-    conn.execute(
-        "UPDATE job_sessions SET interview_context = ? WHERE id = ?",
+def update_job_session_context(conn: Any, session_id: str, interview_context: str) -> None:
+    cur = conn.cursor()
+    cur.execute(
+        "UPDATE job_sessions SET interview_context = %s WHERE id = %s",
         (interview_context, session_id),
     )
+    cur.close()
     conn.commit()
 
 
-def get_job_session(conn: sqlite3.Connection, session_id: str, user_id: str) -> Optional[dict]:
-    row = conn.execute(
+def get_job_session(conn: Any, session_id: str, user_id: str) -> Optional[dict]:
+    cur = conn.cursor()
+    cur.execute(
         """SELECT id, user_id, job_title, company, interview_context, created_at
-           FROM job_sessions WHERE id = ? AND user_id = ?""",
+           FROM job_sessions WHERE id = %s AND user_id = %s""",
         (session_id, user_id),
-    ).fetchone()
+    )
+    row = cur.fetchone()
+    cur.close()
     if not row:
         return None
     return {
@@ -370,13 +415,16 @@ def get_job_session(conn: sqlite3.Connection, session_id: str, user_id: str) -> 
     }
 
 
-def list_job_sessions(conn: sqlite3.Connection, user_id: str) -> list:
-    rows = conn.execute(
+def list_job_sessions(conn: Any, user_id: str) -> list:
+    cur = conn.cursor()
+    cur.execute(
         """SELECT id, job_title, company, created_at
-           FROM job_sessions WHERE user_id = ?
+           FROM job_sessions WHERE user_id = %s
            ORDER BY created_at DESC LIMIT 20""",
         (user_id,),
-    ).fetchall()
+    )
+    rows = cur.fetchall()
+    cur.close()
     return [{"id": r[0], "job_title": r[1], "company": r[2], "created_at": r[3]} for r in rows]
 
 
@@ -428,22 +476,27 @@ def decode_token_raw(token: str) -> Optional[dict]:
 
 # ── Contact messages ──────────────────────────────────────────────────────────
 
-def create_contact_message(conn: sqlite3.Connection, name: str, email: str,
+def create_contact_message(conn: Any, name: str, email: str,
                             subject: str, body: str) -> str:
     msg_id = str(uuid.uuid4())
-    conn.execute(
-        "INSERT INTO contact_messages (id, name, email, subject, body, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO contact_messages (id, name, email, subject, body, created_at) VALUES (%s, %s, %s, %s, %s, %s)",
         (msg_id, name.strip(), email.strip().lower(), subject.strip(), body.strip(), _now_ms()),
     )
+    cur.close()
     conn.commit()
     return msg_id
 
 
-def list_contact_messages(conn: sqlite3.Connection) -> list:
-    rows = conn.execute(
+def list_contact_messages(conn: Any) -> list:
+    cur = conn.cursor()
+    cur.execute(
         "SELECT id, name, email, subject, body, created_at, replied_at, reply_text "
         "FROM contact_messages ORDER BY created_at DESC"
-    ).fetchall()
+    )
+    rows = cur.fetchall()
+    cur.close()
     return [
         {
             "id":         r[0],
@@ -459,35 +512,47 @@ def list_contact_messages(conn: sqlite3.Connection) -> list:
     ]
 
 
-def save_contact_reply(conn: sqlite3.Connection, msg_id: str, reply_text: str) -> bool:
-    existing = conn.execute(
-        "SELECT reply_text FROM contact_messages WHERE id = ?", (msg_id,)
-    ).fetchone()
+def save_contact_reply(conn: Any, msg_id: str, reply_text: str) -> bool:
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT reply_text FROM contact_messages WHERE id = %s", (msg_id,)
+    )
+    existing = cur.fetchone()
+    cur.close()
     if existing and existing[0]:
         now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
         combined = existing[0] + f"\n\n--- Reply on {now_str} ---\n" + reply_text.strip()
     else:
         combined = reply_text.strip()
-    cur = conn.execute(
-        "UPDATE contact_messages SET replied_at = ?, reply_text = ? WHERE id = ?",
+    cur2 = conn.cursor()
+    cur2.execute(
+        "UPDATE contact_messages SET replied_at = %s, reply_text = %s WHERE id = %s",
         (_now_ms(), combined, msg_id),
     )
+    affected = cur2.rowcount
+    cur2.close()
     conn.commit()
-    return cur.rowcount > 0
+    return affected > 0
 
 
-def delete_contact_message(conn: sqlite3.Connection, msg_id: str) -> bool:
-    cur = conn.execute("DELETE FROM contact_messages WHERE id = ?", (msg_id,))
+def delete_contact_message(conn: Any, msg_id: str) -> bool:
+    cur = conn.cursor()
+    cur.execute("DELETE FROM contact_messages WHERE id = %s", (msg_id,))
+    affected = cur.rowcount
+    cur.close()
     conn.commit()
-    return cur.rowcount > 0
+    return affected > 0
 
 
-def get_contact_message(conn: sqlite3.Connection, msg_id: str) -> Optional[dict]:
-    row = conn.execute(
+def get_contact_message(conn: Any, msg_id: str) -> Optional[dict]:
+    cur = conn.cursor()
+    cur.execute(
         "SELECT id, name, email, subject, body, created_at, replied_at, reply_text "
-        "FROM contact_messages WHERE id = ?",
+        "FROM contact_messages WHERE id = %s",
         (msg_id,),
-    ).fetchone()
+    )
+    row = cur.fetchone()
+    cur.close()
     if not row:
         return None
     return {
@@ -504,53 +569,68 @@ def get_contact_message(conn: sqlite3.Connection, msg_id: str) -> Optional[dict]
 
 # ── Stripe helpers ────────────────────────────────────────────────────────────
 
-def set_stripe_info(conn: sqlite3.Connection, user_id: str,
+def set_stripe_info(conn: Any, user_id: str,
                     customer_id: str, subscription_id: str) -> None:
-    conn.execute(
-        "UPDATE users SET stripe_customer_id = ?, stripe_subscription_id = ? WHERE id = ?",
+    cur = conn.cursor()
+    cur.execute(
+        "UPDATE users SET stripe_customer_id = %s, stripe_subscription_id = %s WHERE id = %s",
         (customer_id, subscription_id, user_id),
     )
+    cur.close()
     conn.commit()
 
 
-def clear_stripe_subscription(conn: sqlite3.Connection, user_id: str) -> None:
-    conn.execute(
-        "UPDATE users SET stripe_subscription_id = NULL WHERE id = ?",
+def clear_stripe_subscription(conn: Any, user_id: str) -> None:
+    cur = conn.cursor()
+    cur.execute(
+        "UPDATE users SET stripe_subscription_id = NULL WHERE id = %s",
         (user_id,),
     )
+    cur.close()
     conn.commit()
 
 
-def get_user_by_stripe_customer(conn: sqlite3.Connection, customer_id: str) -> Optional[dict]:
-    row = conn.execute(
-        "SELECT id, email, name, plan FROM users WHERE stripe_customer_id = ?",
+def get_user_by_stripe_customer(conn: Any, customer_id: str) -> Optional[dict]:
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT id, email, name, plan FROM users WHERE stripe_customer_id = %s",
         (customer_id,),
-    ).fetchone()
+    )
+    row = cur.fetchone()
+    cur.close()
     if not row:
         return None
     return {"id": row[0], "email": row[1], "name": row[2], "plan": row[3]}
 
 
-def get_user_by_email(conn: sqlite3.Connection, email: str) -> Optional[dict]:
-    row = conn.execute(
-        "SELECT id, email, name, plan FROM users WHERE email = ?",
+def get_user_by_email(conn: Any, email: str) -> Optional[dict]:
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT id, email, name, plan FROM users WHERE email = %s",
         (email.lower(),),
-    ).fetchone()
+    )
+    row = cur.fetchone()
+    cur.close()
     if not row:
         return None
     return {"id": row[0], "email": row[1], "name": row[2], "plan": row[3]}
 
 
-def get_stripe_info(conn: sqlite3.Connection, user_id: str) -> dict:
-    row = conn.execute(
-        "SELECT stripe_customer_id, stripe_subscription_id, stripe_cancel_at FROM users WHERE id = ?",
+def get_stripe_info(conn: Any, user_id: str) -> dict:
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT stripe_customer_id, stripe_subscription_id, stripe_cancel_at FROM users WHERE id = %s",
         (user_id,),
-    ).fetchone()
+    )
+    row = cur.fetchone()
+    cur.close()
     if not row:
         return {}
     return {"stripe_customer_id": row[0], "stripe_subscription_id": row[1], "stripe_cancel_at": row[2]}
 
 
-def set_stripe_cancel_at(conn: sqlite3.Connection, user_id: str, cancel_at) -> None:
-    conn.execute("UPDATE users SET stripe_cancel_at = ? WHERE id = ?", (cancel_at, user_id))
+def set_stripe_cancel_at(conn: Any, user_id: str, cancel_at) -> None:
+    cur = conn.cursor()
+    cur.execute("UPDATE users SET stripe_cancel_at = %s WHERE id = %s", (cancel_at, user_id))
+    cur.close()
     conn.commit()

@@ -68,6 +68,21 @@
     #home-btn:hover    { border-color: #6366f1; color: #a78bfa; }
     #new-btn:hover     { border-color: #f87171; color: #f87171; }
     #history-btn:hover { border-color: #6366f1; color: #a78bfa; }
+    #tips-btn-hdr {
+      font-size: 11px; font-weight: 500; padding: 5px 12px; border-radius: 20px;
+      background: transparent; border: 1px solid #2d3148; color: #64748b;
+      text-decoration: none; transition: all 0.2s; display: inline-flex; align-items: center;
+    }
+    #tips-btn-hdr:hover { border-color: #6366f1; color: #a78bfa; }
+
+    /* ── Mobile header ── */
+    @media (max-width: 600px) {
+      header { padding: 10px 12px; gap: 6px; }
+      .home-link > div { display: none; }
+      .plan-pill { display: none !important; }
+      .btn-label { display: none; }
+      #tips-btn-hdr { display: none; }
+    }
 
     /* ── New-interview popover ── */
     #new-popover {
@@ -503,9 +518,9 @@
   </a>
   <div id="status-badge">Connecting…</div>
   <span id="plan-pill" class="plan-pill"></span>
-  <a id="profile-btn-hdr" href="/profile.html" title="Account settings">⚙️ Settings</a>
-  <a href="/tips.html" title="Interview tips &amp; frameworks" style="font-size:11px;font-weight:500;padding:5px 12px;border-radius:20px;background:transparent;border:1px solid #2d3148;color:#64748b;text-decoration:none;transition:all 0.2s" onmouseover="this.style.borderColor='#6366f1';this.style.color='#a78bfa'" onmouseout="this.style.borderColor='#2d3148';this.style.color='#64748b'">💡 Tips</a>
-  <a id="history-btn" href="/history.html" title="View all past interviews">📋 History</a>
+  <a id="profile-btn-hdr" href="/profile.html" title="Account settings">⚙️ <span class="btn-label">Settings</span></a>
+  <a id="tips-btn-hdr" href="/tips.html" title="Interview tips &amp; frameworks">💡 <span class="btn-label">Tips</span></a>
+  <a id="history-btn" href="/history.html" title="View all past interviews">📋 <span class="btn-label">History</span></a>
   <div id="new-btn-wrap">
     <button id="new-btn" title="Start a new interview">＋ New</button>
     <div id="new-popover">
@@ -1681,6 +1696,22 @@
     el.style.display = 'inline-block';
     el.style.cursor = 'pointer';
     el.addEventListener('click', () => location.href = '/upgrade.html');
+  } catch(_){}
+})();
+(async function(){
+  try {
+    const tok = localStorage.getItem('auth_token');
+    if (!tok) return;
+    const res = await fetch('/auth/usage', { headers: { 'Authorization': 'Bearer ' + tok } });
+    if (!res.ok) return;
+    const usage = await res.json();
+    const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
+    if (u && u.plan !== usage.plan) { u.plan = usage.plan; localStorage.setItem('auth_user', JSON.stringify(u)); }
+    const el = document.getElementById('plan-pill');
+    if (!el) return;
+    const isHunter = usage.plan === 'hunter';
+    el.className = 'plan-pill ' + (isHunter ? 'hunter' : 'explorer');
+    el.textContent = isHunter ? '🎯 Hunter' : '🗺️ Explorer';
   } catch(_){}
 })();
 </script>
