@@ -11,6 +11,7 @@ load_dotenv()
 import stripe as _stripe
 
 from fastapi import FastAPI, HTTPException, Request, UploadFile, WebSocket, WebSocketDisconnect, Depends
+from fastapi.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
@@ -55,6 +56,18 @@ TTS_CACHE_DIR.mkdir(exist_ok=True)
 _TTS_CACHE_HEADERS = {"Cache-Control": "public, max-age=31536000, immutable"}
 
 app = FastAPI()
+
+
+class _CacheMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        path = request.url.path
+        if path.endswith(".html") or path in ("/", "") or path.endswith(".json"):
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+        return response
+
+app.add_middleware(_CacheMiddleware)
 
 
 # ── Auth endpoints ────────────────────────────────────────────────────────────

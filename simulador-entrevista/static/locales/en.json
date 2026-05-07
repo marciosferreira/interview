@@ -319,6 +319,55 @@
     "errorDefault": "Registration failed. Please try again.",
     "errorNetwork": "Network error — please try again."
   },
+  "upgrade": {
+    "pageTitle": "Plans & Pricing — Interview Coach",
+    "heroLabel": "Choose your plan",
+    "heroTitle": "Practice more.<br>Land the role.",
+    "heroSub": "Every interview session is fully personalized to your resume and target role. Upgrade to practice more rounds per week.",
+    "usageThisWeek": "This week",
+    "plans": {
+      "explorer": {
+        "badge": "Explorer",
+        "name": "Explorer",
+        "tagline": "For casual practice",
+        "priceHtml": "$0 <span>/ month</span>",
+        "priceNote": "Always free",
+        "f1": "3 interviews per week",
+        "f2": "Full 7-phase interview flow",
+        "f3": "Phase-by-phase feedback",
+        "f4": "Interview history",
+        "f5NoAccess": "AI scorecard",
+        "f6NoAccess": "Priority processing",
+        "btnCurrent": "Current plan",
+        "btnCreate": "Get started free →",
+        "btnDowngrade": "Downgrade to Explorer"
+      },
+      "hunter": {
+        "badge": "🎯 Hunter",
+        "name": "Hunter",
+        "tagline": "For serious job seekers",
+        "priceHtml": "$9<span style=\"font-size:22px;font-weight:700\">.99</span> <span>/ month</span>",
+        "priceNote": "Cancel anytime",
+        "f1": "15 interviews per week",
+        "f2": "Full 7-phase interview flow",
+        "f3": "Phase-by-phase feedback",
+        "f4": "AI scorecard",
+        "f5": "Interview history",
+        "f6": "Priority processing",
+        "btnUpgrade": "Upgrade to Hunter →",
+        "btnPortal": "⚙ Manage subscription",
+        "btnCurrent": "✓ Current plan",
+        "note": "Billed monthly · cancel anytime",
+        "notePortal": "Cancel or change plan via Stripe portal",
+        "activePlan": "Active plan"
+      }
+    },
+    "success": {
+      "title": "You're a Hunter now!",
+      "body": "15 interview sessions per week, unlocked. Go crush those interviews.",
+      "cta": "Start a new interview →"
+    }
+  },
   "tips": {
     "pageTitle": "Interview Tips — Interview Coach",
     "header": {

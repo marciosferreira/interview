@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Upgrade — Interview Coach</title>
+  <title data-i18n="upgrade.pageTitle">Upgrade — Interview Coach</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -210,9 +210,9 @@
 </header>
 
 <main>
-  <div class="hero-label">Choose your plan</div>
-  <h2>Practice more.<br>Land the role.</h2>
-  <p class="hero-sub">
+  <div class="hero-label" data-i18n="upgrade.heroLabel">Choose your plan</div>
+  <h2 data-i18n-html="upgrade.heroTitle">Practice more.<br>Land the role.</h2>
+  <p class="hero-sub" data-i18n="upgrade.heroSub">
     Every interview session is fully personalized to your resume and target role.
     Upgrade to practice more rounds per week.
   </p>
@@ -229,50 +229,51 @@
   <div class="plans">
     <!-- Explorer (Free) -->
     <div class="plan-card" id="card-free">
-      <div class="plan-badge free">Explorer</div>
-      <div class="plan-name">Explorer</div>
-      <div class="plan-tagline">For casual practice</div>
-      <div class="plan-price">$0 <span>/ month</span></div>
-      <div class="plan-price-note">Always free</div>
+      <div class="plan-badge free" data-i18n="upgrade.plans.explorer.badge">Explorer</div>
+      <div class="plan-name" data-i18n="upgrade.plans.explorer.name">Explorer</div>
+      <div class="plan-tagline" data-i18n="upgrade.plans.explorer.tagline">For casual practice</div>
+      <div class="plan-price" data-i18n-html="upgrade.plans.explorer.priceHtml">$0 <span>/ month</span></div>
+      <div class="plan-price-note" data-i18n="upgrade.plans.explorer.priceNote">Always free</div>
       <ul class="plan-features">
-        <li><span class="check">✓</span> 3 interviews per week</li>
-        <li><span class="check">✓</span> Full 7-phase interview flow</li>
-        <li><span class="check">✓</span> Phase-by-phase feedback</li>
-        <li><span class="check">✓</span> Interview history</li>
-        <li><span class="dash">–</span> <span style="color:#475569">AI scorecard</span></li>
-        <li><span class="dash">–</span> <span style="color:#475569">Priority processing</span></li>
+        <li><span class="check">✓</span> <span data-i18n="upgrade.plans.explorer.f1">3 interviews per week</span></li>
+        <li><span class="check">✓</span> <span data-i18n="upgrade.plans.explorer.f2">Full 7-phase interview flow</span></li>
+        <li><span class="check">✓</span> <span data-i18n="upgrade.plans.explorer.f3">Phase-by-phase feedback</span></li>
+        <li><span class="check">✓</span> <span data-i18n="upgrade.plans.explorer.f4">Interview history</span></li>
+        <li><span class="dash">–</span> <span style="color:#475569" data-i18n="upgrade.plans.explorer.f5NoAccess">AI scorecard</span></li>
+        <li><span class="dash">–</span> <span style="color:#475569" data-i18n="upgrade.plans.explorer.f6NoAccess">Priority processing</span></li>
       </ul>
-      <button class="plan-btn current" id="free-btn">Current plan</button>
+      <button class="plan-btn current" id="free-btn" data-i18n="upgrade.plans.explorer.btnCurrent">Current plan</button>
     </div>
 
     <!-- Hunter -->
     <div class="plan-card featured" id="card-hunter">
-      <div class="plan-badge hunter">🎯 Hunter</div>
-      <div class="plan-name">Hunter</div>
-      <div class="plan-tagline">For serious job seekers</div>
-      <div class="plan-price" id="hunter-price">$9<span style="font-size:22px;font-weight:700">.99</span> <span>/ month</span></div>
-      <div class="plan-price-note" id="hunter-price-note">Cancel anytime</div>
+      <div class="plan-badge hunter" data-i18n="upgrade.plans.hunter.badge">🎯 Hunter</div>
+      <div class="plan-name" data-i18n="upgrade.plans.hunter.name">Hunter</div>
+      <div class="plan-tagline" data-i18n="upgrade.plans.hunter.tagline">For serious job seekers</div>
+      <div class="plan-price" id="hunter-price" data-i18n-html="upgrade.plans.hunter.priceHtml">$9<span style="font-size:22px;font-weight:700">.99</span> <span>/ month</span></div>
+      <div class="plan-price-note" id="hunter-price-note" data-i18n="upgrade.plans.hunter.priceNote">Cancel anytime</div>
       <ul class="plan-features">
-        <li><span class="check">✓</span> <strong style="color:#e2e8f0">15 interviews per week</strong></li>
-        <li><span class="check">✓</span> Full 7-phase interview flow</li>
-        <li><span class="check">✓</span> Phase-by-phase feedback</li>
-        <li><span class="check">✓</span> <strong style="color:#e2e8f0">AI scorecard</strong></li>
-        <li><span class="check">✓</span> Interview history</li>
-        <li><span class="check">✓</span> Priority processing</li>
+        <li><span class="check">✓</span> <strong style="color:#e2e8f0" data-i18n="upgrade.plans.hunter.f1">15 interviews per week</strong></li>
+        <li><span class="check">✓</span> <span data-i18n="upgrade.plans.hunter.f2">Full 7-phase interview flow</span></li>
+        <li><span class="check">✓</span> <span data-i18n="upgrade.plans.hunter.f3">Phase-by-phase feedback</span></li>
+        <li><span class="check">✓</span> <strong style="color:#e2e8f0" data-i18n="upgrade.plans.hunter.f4">AI scorecard</strong></li>
+        <li><span class="check">✓</span> <span data-i18n="upgrade.plans.hunter.f5">Interview history</span></li>
+        <li><span class="check">✓</span> <span data-i18n="upgrade.plans.hunter.f6">Priority processing</span></li>
       </ul>
-      <button class="plan-btn upgrade" id="hunter-btn">Upgrade to Hunter →</button>
-      <div class="trial-note" id="hunter-note">Billed monthly · cancel anytime</div>
+      <button class="plan-btn upgrade" id="hunter-btn" data-i18n="upgrade.plans.hunter.btnUpgrade">Upgrade to Hunter →</button>
+      <div class="trial-note" id="hunter-note" data-i18n="upgrade.plans.hunter.note">Billed monthly · cancel anytime</div>
     </div>
   </div>
 
   <div id="success-msg">
     <div class="big">🎯</div>
-    <h3>You're a Hunter now!</h3>
-    <p>15 interview sessions per week, unlocked. Go crush those interviews.</p>
-    <a href="/onboarding.html">Start a new interview →</a>
+    <h3 data-i18n="upgrade.success.title">You're a Hunter now!</h3>
+    <p data-i18n="upgrade.success.body">15 interview sessions per week, unlocked. Go crush those interviews.</p>
+    <a href="/onboarding.html" data-i18n="upgrade.success.cta">Start a new interview →</a>
   </div>
 </main>
 
+<script src="/i18n.js"></script>
 <script>
   const _token = localStorage.getItem('auth_token');
 
@@ -280,9 +281,9 @@
     if (!_token) {
       document.getElementById('hdr-login').style.display = '';
       document.getElementById('free-btn').className   = 'plan-btn upgrade';
-      document.getElementById('free-btn').textContent = 'Get started free →';
+      document.getElementById('free-btn').textContent = t('upgrade.plans.explorer.btnCreate');
       document.getElementById('free-btn').onclick = () => location.href = '/register.html';
-      document.getElementById('hunter-btn').textContent = 'Create account →';
+      document.getElementById('hunter-btn').textContent = t('upgrade.plans.explorer.btnCreate');
       document.getElementById('hunter-btn').dataset.linked = '1';
       document.getElementById('hunter-btn').onclick = () => location.href = '/register.html';
       return;
@@ -297,16 +298,16 @@
 
       if (plan === 'hunter') {
         document.getElementById('free-btn').className   = 'plan-btn downgrade';
-        document.getElementById('free-btn').textContent = 'Downgrade to Explorer';
-        document.getElementById('hunter-price-note').textContent = 'Active plan';
+        document.getElementById('free-btn').textContent = t('upgrade.plans.explorer.btnDowngrade');
+        document.getElementById('hunter-price-note').textContent = t('upgrade.plans.hunter.activePlan');
         if (data.has_stripe_subscription) {
           document.getElementById('hunter-btn').className   = 'plan-btn upgrade';
-          document.getElementById('hunter-btn').textContent = '⚙ Manage subscription';
+          document.getElementById('hunter-btn').textContent = t('upgrade.plans.hunter.btnPortal');
           document.getElementById('hunter-btn').dataset.portal = '1';
-          document.getElementById('hunter-note').textContent = 'Cancel or change plan via Stripe portal';
+          document.getElementById('hunter-note').textContent = t('upgrade.plans.hunter.notePortal');
         } else {
           document.getElementById('hunter-btn').className   = 'plan-btn current';
-          document.getElementById('hunter-btn').textContent = '✓ Current plan';
+          document.getElementById('hunter-btn').textContent = t('upgrade.plans.hunter.btnCurrent');
           document.getElementById('hunter-note').textContent = '';
         }
       }
@@ -320,7 +321,7 @@
       fill.style.width = pct + '%';
       if (pct >= 100) fill.classList.add('full');
       count.textContent = `${data.used} / ${data.limit} used`;
-      label.textContent = `This week — ${plan === 'hunter' ? '🎯 Hunter' : '🗺️ Explorer'} plan`;
+      label.textContent = `${t('upgrade.usageThisWeek')} — ${plan === 'hunter' ? '🎯 Hunter' : '🗺️ Explorer'} plan`;
 
       try {
         const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
@@ -328,20 +329,8 @@
       } catch {}
     } catch {}
   }
-  // Show price in user's currency
-  (function() {
-    try {
-      const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
-      const lang = (u && u.language) || localStorage.getItem('preferred_lang') || 'en';
-      if (lang === 'pt') {
-        document.getElementById('hunter-price').innerHTML =
-          'R$49<span style="font-size:22px;font-weight:700">,90</span> <span>/ mês</span>';
-        document.getElementById('hunter-btn').textContent = 'Assinar o Hunter →';
-      }
-    } catch(_) {}
-  })();
-
-  loadUsage();
+  // i18n handles price and all static text; call loadUsage once translations are ready
+  document.addEventListener('i18n:ready', loadUsage, { once: true });
 
   document.getElementById('hunter-btn').addEventListener('click', async () => {
     const btn = document.getElementById('hunter-btn');

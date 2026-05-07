@@ -63,7 +63,7 @@
 
   async function loadLang(lang) {
     try {
-      const res = await fetch(`/locales/${lang}.json?v=1`);
+      const res = await fetch(`/locales/${lang}.json?v=2`);
       if (!res.ok) throw new Error(res.status);
       _dict = await res.json();
       _lang = lang;

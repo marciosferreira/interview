@@ -319,6 +319,55 @@
     "errorDefault": "Falha no cadastro. Tente novamente.",
     "errorNetwork": "Erro de rede — tente novamente."
   },
+  "upgrade": {
+    "pageTitle": "Planos & Preços — Interview Coach",
+    "heroLabel": "Escolha seu plano",
+    "heroTitle": "Pratique mais.<br>Conquiste a vaga.",
+    "heroSub": "Cada sessão de entrevista é totalmente personalizada para seu currículo e vaga. Faça upgrade para praticar mais rodadas por semana.",
+    "usageThisWeek": "Esta semana",
+    "plans": {
+      "explorer": {
+        "badge": "Explorer",
+        "name": "Explorer",
+        "tagline": "Para prática casual",
+        "priceHtml": "$0 <span>/ mês</span>",
+        "priceNote": "Sempre grátis",
+        "f1": "3 entrevistas por semana",
+        "f2": "Entrevista completa com 7 fases",
+        "f3": "Feedback fase a fase",
+        "f4": "Histórico de entrevistas",
+        "f5NoAccess": "Scorecard com IA",
+        "f6NoAccess": "Processamento prioritário",
+        "btnCurrent": "Plano atual",
+        "btnCreate": "Começar grátis →",
+        "btnDowngrade": "Fazer downgrade para Explorer"
+      },
+      "hunter": {
+        "badge": "🎯 Hunter",
+        "name": "Hunter",
+        "tagline": "Para quem está sério na busca",
+        "priceHtml": "R$49<span style=\"font-size:22px;font-weight:700\">,90</span> <span>/ mês</span>",
+        "priceNote": "Cancele quando quiser",
+        "f1": "15 entrevistas por semana",
+        "f2": "Entrevista completa com 7 fases",
+        "f3": "Feedback fase a fase",
+        "f4": "Scorecard com IA",
+        "f5": "Histórico de entrevistas",
+        "f6": "Processamento prioritário",
+        "btnUpgrade": "Assinar o Hunter →",
+        "btnPortal": "⚙ Gerenciar assinatura",
+        "btnCurrent": "✓ Plano atual",
+        "note": "Cobrado mensalmente · cancele quando quiser",
+        "notePortal": "Cancele ou altere seu plano no portal Stripe",
+        "activePlan": "Plano ativo"
+      }
+    },
+    "success": {
+      "title": "Você agora é Hunter!",
+      "body": "15 sessões de entrevista por semana desbloqueadas. Vá arrasar nas entrevistas.",
+      "cta": "Iniciar uma nova entrevista →"
+    }
+  },
   "tips": {
     "pageTitle": "Dicas de Entrevista — Interview Coach",
     "header": {
