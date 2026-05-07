@@ -646,3 +646,13 @@ def set_stripe_cancel_at(conn: Any, user_id: str, cancel_at) -> None:
     cur.execute("UPDATE users SET stripe_cancel_at = %s WHERE id = %s", (cancel_at, user_id))
     cur.close()
     conn.commit()
+
+
+def delete_account(conn: Any, user_id: str) -> None:
+    """Delete all data for a user. Caller must verify plan eligibility first."""
+    cur = conn.cursor()
+    cur.execute("DELETE FROM session_meta WHERE user_id = %s", (user_id,))
+    cur.execute("DELETE FROM job_sessions WHERE user_id = %s", (user_id,))
+    cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
+    cur.close()
+    conn.commit()

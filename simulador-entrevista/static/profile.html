@@ -160,6 +160,27 @@
 
     /* Language switcher */
     .lang-row { display: flex; gap: 8px; }
+
+    /* Danger zone */
+    .danger-section {
+      background: #1a1d27; border: 1px solid #3d1515;
+      border-radius: 16px; padding: 24px; margin-bottom: 20px;
+    }
+    .danger-section .section-title { color: #f87171; }
+    .danger-desc { font-size: 13px; color: #64748b; margin-bottom: 16px; line-height: 1.6; }
+    .btn-danger {
+      padding: 10px 22px; background: transparent;
+      border: 1px solid #7f1d1d; border-radius: 8px; color: #f87171;
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-danger:hover:not(:disabled) { background: #3d1515; border-color: #f87171; }
+    .btn-danger:disabled { opacity: 0.4; cursor: not-allowed; }
+    #delete-account-warning {
+      display: none; margin-top: 12px;
+      background: #1c1700; border: 1px solid #854d0e;
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 13px; color: #fbbf24; line-height: 1.5;
+    }
     .lang-btn {
       flex: 1; padding: 10px 16px;
       border: 1px solid #2d3148; border-radius: 8px;
@@ -269,6 +290,16 @@
     <div class="section-title" data-i18n="profile.sections.session">Session</div>
     <button class="logout-btn" id="logout-btn" data-i18n="profile.buttons.signOut">Sign out of all devices</button>
   </div>
+
+  <!-- Danger zone -->
+  <div class="danger-section">
+    <div class="section-title" data-i18n="profile.sections.dangerZone">Danger Zone</div>
+    <p class="danger-desc" data-i18n="profile.deleteAccount.desc">Permanently delete your account and all interview data. This action cannot be undone.</p>
+    <button class="btn-danger" id="delete-account-btn" data-i18n="profile.deleteAccount.btn">Delete my account</button>
+    <div id="delete-account-warning" data-i18n="profile.deleteAccount.warning">
+      You have an active Hunter subscription. Please cancel it first before deleting your account.
+    </div>
+  </div>
 </main>
 
 <script>
@@ -359,6 +390,13 @@
         } else {
           document.getElementById('plan-downgrade-btn').style.display = '';
         }
+
+        // Delete account button — blocked if active Hunter with no cancel scheduled
+        const canDelete = !isHunter || !!usage.stripe_cancel_at;
+        const deleteBtn = document.getElementById('delete-account-btn');
+        const deleteWarn = document.getElementById('delete-account-warning');
+        deleteBtn.disabled = !canDelete;
+        deleteWarn.style.display = canDelete ? 'none' : 'block';
       }
     } catch {}
   }
@@ -551,6 +589,36 @@
     localStorage.removeItem('auth_user');
     localStorage.removeItem('interview_v1');
     location.replace('/login.html');
+  });
+
+  document.getElementById('delete-account-btn').addEventListener('click', async () => {
+    const t_confirm = t('profile.deleteAccount.confirm') || 'Type DELETE to confirm account deletion:';
+    const answer = prompt(t_confirm);
+    if (answer !== 'DELETE') return;
+    const btn = document.getElementById('delete-account-btn');
+    btn.disabled = true;
+    btn.textContent = '…';
+    try {
+      const res = await fetch('/auth/account', {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${_token}` },
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.detail || t('profile.msgs.errorDefault'));
+        btn.disabled = false;
+        btn.textContent = t('profile.deleteAccount.btn') || 'Delete my account';
+        return;
+      }
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+      localStorage.removeItem('interview_v1');
+      location.replace('/login.html');
+    } catch {
+      alert(t('profile.msgs.errorNetwork'));
+      btn.disabled = false;
+      btn.textContent = t('profile.deleteAccount.btn') || 'Delete my account';
+    }
   });
 </script>
 <script>

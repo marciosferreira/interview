@@ -96,7 +96,14 @@
       "profile": "Profile",
       "password": "Change Password",
       "language": "Language",
-      "session": "Session"
+      "session": "Session",
+      "dangerZone": "Danger Zone"
+    },
+    "deleteAccount": {
+      "desc": "Permanently delete your account and all interview data. This action cannot be undone.",
+      "btn": "Delete my account",
+      "confirm": "Type DELETE to confirm account deletion:",
+      "warning": "You have an active Hunter subscription. Please cancel it first before deleting your account."
     },
     "langHint": "Choose the language for the interface.",
     "fields": {

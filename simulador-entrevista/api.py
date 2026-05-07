@@ -36,7 +36,7 @@ from auth import (
     create_access_token, get_current_user, decode_token_raw,
     create_contact_message, list_contact_messages, save_contact_reply, get_contact_message, delete_contact_message,
     set_stripe_info, clear_stripe_subscription, get_user_by_stripe_customer, get_user_by_email,
-    get_stripe_info, set_stripe_cancel_at, force_verify_email,
+    get_stripe_info, set_stripe_cancel_at, force_verify_email, delete_account,
 )
 from email_service import send_verification_email, send_reset_email, send_contact_notification, send_contact_reply
 from prompt_generator import generate_interview_context, extract_candidate_name
@@ -139,6 +139,24 @@ async def login(body: UserLogin):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     token = create_access_token(user["id"], user["email"])
     return TokenResponse(access_token=token, user=user)
+
+
+@app.delete("/auth/account")
+async def delete_my_account(current_user: dict = Depends(get_current_user)):
+    loop = asyncio.get_running_loop()
+    user = await loop.run_in_executor(None, lambda: get_user_by_id(_conn, current_user["id"]))
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    stripe_info = await loop.run_in_executor(None, lambda: get_stripe_info(_conn, current_user["id"]))
+    is_hunter = user.get("plan") == "hunter"
+    cancel_at = stripe_info.get("stripe_cancel_at") if stripe_info else None
+    if is_hunter and not cancel_at:
+        raise HTTPException(
+            status_code=403,
+            detail="You have an active Hunter subscription. Please cancel it first before deleting your account.",
+        )
+    await loop.run_in_executor(None, lambda: delete_account(_conn, current_user["id"]))
+    return {"ok": True}
 
 
 @app.get("/auth/me")

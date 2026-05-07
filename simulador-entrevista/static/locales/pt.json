@@ -96,7 +96,14 @@
       "profile": "Perfil",
       "password": "Alterar Senha",
       "language": "Idioma",
-      "session": "Sessão"
+      "session": "Sessão",
+      "dangerZone": "Zona de Perigo"
+    },
+    "deleteAccount": {
+      "desc": "Exclui permanentemente sua conta e todos os dados de entrevista. Esta ação não pode ser desfeita.",
+      "btn": "Excluir minha conta",
+      "confirm": "Digite EXCLUIR para confirmar a exclusão da conta:",
+      "warning": "Você tem uma assinatura Hunter ativa. Cancele-a antes de excluir sua conta."
     },
     "langHint": "Escolha o idioma da interface.",
     "fields": {
