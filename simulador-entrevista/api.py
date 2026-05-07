@@ -207,6 +207,8 @@ async def reset_password(body: ResetPasswordRequest):
 
 @app.post("/auth/upgrade")
 async def upgrade_to_hunter(current_user: dict = Depends(get_current_user)):
+    if current_user.get("email") != ADMIN_EMAIL:
+        raise HTTPException(status_code=403, detail="Use Stripe checkout to upgrade")
     loop = asyncio.get_running_loop()
     await loop.run_in_executor(None, lambda: upgrade_plan(_conn, current_user["id"], "hunter"))
     user = await loop.run_in_executor(None, lambda: get_user_by_id(_conn, current_user["id"]))
