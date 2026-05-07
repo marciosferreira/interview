@@ -12,6 +12,7 @@ import stripe as _stripe
 
 from fastapi import FastAPI, HTTPException, Request, UploadFile, WebSocket, WebSocketDisconnect, Depends
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.types import ASGIApp, Receive, Scope, Send
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
@@ -32,7 +33,7 @@ from auth import (
     create_job_session, update_job_session_context, get_job_session, list_job_sessions,
     create_access_token, get_current_user, decode_token_raw,
     create_contact_message, list_contact_messages, save_contact_reply, get_contact_message, delete_contact_message,
-    set_stripe_info, clear_stripe_subscription, get_user_by_stripe_customer, get_stripe_info,
+    set_stripe_info, clear_stripe_subscription, get_user_by_stripe_customer, get_stripe_info, set_stripe_cancel_at,
 )
 from email_service import send_verification_email, send_reset_email, send_contact_notification, send_contact_reply
 from prompt_generator import generate_interview_context, extract_candidate_name
@@ -58,14 +59,29 @@ _TTS_CACHE_HEADERS = {"Cache-Control": "public, max-age=31536000, immutable"}
 app = FastAPI()
 
 
-class _CacheMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        response = await call_next(request)
-        path = request.url.path
-        if path.endswith(".html") or path in ("/", "") or path.endswith(".json"):
-            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-            response.headers["Pragma"] = "no-cache"
-        return response
+class _CacheMiddleware:
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        path = scope.get("path", "")
+        no_cache = path.endswith(".html") or path in ("/", "") or path.endswith(".json")
+
+        async def send_with_headers(message):
+            if no_cache and message["type"] == "http.response.start":
+                headers = list(message.get("headers", []))
+                headers += [
+                    (b"cache-control", b"no-cache, no-store, must-revalidate"),
+                    (b"pragma", b"no-cache"),
+                ]
+                message = {**message, "headers": headers}
+            await send(message)
+
+        await self.app(scope, receive, send_with_headers)
 
 app.add_middleware(_CacheMiddleware)
 
@@ -241,6 +257,7 @@ async def get_usage(current_user: dict = Depends(get_current_user)):
     return {
         "plan": plan, "used": used, "limit": limit, "remaining": max(0, limit - used),
         "has_stripe_subscription": bool(stripe_info.get("stripe_subscription_id")),
+        "stripe_cancel_at": stripe_info.get("stripe_cancel_at"),
     }
 
 
@@ -296,27 +313,112 @@ async def stripe_webhook(request: Request):
     data  = event["data"]["object"]
 
     if etype == "checkout.session.completed":
-        user_id = data.get("client_reference_id") or (data.get("metadata") or {}).get("user_id")
-        customer_id      = data.get("customer")
-        subscription_id  = data.get("subscription")
-        if user_id and customer_id and subscription_id:
+        user_id         = data.get("client_reference_id") or (data.get("metadata") or {}).get("user_id")
+        customer_id     = data.get("customer")
+        subscription_id = data.get("subscription")
+        if user_id and customer_id:
             upgrade_plan(_conn, user_id, "hunter")
-            set_stripe_info(_conn, user_id, customer_id, subscription_id)
-            print(f"[Stripe] Upgraded user {user_id} → hunter (sub {subscription_id})")
+            set_stripe_info(_conn, user_id, customer_id, subscription_id or "")
+            print(f"[Stripe] checkout.session.completed → upgraded user {user_id} (sub {subscription_id})")
 
-    elif etype in ("customer.subscription.deleted",):
+    elif etype in ("invoice_payment.paid", "invoice.paid"):
+        # Fired on every successful charge (first and recurring).
+        # For invoice_payment.paid the customer is on the invoice, so fetch it.
+        invoice_id  = data.get("invoice") or data.get("id")
+        customer_id = data.get("customer")
+
+        if not customer_id and invoice_id:
+            try:
+                inv = _stripe.Invoice.retrieve(invoice_id)
+                customer_id = inv.get("customer")
+            except Exception as exc:
+                print(f"[Stripe] Could not fetch invoice {invoice_id}: {exc}")
+
+        if customer_id:
+            user = get_user_by_stripe_customer(_conn, customer_id)
+            if user:
+                if user.get("plan") != "hunter":
+                    upgrade_plan(_conn, user["id"], "hunter")
+                    print(f"[Stripe] {etype} → upgraded user {user['id']} to hunter")
+                else:
+                    print(f"[Stripe] {etype} → user {user['id']} already hunter, skipped")
+            else:
+                print(f"[Stripe] {etype} → no user found for customer {customer_id} — checkout.session.completed may have failed earlier")
+
+    elif etype == "customer.subscription.deleted":
         customer_id = data.get("customer")
         user = get_user_by_stripe_customer(_conn, customer_id)
         if user:
             upgrade_plan(_conn, user["id"], "free")
             clear_stripe_subscription(_conn, user["id"])
-            print(f"[Stripe] Downgraded user {user['id']} → free (sub canceled)")
+            set_stripe_cancel_at(_conn, user["id"], None)
+            print(f"[Stripe] subscription.deleted → downgraded user {user['id']} to free")
+
+    elif etype == "customer.subscription.updated":
+        customer_id = data.get("customer")
+        status      = data.get("status")
+        user = get_user_by_stripe_customer(_conn, customer_id)
+        if user and status not in ("active", "trialing"):
+            upgrade_plan(_conn, user["id"], "free")
+            print(f"[Stripe] subscription.updated status={status} → downgraded user {user['id']} to free")
 
     elif etype == "invoice.payment_failed":
         customer_id = data.get("customer")
-        print(f"[Stripe] Payment failed for customer {customer_id}")
+        attempt     = data.get("attempt_count", 1)
+        print(f"[Stripe] payment failed (attempt {attempt}) for customer {customer_id}")
+        # Downgrade only after the final attempt — Stripe cancels the subscription
+        # automatically after retries are exhausted, which fires subscription.deleted.
+        # Uncomment below to downgrade immediately on first failure instead:
+        # user = get_user_by_stripe_customer(_conn, customer_id)
+        # if user:
+        #     upgrade_plan(_conn, user["id"], "free")
+        #     print(f"[Stripe] payment failed → downgraded user {user['id']} to free")
+
+    else:
+        print(f"[Stripe] unhandled event type: {etype}")
 
     return {"ok": True}
+
+
+@app.get("/stripe/invoices")
+async def stripe_invoices(current_user: dict = Depends(get_current_user)):
+    loop = asyncio.get_running_loop()
+    info = await loop.run_in_executor(None, lambda: get_stripe_info(_conn, current_user["id"]))
+    customer_id = info.get("stripe_customer_id")
+    if not customer_id:
+        return {"invoices": []}
+    try:
+        result = _stripe.Invoice.list(customer=customer_id, limit=24, status="paid")
+        invoices = [
+            {
+                "id":                  inv["id"],
+                "created":             inv["created"],
+                "amount_paid":         inv["amount_paid"],
+                "currency":            inv["currency"],
+                "invoice_pdf":         inv.get("invoice_pdf"),
+                "hosted_invoice_url":  inv.get("hosted_invoice_url"),
+            }
+            for inv in result.get("data", [])
+        ]
+        return {"invoices": invoices}
+    except _stripe.error.StripeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc))
+
+
+@app.post("/stripe/cancel")
+async def stripe_cancel_subscription(current_user: dict = Depends(get_current_user)):
+    loop = asyncio.get_running_loop()
+    info = await loop.run_in_executor(None, lambda: get_stripe_info(_conn, current_user["id"]))
+    subscription_id = info.get("stripe_subscription_id")
+    if not subscription_id:
+        raise HTTPException(status_code=400, detail="No active Stripe subscription found")
+    try:
+        sub = _stripe.Subscription.modify(subscription_id, cancel_at_period_end=True)
+        period_end = sub.get("current_period_end")
+        set_stripe_cancel_at(_conn, current_user["id"], period_end)
+        return {"ok": True, "period_end": period_end}
+    except _stripe.error.StripeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc))
 
 
 @app.post("/stripe/portal")

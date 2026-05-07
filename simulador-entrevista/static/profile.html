@@ -116,6 +116,22 @@
     }
     .msg.error   { background: #450a0a; border: 1px solid #7f1d1d; color: #fca5a5; }
     .msg.success { background: #14532d; border: 1px solid #166534; color: #4ade80; }
+    .invoice-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .invoice-table th {
+      text-align: left; color: #475569; font-weight: 500;
+      padding: 6px 8px; border-bottom: 1px solid #2d3148; font-size: 11px;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .invoice-table td { padding: 10px 8px; color: #94a3b8; border-bottom: 1px solid #1e293b; }
+    .invoice-table tr:last-child td { border-bottom: none; }
+    .invoice-table td:first-child { color: #e2e8f0; }
+    .invoice-link {
+      font-size: 11px; font-weight: 600; padding: 3px 10px;
+      border-radius: 6px; border: 1px solid #2d3148;
+      color: #94a3b8; text-decoration: none; margin-left: 6px;
+      transition: all 0.15s;
+    }
+    .invoice-link:hover { border-color: #6366f1; color: #a5b4fc; }
     .logout-btn {
       width: 100%; padding: 10px;
       background: transparent; border: 1px solid #3d1515;
@@ -167,6 +183,7 @@
     </div>
     <div id="plan-usage" style="font-size:12px;color:#64748b;text-align:right;margin-right:8px"></div>
     <a id="plan-upgrade-link" href="/upgrade.html" style="display:none;font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;border:1px solid #6366f1;color:#a78bfa;text-decoration:none;white-space:nowrap" data-i18n="profile.plan.upgrade">Upgrade →</a>
+    <button id="plan-cancel-btn" style="display:none;font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;border:1px solid #3d1515;background:transparent;color:#f87171;cursor:pointer;white-space:nowrap" onmouseover="this.style.background='#3d1515'" onmouseout="this.style.background='transparent'">Cancel subscription</button>
     <button id="plan-downgrade-btn" style="display:none;font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;border:1px solid #3d1515;background:transparent;color:#f87171;cursor:pointer;white-space:nowrap" onmouseover="this.style.background='#3d1515'" onmouseout="this.style.background='transparent'" data-i18n="profile.plan.downgrade">Downgrade</button>
   </div>
 
@@ -228,6 +245,12 @@
       <button class="lang-btn" data-lang="en" onclick="saveLang('en')">🇺🇸 English</button>
       <button class="lang-btn" data-lang="pt" onclick="saveLang('pt')">🇧🇷 Português</button>
     </div>
+  </div>
+
+  <!-- Billing history -->
+  <div class="section" id="invoices-section" style="display:none">
+    <div class="section-title" data-i18n="profile.plan.invoicesTitle">Billing history</div>
+    <div id="invoices-body"><span style="color:#475569;font-size:13px">Loading…</span></div>
   </div>
 
   <!-- Logout section -->
@@ -295,8 +318,21 @@
           : `🗺️ Explorer <span style="font-size:11px;font-weight:500;background:#1e293b;color:#64748b;padding:2px 8px;border-radius:20px;margin-left:6px">${t('profile.plan.free')}</span>`;
         document.getElementById('plan-usage').textContent =
           t('profile.plan.usage', { used: usage.used, limit: usage.limit });
-        if (!isHunter) document.getElementById('plan-upgrade-link').style.display = '';
-        if (isHunter)  document.getElementById('plan-downgrade-btn').style.display = '';
+        if (!isHunter) {
+          document.getElementById('plan-upgrade-link').style.display = '';
+        } else if (usage.stripe_cancel_at) {
+          // Cancellation already requested — show persistent notice
+          const endDate = new Date(usage.stripe_cancel_at * 1000).toLocaleDateString();
+          const banner = document.getElementById('plan-banner-label');
+          banner.innerHTML = `⚠️ ${t('profile.plan.canceledUntil', { date: endDate })}`;
+          banner.style.color = '#f59e0b';
+        } else if (usage.has_stripe_subscription) {
+          const cancelBtn = document.getElementById('plan-cancel-btn');
+          cancelBtn.textContent = t('profile.plan.cancelSubscription');
+          cancelBtn.style.display = '';
+        } else {
+          document.getElementById('plan-downgrade-btn').style.display = '';
+        }
       }
     } catch {}
   }
@@ -402,6 +438,25 @@
     }
   });
 
+  document.getElementById('plan-cancel-btn').addEventListener('click', async () => {
+    if (!confirm(t('profile.plan.cancelConfirm'))) return;
+    const btn = document.getElementById('plan-cancel-btn');
+    btn.disabled = true;
+    btn.textContent = t('profile.plan.canceling');
+    try {
+      const res  = await fetch('/stripe/cancel', {
+        method: 'POST', headers: { 'Authorization': `Bearer ${_token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) { alert(data.detail || t('profile.msgs.errorDefault')); btn.disabled = false; btn.textContent = t('profile.plan.cancelSubscription'); return; }
+      location.reload();
+    } catch {
+      alert(t('profile.msgs.errorNetwork'));
+      btn.disabled = false;
+      btn.textContent = t('profile.plan.cancelSubscription');
+    }
+  });
+
   document.getElementById('plan-downgrade-btn').addEventListener('click', async () => {
     if (!confirm(t('profile.confirm.downgrade'))) return;
     const btn = document.getElementById('plan-downgrade-btn');
@@ -424,6 +479,45 @@
       btn.textContent = t('profile.plan.downgrade');
     }
   });
+
+  async function loadInvoices() {
+    if (!_token) return;
+    try {
+      const res  = await fetch('/stripe/invoices', { headers: { 'Authorization': `Bearer ${_token}` } });
+      if (!res.ok) return;
+      const { invoices } = await res.json();
+      if (!invoices.length) return;
+
+      document.getElementById('invoices-section').style.display = '';
+      const fmt = new Intl.NumberFormat(undefined, { minimumFractionDigits: 2 });
+      const rows = invoices.map(inv => {
+        const date   = new Date(inv.created * 1000).toLocaleDateString();
+        const amount = fmt.format(inv.amount_paid / 100);
+        const curr   = inv.currency.toUpperCase();
+        const pdfLink  = inv.invoice_pdf
+          ? `<a class="invoice-link" href="${inv.invoice_pdf}" target="_blank" rel="noopener">${t('profile.plan.invoiceDownload')}</a>`
+          : '';
+        const viewLink = inv.hosted_invoice_url
+          ? `<a class="invoice-link" href="${inv.hosted_invoice_url}" target="_blank" rel="noopener">${t('profile.plan.invoiceView')}</a>`
+          : '';
+        return `<tr>
+          <td>${date}</td>
+          <td>${curr} ${amount}</td>
+          <td style="color:#4ade80">${t('profile.plan.invoiceStatusPaid')}</td>
+          <td style="text-align:right">${viewLink}${pdfLink}</td>
+        </tr>`;
+      }).join('');
+
+      document.getElementById('invoices-body').innerHTML = `
+        <table class="invoice-table">
+          <thead><tr>
+            <th>${t('profile.plan.invoiceColDate')}</th><th>${t('profile.plan.invoiceColAmount')}</th><th>${t('profile.plan.invoiceColStatus')}</th><th></th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    } catch {}
+  }
+  loadInvoices();
 
   document.getElementById('logout-btn').addEventListener('click', () => {
     localStorage.removeItem('auth_token');

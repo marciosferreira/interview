@@ -70,7 +70,20 @@
       "usage": "{{used}} / {{limit}} interviews this week",
       "upgrade": "Upgrade →",
       "downgrade": "Downgrade",
-      "downgrading": "Downgrading…"
+      "downgrading": "Downgrading…",
+      "cancelSubscription": "Cancel subscription",
+      "canceling": "Canceling…",
+      "cancelConfirm": "Cancel your Hunter subscription? You'll keep access until the end of the current billing period.",
+      "canceledUntil": "Active until {{date}} — then reverts to Explorer",
+      "manageSubscription": "Manage subscription",
+      "invoicesTitle": "Billing history",
+      "invoicesEmpty": "No invoices yet.",
+      "invoiceDownload": "PDF",
+      "invoiceView": "View",
+      "invoiceColDate": "Date",
+      "invoiceColAmount": "Amount",
+      "invoiceColStatus": "Status",
+      "invoiceStatusPaid": "Paid"
     },
     "verify": {
       "title": "Please verify your email address",

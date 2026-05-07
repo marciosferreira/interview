@@ -93,6 +93,7 @@ def setup_user_tables(conn: sqlite3.Connection) -> None:
         ("plan",                   "TEXT NOT NULL DEFAULT 'free'"),
         ("stripe_customer_id",     "TEXT"),
         ("stripe_subscription_id", "TEXT"),
+        ("stripe_cancel_at",       "INTEGER"),
     ]:
         try:
             conn.execute(f"ALTER TABLE users ADD COLUMN {col} {defn}")
@@ -532,9 +533,14 @@ def get_user_by_stripe_customer(conn: sqlite3.Connection, customer_id: str) -> O
 
 def get_stripe_info(conn: sqlite3.Connection, user_id: str) -> dict:
     row = conn.execute(
-        "SELECT stripe_customer_id, stripe_subscription_id FROM users WHERE id = ?",
+        "SELECT stripe_customer_id, stripe_subscription_id, stripe_cancel_at FROM users WHERE id = ?",
         (user_id,),
     ).fetchone()
     if not row:
         return {}
-    return {"stripe_customer_id": row[0], "stripe_subscription_id": row[1]}
+    return {"stripe_customer_id": row[0], "stripe_subscription_id": row[1], "stripe_cancel_at": row[2]}
+
+
+def set_stripe_cancel_at(conn: sqlite3.Connection, user_id: str, cancel_at) -> None:
+    conn.execute("UPDATE users SET stripe_cancel_at = ? WHERE id = ?", (cancel_at, user_id))
+    conn.commit()
