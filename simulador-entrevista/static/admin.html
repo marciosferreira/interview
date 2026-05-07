@@ -104,6 +104,8 @@
     .plan-btn.demote:hover   { background: #2d3148; color: #e2e8f0; }
     .plan-btn.delete   { background: transparent; color: #f87171; border: 1px solid #450a0a; margin-left: 6px; }
     .plan-btn.delete:hover   { background: #1a0f0f; border-color: #f87171; }
+    .plan-btn.verify   { background: #052e16; color: #4ade80; border: 1px solid #14532d; margin-left: 6px; }
+    .plan-btn.verify:hover   { background: #14532d; color: #fff; }
     .plan-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* ── Search ── */
@@ -312,6 +314,10 @@
             ? `<button class="plan-btn demote"  onclick="setPlan('${u.id}','free',this)">Demote</button>`
             : `<button class="plan-btn promote" onclick="setPlan('${u.id}','hunter',this)">Promote</button>`
           }
+          ${!u.email_verified
+            ? `<button class="plan-btn verify" onclick="verifyEmail('${u.id}',this)">Verify</button>`
+            : ''
+          }
           ${u.email !== 'marciosferreira@yahoo.com.br'
             ? `<button class="plan-btn delete" onclick="deleteUser('${u.id}','${esc(u.name)}',this)">Delete</button>`
             : ''
@@ -338,6 +344,24 @@
       applyFilters();
     } catch {
       alert('Network error.'); btn.disabled = false;
+    }
+  }
+
+  async function verifyEmail(userId, btn) {
+    btn.disabled = true;
+    btn.textContent = '…';
+    try {
+      const res = await fetch(`/admin/users/${userId}/verify`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${_token}` },
+      });
+      if (!res.ok) { alert('Failed to verify email.'); btn.disabled = false; btn.textContent = 'Verify'; return; }
+      const u = _users.find(u => u.id === userId);
+      if (u) u.email_verified = true;
+      renderSummary();
+      applyFilters();
+    } catch {
+      alert('Network error.'); btn.disabled = false; btn.textContent = 'Verify';
     }
   }
 

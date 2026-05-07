@@ -321,6 +321,18 @@ def verify_email_token(conn: Any, token: str) -> Optional[dict]:
     return {"id": user_id, "email": email}
 
 
+def force_verify_email(conn: Any, user_id: str) -> bool:
+    cur = conn.cursor()
+    cur.execute(
+        "UPDATE users SET email_verified = 1, verification_token = NULL, verification_expires = NULL WHERE id = %s",
+        (user_id,),
+    )
+    updated = cur.rowcount
+    cur.close()
+    conn.commit()
+    return updated > 0
+
+
 # ── Password reset ────────────────────────────────────────────────────────────
 
 def create_reset_token(conn: Any, email: str) -> Optional[tuple[str, str, str]]:

@@ -36,7 +36,7 @@ from auth import (
     create_access_token, get_current_user, decode_token_raw,
     create_contact_message, list_contact_messages, save_contact_reply, get_contact_message, delete_contact_message,
     set_stripe_info, clear_stripe_subscription, get_user_by_stripe_customer, get_user_by_email,
-    get_stripe_info, set_stripe_cancel_at,
+    get_stripe_info, set_stripe_cancel_at, force_verify_email,
 )
 from email_service import send_verification_email, send_reset_email, send_contact_notification, send_contact_reply
 from prompt_generator import generate_interview_context, extract_candidate_name
@@ -685,6 +685,17 @@ async def admin_set_plan(user_id: str, body: dict, current_user: dict = Depends(
         raise HTTPException(status_code=422, detail="Invalid plan")
     loop = asyncio.get_running_loop()
     await loop.run_in_executor(None, lambda: upgrade_plan(_conn, user_id, plan))
+    return {"ok": True}
+
+
+@app.post("/admin/users/{user_id}/verify")
+async def admin_verify_email(user_id: str, current_user: dict = Depends(get_current_user)):
+    if current_user.get("email") != ADMIN_EMAIL:
+        raise HTTPException(status_code=403, detail="Admin only")
+    loop = asyncio.get_running_loop()
+    ok = await loop.run_in_executor(None, lambda: force_verify_email(_conn, user_id))
+    if not ok:
+        raise HTTPException(status_code=404, detail="User not found")
     return {"ok": True}
 
 
