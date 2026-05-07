@@ -280,7 +280,6 @@
     </div>
   </a>
   <span id="plan-pill" class="plan-pill"></span>
-  <a id="back-btn" class="hdr-btn back" href="/interview.html" data-i18n="history.nav.current">← Current interview</a>
   <a class="hdr-btn" href="/tips.html" data-i18n="nav.tips">💡 Tips</a>
   <a class="hdr-btn settings" href="/profile.html" data-i18n="nav.settings">⚙️ Settings</a>
   <button id="new-btn" class="hdr-btn new" onclick="newInterview()" data-i18n="history.nav.newInterview">＋ New interview</button>
@@ -293,11 +292,11 @@
       <span>Menu</span>
       <button class="drawer-close" onclick="closeMobileMenu()">✕</button>
     </div>
-    <a class="drawer-item" href="/interview.html"><span class="di-icon">←</span> <span data-i18n="history.nav.currentLabel">Current interview</span></a>
+    <a class="drawer-item" href="/"><span class="di-icon">🏠</span> <span data-i18n="nav.homeLabel">Home</span></a>
     <a class="drawer-item" href="/tips.html"><span class="di-icon">💡</span> <span data-i18n="nav.tipsLabel">Tips</span></a>
     <a class="drawer-item" href="/profile.html"><span class="di-icon">⚙️</span> <span data-i18n="nav.settingsLabel">Settings</span></a>
     <div class="drawer-divider"></div>
-    <button class="drawer-item" onclick="closeMobileMenu(); newInterview()"><span class="di-icon">＋</span> <span data-i18n="history.nav.newInterview">New interview</span></button>
+    <button class="drawer-item" onclick="closeMobileMenu(); newInterview()"><span data-i18n="history.nav.newInterview">New interview</span></button>
     <div class="drawer-divider"></div>
     <button class="drawer-item" onclick="closeMobileMenu(); window.openContactWidget?.()"><span class="di-icon">✉️</span> Contact us</button>
   </nav>
@@ -454,10 +453,8 @@
   async function render() {
     const listEl  = document.getElementById('session-list');
     const subEl   = document.getElementById('page-sub');
-    const backBtn = document.getElementById('back-btn');
 
     const active = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
-    backBtn.style.display = active?.threadId ? '' : 'none';
 
     try {
       const res = await fetch('/sessions', { headers: { 'Authorization': `Bearer ${_authToken}` } });

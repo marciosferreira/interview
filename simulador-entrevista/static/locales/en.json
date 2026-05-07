@@ -3,6 +3,8 @@
     "tagline": "AI-powered mock interview preparation"
   },
   "nav": {
+    "home": "🏠 Home",
+    "homeLabel": "Home",
     "tips": "💡 Tips",
     "tipsLabel": "Tips",
     "signin": "Sign in",

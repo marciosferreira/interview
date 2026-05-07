@@ -3,6 +3,8 @@
     "tagline": "Preparação para entrevistas com IA"
   },
   "nav": {
+    "home": "🏠 Início",
+    "homeLabel": "Início",
     "tips": "💡 Dicas",
     "tipsLabel": "Dicas",
     "signin": "Entrar",
