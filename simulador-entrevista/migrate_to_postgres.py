@@ -2,7 +2,9 @@ import psycopg2, sqlite3, os
 from dotenv import load_dotenv
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgres://acing_root:cpfl2002@129.121.47.144:5433/acing?sslmode=disable")
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("Set DATABASE_URL environment variable before running this script")
 
 pg = psycopg2.connect(DATABASE_URL)
 pg.autocommit = True
