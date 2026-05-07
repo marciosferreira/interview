@@ -336,7 +336,7 @@
       }
     } catch {}
   }
-  loadUser();
+  document.addEventListener('i18n:ready', loadUser, { once: true });
 
   document.getElementById('resend-btn').addEventListener('click', async () => {
     const btn = document.getElementById('resend-btn');
@@ -517,7 +517,7 @@
         </table>`;
     } catch {}
   }
-  loadInvoices();
+  document.addEventListener('i18n:ready', loadInvoices, { once: true });
 
   document.getElementById('logout-btn').addEventListener('click', () => {
     localStorage.removeItem('auth_token');
