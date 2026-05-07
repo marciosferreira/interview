@@ -90,7 +90,9 @@ def setup_user_tables(conn: sqlite3.Connection) -> None:
         ("verification_expires", "INTEGER"),
         ("reset_token",          "TEXT"),
         ("reset_token_expires",  "INTEGER"),
-        ("plan",                 "TEXT NOT NULL DEFAULT 'free'"),
+        ("plan",                   "TEXT NOT NULL DEFAULT 'free'"),
+        ("stripe_customer_id",     "TEXT"),
+        ("stripe_subscription_id", "TEXT"),
     ]:
         try:
             conn.execute(f"ALTER TABLE users ADD COLUMN {col} {defn}")
@@ -497,3 +499,42 @@ def get_contact_message(conn: sqlite3.Connection, msg_id: str) -> Optional[dict]
         "replied_at": row[6],
         "reply_text": row[7],
     }
+
+
+# ── Stripe helpers ────────────────────────────────────────────────────────────
+
+def set_stripe_info(conn: sqlite3.Connection, user_id: str,
+                    customer_id: str, subscription_id: str) -> None:
+    conn.execute(
+        "UPDATE users SET stripe_customer_id = ?, stripe_subscription_id = ? WHERE id = ?",
+        (customer_id, subscription_id, user_id),
+    )
+    conn.commit()
+
+
+def clear_stripe_subscription(conn: sqlite3.Connection, user_id: str) -> None:
+    conn.execute(
+        "UPDATE users SET stripe_subscription_id = NULL WHERE id = ?",
+        (user_id,),
+    )
+    conn.commit()
+
+
+def get_user_by_stripe_customer(conn: sqlite3.Connection, customer_id: str) -> Optional[dict]:
+    row = conn.execute(
+        "SELECT id, email, name, plan FROM users WHERE stripe_customer_id = ?",
+        (customer_id,),
+    ).fetchone()
+    if not row:
+        return None
+    return {"id": row[0], "email": row[1], "name": row[2], "plan": row[3]}
+
+
+def get_stripe_info(conn: sqlite3.Connection, user_id: str) -> dict:
+    row = conn.execute(
+        "SELECT stripe_customer_id, stripe_subscription_id FROM users WHERE id = ?",
+        (user_id,),
+    ).fetchone()
+    if not row:
+        return {}
+    return {"stripe_customer_id": row[0], "stripe_subscription_id": row[1]}

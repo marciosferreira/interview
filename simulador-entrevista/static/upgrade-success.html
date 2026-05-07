@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to Hunter — Interview Coach</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1117; color: #e2e8f0;
+      min-height: 100dvh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .card {
+      background: #1a1d27; border: 1px solid #166534;
+      border-radius: 24px; padding: 48px 40px;
+      max-width: 460px; width: 100%; text-align: center;
+    }
+    .icon { font-size: 56px; margin-bottom: 20px; }
+    h1 { font-size: 26px; font-weight: 800; color: #4ade80; margin-bottom: 10px; }
+    p  { font-size: 14px; color: #86efac; line-height: 1.6; margin-bottom: 28px; }
+    .btn {
+      display: inline-block; padding: 14px 32px;
+      background: linear-gradient(135deg, #6366f1, #7c3aed);
+      color: #fff; border-radius: 12px; text-decoration: none;
+      font-size: 15px; font-weight: 700;
+      box-shadow: 0 4px 20px rgba(99,102,241,0.35);
+    }
+    .note { font-size: 12px; color: #475569; margin-top: 20px; }
+    .spinner {
+      display: inline-block; width: 18px; height: 18px;
+      border: 2px solid rgba(74,222,128,0.3);
+      border-top-color: #4ade80; border-radius: 50%;
+      animation: spin 0.7s linear infinite; vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="icon">🎯</div>
+  <h1>You're a Hunter now!</h1>
+  <p>Payment confirmed. Your plan has been upgraded to <strong>Hunter</strong> — 15 interview sessions per week and full AI scorecard access are now unlocked.</p>
+  <a class="btn" href="/onboarding.html">Start an interview →</a>
+  <p class="note" id="status-note"><span class="spinner"></span> Syncing your account…</p>
+</div>
+
+<script>
+  (async () => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      document.getElementById('status-note').textContent = '';
+      return;
+    }
+    // Poll until plan becomes hunter (webhook may take a few seconds)
+    for (let i = 0; i < 10; i++) {
+      await new Promise(r => setTimeout(r, 1500));
+      try {
+        const res  = await fetch('/auth/usage', { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if (data.plan === 'hunter') {
+          try {
+            const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
+            if (u) { u.plan = 'hunter'; localStorage.setItem('auth_user', JSON.stringify(u)); }
+          } catch {}
+          document.getElementById('status-note').textContent = '✓ Account synced';
+          return;
+        }
+      } catch {}
+    }
+    document.getElementById('status-note').textContent = 'Plan will activate shortly — refresh if needed.';
+  })();
+</script>
+</body>
+</html>

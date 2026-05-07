@@ -250,8 +250,8 @@
       <div class="plan-badge hunter">🎯 Hunter</div>
       <div class="plan-name">Hunter</div>
       <div class="plan-tagline">For serious job seekers</div>
-      <div class="plan-price">$0 <span>/ month</span></div>
-      <div class="plan-price-note" id="hunter-price-note" style="color:#4ade80;font-weight:600">✦ Free during beta</div>
+      <div class="plan-price">$9<span style="font-size:22px;font-weight:700">.99</span> <span>/ month</span></div>
+      <div class="plan-price-note" id="hunter-price-note">Cancel anytime</div>
       <ul class="plan-features">
         <li><span class="check">✓</span> <strong style="color:#e2e8f0">15 interviews per week</strong></li>
         <li><span class="check">✓</span> Full 7-phase interview flow</li>
@@ -260,8 +260,8 @@
         <li><span class="check">✓</span> Interview history</li>
         <li><span class="check">✓</span> Priority processing</li>
       </ul>
-      <button class="plan-btn upgrade" id="hunter-btn">Upgrade to Hunter — Free</button>
-      <div class="trial-note">No credit card required</div>
+      <button class="plan-btn upgrade" id="hunter-btn">Upgrade to Hunter →</button>
+      <div class="trial-note" id="hunter-note">Billed monthly · cancel anytime</div>
     </div>
   </div>
 
@@ -297,10 +297,18 @@
 
       if (plan === 'hunter') {
         document.getElementById('free-btn').className   = 'plan-btn downgrade';
-        document.getElementById('free-btn').textContent = 'Downgrade';
-        document.getElementById('hunter-btn').className   = 'plan-btn current';
-        document.getElementById('hunter-btn').textContent = '✓ Current plan';
+        document.getElementById('free-btn').textContent = 'Downgrade to Explorer';
         document.getElementById('hunter-price-note').textContent = 'Active plan';
+        if (data.has_stripe_subscription) {
+          document.getElementById('hunter-btn').className   = 'plan-btn upgrade';
+          document.getElementById('hunter-btn').textContent = '⚙ Manage subscription';
+          document.getElementById('hunter-btn').dataset.portal = '1';
+          document.getElementById('hunter-note').textContent = 'Cancel or change plan via Stripe portal';
+        } else {
+          document.getElementById('hunter-btn').className   = 'plan-btn current';
+          document.getElementById('hunter-btn').textContent = '✓ Current plan';
+          document.getElementById('hunter-note').textContent = '';
+        }
       }
 
       const wrap  = document.getElementById('usage-wrap');
@@ -326,24 +334,36 @@
     const btn = document.getElementById('hunter-btn');
     if (btn.classList.contains('current') || btn.dataset.linked) return;
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span>Upgrading…';
+
+    // Stripe customer portal (for existing subscribers)
+    if (btn.dataset.portal) {
+      btn.innerHTML = '<span class="spinner"></span>Opening portal…';
+      try {
+        const res  = await fetch('/stripe/portal', {
+          method: 'POST', headers: { 'Authorization': `Bearer ${_token}` },
+        });
+        const data = await res.json();
+        if (!res.ok) { alert(data.detail || 'Could not open portal.'); return; }
+        location.href = data.url;
+      } catch { alert('Network error — please try again.'); }
+      finally { btn.disabled = false; btn.textContent = '⚙ Manage subscription'; }
+      return;
+    }
+
+    // Stripe checkout (new subscription)
+    btn.innerHTML = '<span class="spinner"></span>Redirecting to checkout…';
     try {
-      const res  = await fetch('/auth/upgrade', {
+      const res  = await fetch('/stripe/create-checkout-session', {
         method: 'POST', headers: { 'Authorization': `Bearer ${_token}` },
       });
       const data = await res.json();
-      if (!res.ok) { alert(data.detail || 'Upgrade failed.'); return; }
-      try {
-        const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
-        if (u) { u.plan = 'hunter'; localStorage.setItem('auth_user', JSON.stringify(u)); }
-      } catch {}
-      document.querySelector('.plans').style.display = 'none';
-      document.getElementById('usage-wrap').style.display = 'none';
-      document.getElementById('success-msg').style.display = 'block';
+      if (!res.ok) { alert(data.detail || 'Checkout failed.'); return; }
+      location.href = data.url;
     } catch {
       alert('Network error — please try again.');
     } finally {
       btn.disabled = false;
+      btn.textContent = 'Upgrade to Hunter →';
     }
   });
 

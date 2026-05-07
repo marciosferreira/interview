@@ -8,7 +8,9 @@ from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv()
 
-from fastapi import FastAPI, HTTPException, UploadFile, WebSocket, WebSocketDisconnect, Depends
+import stripe as _stripe
+
+from fastapi import FastAPI, HTTPException, Request, UploadFile, WebSocket, WebSocketDisconnect, Depends
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
@@ -29,11 +31,17 @@ from auth import (
     create_job_session, update_job_session_context, get_job_session, list_job_sessions,
     create_access_token, get_current_user, decode_token_raw,
     create_contact_message, list_contact_messages, save_contact_reply, get_contact_message, delete_contact_message,
+    set_stripe_info, clear_stripe_subscription, get_user_by_stripe_customer, get_stripe_info,
 )
 from email_service import send_verification_email, send_reset_email, send_contact_notification, send_contact_reply
 from prompt_generator import generate_interview_context, extract_candidate_name
 
 openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+_stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
+_STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+_STRIPE_PRICE_ID       = os.getenv("STRIPE_PRICE_ID", "")
+_APP_BASE_URL          = os.getenv("APP_BASE_URL", "http://localhost:8001").rstrip("/")
 
 TTS_CACHE_DIR = Path(__file__).parent / "static" / "tts_cache"
 TTS_CACHE_DIR.mkdir(exist_ok=True)
@@ -207,7 +215,11 @@ async def get_usage(current_user: dict = Depends(get_current_user)):
         None, lambda: count_interviews_this_week(_conn, current_user["id"])
     )
     limit = PLAN_WEEKLY_LIMITS.get(plan, 3)
-    return {"plan": plan, "used": used, "limit": limit, "remaining": max(0, limit - used)}
+    stripe_info = await loop.run_in_executor(None, lambda: get_stripe_info(_conn, current_user["id"]))
+    return {
+        "plan": plan, "used": used, "limit": limit, "remaining": max(0, limit - used),
+        "has_stripe_subscription": bool(stripe_info.get("stripe_subscription_id")),
+    }
 
 
 @app.post("/auth/downgrade")
@@ -216,6 +228,87 @@ async def downgrade_to_free(current_user: dict = Depends(get_current_user)):
     await loop.run_in_executor(None, lambda: upgrade_plan(_conn, current_user["id"], "free"))
     user = await loop.run_in_executor(None, lambda: get_user_by_id(_conn, current_user["id"]))
     return {"ok": True, "plan": "free", "user": user}
+
+
+# ── Stripe endpoints ──────────────────────────────────────────────────────────
+
+@app.post("/stripe/create-checkout-session")
+async def stripe_create_checkout(current_user: dict = Depends(get_current_user)):
+    if not _STRIPE_PRICE_ID:
+        raise HTTPException(status_code=503, detail="Stripe not configured")
+    if current_user.get("plan") == "hunter":
+        raise HTTPException(status_code=400, detail="Already on Hunter plan")
+    try:
+        session = _stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            mode="subscription",
+            line_items=[{"price": _STRIPE_PRICE_ID, "quantity": 1}],
+            success_url=f"{_APP_BASE_URL}/upgrade-success.html?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{_APP_BASE_URL}/upgrade.html",
+            client_reference_id=current_user["id"],
+            customer_email=current_user.get("email"),
+            metadata={"user_id": current_user["id"]},
+        )
+        return {"url": session.url}
+    except _stripe.error.StripeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc))
+
+
+@app.post("/stripe/webhook")
+async def stripe_webhook(request: Request):
+    payload    = await request.body()
+    sig_header = request.headers.get("stripe-signature", "")
+    try:
+        event = _stripe.Webhook.construct_event(payload, sig_header, _STRIPE_WEBHOOK_SECRET)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid payload")
+    except _stripe.error.SignatureVerificationError:
+        raise HTTPException(status_code=400, detail="Invalid signature")
+
+    etype = event["type"]
+    data  = event["data"]["object"]
+
+    if etype == "checkout.session.completed":
+        user_id = data.get("client_reference_id") or (data.get("metadata") or {}).get("user_id")
+        customer_id      = data.get("customer")
+        subscription_id  = data.get("subscription")
+        if user_id and customer_id and subscription_id:
+            upgrade_plan(_conn, user_id, "hunter")
+            set_stripe_info(_conn, user_id, customer_id, subscription_id)
+            print(f"[Stripe] Upgraded user {user_id} → hunter (sub {subscription_id})")
+
+    elif etype in ("customer.subscription.deleted",):
+        customer_id = data.get("customer")
+        user = get_user_by_stripe_customer(_conn, customer_id)
+        if user:
+            upgrade_plan(_conn, user["id"], "free")
+            clear_stripe_subscription(_conn, user["id"])
+            print(f"[Stripe] Downgraded user {user['id']} → free (sub canceled)")
+
+    elif etype == "invoice.payment_failed":
+        customer_id = data.get("customer")
+        print(f"[Stripe] Payment failed for customer {customer_id}")
+
+    return {"ok": True}
+
+
+@app.post("/stripe/portal")
+async def stripe_portal(current_user: dict = Depends(get_current_user)):
+    if not _STRIPE_PRICE_ID:
+        raise HTTPException(status_code=503, detail="Stripe not configured")
+    loop = asyncio.get_running_loop()
+    info = await loop.run_in_executor(None, lambda: get_stripe_info(_conn, current_user["id"]))
+    customer_id = info.get("stripe_customer_id")
+    if not customer_id:
+        raise HTTPException(status_code=400, detail="No Stripe subscription found")
+    try:
+        portal = _stripe.billing_portal.Session.create(
+            customer=customer_id,
+            return_url=f"{_APP_BASE_URL}/upgrade.html",
+        )
+        return {"url": portal.url}
+    except _stripe.error.StripeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc))
 
 
 # ── Job session / prepare endpoints ──────────────────────────────────────────
