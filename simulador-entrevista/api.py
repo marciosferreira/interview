@@ -155,6 +155,8 @@ async def delete_my_account(current_user: dict = Depends(get_current_user)):
             status_code=403,
             detail="You have an active Hunter subscription. Please cancel it first before deleting your account.",
         )
+    if user.get("email") == ADMIN_EMAIL:
+        raise HTTPException(status_code=403, detail="The admin account cannot be deleted.")
     await loop.run_in_executor(None, lambda: delete_account(_conn, current_user["id"]))
     return {"ok": True}
 

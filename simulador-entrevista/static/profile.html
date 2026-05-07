@@ -391,12 +391,19 @@
           document.getElementById('plan-downgrade-btn').style.display = '';
         }
 
-        // Delete account button — blocked if active Hunter with no cancel scheduled
-        const canDelete = !isHunter || !!usage.stripe_cancel_at;
+        // Delete account button — blocked if active Hunter with no cancel scheduled, or if admin
+        const isAdmin = user.email === 'marciosferreira@yahoo.com.br';
+        const canDelete = !isAdmin && (!isHunter || !!usage.stripe_cancel_at);
         const deleteBtn = document.getElementById('delete-account-btn');
         const deleteWarn = document.getElementById('delete-account-warning');
-        deleteBtn.disabled = !canDelete;
-        deleteWarn.style.display = canDelete ? 'none' : 'block';
+        if (isAdmin) {
+          deleteBtn.disabled = true;
+          deleteBtn.style.display = 'none';
+          deleteWarn.style.display = 'none';
+        } else {
+          deleteBtn.disabled = !canDelete;
+          deleteWarn.style.display = canDelete ? 'none' : 'block';
+        }
       }
     } catch {}
   }
