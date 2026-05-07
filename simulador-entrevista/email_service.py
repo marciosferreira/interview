@@ -46,7 +46,7 @@ def _send(to: str, subject: str, html: str, text: str) -> None:
 
 _VERIFY_COPY = {
     "en": {
-        "subject": "Verify your Interview Coach account",
+        "subject": "Verify your Acing Interview account",
         "heading": "Verify your email",
         "body":    "Click the button below to verify your email address.",
         "button":  "Verify my email",
@@ -54,7 +54,7 @@ _VERIFY_COPY = {
         "plain":   "Please verify your email by visiting:\n{link}\n\nThis link expires in 24 hours.",
     },
     "pt": {
-        "subject": "Verifique sua conta no Interview Coach",
+        "subject": "Verifique sua conta no Acing Interview",
         "heading": "Verifique seu e-mail",
         "body":    "Clique no botão abaixo para verificar seu endereço de e-mail.",
         "button":  "Verificar meu e-mail",
@@ -65,7 +65,7 @@ _VERIFY_COPY = {
 
 _RESET_COPY = {
     "en": {
-        "subject": "Reset your Interview Coach password",
+        "subject": "Reset your Acing Interview password",
         "heading": "Reset your password",
         "body":    "We received a password reset request for your account.",
         "button":  "Reset my password",
@@ -73,7 +73,7 @@ _RESET_COPY = {
         "plain":   "Reset your password by visiting:\n{link}\n\nThis link expires in 15 minutes.",
     },
     "pt": {
-        "subject": "Redefina sua senha no Interview Coach",
+        "subject": "Redefina sua senha no Acing Interview",
         "heading": "Redefina sua senha",
         "body":    "Recebemos uma solicitação de redefinição de senha para sua conta.",
         "button":  "Redefinir minha senha",
@@ -86,7 +86,7 @@ _RESET_COPY = {
 def _build_html(link: str, copy: dict) -> str:
     return f"""
 <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px">
-  <h2 style="color:#6366f1">Interview Coach</h2>
+  <h2 style="color:#6366f1">Acing Interview</h2>
   <p>{copy['body']}</p>
   <a href="{link}" style="display:inline-block;margin:24px 0;padding:12px 28px;
      background:#6366f1;color:#fff;border-radius:10px;text-decoration:none;font-weight:600">
@@ -113,7 +113,7 @@ def send_contact_notification(name: str, from_email: str, subject: str, body: st
     text = f"New contact message from {name} <{from_email}>:\n\nSubject: {subject}\n\n{body}"
     html = f"""
 <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px">
-  <h2 style="color:#6366f1">New Contact Message — Interview Coach</h2>
+  <h2 style="color:#6366f1">New Contact Message — Acing Interview</h2>
   <p><strong>From:</strong> {name} &lt;{from_email}&gt;</p>
   <p><strong>Subject:</strong> {subject}</p>
   <hr style="border:none;border-top:1px solid #2d3148;margin:16px 0"/>
@@ -126,14 +126,14 @@ def send_contact_notification(name: str, from_email: str, subject: str, body: st
 
 def send_contact_reply(to_email: str, to_name: str, original_subject: str, reply_text: str) -> None:
     reply_subject = f"Re: {original_subject}"
-    text = f"Hello {to_name},\n\n{reply_text}\n\n---\nInterview Coach\n{_BASE}"
+    text = f"Hello {to_name},\n\n{reply_text}\n\n---\nAcing Interview\n{_BASE}"
     html = f"""
 <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px">
-  <h2 style="color:#6366f1">Interview Coach</h2>
+  <h2 style="color:#6366f1">Acing Interview</h2>
   <p>Hello {to_name},</p>
   <p style="white-space:pre-wrap">{reply_text}</p>
   <hr style="border:none;border-top:1px solid #2d3148;margin:24px 0"/>
-  <p style="color:#64748b;font-size:13px">Interview Coach &mdash; <a href="{_BASE}" style="color:#6366f1">{_BASE}</a></p>
+  <p style="color:#64748b;font-size:13px">Acing Interview &mdash; <a href="{_BASE}" style="color:#6366f1">{_BASE}</a></p>
 </div>"""
     if _MOCK:
         print(f"\n{'='*60}")

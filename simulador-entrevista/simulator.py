@@ -35,7 +35,7 @@ if _database_url:
     try:
         import psycopg2 as _psycopg2
         from langgraph.checkpoint.memory import MemorySaver as _MemorySaver
-        _conn = _psycopg2.connect(_database_url)
+        _conn = _psycopg2.connect(_database_url, connect_timeout=5)
         _conn.autocommit = True          # DDL sem transações pendentes
         # LangGraph não tem checkpointer nativo para psycopg2 síncrono;
         # usa MemorySaver para o grafo e psycopg2 para as tabelas de negócio.

@@ -50,6 +50,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     .contact-fab:hover { opacity: 0.9; transform: translateY(-1px); }
+    @media (max-width: 768px) { .contact-fab { display: none !important; } }
     .contact-overlay {
       display: none; position: fixed; inset: 0; z-index: 9100;
       background: rgba(0,0,0,0.65); align-items: center; justify-content: center;
@@ -143,8 +144,10 @@
     return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
+  const openModal  = () => overlay.classList.add('open');
   const closeModal = () => overlay.classList.remove('open');
-  fab.addEventListener('click', () => overlay.classList.add('open'));
+  window.openContactWidget = openModal;
+  fab.addEventListener('click', openModal);
   document.getElementById('cw-close').addEventListener('click', closeModal);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });

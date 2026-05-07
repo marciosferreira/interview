@@ -4,6 +4,7 @@
   },
   "nav": {
     "tips": "💡 Dicas",
+    "tipsLabel": "Dicas",
     "signin": "Entrar",
     "getStarted": "Começar grátis",
     "settings": "⚙️ Configurações",
@@ -59,7 +60,7 @@
     "admin": "Admin"
   },
   "profile": {
-    "pageTitle": "Configurações — Interview Coach",
+    "pageTitle": "Configurações — Acing Interview",
     "header": { "tagline": "Configurações da conta", "backBtn": "← Voltar para a entrevista" },
     "pageHeading": "Configurações do Perfil",
     "pageSub": "Gerencie seus dados e senha.",
@@ -141,7 +142,7 @@
     }
   },
   "history": {
-    "pageTitle": "Histórico de Entrevistas — Interview Coach",
+    "pageTitle": "Histórico de Entrevistas — Acing Interview",
     "header": { "tagline": "Histórico de entrevistas" },
     "nav": {
       "current": "← Entrevista atual",
@@ -187,7 +188,7 @@
     }
   },
   "onboarding": {
-    "pageTitle": "Preparar Entrevista — Interview Coach",
+    "pageTitle": "Preparar Entrevista — Acing Interview",
     "steps": {
       "jobDesc": "Descrição da Vaga",
       "resume": "Seu Currículo",
@@ -232,7 +233,7 @@
     }
   },
   "interview": {
-    "pageTitle": "Simulador de Entrevista — Interview Coach",
+    "pageTitle": "Simulador de Entrevista — Acing Interview",
     "phases": {
       "elevatorPitch": "Elevator Pitch",
       "CAR": "História CAR",
@@ -271,7 +272,7 @@
     }
   },
   "forgot": {
-    "pageTitle": "Esqueci a Senha — Interview Coach",
+    "pageTitle": "Esqueci a Senha — Acing Interview",
     "title": "Esqueceu a senha?",
     "subtitle": "Informe seu e-mail e enviaremos um link de redefinição",
     "email": "E-mail",
@@ -283,7 +284,7 @@
     "errorNetwork": "Erro de rede — tente novamente."
   },
   "reset": {
-    "pageTitle": "Redefinir Senha — Interview Coach",
+    "pageTitle": "Redefinir Senha — Acing Interview",
     "title": "Definir nova senha",
     "subtitle": "Digite e confirme sua nova senha",
     "newPassword": "Nova senha",
@@ -301,9 +302,9 @@
     "errorNetwork": "Erro de rede — tente novamente."
   },
   "login": {
-    "pageTitle": "Entrar — Interview Coach",
+    "pageTitle": "Entrar — Acing Interview",
     "title": "Bem-vindo de volta",
-    "subtitle": "Entre na sua conta do interview coach",
+    "subtitle": "Entre na sua conta do acing interview",
     "email": "E-mail",
     "emailPlaceholder": "voce@exemplo.com",
     "password": "Senha",
@@ -317,7 +318,7 @@
     "errorNetwork": "Erro de rede — tente novamente."
   },
   "register": {
-    "pageTitle": "Criar Conta — Interview Coach",
+    "pageTitle": "Criar Conta — Acing Interview",
     "title": "Crie sua conta",
     "subtitle": "Pratique entrevistas personalizadas para seu currículo e vaga",
     "name": "Nome completo",
@@ -340,7 +341,7 @@
     "errorNetwork": "Erro de rede — tente novamente."
   },
   "upgrade": {
-    "pageTitle": "Planos & Preços — Interview Coach",
+    "pageTitle": "Planos & Preços — Acing Interview",
     "heroLabel": "Escolha seu plano",
     "heroTitle": "Pratique mais.<br>Conquiste a vaga.",
     "heroSub": "Cada sessão de entrevista é totalmente personalizada para seu currículo e vaga. Faça upgrade para praticar mais rodadas por semana.",
@@ -389,7 +390,7 @@
     }
   },
   "tips": {
-    "pageTitle": "Dicas de Entrevista — Interview Coach",
+    "pageTitle": "Dicas de Entrevista — Acing Interview",
     "header": {
       "tagline": "Dicas &amp; Frameworks para Entrevistas"
     },

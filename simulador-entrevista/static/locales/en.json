@@ -4,6 +4,7 @@
   },
   "nav": {
     "tips": "💡 Tips",
+    "tipsLabel": "Tips",
     "signin": "Sign in",
     "getStarted": "Get started free",
     "settings": "⚙️ Settings",
@@ -59,7 +60,7 @@
     "admin": "Admin"
   },
   "profile": {
-    "pageTitle": "Profile Settings — Interview Coach",
+    "pageTitle": "Profile Settings — Acing Interview",
     "header": { "tagline": "Account settings", "backBtn": "← Back to interview" },
     "pageHeading": "Profile Settings",
     "pageSub": "Manage your account details and password.",
@@ -141,7 +142,7 @@
     }
   },
   "history": {
-    "pageTitle": "Interview History — Interview Coach",
+    "pageTitle": "Interview History — Acing Interview",
     "header": { "tagline": "Interview history" },
     "nav": {
       "current": "← Current interview",
@@ -187,7 +188,7 @@
     }
   },
   "onboarding": {
-    "pageTitle": "Prepare Your Interview — Interview Coach",
+    "pageTitle": "Prepare Your Interview — Acing Interview",
     "steps": {
       "jobDesc": "Job Description",
       "resume": "Your Resume",
@@ -232,7 +233,7 @@
     }
   },
   "interview": {
-    "pageTitle": "Mock Interview Simulator — Interview Coach",
+    "pageTitle": "Mock Interview Simulator — Acing Interview",
     "phases": {
       "elevatorPitch": "Elevator Pitch",
       "CAR": "CAR Story",
@@ -271,7 +272,7 @@
     }
   },
   "forgot": {
-    "pageTitle": "Forgot Password — Interview Coach",
+    "pageTitle": "Forgot Password — Acing Interview",
     "title": "Forgot password?",
     "subtitle": "Enter your email and we'll send a reset link",
     "email": "Email",
@@ -283,7 +284,7 @@
     "errorNetwork": "Network error — please try again."
   },
   "reset": {
-    "pageTitle": "Reset Password — Interview Coach",
+    "pageTitle": "Reset Password — Acing Interview",
     "title": "Set new password",
     "subtitle": "Enter and confirm your new password",
     "newPassword": "New password",
@@ -301,9 +302,9 @@
     "errorNetwork": "Network error — please try again."
   },
   "login": {
-    "pageTitle": "Sign In — Interview Coach",
+    "pageTitle": "Sign In — Acing Interview",
     "title": "Welcome back",
-    "subtitle": "Sign in to your interview coach account",
+    "subtitle": "Sign in to your acing interview account",
     "email": "Email",
     "emailPlaceholder": "you@example.com",
     "password": "Password",
@@ -317,7 +318,7 @@
     "errorNetwork": "Network error — please try again."
   },
   "register": {
-    "pageTitle": "Create Account — Interview Coach",
+    "pageTitle": "Create Account — Acing Interview",
     "title": "Create your account",
     "subtitle": "Practice interviews personalized to your resume and target role",
     "name": "Full name",
@@ -340,7 +341,7 @@
     "errorNetwork": "Network error — please try again."
   },
   "upgrade": {
-    "pageTitle": "Plans & Pricing — Interview Coach",
+    "pageTitle": "Plans & Pricing — Acing Interview",
     "heroLabel": "Choose your plan",
     "heroTitle": "Practice more.<br>Land the role.",
     "heroSub": "Every interview session is fully personalized to your resume and target role. Upgrade to practice more rounds per week.",
@@ -389,7 +390,7 @@
     }
   },
   "tips": {
-    "pageTitle": "Interview Tips — Interview Coach",
+    "pageTitle": "Interview Tips — Acing Interview",
     "header": {
       "tagline": "Interview Tips &amp; Frameworks"
     },

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title data-i18n="history.pageTitle">Interview History — Interview Coach</title>
+  <title data-i18n="history.pageTitle">Interview History — Acing Interview</title>
   <script src="/i18n.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -72,21 +72,54 @@
     .hdr-btn.new:hover      { border-color: #22c55e; color: #4ade80; }
     .hdr-btn.settings:hover { border-color: #6366f1; color: #a78bfa; }
 
+    /* ── Hamburger button ── */
+    #hamburger-btn {
+      display: none; margin-left: auto;
+      background: transparent; border: 1px solid #2d3148;
+      color: #94a3b8; border-radius: 8px;
+      width: 36px; height: 36px; font-size: 18px;
+      cursor: pointer; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ── Mobile drawer ── */
+    #mobile-drawer { display: none; position: fixed; inset: 0; z-index: 8000; }
+    #mobile-drawer.open { display: block; }
+    .drawer-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
+    .drawer-panel {
+      position: absolute; top: 0; right: 0; bottom: 0;
+      width: min(280px, 85vw);
+      background: #1a1d27; border-left: 1px solid #2d3148;
+      display: flex; flex-direction: column;
+      padding: 16px; gap: 6px; overflow-y: auto;
+      animation: slideIn 0.22s ease;
+    }
+    @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    .drawer-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-bottom: 12px; margin-bottom: 6px; border-bottom: 1px solid #2d3148;
+    }
+    .drawer-header span { font-size: 14px; font-weight: 600; color: #f1f5f9; }
+    .drawer-close { background: transparent; border: none; color: #64748b; font-size: 18px; cursor: pointer; padding: 4px; }
+    .drawer-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px; border-radius: 10px;
+      font-size: 14px; font-weight: 500; color: #94a3b8;
+      text-decoration: none; background: transparent;
+      border: none; cursor: pointer; width: 100%; text-align: left;
+      transition: background 0.15s, color 0.15s;
+    }
+    .drawer-item:hover { background: #2d3148; color: #e2e8f0; }
+    .drawer-item .di-icon { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
+    .drawer-divider { height: 1px; background: #2d3148; margin: 4px 0; }
+
     /* ── Mobile header ── */
-    @media (max-width: 600px) {
-      header { padding: 10px 12px; gap: 4px; }
+    @media (max-width: 768px) {
+      header { padding: 10px 12px; gap: 8px; }
       .home-link > div { display: none; }
       .plan-pill { display: none !important; }
-      .hdr-btn + .hdr-btn { margin-left: 3px; }
-      /* icon-only: clip after first character */
-      .hdr-btn {
-        overflow: hidden; white-space: nowrap;
-        padding: 5px 7px; max-width: 34px;
-      }
-      /* tips not critical on history page, hide entirely */
-      .hdr-btn[href="/tips.html"] { display: none; }
-      /* new interview: show "＋ New" */
-      .hdr-btn.new { max-width: 68px; }
+      .hdr-btn { display: none; }
+      #hamburger-btn { display: flex; }
     }
 
     /* ── Content ── */
@@ -242,7 +275,7 @@
   <a class="home-link" href="/">
     <div class="logo">🎯</div>
     <div>
-      <h1>Interview Coach</h1>
+      <h1>Acing Interview</h1>
       <p data-i18n="history.header.tagline">Interview history</p>
     </div>
   </a>
@@ -251,7 +284,24 @@
   <a class="hdr-btn" href="/tips.html" data-i18n="nav.tips">💡 Tips</a>
   <a class="hdr-btn settings" href="/profile.html" data-i18n="nav.settings">⚙️ Settings</a>
   <button id="new-btn" class="hdr-btn new" onclick="newInterview()" data-i18n="history.nav.newInterview">＋ New interview</button>
+  <button id="hamburger-btn" aria-label="Menu">☰</button>
 </header>
+<div id="mobile-drawer">
+  <div class="drawer-backdrop"></div>
+  <nav class="drawer-panel">
+    <div class="drawer-header">
+      <span>Menu</span>
+      <button class="drawer-close" onclick="closeMobileMenu()">✕</button>
+    </div>
+    <a class="drawer-item" href="/interview.html"><span class="di-icon">←</span> <span data-i18n="history.nav.current">Current interview</span></a>
+    <a class="drawer-item" href="/tips.html"><span class="di-icon">💡</span> <span data-i18n="nav.tipsLabel">Tips</span></a>
+    <a class="drawer-item" href="/profile.html"><span class="di-icon">⚙️</span> <span data-i18n="nav.settings">Settings</span></a>
+    <div class="drawer-divider"></div>
+    <button class="drawer-item" onclick="closeMobileMenu(); newInterview()"><span class="di-icon">＋</span> <span data-i18n="history.nav.newInterview">New interview</span></button>
+    <div class="drawer-divider"></div>
+    <button class="drawer-item" onclick="closeMobileMenu(); window.openContactWidget?.()"><span class="di-icon">✉️</span> Contact us</button>
+  </nav>
+</div>
 
 <main>
   <div class="page-title" data-i18n="history.pageHeading">Past interviews</div>
@@ -510,6 +560,7 @@
   } catch(_){}
 })();
 </script>
+<script src="/mobile-menu.js"></script>
 <script src="/contact-widget.js"></script>
 </body>
 </html>

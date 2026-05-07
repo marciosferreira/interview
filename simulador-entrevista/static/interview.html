@@ -75,13 +75,70 @@
     }
     #tips-btn-hdr:hover { border-color: #6366f1; color: #a78bfa; }
 
+    /* ── Hamburger button ── */
+    #hamburger-btn {
+      display: none; margin-left: auto;
+      background: transparent; border: 1px solid #2d3148;
+      color: #94a3b8; border-radius: 8px;
+      width: 36px; height: 36px; font-size: 18px;
+      cursor: pointer; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ── Mobile drawer ── */
+    #mobile-drawer {
+      display: none; position: fixed; inset: 0; z-index: 8000;
+    }
+    #mobile-drawer.open { display: block; }
+    .drawer-backdrop {
+      position: absolute; inset: 0; background: rgba(0,0,0,0.6);
+    }
+    .drawer-panel {
+      position: absolute; top: 0; right: 0; bottom: 0;
+      width: min(280px, 85vw);
+      background: #1a1d27; border-left: 1px solid #2d3148;
+      display: flex; flex-direction: column;
+      padding: 16px; gap: 6px;
+      overflow-y: auto;
+      animation: slideIn 0.22s ease;
+    }
+    @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    .drawer-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-bottom: 12px; margin-bottom: 6px;
+      border-bottom: 1px solid #2d3148;
+    }
+    .drawer-header span { font-size: 14px; font-weight: 600; color: #f1f5f9; }
+    .drawer-close {
+      background: transparent; border: none; color: #64748b;
+      font-size: 18px; cursor: pointer; padding: 4px;
+    }
+    .drawer-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px; border-radius: 10px;
+      font-size: 14px; font-weight: 500; color: #94a3b8;
+      text-decoration: none; background: transparent;
+      border: none; cursor: pointer; width: 100%; text-align: left;
+      transition: background 0.15s, color 0.15s;
+    }
+    .drawer-item:hover { background: #2d3148; color: #e2e8f0; }
+    .drawer-item .di-icon { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
+    .drawer-divider { height: 1px; background: #2d3148; margin: 4px 0; }
+
     /* ── Mobile header ── */
-    @media (max-width: 600px) {
-      header { padding: 10px 12px; gap: 6px; }
+    @media (max-width: 768px) {
+      header { padding: 10px 12px; gap: 8px; }
       .home-link > div { display: none; }
       .plan-pill { display: none !important; }
-      .btn-label { display: none; }
-      #tips-btn-hdr { display: none; }
+      #status-badge { margin-left: auto; }
+      #profile-btn-hdr, #tips-btn-hdr, #history-btn, #new-btn-wrap { display: none; }
+      #hamburger-btn { display: flex; }
+      /* Phase bar: dots only */
+      .ps-label { display: none; }
+      .phase-connector { min-width: 4px; max-width: 16px; }
+      #phase-bar { padding: 0 12px; }
+      /* Input area */
+      #input-area { padding: 10px 12px; }
     }
 
     /* ── New-interview popover ── */
@@ -512,7 +569,7 @@
   <a class="home-link" href="/">
     <div class="logo">🎯</div>
     <div>
-      <h1>Interview Coach</h1>
+      <h1>Acing Interview</h1>
       <p id="header-subtitle">Connecting…</p>
     </div>
   </a>
@@ -540,7 +597,27 @@
       </div>
     </div>
   </div>
+  <button id="hamburger-btn" aria-label="Menu">☰</button>
 </header>
+
+<!-- Mobile drawer -->
+<div id="mobile-drawer">
+  <div class="drawer-backdrop"></div>
+  <nav class="drawer-panel">
+    <div class="drawer-header">
+      <span>Menu</span>
+      <button class="drawer-close">✕</button>
+    </div>
+    <a class="drawer-item" href="/profile.html"><span class="di-icon">⚙️</span> <span data-i18n="nav.settings">Settings</span></a>
+    <a class="drawer-item" href="/tips.html"><span class="di-icon">💡</span> <span data-i18n="nav.tipsLabel">Tips</span></a>
+    <a class="drawer-item" href="/history.html"><span class="di-icon">📋</span> <span data-i18n="history.nav.current">History</span></a>
+    <div class="drawer-divider"></div>
+    <button class="drawer-item" id="drawer-new-same"><span class="di-icon">🔄</span> <span data-i18n="interview.popover.sameRole">New round — same role</span></button>
+    <button class="drawer-item" id="drawer-new-role"><span class="di-icon">📝</span> <span data-i18n="interview.popover.newRole">New role</span></button>
+    <div class="drawer-divider"></div>
+    <button class="drawer-item" onclick="closeMobileMenu(); window.openContactWidget?.()"><span class="di-icon">✉️</span> Contact us</button>
+  </nav>
+</div>
 
 <nav id="phase-bar">
   <div class="phase-steps">
@@ -1630,6 +1707,16 @@
     window.location.href = '/onboarding.html';
   });
 
+  // Drawer buttons — same logic as popover items
+  document.getElementById('drawer-new-same').addEventListener('click', () => {
+    window.closeMobileMenu?.();
+    document.getElementById('pop-same-role').click();
+  });
+  document.getElementById('drawer-new-role').addEventListener('click', () => {
+    window.closeMobileMenu?.();
+    document.getElementById('pop-new-role').click();
+  });
+
   // Close popover when clicking outside
   document.addEventListener('click', () => newPopover.classList.remove('open'));
 
@@ -1715,6 +1802,7 @@
   } catch(_){}
 })();
 </script>
+<script src="/mobile-menu.js"></script>
 <script src="/contact-widget.js"></script>
 </body>
 </html>
