@@ -309,18 +309,9 @@
     if (btn.style.pointerEvents === 'none' || btn.dataset.linked) return;
     btn.disabled = true;
 
-    // Stripe customer portal (for existing subscribers)
+    // Redirect to settings for existing subscribers
     if (btn.dataset.portal) {
-      btn.innerHTML = '<span class="spinner"></span> Opening portal...';
-      try {
-        const res  = await fetch('/stripe/portal', {
-          method: 'POST', headers: { 'Authorization': `Bearer ${_token}` },
-        });
-        const data = await res.json();
-        if (!res.ok) { alert(data.detail || 'Could not open portal.'); return; }
-        location.href = data.url;
-      } catch { alert('Network error — please try again.'); }
-      finally { btn.disabled = false; btn.textContent = 'Manage subscription'; }
+      location.href = '/profile.html';
       return;
     }
 
@@ -341,28 +332,10 @@
     }
   });
 
-  document.getElementById('free-btn').addEventListener('click', async () => {
+  document.getElementById('free-btn').addEventListener('click', () => {
     const btn = document.getElementById('free-btn');
     if (btn.textContent.includes('Current')) return;
-    if (!confirm('Downgrade to Explorer? You\'ll be limited to 3 interviews per week.')) return;
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Downgrading...';
-    try {
-      const res  = await fetch('/auth/downgrade', {
-        method: 'POST', headers: { 'Authorization': `Bearer ${_token}` },
-      });
-      const data = await res.json();
-      if (!res.ok) { alert(data.detail || 'Downgrade failed.'); return; }
-      try {
-        const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
-        if (u) { u.plan = 'free'; localStorage.setItem('auth_user', JSON.stringify(u)); }
-      } catch {}
-      location.reload();
-    } catch {
-      alert('Network error — please try again.');
-    } finally {
-      btn.disabled = false;
-    }
+    location.href = '/profile.html';
   });
 </script>
 <script src="/mobile-menu.js"></script>

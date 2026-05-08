@@ -65,6 +65,7 @@ _gemini_client = _genai.Client(api_key=os.getenv("GEMINI_API_KEY") or os.getenv(
 
 _TTS_PROVIDER = os.getenv("TTS_PROVIDER", "openai").lower()
 _GEMINI_TTS_VOICE = os.getenv("GEMINI_TTS_VOICE", "Zephyr")
+_GEMINI_TTS_SCORECARD_VOICE = os.getenv("GEMINI_TTS_SCORECARD_VOICE", _GEMINI_TTS_VOICE)
 
 _stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 _STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
@@ -909,7 +910,19 @@ space to think. Vary intonation to signal transitions between topics. Sound like
 {text}"""
 
 
-def _gemini_tts_sync(text: str) -> bytes:
+_GEMINI_LANG_CODES = {"en": "en-US", "pt": "pt-BR"}
+_GEMINI_VOICES = {
+    "Zephyr", "Puck", "Charon", "Kore", "Fenrir", "Leda", "Orus", "Aoede",
+    "Callirrhoe", "Autonoe", "Enceladus", "Iapetus", "Umbriel", "Algieba",
+    "Despina", "Erinome", "Algenib", "Rasalghul", "Laomedeia", "Achernar",
+    "Alnilam", "Schedar", "Gacrux", "Pulcherrima", "Achird", "Zubenelgenubi",
+    "Vindemiatrix", "Sadachbia", "Sadaltager", "Sulafat",
+}
+
+
+def _gemini_tts_sync(text: str, lang: str = "en", voice: str | None = None) -> bytes:
+    language_code = _GEMINI_LANG_CODES.get(lang, "en-US")
+    voice_name = voice if voice in _GEMINI_VOICES else _GEMINI_TTS_VOICE
     contents = [
         _genai_types.Content(
             role="user",
@@ -920,9 +933,10 @@ def _gemini_tts_sync(text: str) -> bytes:
         temperature=1,
         response_modalities=["audio"],
         speech_config=_genai_types.SpeechConfig(
+            language_code=language_code,
             voice_config=_genai_types.VoiceConfig(
                 prebuilt_voice_config=_genai_types.PrebuiltVoiceConfig(
-                    voice_name=_GEMINI_TTS_VOICE,
+                    voice_name=voice_name,
                 )
             )
         ),
@@ -947,10 +961,16 @@ def _gemini_tts_sync(text: str) -> bytes:
     return raw
 
 
+@app.get("/tts-config")
+async def tts_config():
+    return {"scorecard_voice": _GEMINI_TTS_SCORECARD_VOICE, "default_voice": _GEMINI_TTS_VOICE}
+
+
 @app.get("/tts")
 async def tts(text: str, voice: str = "nova", lang: str = "en", nocache: bool = False):
     if _TTS_PROVIDER == "gemini":
-        cache_key_str = f"gemini:{_GEMINI_TTS_VOICE}:{text}"
+        effective_gemini_voice = voice if voice in _GEMINI_VOICES else _GEMINI_TTS_VOICE
+        cache_key_str = f"gemini:{effective_gemini_voice}:{lang}:{text}"
         ext = "wav"
         media_type = "audio/wav"
     else:
@@ -977,7 +997,7 @@ async def tts(text: str, voice: str = "nova", lang: str = "en", nocache: bool = 
     for attempt in range(3):
         try:
             if _TTS_PROVIDER == "gemini":
-                audio_bytes = await asyncio.to_thread(_gemini_tts_sync, text)
+                audio_bytes = await asyncio.to_thread(_gemini_tts_sync, text, lang, voice)
             else:
                 kwargs = dict(model=tts_model, voice=voice, input=text)
                 if instructions:

@@ -1415,6 +1415,9 @@
     let streamVoice = 'nova'; // TTS voice for the current streaming session
     let streamLang = _lang;  // TTS lang for the current streaming session
 
+    let _scorecardVoice = 'Charon'; // fallback; overridden by /tts-config
+    fetch('/tts-config').then(r => r.json()).then(cfg => { _scorecardVoice = cfg.scorecard_voice || _scorecardVoice; }).catch(() => {});
+
     // ── Mobile audio unlock ──────────────────────────────────────────────
     // iOS and Android block autoplay until after a user gesture.
     // Desktop browsers allow autoplay freely, so we start unlocked there.
@@ -2155,7 +2158,7 @@
             lucide.createIcons();
             document.getElementById('sc-tts-btn').addEventListener('click', () => {
               stopTTS();
-              speak(data.scorecard, 'nova');
+              speak(data.scorecard, _scorecardVoice);
             });
           } else if (status === 403) {
             scorecardPanel.innerHTML = `<div class="sc-inner" style="border-color:#3d4160;text-align:center;padding:32px 24px">
