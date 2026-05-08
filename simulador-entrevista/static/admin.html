@@ -4,151 +4,120 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin — Acing Interview</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0f1117; color: #e2e8f0;
-      min-height: 100dvh; display: flex; flex-direction: column;
-    }
+    main { flex: 1; padding: 40px 24px; max-width: 1200px; margin: 0 auto; width: 100%; }
 
-    header {
-      padding: 14px 24px; background: #1a1d27;
-      border-bottom: 1px solid #2d3148;
-      display: flex; align-items: center; gap: 12px; flex-shrink: 0;
-      position: sticky; top: 0; z-index: 100;
-    }
-    .logo {
-      width: 36px; height: 36px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      border-radius: 10px; display: flex; align-items: center;
-      justify-content: center; font-size: 18px; flex-shrink: 0;
-    }
-    header h1 { font-size: 16px; font-weight: 600; color: #f1f5f9; }
-    header p  { font-size: 12px; color: #64748b; margin-top: 1px; }
-    .home-link {
-      display: flex; align-items: center; gap: 12px;
-      text-decoration: none; color: inherit;
-      border-radius: 10px; padding: 2px 6px; margin: -2px -6px;
-      transition: background 0.2s;
-    }
-    .home-link:hover { background: rgba(99,102,241,0.08); }
-    .hdr-spacer { margin-left: auto; }
-    .hdr-btn {
-      font-size: 11px; font-weight: 500; padding: 5px 12px;
-      border-radius: 20px; background: transparent; border: 1px solid #2d3148;
-      color: #64748b; text-decoration: none; transition: all 0.2s; flex-shrink: 0;
-    }
-    .hdr-btn:hover { border-color: #6366f1; color: #a78bfa; }
-
-    main { flex: 1; padding: 32px 24px; max-width: 1200px; margin: 0 auto; width: 100%; }
-
-    /* ── Summary cards ── */
+    /* Summary cards */
     .summary {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 14px; margin-bottom: 32px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px; margin-bottom: 32px;
     }
     .stat-card {
-      background: #1a1d27; border: 1px solid #2d3148;
-      border-radius: 14px; padding: 18px 20px;
+      background: var(--bg-surface); border: 1px solid var(--bg-surface-border);
+      border-radius: var(--radius-lg); padding: 20px 24px;
     }
-    .stat-card .label { font-size: 11px; color: #64748b; font-weight: 500; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em; }
-    .stat-card .value { font-size: 28px; font-weight: 800; color: #f1f5f9; }
-    .stat-card .value.hunter { color: #a78bfa; }
-    .stat-card .value.green  { color: #4ade80; }
+    .stat-card .label { font-size: 12px; color: var(--text-secondary); font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px; }
+    .stat-card .value { font-size: 32px; font-weight: 800; color: var(--text-primary); }
+    .stat-card .value.hunter { color: var(--brand-primary); }
+    .stat-card .value.green  { color: var(--status-success); }
 
-    /* ── Section title ── */
+    /* Section title */
     .section-title {
-      font-size: 13px; font-weight: 700; color: #94a3b8;
-      text-transform: uppercase; letter-spacing: 0.06em;
-      margin-bottom: 14px;
+      font-size: 14px; font-weight: 700; color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 16px;
     }
 
-    /* ── Table ── */
-    .table-wrap { overflow-x: auto; }
-    table {
-      width: 100%; border-collapse: collapse;
-      font-size: 13px;
-    }
+    /* Table */
+    .table-wrap { overflow-x: auto; background: var(--bg-surface); border: 1px solid var(--bg-surface-border); border-radius: var(--radius-lg); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
     thead th {
-      text-align: left; padding: 10px 14px;
-      font-size: 11px; font-weight: 700; color: #475569;
-      text-transform: uppercase; letter-spacing: 0.06em;
-      border-bottom: 1px solid #2d3148;
-      white-space: nowrap; cursor: pointer; user-select: none;
+      text-align: left; padding: 12px 16px;
+      font-size: 12px; font-weight: 700; color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--bg-surface-border); background: rgba(0,0,0,0.2);
+      white-space: nowrap; cursor: pointer; user-select: none; transition: color 0.2s;
     }
-    thead th:hover { color: #a78bfa; }
-    tbody tr { border-bottom: 1px solid #1e2235; transition: background 0.12s; }
-    tbody tr:hover { background: #1a1d27; }
-    tbody td { padding: 11px 14px; color: #94a3b8; vertical-align: middle; white-space: nowrap; }
-    tbody td.name { color: #e2e8f0; font-weight: 500; }
-    tbody td.email { color: #64748b; font-size: 12px; }
-
-    .badge {
-      display: inline-block; font-size: 10px; font-weight: 700;
-      letter-spacing: 0.06em; text-transform: uppercase;
-      padding: 2px 8px; border-radius: 20px;
-    }
-    .badge.hunter   { background: #312e81; color: #a5b4fc; }
-    .badge.explorer { background: #1e293b; color: #64748b; }
-    .badge.verified   { background: #052e16; color: #4ade80; }
-    .badge.unverified { background: #1a0f0f; color: #f87171; }
-    .badge.no-stripe  { background: #431407; color: #fb923c; margin-left: 4px; font-size: 9px; }
+    thead th:hover { color: var(--brand-primary); }
+    tbody tr { border-bottom: 1px solid var(--bg-surface-border); transition: background 0.15s; }
+    tbody tr:hover { background: rgba(99, 102, 241, 0.05); }
+    tbody td { padding: 14px 16px; color: var(--text-secondary); vertical-align: middle; white-space: nowrap; }
+    tbody td.name { color: var(--text-primary); font-weight: 500; }
+    tbody td.email { color: var(--text-tertiary); font-size: 13px; }
 
     .plan-btn {
-      font-size: 11px; font-weight: 600; padding: 4px 10px;
-      border-radius: 8px; cursor: pointer; border: none; transition: all 0.15s;
+      font-size: 12px; font-weight: 600; padding: 6px 12px;
+      border-radius: var(--radius-sm); cursor: pointer; border: 1px solid transparent; transition: all 0.2s;
+      display: inline-flex; align-items: center; gap: 4px;
     }
-    .plan-btn.promote  { background: #312e81; color: #a5b4fc; }
-    .plan-btn.promote:hover  { background: #4338ca; color: #fff; }
-    .plan-btn.demote   { background: #1e293b; color: #64748b; }
-    .plan-btn.demote:hover   { background: #2d3148; color: #e2e8f0; }
-    .plan-btn.delete   { background: transparent; color: #f87171; border: 1px solid #450a0a; margin-left: 6px; }
-    .plan-btn.delete:hover   { background: #1a0f0f; border-color: #f87171; }
-    .plan-btn.verify   { background: #052e16; color: #4ade80; border: 1px solid #14532d; margin-left: 6px; }
-    .plan-btn.verify:hover   { background: #14532d; color: #fff; }
+    .plan-btn.promote  { background: rgba(99, 102, 241, 0.1); color: var(--brand-primary); border-color: rgba(99, 102, 241, 0.2); }
+    .plan-btn.promote:hover  { background: var(--brand-primary); color: white; }
+    .plan-btn.demote   { background: var(--bg-surface-border); color: var(--text-secondary); }
+    .plan-btn.demote:hover   { background: rgba(255,255,255,0.1); color: var(--text-primary); }
+    .plan-btn.delete   { background: transparent; color: var(--status-error); border-color: var(--status-error-border); margin-left: 8px; }
+    .plan-btn.delete:hover   { background: var(--status-error-bg); }
+    .plan-btn.verify   { background: rgba(16, 185, 129, 0.1); color: var(--status-success); border-color: rgba(16, 185, 129, 0.2); margin-left: 8px; }
+    .plan-btn.verify:hover   { background: var(--status-success); color: white; }
     .plan-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* ── Search ── */
+    /* Search */
     .toolbar {
-      display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
+      display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
     }
     #search {
-      flex: 1; min-width: 200px; max-width: 320px;
-      background: #1a1d27; border: 1px solid #2d3148;
-      border-radius: 10px; padding: 8px 14px;
-      color: #e2e8f0; font-size: 13px; outline: none;
+      flex: 1; min-width: 240px; max-width: 360px;
+      background: var(--bg-surface); border: 1px solid var(--bg-surface-border);
+      border-radius: var(--radius-md); padding: 10px 16px;
+      color: var(--text-primary); font-size: 14px; outline: none; transition: border-color 0.2s;
     }
-    #search::placeholder { color: #475569; }
-    #search:focus { border-color: #6366f1; }
+    #search::placeholder { color: var(--text-tertiary); }
+    #search:focus { border-color: var(--brand-primary); }
+    
     .filter-btn {
-      font-size: 12px; padding: 6px 14px; border-radius: 10px;
-      background: transparent; border: 1px solid #2d3148;
-      color: #64748b; cursor: pointer; transition: all 0.15s;
+      font-size: 13px; font-weight: 500; padding: 8px 16px; border-radius: var(--radius-md);
+      background: transparent; border: 1px solid var(--bg-surface-border);
+      color: var(--text-secondary); cursor: pointer; transition: all 0.2s;
+      display: inline-flex; align-items: center; gap: 6px;
     }
-    .filter-btn.active { border-color: #6366f1; color: #a78bfa; background: #1e1b4b; }
-    #row-count { font-size: 12px; color: #475569; margin-left: auto; }
+    .filter-btn.active { border-color: var(--brand-primary); color: var(--brand-primary); background: rgba(99, 102, 241, 0.1); }
+    #row-count { font-size: 13px; color: var(--text-tertiary); margin-left: auto; font-weight: 500; }
 
-    #loading { text-align: center; padding: 60px; color: #475569; font-size: 14px; }
-    #error   { text-align: center; padding: 60px; color: #f87171; font-size: 14px; }
+    #loading { text-align: center; padding: 80px; color: var(--text-tertiary); font-size: 15px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    #error   { text-align: center; padding: 80px; color: var(--status-error); font-size: 15px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
   </style>
 </head>
 <body>
 
-<header>
-  <a class="home-link" href="/">
-    <div class="logo">🎯</div>
-    <div><h1>Acing Interview</h1><p>Admin panel</p></div>
+<header class="app-header">
+  <a class="header-brand-link" href="/">
+    <div class="header-logo"><i data-lucide="target" style="width: 22px; height: 22px;"></i></div>
+    <div class="header-brand-info">
+      <h1>Acing Interview</h1>
+      <p>Admin panel</p>
+    </div>
   </a>
-  <span class="hdr-spacer"></span>
-  <a class="hdr-btn" href="/admin-contact.html" id="contact-link">✉ Messages</a>
-  <a class="hdr-btn" href="/history.html">📋 History</a>
-  <a class="hdr-btn" href="/profile.html">⚙️ Settings</a>
+  <div class="header-actions">
+    <a class="nav-link" href="/admin-contact.html" id="contact-link"><i data-lucide="mail" style="width:16px;height:16px"></i> Messages</a>
+    <a class="nav-link" href="/history.html"><i data-lucide="clipboard-list" style="width:16px;height:16px"></i> History</a>
+    <a class="nav-link" href="/profile.html"><i data-lucide="settings" style="width:16px;height:16px"></i> Settings</a>
+  </div>
 </header>
 
 <main>
-  <div id="loading">Loading users…</div>
-  <div id="error" style="display:none"></div>
+  <div id="loading"><span class="spinner" style="width:24px;height:24px;border-width:3px;border-top-color:var(--brand-primary);"></span> Loading users...</div>
+  <div id="error" style="display:none"><i data-lucide="alert-triangle" style="width:32px;height:32px"></i> <span id="error-text"></span></div>
 
   <div id="content" style="display:none">
     <!-- Summary cards -->
@@ -157,12 +126,15 @@
     <div class="section-title">Users</div>
 
     <div class="toolbar">
-      <input id="search" type="text" placeholder="Search name or email…" oninput="applyFilters()" />
-      <button class="filter-btn active" data-filter="all"       onclick="setFilter('all',this)">All</button>
-      <button class="filter-btn"        data-filter="hunter"   onclick="setFilter('hunter',this)">🎯 Hunter</button>
-      <button class="filter-btn"        data-filter="explorer"  onclick="setFilter('explorer',this)">🗺️ Explorer</button>
-      <button class="filter-btn"        data-filter="verified"  onclick="setFilter('verified',this)">Verified</button>
-      <button class="filter-btn"        data-filter="no-stripe" onclick="setFilter('no-stripe',this)" title="Hunter without Stripe subscription">⚠️ No subscription</button>
+      <div style="position: relative; flex: 1; min-width: 240px; max-width: 360px;">
+        <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-tertiary);"></i>
+        <input id="search" style="padding-left: 36px;" type="text" placeholder="Search name or email..." oninput="applyFilters()" />
+      </div>
+      <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">All</button>
+      <button class="filter-btn" data-filter="hunter" onclick="setFilter('hunter',this)"><i data-lucide="target" style="width:14px;height:14px"></i> Hunter</button>
+      <button class="filter-btn" data-filter="explorer" onclick="setFilter('explorer',this)"><i data-lucide="map" style="width:14px;height:14px"></i> Explorer</button>
+      <button class="filter-btn" data-filter="verified" onclick="setFilter('verified',this)"><i data-lucide="check-circle" style="width:14px;height:14px"></i> Verified</button>
+      <button class="filter-btn" data-filter="no-stripe" onclick="setFilter('no-stripe',this)" title="Hunter without Stripe subscription"><i data-lucide="alert-circle" style="width:14px;height:14px"></i> No subscription</button>
       <span id="row-count"></span>
     </div>
 
@@ -170,15 +142,15 @@
       <table id="users-table">
         <thead>
           <tr>
-            <th onclick="sortBy('name')">Name ↕</th>
-            <th onclick="sortBy('email')">Email ↕</th>
-            <th onclick="sortBy('plan')">Plan ↕</th>
+            <th onclick="sortBy('name')">Name <i data-lucide="arrow-up-down" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-left:4px"></i></th>
+            <th onclick="sortBy('email')">Email <i data-lucide="arrow-up-down" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-left:4px"></i></th>
+            <th onclick="sortBy('plan')">Plan <i data-lucide="arrow-up-down" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-left:4px"></i></th>
             <th>Verified</th>
-            <th onclick="sortBy('created_at')">Joined ↕</th>
-            <th onclick="sortBy('total_sessions')">Sessions ↕</th>
-            <th onclick="sortBy('completed')">Done ↕</th>
-            <th onclick="sortBy('sessions_week')">This week ↕</th>
-            <th onclick="sortBy('last_active')">Last active ↕</th>
+            <th onclick="sortBy('created_at')">Joined <i data-lucide="arrow-up-down" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-left:4px"></i></th>
+            <th onclick="sortBy('total_sessions')">Sessions <i data-lucide="arrow-up-down" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-left:4px"></i></th>
+            <th onclick="sortBy('completed')">Done <i data-lucide="arrow-up-down" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-left:4px"></i></th>
+            <th onclick="sortBy('sessions_week')">This week <i data-lucide="arrow-up-down" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-left:4px"></i></th>
+            <th onclick="sortBy('last_active')">Last active <i data-lucide="arrow-up-down" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-left:4px"></i></th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -189,6 +161,8 @@
 </main>
 
 <script>
+  lucide.createIcons();
+
   const _token = localStorage.getItem('auth_token');
   if (!_token) location.replace('/login.html?next=/admin.html');
 
@@ -201,7 +175,8 @@
         const pending = (data.messages || []).filter(m => !m.replied_at).length;
         if (pending > 0) {
           const link = document.getElementById('contact-link');
-          link.innerHTML = `✉ Messages <span style="background:#6366f1;color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">${pending}</span>`;
+          link.innerHTML = `<i data-lucide="mail" style="width:16px;height:16px"></i> Messages <span class="badge badge-primary" style="margin-left:6px;padding:2px 6px;">${pending}</span>`;
+          lucide.createIcons();
         }
       }
     } catch (_) {}
@@ -246,8 +221,8 @@
   function showError(msg) {
     document.getElementById('loading').style.display = 'none';
     const el = document.getElementById('error');
-    el.textContent = msg;
-    el.style.display = '';
+    document.getElementById('error-text').textContent = msg;
+    el.style.display = 'flex';
   }
 
   function renderSummary() {
@@ -257,12 +232,13 @@
     const sessions = _users.reduce((s, u) => s + u.total_sessions, 0);
     const done     = _users.reduce((s, u) => s + u.completed, 0);
     document.getElementById('summary').innerHTML = `
-      <div class="stat-card"><div class="label">Total users</div><div class="value">${total}</div></div>
-      <div class="stat-card"><div class="label">Email verified</div><div class="value green">${verified}</div></div>
-      <div class="stat-card"><div class="label">Hunter plan</div><div class="value hunter">${hunters}</div></div>
-      <div class="stat-card"><div class="label">Total sessions</div><div class="value">${sessions}</div></div>
-      <div class="stat-card"><div class="label">Completed interviews</div><div class="value">${done}</div></div>
+      <div class="stat-card"><div class="label"><i data-lucide="users" style="width:14px;height:14px"></i> Total users</div><div class="value">${total}</div></div>
+      <div class="stat-card"><div class="label"><i data-lucide="check-circle" style="width:14px;height:14px"></i> Email verified</div><div class="value green">${verified}</div></div>
+      <div class="stat-card"><div class="label"><i data-lucide="target" style="width:14px;height:14px"></i> Hunter plan</div><div class="value hunter">${hunters}</div></div>
+      <div class="stat-card"><div class="label"><i data-lucide="message-square" style="width:14px;height:14px"></i> Total sessions</div><div class="value">${sessions}</div></div>
+      <div class="stat-card"><div class="label"><i data-lucide="award" style="width:14px;height:14px"></i> Completed</div><div class="value">${done}</div></div>
     `;
+    lucide.createIcons();
   }
 
   function setFilter(f, btn) {
@@ -306,10 +282,10 @@
         <td class="name">${esc(u.name)}</td>
         <td class="email">${esc(u.email)}</td>
         <td>
-          <span class="badge ${isHunter ? 'hunter' : 'explorer'}">${isHunter ? '🎯 Hunter' : '🗺️ Explorer'}</span>
-          ${isHunter && !u.stripe_subscription_id ? '<span class="badge no-stripe" title="No Stripe subscription">⚠️ manual</span>' : ''}
+          <span class="badge ${isHunter ? 'badge-primary' : ''}" style="${!isHunter ? 'border:1px solid var(--bg-surface-border);color:var(--text-secondary)' : ''}"><i data-lucide="${isHunter ? 'target' : 'map'}" style="width:10px;height:10px;margin-right:4px;display:inline-block;vertical-align:middle;"></i>${isHunter ? 'Hunter' : 'Explorer'}</span>
+          ${isHunter && !u.stripe_subscription_id ? '<span class="badge" style="background:var(--status-warning-bg);color:var(--status-warning);border:1px solid var(--status-warning-border);margin-left:4px;" title="No Stripe subscription">⚠️ manual</span>' : ''}
         </td>
-        <td><span class="badge ${u.email_verified ? 'verified' : 'unverified'}">${u.email_verified ? '✓ Yes' : '✕ No'}</span></td>
+        <td><span class="badge" style="background:${u.email_verified ? 'var(--status-success-bg)' : 'var(--status-error-bg)'};color:${u.email_verified ? 'var(--status-success)' : 'var(--status-error)'};border:1px solid ${u.email_verified ? 'var(--status-success-border)' : 'var(--status-error-border)'}"><i data-lucide="${u.email_verified ? 'check' : 'x'}" style="width:10px;height:10px;margin-right:2px;display:inline-block;vertical-align:middle;"></i>${u.email_verified ? 'Yes' : 'No'}</span></td>
         <td>${_fmt(u.created_at)}</td>
         <td>${u.total_sessions}</td>
         <td>${u.completed}</td>
@@ -317,75 +293,79 @@
         <td title="${u.last_active ? new Date(u.last_active).toLocaleString() : ''}">${_rel(u.last_active)}</td>
         <td>
           ${isHunter
-            ? `<button class="plan-btn demote"  onclick="setPlan('${u.id}','free',this)">Demote</button>`
-            : `<button class="plan-btn promote" onclick="setPlan('${u.id}','hunter',this)">Promote</button>`
+            ? `<button class="plan-btn demote" onclick="setPlan('${u.id}','free',this)"><i data-lucide="arrow-down" style="width:12px;height:12px"></i> Demote</button>`
+            : `<button class="plan-btn promote" onclick="setPlan('${u.id}','hunter',this)"><i data-lucide="arrow-up" style="width:12px;height:12px"></i> Promote</button>`
           }
           ${!u.email_verified
-            ? `<button class="plan-btn verify" onclick="verifyEmail('${u.id}',this)">Verify</button>`
+            ? `<button class="plan-btn verify" onclick="verifyEmail('${u.id}',this)"><i data-lucide="check-circle" style="width:12px;height:12px"></i> Verify</button>`
             : ''
           }
           ${u.email !== 'marciosferreira@yahoo.com.br'
-            ? `<button class="plan-btn delete" onclick="deleteUser('${u.id}','${esc(u.name)}',this)">Delete</button>`
+            ? `<button class="plan-btn delete" onclick="deleteUser('${u.id}','${esc(u.name)}',this)"><i data-lucide="trash-2" style="width:12px;height:12px"></i></button>`
             : ''
           }
         </td>
       `;
       tbody.appendChild(tr);
     }
+    lucide.createIcons();
   }
 
   async function setPlan(userId, plan, btn) {
+    const originalHtml = btn.innerHTML;
     btn.disabled = true;
-    btn.textContent = '…';
+    btn.innerHTML = '<span class="spinner" style="width:12px;height:12px;margin:0;"></span>';
     try {
       const res = await fetch(`/admin/users/${userId}/plan`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${_token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ plan }),
       });
-      if (!res.ok) { alert('Failed to update plan.'); btn.disabled = false; return; }
+      if (!res.ok) { alert('Failed to update plan.'); btn.disabled = false; btn.innerHTML = originalHtml; return; }
       const u = _users.find(u => u.id === userId);
       if (u) u.plan = plan;
       renderSummary();
       applyFilters();
     } catch {
-      alert('Network error.'); btn.disabled = false;
+      alert('Network error.'); btn.disabled = false; btn.innerHTML = originalHtml;
     }
   }
 
   async function verifyEmail(userId, btn) {
+    const originalHtml = btn.innerHTML;
     btn.disabled = true;
-    btn.textContent = '…';
+    btn.innerHTML = '<span class="spinner" style="width:12px;height:12px;margin:0;"></span>';
     try {
       const res = await fetch(`/admin/users/${userId}/verify`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${_token}` },
       });
-      if (!res.ok) { alert('Failed to verify email.'); btn.disabled = false; btn.textContent = 'Verify'; return; }
+      if (!res.ok) { alert('Failed to verify email.'); btn.disabled = false; btn.innerHTML = originalHtml; return; }
       const u = _users.find(u => u.id === userId);
       if (u) u.email_verified = true;
       renderSummary();
       applyFilters();
     } catch {
-      alert('Network error.'); btn.disabled = false; btn.textContent = 'Verify';
+      alert('Network error.'); btn.disabled = false; btn.innerHTML = originalHtml;
     }
   }
 
   async function deleteUser(userId, name, btn) {
     if (!confirm(`Delete "${name}" and all their interview data? This cannot be undone.`)) return;
+    const originalHtml = btn.innerHTML;
     btn.disabled = true;
-    btn.textContent = '…';
+    btn.innerHTML = '<span class="spinner" style="width:12px;height:12px;margin:0;"></span>';
     try {
       const res = await fetch(`/admin/users/${userId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${_token}` },
       });
-      if (!res.ok) { alert('Failed to delete user.'); btn.disabled = false; btn.textContent = 'Delete'; return; }
+      if (!res.ok) { alert('Failed to delete user.'); btn.disabled = false; btn.innerHTML = originalHtml; return; }
       _users = _users.filter(u => u.id !== userId);
       renderSummary();
       applyFilters();
     } catch {
-      alert('Network error.'); btn.disabled = false; btn.textContent = 'Delete';
+      alert('Network error.'); btn.disabled = false; btn.innerHTML = originalHtml;
     }
   }
 

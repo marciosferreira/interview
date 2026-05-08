@@ -4,133 +4,73 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title data-i18n="login.pageTitle">Sign In — Acing Interview</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  
   <script src="/i18n.js"></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0f1117;
-      color: #e2e8f0;
-      min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-    .card {
-      background: #1a1d27;
-      border: 1px solid #2d3148;
-      border-radius: 16px;
-      padding: 40px 36px;
-      width: 100%;
-      max-width: 420px;
-    }
-    .logo {
-      width: 48px; height: 48px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      border-radius: 14px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 24px;
-      margin: 0 auto 20px;
-    }
-    h1 {
-      font-size: 22px; font-weight: 700; color: #f1f5f9;
-      text-align: center; margin-bottom: 6px;
-    }
-    .subtitle {
-      font-size: 13px; color: #64748b;
-      text-align: center; margin-bottom: 28px;
-    }
-    label {
-      display: block; font-size: 13px; font-weight: 500;
-      color: #94a3b8; margin-bottom: 6px;
-    }
-    input {
-      width: 100%; padding: 10px 14px;
-      background: #0f1117; border: 1px solid #2d3148;
-      border-radius: 8px; color: #f1f5f9; font-size: 14px;
-      outline: none; transition: border-color 0.2s;
-      margin-bottom: 16px;
-    }
-    input:focus { border-color: #6366f1; }
-    input::placeholder { color: #475569; }
-    .btn {
-      width: 100%; padding: 11px;
-      background: linear-gradient(135deg, #6366f1, #7c3aed);
-      border: none; border-radius: 8px;
-      color: #fff; font-size: 15px; font-weight: 600;
-      cursor: pointer; transition: opacity 0.2s;
-      margin-top: 4px;
-    }
-    .btn:hover { opacity: 0.9; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .error {
-      background: #450a0a; border: 1px solid #7f1d1d;
-      color: #fca5a5; border-radius: 8px;
-      padding: 10px 14px; font-size: 13px;
-      margin-bottom: 16px; display: none;
-    }
-    .footer {
-      text-align: center; font-size: 13px; color: #64748b;
-      margin-top: 24px;
-    }
-    .footer a { color: #818cf8; text-decoration: none; }
-    .footer a:hover { text-decoration: underline; }
-    .spinner {
-      display: inline-block; width: 14px; height: 14px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: #fff; border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      vertical-align: middle; margin-right: 6px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .lang-switcher {
-      display: flex; align-items: center; justify-content: center; gap: 2px;
-      margin-top: 20px;
-    }
-    .lang-btn {
-      font-size: 11px; font-weight: 600; padding: 3px 10px;
-      border-radius: 6px; border: 1px solid #2d3148;
-      background: transparent; color: #475569;
-      cursor: pointer; transition: all 0.15s;
-    }
-    .lang-btn:hover { color: #94a3b8; }
-    .lang-btn.lang-active { background: #2d3148; color: #e2e8f0; border-color: #2d3148; }
-  </style>
 </head>
 <body>
-<div class="card">
-  <a href="/" style="text-decoration:none"><div class="logo">🎯</div></a>
-  <h1 data-i18n="login.title">Welcome back</h1>
-  <p class="subtitle" data-i18n="login.subtitle">Sign in to your acing interview account</p>
 
-  <div class="error" id="error-msg"></div>
+<div class="auth-wrapper">
+  <div class="glass-card auth-card">
+    <div class="auth-header">
+      <a href="/" style="text-decoration:none">
+        <div class="auth-header-logo">
+          <i data-lucide="target"></i>
+        </div>
+      </a>
+      <h1 data-i18n="login.title">Welcome back</h1>
+      <p data-i18n="login.subtitle">Sign in to your acing interview account</p>
+    </div>
 
-  <form id="login-form" autocomplete="on">
-    <label for="email" data-i18n="login.email">Email</label>
-    <input type="email" id="email" name="email" data-i18n-attr="placeholder:login.emailPlaceholder" placeholder="you@example.com" required autocomplete="email" />
+    <div class="alert alert-error" id="error-msg" style="display:none">
+      <i data-lucide="alert-circle" style="width:18px;height:18px;flex-shrink:0;margin-top:1px"></i>
+      <span id="error-text"></span>
+    </div>
 
-    <label for="password" data-i18n="login.password">Password</label>
-    <input type="password" id="password" name="password" data-i18n-attr="placeholder:login.passwordPlaceholder" placeholder="••••••••" required autocomplete="current-password" />
+    <form id="login-form" autocomplete="on">
+      <div class="form-group">
+        <label class="form-label" for="email" data-i18n="login.email">Email</label>
+        <input class="form-input" type="email" id="email" name="email" data-i18n-attr="placeholder:login.emailPlaceholder" placeholder="you@example.com" required autocomplete="email" />
+      </div>
 
-    <button class="btn" type="submit" id="submit-btn" data-i18n="login.submit">Sign in</button>
-  </form>
+      <div class="form-group">
+        <label class="form-label" for="password" data-i18n="login.password">Password</label>
+        <input class="form-input" type="password" id="password" name="password" data-i18n-attr="placeholder:login.passwordPlaceholder" placeholder="••••••••" required autocomplete="current-password" />
+      </div>
 
-  <div class="footer" style="margin-bottom:12px">
-    <a href="/forgot-password.html" data-i18n="login.forgotPassword">Forgot your password?</a>
-  </div>
-  <div class="footer">
-    <span data-i18n="login.noAccount">Don't have an account?</span> <a href="/register.html" data-i18n="login.createOne">Create one →</a>
-  </div>
+      <button class="btn btn-primary" style="width:100%; margin-top:8px;" type="submit" id="submit-btn" data-i18n="login.submit">Sign in</button>
+    </form>
 
-  <div class="lang-switcher">
-    <button class="lang-btn" data-lang="en" onclick="i18n.switchLang('en')">EN</button>
-    <button class="lang-btn" data-lang="pt" onclick="i18n.switchLang('pt')">PT</button>
+    <div class="auth-footer" style="margin-bottom:12px">
+      <a href="/forgot-password.html" data-i18n="login.forgotPassword">Forgot your password?</a>
+    </div>
+    <div class="auth-footer">
+      <span data-i18n="login.noAccount">Don't have an account?</span> <a href="/register.html" data-i18n="login.createOne">Create one &rarr;</a>
+    </div>
+
+    <div class="flex justify-center mt-6">
+      <div class="lang-switcher">
+        <button class="lang-btn" data-lang="en" onclick="i18n.switchLang('en')">EN</button>
+        <button class="lang-btn" data-lang="pt" onclick="i18n.switchLang('pt')">PT</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
+  // Initialize Lucide icons
+  lucide.createIcons();
+
   const token = localStorage.getItem('auth_token');
   if (token) {
     const returnTo = new URLSearchParams(location.search).get('next') || '/index.html';
@@ -139,18 +79,19 @@
 
   const form      = document.getElementById('login-form');
   const errorMsg  = document.getElementById('error-msg');
+  const errorText = document.getElementById('error-text');
   const submitBtn = document.getElementById('submit-btn');
 
   function showError(msg) {
-    errorMsg.textContent = msg;
-    errorMsg.style.display = 'block';
+    errorText.textContent = msg;
+    errorMsg.style.display = 'flex';
   }
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     errorMsg.style.display = 'none';
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="spinner"></span>' + t('login.signingIn');
+    submitBtn.innerHTML = '<span class="spinner"></span>' + (window.t ? window.t('login.signingIn') : 'Signing in...');
 
     const email    = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
@@ -163,7 +104,7 @@
       });
       const data = await res.json();
       if (!res.ok) {
-        showError(data.detail || t('login.errorCredentials'));
+        showError(data.detail || (window.t ? window.t('login.errorCredentials') : 'Invalid credentials'));
         return;
       }
       localStorage.setItem('auth_token', data.access_token);
@@ -172,10 +113,10 @@
       const returnTo = new URLSearchParams(location.search).get('next') || '/index.html';
       location.replace(returnTo);
     } catch (err) {
-      showError(t('login.errorNetwork'));
+      showError(window.t ? window.t('login.errorNetwork') : 'Network error');
     } finally {
       submitBtn.disabled = false;
-      submitBtn.textContent = t('login.submit');
+      submitBtn.textContent = window.t ? window.t('login.submit') : 'Sign in';
     }
   });
 </script>

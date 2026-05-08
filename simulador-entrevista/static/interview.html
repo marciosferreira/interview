@@ -6,6 +6,7 @@
   <title data-i18n="interview.pageTitle">Mock Interview Simulator</title>
   <script src="/i18n.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -63,17 +64,17 @@
       padding: 4px 10px; border-radius: 20px;
       background: transparent; border: 1px solid #2d3148;
       color: #64748b; cursor: pointer; transition: all 0.2s;
-      text-decoration: none; display: inline-flex; align-items: center;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
     }
     #home-btn:hover    { border-color: #6366f1; color: #a78bfa; }
     #new-btn:hover     { border-color: #f87171; color: #f87171; }
     #history-btn:hover { border-color: #6366f1; color: #a78bfa; }
-    #tips-btn-hdr {
+    #tips-btn-hdr, #profile-btn-hdr {
       font-size: 11px; font-weight: 500; padding: 5px 12px; border-radius: 20px;
       background: transparent; border: 1px solid #2d3148; color: #64748b;
-      text-decoration: none; transition: all 0.2s; display: inline-flex; align-items: center;
+      text-decoration: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
     }
-    #tips-btn-hdr:hover { border-color: #6366f1; color: #a78bfa; }
+    #tips-btn-hdr:hover, #profile-btn-hdr:hover { border-color: #6366f1; color: #a78bfa; }
 
     /* ── Hamburger button ── */
     #hamburger-btn {
@@ -582,7 +583,7 @@
 
 <header>
   <a class="home-link" href="/">
-    <div class="logo">🎯</div>
+    <div class="logo"><i data-lucide="target" style="width:22px;height:22px;"></i></div>
     <div>
       <h1>Acing Interview</h1>
       <p id="header-subtitle">Connecting…</p>
@@ -590,21 +591,21 @@
   </a>
   <div id="status-badge">Connecting…</div>
   <span id="plan-pill" class="plan-pill"></span>
-  <a id="profile-btn-hdr" href="/profile.html" title="Account settings">⚙️ <span class="btn-label">Settings</span></a>
-  <a id="tips-btn-hdr" href="/tips.html" title="Interview tips &amp; frameworks">💡 <span class="btn-label">Tips</span></a>
-  <a id="history-btn" href="/history.html" title="View all past interviews">📋 <span class="btn-label">History</span></a>
+  <a id="profile-btn-hdr" href="/profile.html" title="Account settings"><i data-lucide="settings" style="width:14px;height:14px;"></i> <span class="btn-label">Settings</span></a>
+  <a id="tips-btn-hdr" href="/tips.html" title="Interview tips &amp; frameworks"><i data-lucide="lightbulb" style="width:14px;height:14px;"></i> <span class="btn-label">Tips</span></a>
+  <a id="history-btn" href="/history.html" title="View all past interviews"><i data-lucide="clipboard-list" style="width:14px;height:14px;"></i> <span class="btn-label">History</span></a>
   <div id="new-btn-wrap">
-    <button id="new-btn" title="Start a new interview">＋ New</button>
+    <button id="new-btn" title="Start a new interview"><i data-lucide="plus" style="width:14px;height:14px;"></i> New</button>
     <div id="new-popover">
       <div class="pop-item" id="pop-same-role">
-        <div class="pop-item-icon">🔄</div>
+        <div class="pop-item-icon"><i data-lucide="refresh-cw" style="width:18px;height:18px;"></i></div>
         <div class="pop-item-text">
           <strong data-i18n="interview.popover.sameRole">New round — same role</strong>
           <span data-i18n="interview.popover.sameRoleSub">Practice again with the same job &amp; resume</span>
         </div>
       </div>
       <div class="pop-item" id="pop-new-role">
-        <div class="pop-item-icon">📝</div>
+        <div class="pop-item-icon"><i data-lucide="file-edit" style="width:18px;height:18px;"></i></div>
         <div class="pop-item-text">
           <strong data-i18n="interview.popover.newRole">New role</strong>
           <span data-i18n="interview.popover.newRoleSub">Enter a different job description &amp; resume</span>
@@ -612,7 +613,7 @@
       </div>
     </div>
   </div>
-  <button id="hamburger-btn" aria-label="Menu">☰</button>
+  <button id="hamburger-btn" aria-label="Menu"><i data-lucide="menu"></i></button>
 </header>
 
 <!-- Mobile drawer -->
@@ -621,17 +622,17 @@
   <nav class="drawer-panel">
     <div class="drawer-header">
       <span>Menu</span>
-      <button class="drawer-close">✕</button>
+      <button class="drawer-close"><i data-lucide="x" style="width:20px;height:20px"></i></button>
     </div>
-    <a class="drawer-item" href="/"><span class="di-icon">🏠</span> <span data-i18n="nav.homeLabel">Home</span></a>
-    <a class="drawer-item" href="/profile.html"><span class="di-icon">⚙️</span> <span data-i18n="nav.settingsLabel">Settings</span></a>
-    <a class="drawer-item" href="/tips.html"><span class="di-icon">💡</span> <span data-i18n="nav.tipsLabel">Tips</span></a>
-    <a class="drawer-item" href="/history.html"><span class="di-icon">📋</span> <span data-i18n="history.nav.current">History</span></a>
+    <a class="drawer-item" href="/"><span class="di-icon"><i data-lucide="home"></i></span> <span data-i18n="nav.homeLabel">Home</span></a>
+    <a class="drawer-item" href="/profile.html"><span class="di-icon"><i data-lucide="settings"></i></span> <span data-i18n="nav.settingsLabel">Settings</span></a>
+    <a class="drawer-item" href="/tips.html"><span class="di-icon"><i data-lucide="lightbulb"></i></span> <span data-i18n="nav.tipsLabel">Tips</span></a>
+    <a class="drawer-item" href="/history.html"><span class="di-icon"><i data-lucide="clipboard-list"></i></span> <span data-i18n="history.nav.current">History</span></a>
     <div class="drawer-divider"></div>
-    <button class="drawer-item" id="drawer-new-same"><span class="di-icon">🔄</span> <span data-i18n="interview.popover.sameRole">New round — same role</span></button>
-    <button class="drawer-item" id="drawer-new-role"><span class="di-icon">📝</span> <span data-i18n="interview.popover.newRole">New role</span></button>
+    <button class="drawer-item" id="drawer-new-same"><span class="di-icon"><i data-lucide="refresh-cw"></i></span> <span data-i18n="interview.popover.sameRole">New round — same role</span></button>
+    <button class="drawer-item" id="drawer-new-role"><span class="di-icon"><i data-lucide="file-edit"></i></span> <span data-i18n="interview.popover.newRole">New role</span></button>
     <div class="drawer-divider"></div>
-    <button class="drawer-item" onclick="closeMobileMenu(); window.openContactWidget?.()"><span class="di-icon">✉️</span> Contact us</button>
+    <button class="drawer-item" onclick="closeMobileMenu(); window.openContactWidget?.()"><span class="di-icon"><i data-lucide="mail"></i></span> Contact us</button>
   </nav>
 </div>
 
@@ -657,8 +658,8 @@
 <!-- Floating TTS player pill -->
 <div id="tts-player">
   <span id="tts-label"><span class="tts-dot"></span><span data-i18n="interview.tts.speaking">Alex is speaking…</span></span>
-  <button id="pause-btn" title="Pause / Resume audio" data-i18n="interview.tts.pause">⏸ Pause</button>
-  <button id="skip-btn" title="Skip audio" data-i18n="interview.tts.skip">⏭ Skip</button>
+  <button id="pause-btn" title="Pause / Resume audio"><i data-lucide="pause" style="width:14px;height:14px"></i> <span data-i18n="interview.tts.pause">Pause</span></button>
+  <button id="skip-btn" title="Skip audio"><i data-lucide="skip-forward" style="width:14px;height:14px"></i> <span data-i18n="interview.tts.skip">Skip</span></button>
 </div>
 
 <div id="chat">
@@ -669,22 +670,22 @@
 <div id="input-area">
   <div id="done-banner" onclick="document.getElementById('scorecard-panel').scrollIntoView({behavior:'smooth',block:'start'})" style="cursor:pointer" title="Click to scroll to scorecard" data-i18n="interview.doneBanner">Interview complete — scroll down to see your scorecard ↓</div>
   <div id="input-row">
-    <button id="mic-btn" class="icon-btn" disabled title="Click to start/stop recording">🎙️</button>
-    <button id="cancel-rec-btn" class="icon-btn" title="Cancel recording">✕</button>
+    <button id="mic-btn" class="icon-btn" disabled title="Click to start/stop recording"><i data-lucide="mic"></i></button>
+    <button id="cancel-rec-btn" class="icon-btn" title="Cancel recording"><i data-lucide="x"></i></button>
     <textarea id="text-input" data-i18n-attr="placeholder:interview.input.placeholder" placeholder="Type your answer or press 🎙️ to speak…"
               rows="1" disabled></textarea>
-    <button id="send-btn" class="icon-btn" disabled title="Send (Enter)">➤</button>
+    <button id="send-btn" class="icon-btn" disabled title="Send (Enter)"><i data-lucide="send"></i></button>
   </div>
   <div id="audio-preview">
-    <button id="ap-play" title="Play / Pause">▶</button>
+    <button id="ap-play" title="Play / Pause"><i data-lucide="play" style="width:20px;height:20px"></i></button>
     <div id="ap-track">
       <input id="ap-progress" type="range" min="0" max="100" value="0" step="0.1">
       <div id="ap-times"><span id="ap-cur">0:00</span><span id="ap-dur">0:00</span></div>
     </div>
-    <button id="ap-discard" data-i18n="interview.audio.discard">✕ Discard</button>
-    <button id="ap-send" data-i18n="interview.audio.send">➤ Send</button>
+    <button id="ap-discard"><i data-lucide="x" style="width:14px;height:14px"></i> <span data-i18n="interview.audio.discard">Discard</span></button>
+    <button id="ap-send"><i data-lucide="send" style="width:14px;height:14px"></i> <span data-i18n="interview.audio.send">Send</span></button>
   </div>
-  <p id="hint" data-i18n-html="interview.input.hint">Click <strong>🎙️</strong> to start/stop recording · <strong>Enter</strong> to send text · <strong>Shift+Enter</strong> for new line</p>
+  <p id="hint" data-i18n-html="interview.input.hint">Click <strong><i data-lucide="mic" style="width:14px;height:14px;vertical-align:middle"></i></strong> to start/stop recording · <strong>Enter</strong> to send text · <strong>Shift+Enter</strong> for new line</p>
 </div>
 
 <script>
@@ -960,7 +961,7 @@
     const fetches = chunks.map(c => _fetchAudioUrl(c, voice, lang));
     ttsPlayer.style.display = 'flex';
     ttsPaused = false;
-    pauseBtn.textContent = '⏸ Pause';
+    pauseBtn.innerHTML = '<i data-lucide="pause" style="width:14px;height:14px"></i> Pause'; lucide.createIcons();
     ttsActiveSpeaks++;
 
     for (let i = 0; i < chunks.length; i++) {
@@ -1004,11 +1005,11 @@
     if (ttsPaused) {
       currentAudio.play().catch(() => {});
       ttsPaused = false;
-      pauseBtn.textContent = t('interview.tts.pause');
+      pauseBtn.innerHTML = '<i data-lucide="pause" style="width:14px;height:14px"></i> ' + t('interview.tts.pause'); lucide.createIcons();
     } else {
       currentAudio.pause();
       ttsPaused = true;
-      pauseBtn.textContent = t('interview.tts.resume');
+      pauseBtn.innerHTML = '<i data-lucide="play" style="width:14px;height:14px"></i> ' + t('interview.tts.resume'); lucide.createIcons();
     }
   }
 
@@ -1105,7 +1106,7 @@
       const finalLang  = streamLang;
       const btn = document.createElement('button');
       btn.className = 'replay-btn';
-      btn.innerHTML = '🔊 replay';
+      btn.innerHTML = '<i data-lucide="volume-2" style="width:14px;height:14px"></i> replay';
       btn.title = 'Replay audio';
       btn.addEventListener('click', () => {
         stopTTS();
@@ -1166,7 +1167,7 @@
       apCur.textContent = _fmtSecs(previewAudio.currentTime);
     });
     previewAudio.addEventListener('ended', () => {
-      apPlay.textContent = '▶';
+      apPlay.innerHTML = '<i data-lucide="play" style="width:20px;height:20px"></i>'; lucide.createIcons();
       apProgress.value   = 0;
       apCur.textContent  = _fmtSecs(0);
     });
@@ -1174,11 +1175,11 @@
     apProgress.value   = 0;
     apCur.textContent  = '0:00';
     apDur.textContent  = '…';
-    apPlay.textContent = '▶';
+    apPlay.innerHTML = '<i data-lucide="play" style="width:20px;height:20px"></i>'; lucide.createIcons();
 
     inputRow.style.display    = 'none';
     audioPreview.style.display = 'flex';
-    badge.textContent = 'Ready to send';
+    badge.innerHTML = '<i data-lucide="send" style="width:14px;height:14px"></i> Ready to send'; lucide.createIcons();
     badge.className   = 'connected';
   }
 
@@ -1191,7 +1192,7 @@
     previewBlob = null;
     audioPreview.style.display = 'none';
     inputRow.style.display     = '';
-    badge.textContent = 'Connected';
+    badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Connected'; lucide.createIcons();
     badge.className   = 'connected';
     input.placeholder = 'Type your answer or press 🎙️ to speak…';
   }
@@ -1200,10 +1201,10 @@
     if (!previewAudio) return;
     if (previewAudio.paused) {
       previewAudio.play();
-      apPlay.textContent = '⏸';
+      apPlay.innerHTML = '<i data-lucide="pause" style="width:20px;height:20px"></i>'; lucide.createIcons();
     } else {
       previewAudio.pause();
-      apPlay.textContent = '▶';
+      apPlay.innerHTML = '<i data-lucide="play" style="width:20px;height:20px"></i>'; lucide.createIcons();
     }
   });
 
@@ -1222,7 +1223,7 @@
   });
 
   async function _transcribeAndSend(blob) {
-    badge.textContent = 'Transcribing…';
+    badge.innerHTML = '<i data-lucide="loader" class="spinner" style="width:14px;height:14px"></i> Transcribing...'; lucide.createIcons();
     badge.className   = 'processing';
     input.placeholder = 'Transcribing…';
     disableInput(true);
@@ -1234,14 +1235,14 @@
       const data = await res.json();
       input.value = data.text || '';
       autoResize();
-      badge.textContent = 'Connected';
+      badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Connected'; lucide.createIcons();
       badge.className   = 'connected';
       input.placeholder = 'Type your answer or press 🎙️ to speak…';
       if (input.value.trim()) sendMessage();
       else enableInput();
     } catch (err) {
       console.error('STT error:', err);
-      badge.textContent = 'Connected';
+      badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Connected'; lucide.createIcons();
       badge.className   = 'connected';
       input.placeholder = 'Type your answer or press 🎙️ to speak…';
       enableInput();
@@ -1268,7 +1269,7 @@
         const s  = Math.floor((Date.now() - recStartTime) / 1000);
         const mm = String(Math.floor(s / 60)).padStart(2, '0');
         const ss = String(s % 60).padStart(2, '0');
-        badge.textContent = `🔴 ${mm}:${ss}`;
+        badge.innerHTML = `<i data-lucide="mic" style="width:14px;height:14px"></i> ${mm}:${ss}`; lucide.createIcons();
       };
       _tickTimer();
       recTimerInterval = setInterval(_tickTimer, 1000);
@@ -1291,7 +1292,7 @@
     if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
     mediaRecorder._cancelled = true;
     _stopMediaRecorder();
-    badge.textContent = 'Connected';
+    badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Connected'; lucide.createIcons();
     badge.className   = 'connected';
     input.placeholder = 'Type your answer or press 🎙️ to speak…';
   }
@@ -1320,7 +1321,7 @@
     ws = new WebSocket(`${proto}://${location.host}/ws`);
 
     ws.onopen = () => {
-      badge.textContent = 'Connected';
+      badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Connected'; lucide.createIcons();
       badge.className = 'connected';
       clearInterval(pingInterval);
       pingInterval = setInterval(() => {
@@ -1439,14 +1440,14 @@
         case 'error':
           addBubble('ai', '⚠️ ' + msg.text);
           disableInput(true);
-          badge.textContent = 'Error';
+          badge.innerHTML = '<i data-lucide="alert-triangle" style="width:14px;height:14px"></i> Error'; lucide.createIcons();
           badge.className = '';
           break;
 
         case 'done':
           doneBanner.style.display = 'block';
           disableInput(true);
-          badge.textContent = 'Done';
+          badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Done'; lucide.createIcons();
           badge.className = '';
           break;
       }
@@ -1457,12 +1458,12 @@
       // Don't reconnect if the interview is already finished.
       const _closeRaw = _loadRaw();
       if (e.code === 1000 || _closeRaw?.fase === 'done') {
-        badge.textContent = 'Done';
+        badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Done'; lucide.createIcons();
         badge.className = '';
         return;
       }
       playDisconnectBeep();
-      badge.textContent = 'Reconnecting…';
+      badge.innerHTML = '<i data-lucide="refresh-cw" class="spinner" style="width:14px;height:14px"></i> Reconnecting...'; lucide.createIcons();
       badge.className = '';
       disableInput(true);
       // Reload the page instead of calling connect() again.
@@ -1474,7 +1475,7 @@
     };
 
     ws.onerror = () => {
-      badge.textContent = 'Error';
+      badge.innerHTML = '<i data-lucide="alert-triangle" style="width:14px;height:14px"></i> Error'; lucide.createIcons();
       badge.className = '';
       // onclose fires right after onerror — reconnect logic runs there.
     };
@@ -1509,7 +1510,7 @@
     if (autoReplay) {
       const btn = document.createElement('button');
       btn.className = role === 'user' ? 'replay-btn user' : 'replay-btn';
-      btn.innerHTML = '🔊 replay';
+      btn.innerHTML = '<i data-lucide="volume-2" style="width:14px;height:14px"></i> replay';
       btn.title = role === 'user' ? 'Listen to your answer (TTS)' : 'Replay audio';
       btn.addEventListener('click', () => {
         stopTTS();
@@ -1541,7 +1542,7 @@
 
     const btn = document.createElement('button');
     btn.className = 'replay-btn';
-    btn.innerHTML = '🔊 replay';
+    btn.innerHTML = '<i data-lucide="volume-2" style="width:14px;height:14px"></i> replay';
     btn.title = 'Replay audio';
     btn.addEventListener('click', () => {
       stopTTS();
@@ -1573,7 +1574,7 @@
   function _fetchAndRenderScorecard(threadId) {
     if (!threadId || !_authToken) return;
     scorecardPanel.style.display = 'block';
-    scorecardPanel.innerHTML = `<div class="sc-loading">${t('interview.scorecard.loading')}</div>`;
+    scorecardPanel.innerHTML = `<div class="sc-loading"><span class="spinner" style="width:32px;height:32px;border-width:3px;border-top-color:var(--brand-primary);"></span>${t('interview.scorecard.loading')}</div>`;
     fetch(`/sessions/${encodeURIComponent(threadId)}/scorecard`, {
       headers: { 'Authorization': `Bearer ${_authToken}` },
     })
@@ -1584,22 +1585,23 @@
           scorecardPanel.innerHTML = `
             <div class="sc-inner">
               <div style="text-align:right;margin-bottom:12px">
-                <button class="replay-btn" id="sc-tts-btn" title="Read scorecard aloud">🔊 ${t('interview.scorecard.readAloud')}</button>
+                <button class="replay-btn" id="sc-tts-btn" title="Read scorecard aloud"><i data-lucide="volume-2" style="width:14px;height:14px"></i> ${t('interview.scorecard.readAloud')}</button>
               </div>
               ${renderMd(data.scorecard)}
             </div>`;
+          lucide.createIcons();
           document.getElementById('sc-tts-btn').addEventListener('click', () => {
             stopTTS();
             speak(data.scorecard, 'nova');
           });
         } else if (status === 403) {
           scorecardPanel.innerHTML = `<div class="sc-inner" style="border-color:#3d4160;text-align:center;padding:32px 24px">
-            <div style="font-size:28px;margin-bottom:12px">📄</div>
-            <h2 style="font-size:15px;color:#f1f5f9;margin-bottom:8px">${t('interview.scorecard.upgradeTitle')}</h2>
-            <p style="color:#64748b;font-size:13px;max-width:380px;margin:0 auto 20px">
+            <div style="margin-bottom:16px;color:var(--brand-primary)"><i data-lucide="file-text" style="width:48px;height:48px"></i></div>
+            <h2 style="font-size:18px;color:var(--text-primary);margin-bottom:12px">${t('interview.scorecard.upgradeTitle')}</h2>
+            <p style="color:var(--text-secondary);font-size:15px;max-width:460px;margin:0 auto 24px;line-height:1.6">
               ${t('interview.scorecard.upgradeBody')}
             </p>
-            <a href="/upgrade.html" style="display:inline-block;padding:10px 24px;border-radius:20px;background:linear-gradient(135deg,#6366f1,#7c3aed);color:#fff;font-size:13px;font-weight:600;text-decoration:none">
+            <a href="/upgrade.html" class="btn btn-primary" style="padding:12px 24px;font-size:15px">
               ${t('interview.scorecard.upgradeBtn')}
             </a>
           </div>`;
@@ -1647,7 +1649,7 @@
     sendBtn.disabled = false;
     micBtn.disabled = false;
     input.focus();
-    badge.textContent = 'Connected';
+    badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Connected'; lucide.createIcons();
     badge.className = 'connected';
   }
 
@@ -1656,7 +1658,7 @@
     sendBtn.disabled = true;
     micBtn.disabled = true;
     if (!permanent) {
-      badge.textContent = 'Processing…';
+      badge.innerHTML = '<i data-lucide="loader" class="spinner" style="width:14px;height:14px"></i> Processing...'; lucide.createIcons();
       badge.className = 'processing';
     }
   }
@@ -1749,7 +1751,7 @@
   // without opening a WebSocket — avoids an infinite reconnect loop.
   const _bootRaw = _loadRaw();
   if (_bootRaw?.fase === 'done' && !_pendingJobSession) {
-    badge.textContent = 'Done';
+    badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Done'; lucide.createIcons();
     badge.className = '';
     doneBanner.style.display = 'block';
     disableInput(true);
@@ -1802,8 +1804,10 @@
     const el = document.getElementById('plan-pill');
     if(!el) return;
     const isHunter = u.plan === 'hunter';
-    el.className = 'plan-pill ' + (isHunter ? 'hunter' : 'explorer');
-    el.textContent = isHunter ? '🎯 Hunter' : '🗺️ Explorer';
+    el.className = 'badge ' + (isHunter ? 'badge-primary' : '');
+    if(!isHunter) { el.style.border = '1px solid var(--bg-surface-border)'; el.style.color = 'var(--text-secondary)'; }
+    el.innerHTML = isHunter ? '<i data-lucide="target" style="width:12px;height:12px;margin-right:4px"></i> Hunter' : '<i data-lucide="map" style="width:12px;height:12px;margin-right:4px"></i> Explorer';
+    lucide.createIcons();
     el.setAttribute('data-tooltip', 'Your current plan');
     el.style.display = 'inline-block';
     el.style.cursor = 'pointer';
@@ -1822,10 +1826,13 @@
     const el = document.getElementById('plan-pill');
     if (!el) return;
     const isHunter = usage.plan === 'hunter';
-    el.className = 'plan-pill ' + (isHunter ? 'hunter' : 'explorer');
-    el.textContent = isHunter ? '🎯 Hunter' : '🗺️ Explorer';
+    el.className = 'badge ' + (isHunter ? 'badge-primary' : '');
+    if(!isHunter) { el.style.border = '1px solid var(--bg-surface-border)'; el.style.color = 'var(--text-secondary)'; }
+    el.innerHTML = isHunter ? '<i data-lucide="target" style="width:12px;height:12px;margin-right:4px"></i> Hunter' : '<i data-lucide="map" style="width:12px;height:12px;margin-right:4px"></i> Explorer';
+    lucide.createIcons();
   } catch(_){}
 })();
+  lucide.createIcons();
 </script>
 <script src="/mobile-menu.js"></script>
 <script src="/contact-widget.js"></script>

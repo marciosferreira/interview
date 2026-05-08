@@ -4,190 +4,148 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Contact Messages — Admin</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0f1117; color: #e2e8f0; min-height: 100dvh;
-      display: flex; flex-direction: column;
-    }
-    header {
-      padding: 14px 24px; background: #1a1d27; border-bottom: 1px solid #2d3148;
-      display: flex; align-items: center; gap: 12px; flex-shrink: 0;
-      position: sticky; top: 0; z-index: 100;
-    }
-    .logo {
-      width: 36px; height: 36px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      border-radius: 10px; display: flex; align-items: center;
-      justify-content: center; font-size: 18px; flex-shrink: 0;
-    }
-    header h1 { font-size: 16px; font-weight: 600; color: #f1f5f9; }
-    header p  { font-size: 12px; color: #64748b; margin-top: 1px; }
-    .home-link {
-      display: flex; align-items: center; gap: 12px;
-      text-decoration: none; color: inherit; border-radius: 10px;
-      padding: 2px 6px; margin: -2px -6px; transition: background 0.2s;
-    }
-    .home-link:hover { background: rgba(99,102,241,0.08); }
-    .hdr-links { margin-left: auto; display: flex; gap: 8px; align-items: center; }
-    .hdr-btn {
-      font-size: 13px; font-weight: 500; padding: 6px 14px;
-      border-radius: 8px; border: 1px solid #2d3148;
-      background: transparent; color: #94a3b8; cursor: pointer;
-      text-decoration: none; transition: all 0.15s;
-    }
-    .hdr-btn:hover { background: #2d3148; color: #e2e8f0; }
-    .hdr-btn.active { background: #312e81; border-color: #4338ca; color: #a5b4fc; }
+    main { flex: 1; padding: 40px 24px; max-width: 900px; margin: 0 auto; width: 100%; }
 
-    main { flex: 1; padding: 32px 24px; max-width: 900px; margin: 0 auto; width: 100%; }
+    .page-title { font-size: 24px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+    .page-sub   { font-size: 15px; color: var(--text-secondary); margin-bottom: 32px; }
 
-    .page-title { font-size: 22px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px; }
-    .page-sub   { font-size: 13px; color: #64748b; margin-bottom: 24px; }
-
-    .badge-new {
-      display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
-      text-transform: uppercase; padding: 2px 8px; border-radius: 20px;
-      background: #312e81; color: #a5b4fc; margin-left: 8px; vertical-align: middle;
-    }
-
-    .msg-list { display: flex; flex-direction: column; gap: 12px; }
+    .msg-list { display: flex; flex-direction: column; gap: 16px; }
 
     .msg-card {
-      background: #1a1d27; border: 1px solid #2d3148; border-radius: 12px;
-      overflow: hidden; transition: border-color 0.2s;
+      background: var(--bg-surface); border: 1px solid var(--bg-surface-border); border-radius: var(--radius-lg);
+      overflow: hidden; transition: all 0.2s;
     }
-    .msg-card.unread { border-color: #4338ca; }
-    .msg-card:hover { border-color: #6366f1; }
+    .msg-card.unread { border-color: var(--brand-primary); box-shadow: 0 4px 20px -5px rgba(99, 102, 241, 0.15); }
+    .msg-card:hover { border-color: var(--brand-primary); }
 
     .msg-header {
-      padding: 14px 18px; cursor: pointer; display: flex; align-items: center; gap: 12px;
+      padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 16px;
     }
     .msg-avatar {
-      width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
-      background: linear-gradient(135deg, #312e81, #4338ca);
+      width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+      background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2);
       display: flex; align-items: center; justify-content: center;
-      font-size: 15px; font-weight: 700; color: #a5b4fc; text-transform: uppercase;
+      font-size: 16px; font-weight: 700; color: var(--brand-primary); text-transform: uppercase;
     }
     .msg-meta { flex: 1; min-width: 0; }
-    .msg-from { font-size: 14px; font-weight: 600; color: #f1f5f9; }
-    .msg-email { font-size: 12px; color: #64748b; }
-    .msg-subject { font-size: 13px; font-weight: 500; color: #c7d2fe; margin-top: 2px; }
-    .msg-date { font-size: 11px; color: #475569; flex-shrink: 0; }
+    .msg-from { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+    .msg-email { font-size: 13px; color: var(--text-tertiary); }
+    .msg-subject { font-size: 14px; font-weight: 500; color: var(--brand-secondary); margin-top: 4px; }
+    .msg-date { font-size: 12px; color: var(--text-tertiary); flex-shrink: 0; }
     .msg-status {
-      font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
-      padding: 2px 8px; border-radius: 20px; flex-shrink: 0;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+      padding: 4px 10px; border-radius: var(--radius-sm); flex-shrink: 0;
     }
-    .msg-status.replied  { background: #052e16; color: #86efac; border: 1px solid #166534; }
-    .msg-status.pending  { background: #312e81; color: #a5b4fc; border: 1px solid #4338ca; }
-    .msg-chevron { color: #475569; font-size: 18px; flex-shrink: 0; transition: transform 0.2s; }
-    .msg-card.open .msg-chevron { transform: rotate(180deg); }
+    .msg-status.replied  { background: var(--status-success-bg); color: var(--status-success); border: 1px solid var(--status-success-border); }
+    .msg-status.pending  { background: rgba(99, 102, 241, 0.1); color: var(--brand-primary); border: 1px solid rgba(99, 102, 241, 0.2); }
+    .msg-chevron { color: var(--text-tertiary); transition: transform 0.2s; display: flex; align-items: center; }
+    .msg-card.open .msg-chevron { transform: rotate(180deg); color: var(--text-primary); }
 
     .msg-body {
-      display: none; padding: 0 18px 18px; border-top: 1px solid #2d3148;
+      display: none; padding: 0 20px 20px; border-top: 1px solid var(--bg-surface-border);
       margin-top: 0;
     }
     .msg-card.open .msg-body { display: block; }
 
     .msg-text {
-      font-size: 14px; color: #94a3b8; line-height: 1.6;
-      white-space: pre-wrap; padding: 14px 0;
+      font-size: 15px; color: var(--text-secondary); line-height: 1.6;
+      white-space: pre-wrap; padding: 20px 0;
     }
 
-    .reply-section { margin-top: 12px; }
-    .reply-label { font-size: 12px; font-weight: 500; color: #64748b; margin-bottom: 8px; }
+    .reply-section { margin-top: 16px; background: rgba(0,0,0,0.2); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--bg-surface-border); }
+    .reply-label { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
     .reply-sent {
-      font-size: 13px; color: #86efac; background: #052e16;
-      border: 1px solid #166534; border-radius: 8px; padding: 12px 14px;
+      font-size: 14px; color: var(--status-success); background: var(--status-success-bg);
+      border: 1px solid var(--status-success-border); border-radius: var(--radius-md); padding: 16px;
       white-space: pre-wrap; line-height: 1.5;
     }
     .reply-form textarea {
-      width: 100%; padding: 10px 12px; min-height: 90px;
-      background: #0f1117; border: 1px solid #2d3148;
-      border-radius: 8px; color: #f1f5f9; font-size: 13px;
+      width: 100%; padding: 12px 16px; min-height: 120px;
+      background: var(--bg-surface); border: 1px solid var(--bg-surface-border);
+      border-radius: var(--radius-md); color: var(--text-primary); font-size: 14px;
       outline: none; resize: vertical; font-family: inherit;
-      transition: border-color 0.2s; margin-bottom: 10px;
+      transition: border-color 0.2s; margin-bottom: 12px; line-height: 1.5;
     }
-    .reply-form textarea:focus { border-color: #6366f1; }
-    .reply-form textarea::placeholder { color: #475569; }
-    .reply-send {
-      padding: 8px 20px;
-      background: linear-gradient(135deg, #6366f1, #7c3aed);
-      border: none; border-radius: 8px; color: #fff;
-      font-size: 13px; font-weight: 600; cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .reply-send:hover { opacity: 0.9; }
-    .reply-send:disabled { opacity: 0.5; cursor: not-allowed; }
+    .reply-form textarea:focus { border-color: var(--brand-primary); }
+    .reply-form textarea::placeholder { color: var(--text-tertiary); }
+    
     .reply-msg {
-      font-size: 12px; margin-top: 8px; padding: 6px 10px;
-      border-radius: 6px; display: none;
+      font-size: 13px; margin-top: 12px; padding: 10px 14px;
+      border-radius: var(--radius-sm); display: none;
     }
-    .reply-msg.ok    { background: #052e16; color: #86efac; }
-    .reply-msg.error { background: #450a0a; color: #fca5a5; }
-    .reply-history {
-      margin-bottom: 10px;
-    }
-    .reply-history + .reply-history {
-      border-top: 1px solid #2d3148; padding-top: 10px;
-    }
-    .reply-history-label { font-size: 11px; color: #475569; margin-bottom: 6px; }
+    .reply-history { margin-bottom: 16px; }
+    .reply-history + .reply-history { border-top: 1px solid var(--bg-surface-border); padding-top: 16px; }
+    .reply-history-label { font-size: 12px; color: var(--text-tertiary); margin-bottom: 8px; font-weight: 500; }
+    
     .delete-btn {
-      padding: 6px 14px; background: transparent; border: 1px solid #7f1d1d;
-      border-radius: 8px; color: #fca5a5; font-size: 12px; font-weight: 600;
-      cursor: pointer; transition: all 0.15s; margin-left: auto;
+      padding: 8px 16px; background: transparent; border: 1px solid var(--status-error-border);
+      border-radius: var(--radius-sm); color: var(--status-error); font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; margin-left: auto; display: inline-flex; align-items: center; gap: 6px;
     }
-    .delete-btn:hover { background: #450a0a; border-color: #b91c1c; }
+    .delete-btn:hover { background: var(--status-error-bg); }
 
-    .empty {
-      text-align: center; padding: 60px 24px; color: #475569;
-    }
-    .empty h3 { font-size: 18px; font-weight: 600; margin-bottom: 6px; color: #64748b; }
+    .empty { text-align: center; padding: 80px 24px; color: var(--text-tertiary); display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .empty h3 { font-size: 20px; font-weight: 600; color: var(--text-secondary); }
 
-    .stats {
-      display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
-    }
+    .stats { display: flex; gap: 16px; margin-bottom: 32px; flex-wrap: wrap; }
     .stat {
-      background: #1a1d27; border: 1px solid #2d3148; border-radius: 10px;
-      padding: 14px 20px; min-width: 120px;
+      background: var(--bg-surface); border: 1px solid var(--bg-surface-border); border-radius: var(--radius-lg);
+      padding: 20px 24px; flex: 1; min-width: 160px;
     }
-    .stat-val { font-size: 26px; font-weight: 700; color: #f1f5f9; }
-    .stat-lbl { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .stat-val { font-size: 32px; font-weight: 800; color: var(--text-primary); }
+    .stat-lbl { font-size: 13px; color: var(--text-secondary); margin-top: 4px; font-weight: 500; }
   </style>
 </head>
 <body>
 
-<header>
-  <a class="home-link" href="/index.html">
-    <div class="logo">🎯</div>
-    <div>
+<header class="app-header">
+  <a class="header-brand-link" href="/">
+    <div class="header-logo"><i data-lucide="target" style="width: 22px; height: 22px;"></i></div>
+    <div class="header-brand-info">
       <h1>Acing Interview</h1>
-      <p>Admin</p>
+      <p>Admin panel</p>
     </div>
   </a>
-  <div class="hdr-links">
-    <a class="hdr-btn" href="/admin.html">Users</a>
-    <a class="hdr-btn active" href="/admin-contact.html">Messages</a>
-    <a class="hdr-btn" href="/index.html">← Back to app</a>
+  <div class="header-actions">
+    <a class="nav-link" href="/admin.html"><i data-lucide="users" style="width:16px;height:16px"></i> Users</a>
+    <a class="nav-link" href="/index.html"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Back to app</a>
   </div>
 </header>
 
 <main>
-  <div class="page-title">Contact Messages <span class="badge-new" id="unread-badge" style="display:none"></span></div>
+  <div class="page-title">
+    Contact Messages 
+    <span class="badge badge-primary" id="unread-badge" style="display:none; margin-left:8px; padding:4px 8px;"></span>
+  </div>
   <p class="page-sub">Incoming messages from the contact form.</p>
 
   <div class="stats">
-    <div class="stat"><div class="stat-val" id="stat-total">—</div><div class="stat-lbl">Total</div></div>
-    <div class="stat"><div class="stat-val" id="stat-pending">—</div><div class="stat-lbl">Pending reply</div></div>
-    <div class="stat"><div class="stat-val" id="stat-replied">—</div><div class="stat-lbl">Replied</div></div>
+    <div class="stat"><div class="stat-val" id="stat-total">—</div><div class="stat-lbl"><i data-lucide="inbox" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i> Total</div></div>
+    <div class="stat"><div class="stat-val" id="stat-pending" style="color:var(--brand-primary)">—</div><div class="stat-lbl"><i data-lucide="clock" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i> Pending reply</div></div>
+    <div class="stat"><div class="stat-val" id="stat-replied" style="color:var(--status-success)">—</div><div class="stat-lbl"><i data-lucide="check-circle" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i> Replied</div></div>
   </div>
 
   <div class="msg-list" id="msg-list">
-    <p style="color:#475569">Loading…</p>
+    <div class="empty"><span class="spinner" style="width:32px;height:32px;border-width:3px;border-top-color:var(--brand-primary);"></span></div>
   </div>
 </main>
 
 <script>
+  lucide.createIcons();
+
   const _token = localStorage.getItem('auth_token');
   if (!_token) location.replace('/login.html?next=/admin-contact.html');
   const _headers = { 'Authorization': `Bearer ${_token}`, 'Content-Type': 'application/json' };
@@ -204,7 +162,6 @@
 
   function _parseReplies(replyText) {
     if (!replyText) return [];
-    // Split on the separator inserted by save_contact_reply
     const parts = replyText.split(/\n\n--- Reply on /);
     return parts.map((part, i) => {
       if (i === 0) return { date: null, text: part.trim() };
@@ -221,7 +178,7 @@
     return replies.map((r, i) => {
       const label = r.date || (i === 0 && repliedAt ? _fmtDate(repliedAt) : '—');
       return `<div class="reply-history">
-         <div class="reply-history-label">Reply · ${label}</div>
+         <div class="reply-history-label"><i data-lucide="corner-down-right" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-right:4px;"></i> Reply &middot; ${label}</div>
          <div class="reply-sent">${_esc(r.text)}</div>
        </div>`;
     }).join('');
@@ -244,7 +201,8 @@
     }
 
     if (!total) {
-      list.innerHTML = '<div class="empty"><h3>No messages yet</h3><p>Messages submitted via the contact form will appear here.</p></div>';
+      list.innerHTML = '<div class="empty"><i data-lucide="inbox" style="width:48px;height:48px"></i><h3>No messages yet</h3><p>Messages submitted via the contact form will appear here.</p></div>';
+      lucide.createIcons();
       return;
     }
 
@@ -265,21 +223,21 @@
             <div class="msg-subject">${_esc(msg.subject)}</div>
           </div>
           <div class="msg-date">${_fmtDate(msg.created_at)}</div>
-          <span class="msg-status ${msg.replied_at ? 'replied' : 'pending'}">${msg.replied_at ? 'Replied' : 'Pending'}</span>
-          <span class="msg-chevron">▾</span>
+          <span class="msg-status ${msg.replied_at ? 'replied' : 'pending'}"><i data-lucide="${msg.replied_at ? 'check' : 'clock'}" style="width:12px;height:12px;margin-right:4px;display:inline-block;vertical-align:middle;"></i>${msg.replied_at ? 'Replied' : 'Pending'}</span>
+          <span class="msg-chevron"><i data-lucide="chevron-down" style="width:20px;height:20px;"></i></span>
         </div>
         <div class="msg-body">
           <div class="msg-text">${_esc(msg.body)}</div>
           <div class="reply-section">
-            <div class="reply-label">Reply to ${_esc(msg.name)}</div>
+            <div class="reply-label"><i data-lucide="reply" style="width:16px;height:16px;"></i> Reply to ${_esc(msg.name)}</div>
             ${historyHtml}
             <div class="reply-form">
-              <textarea placeholder="Type your reply…" id="reply-${msg.id}"></textarea>
-              <div style="display:flex;align-items:center;gap:10px">
-                <button class="reply-send" onclick="sendReply('${msg.id}')">Send reply</button>
-                <button class="delete-btn" onclick="deleteMsg('${msg.id}')">🗑 Delete</button>
+              <textarea placeholder="Type your reply here..." id="reply-${msg.id}"></textarea>
+              <div style="display:flex;align-items:center;gap:12px">
+                <button class="btn btn-primary" onclick="sendReply('${msg.id}')"><i data-lucide="send" style="width:16px;height:16px"></i> Send reply</button>
+                <button class="delete-btn" onclick="deleteMsg('${msg.id}')"><i data-lucide="trash-2" style="width:14px;height:14px"></i> Delete</button>
               </div>
-              <div class="reply-msg" id="rmsg-${msg.id}"></div>
+              <div class="alert reply-msg" id="rmsg-${msg.id}"></div>
             </div>
           </div>
         </div>
@@ -291,6 +249,7 @@
 
       list.appendChild(card);
     });
+    lucide.createIcons();
   }
 
   function _esc(s) {
@@ -299,13 +258,14 @@
 
   async function sendReply(msgId) {
     const ta   = document.getElementById(`reply-${msgId}`);
-    const btn  = ta.parentElement.querySelector('.reply-send');
+    const btn  = ta.parentElement.querySelector('.btn-primary');
     const rmsg = document.getElementById(`rmsg-${msgId}`);
     const text = ta.value.trim();
     if (!text) return;
 
+    const originalHtml = btn.innerHTML;
     btn.disabled = true;
-    btn.textContent = 'Sending…';
+    btn.innerHTML = '<span class="spinner" style="width:14px;height:14px;margin:0;"></span> Sending...';
     rmsg.style.display = 'none';
 
     try {
@@ -314,25 +274,27 @@
         body: JSON.stringify({ reply_text: text }),
       });
       if (res.ok) {
-        rmsg.textContent = '✓ Reply sent';
-        rmsg.className = 'reply-msg ok';
+        rmsg.innerHTML = '<i data-lucide="check-circle" style="width:16px;height:16px;margin-right:8px;vertical-align:text-bottom;"></i> Reply sent successfully';
+        rmsg.className = 'alert alert-success reply-msg';
         rmsg.style.display = 'block';
-        // Refresh after 1s to show replied state
+        lucide.createIcons();
         setTimeout(loadMessages, 1200);
       } else {
         const d = await res.json().catch(() => ({}));
-        rmsg.textContent = d.detail || 'Failed to send reply.';
-        rmsg.className = 'reply-msg error';
+        rmsg.innerHTML = `<i data-lucide="alert-circle" style="width:16px;height:16px;margin-right:8px;vertical-align:text-bottom;"></i> ${d.detail || 'Failed to send reply.'}`;
+        rmsg.className = 'alert alert-error reply-msg';
         rmsg.style.display = 'block';
+        lucide.createIcons();
         btn.disabled = false;
-        btn.textContent = 'Send reply';
+        btn.innerHTML = originalHtml;
       }
     } catch (_) {
-      rmsg.textContent = 'Network error — please try again.';
-      rmsg.className = 'reply-msg error';
+      rmsg.innerHTML = '<i data-lucide="alert-triangle" style="width:16px;height:16px;margin-right:8px;vertical-align:text-bottom;"></i> Network error — please try again.';
+      rmsg.className = 'alert alert-error reply-msg';
       rmsg.style.display = 'block';
+      lucide.createIcons();
       btn.disabled = false;
-      btn.textContent = 'Send reply';
+      btn.innerHTML = originalHtml;
     }
   }
 
@@ -357,7 +319,8 @@
       const res = await fetch('/admin/contact', { headers: _headers });
       if (res.status === 403) {
         document.getElementById('msg-list').innerHTML =
-          '<p style="color:#fca5a5;text-align:center;padding:40px">Access restricted to admin only.</p>';
+          '<div class="empty"><i data-lucide="lock" style="width:48px;height:48px;color:var(--status-error);"></i><h3 style="color:var(--status-error);">Access Restricted</h3><p>This area is for administrators only.</p></div>';
+        lucide.createIcons();
         return;
       }
       if (!res.ok) throw new Error('Failed to load');
@@ -365,7 +328,8 @@
       _renderMessages(data.messages || []);
     } catch (err) {
       document.getElementById('msg-list').innerHTML =
-        `<p style="color:#fca5a5;text-align:center;padding:40px">Error: ${err.message}</p>`;
+        `<div class="empty"><i data-lucide="alert-triangle" style="width:48px;height:48px;color:var(--status-error);"></i><h3 style="color:var(--status-error);">Error Loading Messages</h3><p>${err.message}</p></div>`;
+      lucide.createIcons();
     }
   }
 

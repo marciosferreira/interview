@@ -4,301 +4,121 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title data-i18n="history.pageTitle">Interview History — Acing Interview</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  
   <script src="/i18n.js"></script>
+  
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0f1117;
-      color: #e2e8f0;
-      min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* ── Header ── */
-    header {
-      padding: 14px 24px;
-      background: #1a1d27;
-      border-bottom: 1px solid #2d3148;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-shrink: 0;
-    }
-    .logo {
-      width: 36px; height: 36px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px;
-    }
-    header h1 { font-size: 16px; font-weight: 600; color: #f1f5f9; }
-    header p  { font-size: 12px; color: #64748b; margin-top: 1px; }
-    .home-link {
-      display: flex; align-items: center; gap: 12px;
-      text-decoration: none; color: inherit;
-      border-radius: 10px; padding: 2px 6px; margin: -2px -6px;
-      transition: background 0.2s;
-    }
-    .home-link:hover { background: rgba(99,102,241,0.08); }
-    .plan-pill {
-      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
-      text-transform: uppercase; padding: 3px 10px; border-radius: 20px;
-      flex-shrink: 0; display: none; margin-left: auto;
-    }
-    .plan-pill { position: relative; cursor: default; }
-    .plan-pill.hunter  { background: #312e81; color: #a5b4fc; }
-    .plan-pill.explorer { background: #1e293b; color: #64748b; }
-    .plan-pill::after {
-      content: attr(data-tooltip); position: absolute;
-      bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
-      background: #1e2235; border: 1px solid #3d4160; color: #e2e8f0;
-      font-size: 11px; font-weight: 500; text-transform: none; letter-spacing: 0;
-      white-space: nowrap; padding: 5px 10px; border-radius: 8px;
-      pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 999;
-    }
-    .plan-pill:hover::after, .plan-pill.tooltip-open::after { opacity: 1; }
-    .hdr-btn {
-      font-size: 11px; font-weight: 500;
-      padding: 5px 12px; border-radius: 20px;
-      background: transparent; border: 1px solid #2d3148;
-      color: #64748b; cursor: pointer; transition: all 0.2s;
-      text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
-    }
-    .hdr-btn + .hdr-btn { margin-left: 8px; }
-    .hdr-btn.back:hover     { border-color: #6366f1; color: #a78bfa; }
-    .hdr-btn.new:hover      { border-color: #22c55e; color: #4ade80; }
-    .hdr-btn.settings:hover { border-color: #6366f1; color: #a78bfa; }
-
-    /* ── Hamburger button ── */
-    #hamburger-btn {
-      display: none; margin-left: auto;
-      background: transparent; border: 1px solid #2d3148;
-      color: #94a3b8; border-radius: 8px;
-      width: 36px; height: 36px; font-size: 18px;
-      cursor: pointer; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-
-    /* ── Mobile drawer ── */
-    #mobile-drawer { display: none; position: fixed; inset: 0; z-index: 8000; }
-    #mobile-drawer.open { display: block; }
-    .drawer-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
-    .drawer-panel {
-      position: absolute; top: 0; right: 0; bottom: 0;
-      width: min(280px, 85vw);
-      background: #1a1d27; border-left: 1px solid #2d3148;
-      display: flex; flex-direction: column;
-      padding: 16px; gap: 6px; overflow-y: auto;
-      animation: slideIn 0.22s ease;
-    }
-    @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-    .drawer-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding-bottom: 12px; margin-bottom: 6px; border-bottom: 1px solid #2d3148;
-    }
-    .drawer-header span { font-size: 14px; font-weight: 600; color: #f1f5f9; }
-    .drawer-close { background: transparent; border: none; color: #64748b; font-size: 18px; cursor: pointer; padding: 4px; }
-    .drawer-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 12px 14px; border-radius: 10px;
-      font-size: 14px; font-weight: 500; color: #94a3b8;
-      text-decoration: none; background: transparent;
-      border: none; cursor: pointer; width: 100%; text-align: left;
-      transition: background 0.15s, color 0.15s;
-    }
-    .drawer-item:hover { background: #2d3148; color: #e2e8f0; }
-    .drawer-item .di-icon { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
-    .drawer-divider { height: 1px; background: #2d3148; margin: 4px 0; }
-
-    /* ── Mobile header ── */
-    @media (max-width: 768px) {
-      header { padding: 10px 12px; gap: 8px; }
-      .home-link > div { display: none; }
-      .plan-pill { display: none !important; }
-      .hdr-btn { display: none; }
-      #hamburger-btn { display: flex; }
-    }
-
-    /* ── Content ── */
     main {
       flex: 1;
-      padding: 32px 24px;
-      max-width: 860px;
+      padding: 40px 24px;
+      max-width: 900px;
       width: 100%;
       margin: 0 auto;
     }
-    .page-title { font-size: 20px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px; }
-    .page-sub   { font-size: 13px; color: #475569; margin-bottom: 32px; }
+    .page-title { font-size: 24px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+    .page-sub   { font-size: 14px; color: var(--text-secondary); margin-bottom: 32px; }
 
-    /* ── Role group ── */
+    /* Role group */
     .role-group { margin-bottom: 32px; }
-
     .role-header {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 12px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #2d3148;
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 16px; padding-bottom: 16px;
+      border-bottom: 1px solid var(--bg-surface-border);
     }
     .role-icon {
-      width: 42px; height: 42px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #312e81, #4338ca);
+      width: 48px; height: 48px; border-radius: var(--radius-md);
+      background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2);
       display: flex; align-items: center; justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0;
+      color: var(--brand-primary); flex-shrink: 0;
     }
     .role-info { flex: 1; min-width: 0; }
-    .role-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: #f1f5f9;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .role-company {
-      font-size: 12px;
-      color: #6366f1;
-      font-weight: 500;
-      margin-top: 1px;
-    }
-    .role-count {
-      font-size: 11px;
-      color: #475569;
-      margin-top: 2px;
-    }
-    .role-actions { display: flex; gap: 8px; flex-shrink: 0; }
-    .practice-btn {
-      font-size: 11px; font-weight: 600;
-      padding: 5px 12px; border-radius: 20px;
-      border: 1px solid #22c55e; color: #4ade80;
-      background: transparent; cursor: pointer;
-      transition: all 0.2s; white-space: nowrap;
-    }
-    .practice-btn:hover { background: #14532d; }
-
-    /* ── Session cards ── */
-    .session-list { display: flex; flex-direction: column; gap: 8px; }
-
+    .role-title { font-size: 18px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .role-company { font-size: 14px; color: var(--brand-primary); font-weight: 500; margin-top: 2px; }
+    .role-count { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
+    
+    /* Session List */
+    .session-list { display: flex; flex-direction: column; gap: 12px; }
     .session-card {
-      background: #1a1d27;
-      border: 1px solid #2d3148;
-      border-radius: 12px;
-      padding: 14px 18px;
+      padding: 16px 20px;
+      display: flex; align-items: center; gap: 16px;
       cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 14px;
     }
-    .session-card:hover { border-color: #6366f1; background: #1e2235; }
-
     .session-icon {
-      width: 34px; height: 34px;
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-      flex-shrink: 0;
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
-    .session-icon.done     { background: #14532d; }
-    .session-icon.progress { background: #1e1b4b; }
-
+    .session-icon.done { background: var(--status-success-bg); color: var(--status-success); border: 1px solid var(--status-success-border); }
+    .session-icon.progress { background: rgba(99, 102, 241, 0.1); color: var(--brand-primary); border: 1px solid rgba(99, 102, 241, 0.2); }
+    
     .session-body { flex: 1; min-width: 0; }
-    .session-row1 {
-      display: flex; align-items: center; gap: 8px;
-      margin-bottom: 3px; flex-wrap: wrap;
-    }
-    .session-date  { font-size: 13px; font-weight: 600; color: #e2e8f0; }
-    .session-badge {
-      font-size: 10px; font-weight: 600;
-      padding: 2px 7px; border-radius: 20px;
-      letter-spacing: 0.04em; text-transform: uppercase;
-    }
-    .session-badge.done     { background: #14532d; color: #4ade80; }
-    .session-badge.progress { background: #1e1b4b; color: #a78bfa; }
-
+    .session-row1 { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; flex-wrap: wrap; }
+    .session-date { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    
     .session-row2 { display: flex; align-items: center; gap: 10px; }
-    .session-phase { font-size: 11px; color: #475569; }
-    .session-msgs  { font-size: 11px; color: #334155; }
-
-    .session-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .continue-btn {
-      font-size: 11px; font-weight: 600;
-      padding: 4px 10px; border-radius: 20px;
-      border: 1px solid #6366f1; color: #a78bfa;
-      background: transparent; cursor: pointer;
-      transition: all 0.2s; white-space: nowrap;
-      pointer-events: none;
-    }
-    .session-card:hover .continue-btn { background: #6366f1; color: #fff; }
-
+    .session-phase { font-size: 13px; color: var(--text-secondary); }
+    .session-msgs { font-size: 12px; color: var(--text-tertiary); }
+    
+    .session-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    
     .delete-btn {
-      background: transparent;
-      border: 1px solid transparent;
-      color: #334155;
-      border-radius: 6px;
-      padding: 3px 7px;
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-      flex-shrink: 0;
+      background: transparent; border: none; color: var(--text-tertiary);
+      padding: 6px; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s;
     }
-    .session-card:hover .delete-btn { border-color: #3d1515; color: #f87171; }
-    .delete-btn:hover { background: #3d1515 !important; color: #f87171 !important; }
+    .session-card:hover .delete-btn { color: var(--status-error); background: var(--status-error-bg); }
 
-    /* ── Unknown group (no role) ── */
-    .role-header.unknown .role-icon { background: #1e293b; }
-    .role-header.unknown .role-title { color: #64748b; font-style: italic; }
-
-    /* ── Empty state ── */
+    /* Empty state */
     .empty-state { text-align: center; padding: 80px 24px; }
-    .empty-icon  { font-size: 48px; margin-bottom: 16px; }
-    .empty-title { font-size: 18px; font-weight: 600; color: #94a3b8; margin-bottom: 8px; }
-    .empty-sub   { font-size: 14px; color: #475569; margin-bottom: 24px; }
-    .start-btn {
-      display: inline-block; padding: 10px 24px;
-      background: #6366f1; color: #fff; border-radius: 12px;
-      font-size: 14px; font-weight: 600; text-decoration: none;
-      transition: background 0.2s;
-    }
-    .start-btn:hover { background: #4f46e5; }
+    .empty-icon { width: 64px; height: 64px; margin: 0 auto 24px; color: var(--text-tertiary); background: var(--bg-surface); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .empty-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .empty-sub { font-size: 15px; color: var(--text-secondary); margin-bottom: 24px; }
   </style>
 </head>
 <body>
 
-<header>
-  <a class="home-link" href="/">
-    <div class="logo">🎯</div>
-    <div>
+<!-- Global Header -->
+<header class="app-header">
+  <a class="header-brand-link" href="/">
+    <div class="header-logo"><i data-lucide="target" style="width: 22px; height: 22px;"></i></div>
+    <div class="header-brand-info">
       <h1>Acing Interview</h1>
       <p data-i18n="history.header.tagline">Interview history</p>
     </div>
   </a>
-  <span id="plan-pill" class="plan-pill"></span>
-  <a class="hdr-btn" href="/tips.html" data-i18n="nav.tips">💡 Tips</a>
-  <a class="hdr-btn settings" href="/profile.html" data-i18n="nav.settings">⚙️ Settings</a>
-  <button id="new-btn" class="hdr-btn new" onclick="newInterview()" data-i18n="history.nav.newInterview">＋ New interview</button>
-  <button id="hamburger-btn" aria-label="Menu">☰</button>
+  
+  <div class="header-actions">
+    <span id="plan-pill" class="badge"></span>
+    <button class="btn btn-primary" style="padding: 6px 12px; font-size: 13px;" onclick="newInterview()" data-i18n="history.nav.newInterview">
+      <i data-lucide="plus" style="width:16px;height:16px"></i> New interview
+    </button>
+    <a href="/tips.html" class="nav-link"><i data-lucide="lightbulb" style="width:16px;height:16px;"></i> <span data-i18n="nav.tipsLabel">Tips</span></a>
+    <a href="/profile.html" class="nav-link"><i data-lucide="settings" style="width:16px;height:16px;"></i> <span data-i18n="nav.settingsLabel">Settings</span></a>
+  </div>
+  
+  <button class="mobile-menu-btn" id="hamburger-btn" aria-label="Menu"><i data-lucide="menu"></i></button>
 </header>
+
 <div id="mobile-drawer">
-  <div class="drawer-backdrop"></div>
+  <div class="drawer-backdrop" onclick="closeMobileMenu()"></div>
   <nav class="drawer-panel">
     <div class="drawer-header">
       <span>Menu</span>
-      <button class="drawer-close" onclick="closeMobileMenu()">✕</button>
+      <button class="drawer-close" onclick="closeMobileMenu()"><i data-lucide="x"></i></button>
     </div>
-    <a class="drawer-item" href="/"><span class="di-icon">🏠</span> <span data-i18n="nav.homeLabel">Home</span></a>
-    <a class="drawer-item" href="/tips.html"><span class="di-icon">💡</span> <span data-i18n="nav.tipsLabel">Tips</span></a>
-    <a class="drawer-item" href="/profile.html"><span class="di-icon">⚙️</span> <span data-i18n="nav.settingsLabel">Settings</span></a>
-    <div class="drawer-divider"></div>
-    <button class="drawer-item" onclick="closeMobileMenu(); newInterview()"><span data-i18n="history.nav.newInterview">New interview</span></button>
-    <div class="drawer-divider"></div>
-    <button class="drawer-item" onclick="closeMobileMenu(); window.openContactWidget?.()"><span class="di-icon">✉️</span> Contact us</button>
+    <a class="drawer-item" href="/"><i data-lucide="home"></i> <span data-i18n="nav.homeLabel">Home</span></a>
+    <button class="drawer-item" onclick="closeMobileMenu(); newInterview()"><i data-lucide="plus"></i> <span data-i18n="history.nav.newInterview">New interview</span></button>
+    <a class="drawer-item" href="/tips.html"><i data-lucide="lightbulb"></i> <span data-i18n="nav.tipsLabel">Tips</span></a>
+    <a class="drawer-item" href="/profile.html"><i data-lucide="settings"></i> <span data-i18n="nav.settingsLabel">Settings</span></a>
   </nav>
 </div>
 
@@ -309,6 +129,8 @@
 </main>
 
 <script>
+  lucide.createIcons();
+
   const _authToken = localStorage.getItem('auth_token');
   if (!_authToken) location.replace('/login.html?next=/history.html');
 
@@ -317,33 +139,24 @@
 
   function getFaseLabel(fase) {
     const map = {
-      elevator_pitch:        t('history.phases.elevator_pitch'),
-      elevator_pitch_report: t('history.phases.elevator_pitch_report'),
-      CAR:                   t('history.phases.CAR'),
-      CAR_report:            t('history.phases.CAR_report'),
-      technical:             t('history.phases.technical'),
-      technical_report:      t('history.phases.technical_report'),
-      leadership:            t('history.phases.leadership'),
-      leadership_report:     t('history.phases.leadership_report'),
-      motivation:            t('history.phases.motivation'),
-      motivation_report:     t('history.phases.motivation_report'),
-      candidate_questions:   t('history.phases.candidate_questions'),
-      feedback:              t('history.phases.feedback'),
-      done:                  t('history.phases.done'),
+      elevator_pitch: 'Elevator Pitch', elevator_pitch_report: 'Elevator Pitch — review',
+      CAR: 'CAR Story', CAR_report: 'CAR Story — review',
+      technical: 'Technical Questions', technical_report: 'Technical — review',
+      leadership: 'Leadership Questions', leadership_report: 'Leadership — review',
+      motivation: 'Motivation Questions', motivation_report: 'Motivation — review',
+      candidate_questions: 'Your Questions', feedback: 'Final Scorecard', done: 'Completed',
     };
-    return map[fase] || fase || t('history.phases.starting');
+    return map[fase] || fase || 'Starting...';
   }
 
   function _fmt(ts) {
     if (!ts) return '—';
     const d = new Date(ts), now = new Date();
-    const lang = i18n.currentLang();
     const diffDays = Math.floor((now - d) / 86400000);
-    const time = d.toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' });
-    if (diffDays === 0) return t('history.date.today', { time });
-    if (diffDays === 1) return t('history.date.yesterday', { time });
-    if (diffDays < 7)  return `${d.toLocaleDateString(lang, { weekday: 'long' })} ${t('history.date.at')} ${time}`;
-    return d.toLocaleDateString(lang, { month: 'short', day: 'numeric', year: 'numeric' }) + ` ${t('history.date.at')} ${time}`;
+    const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (diffDays === 0) return `Today at ${time}`;
+    if (diffDays === 1) return `Yesterday at ${time}`;
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ` at ${time}`;
   }
 
   function _msgCount(history) {
@@ -355,9 +168,8 @@
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // Group sessions by role key (jobTitle|company)
   function _groupByRole(sessions) {
-    const groups = new Map(); // key → { jobTitle, company, jobSessionId, sessions[] }
+    const groups = new Map();
     for (const s of sessions) {
       const key = (s.jobTitle || '') + '|' + (s.company || '');
       if (!groups.has(key)) {
@@ -370,7 +182,6 @@
       }
       groups.get(key).sessions.push(s);
     }
-    // Sort groups: most recently active group first
     return [...groups.values()].sort((a, b) => {
       const aLast = Math.max(...a.sessions.map(s => s.startedAt || 0));
       const bLast = Math.max(...b.sessions.map(s => s.startedAt || 0));
@@ -424,23 +235,29 @@
     const turns     = _msgCount(s.history);
 
     const card = document.createElement('div');
-    card.className = 'session-card';
+    card.className = 'glass-card session-card glass-card-hover';
     card.onclick   = () => openSession(s.threadId);
     card.innerHTML = `
-      <div class="session-icon ${isDone ? 'done' : 'progress'}">${isDone ? '✅' : '🎙️'}</div>
+      <div class="session-icon ${isDone ? 'done' : 'progress'}">
+        <i data-lucide="${isDone ? 'check-circle' : 'mic'}" style="width:20px;height:20px;"></i>
+      </div>
       <div class="session-body">
         <div class="session-row1">
           <span class="session-date">${_fmt(s.startedAt)}</span>
-          <span class="session-badge ${isDone ? 'done' : 'progress'}">${isDone ? t('history.badges.completed') : t('history.badges.inProgress')}</span>
+          <span class="badge ${isDone ? 'badge-primary' : ''}" style="${isDone ? 'background:var(--status-success-bg);color:var(--status-success);border-color:var(--status-success-border)' : ''}">${isDone ? 'Completed' : 'In Progress'}</span>
         </div>
         <div class="session-row2">
           <span class="session-phase">${_escHtml(phaseText)}</span>
-          <span class="session-msgs">· ${turns} ${turns !== 1 ? t('history.session.answers') : t('history.session.answer')}</span>
+          <span class="session-msgs">· ${turns} answer${turns !== 1 ? 's' : ''}</span>
         </div>
       </div>
       <div class="session-actions">
-        <span class="continue-btn">${isDone ? t('history.session.review') : t('history.session.continue')}</span>
-        <button class="delete-btn" title="Delete">🗑</button>
+        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px; pointer-events: none;">
+          ${isDone ? 'Review' : 'Continue'} <i data-lucide="chevron-right" style="width:14px;height:14px"></i>
+        </button>
+        <button class="delete-btn" title="Delete">
+          <i data-lucide="trash-2" style="width:16px;height:16px"></i>
+        </button>
       </div>`;
 
     card.querySelector('.delete-btn').addEventListener('click', (e) => {
@@ -454,8 +271,6 @@
     const listEl  = document.getElementById('session-list');
     const subEl   = document.getElementById('page-sub');
 
-    const active = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
-
     try {
       const res = await fetch('/sessions', { headers: { 'Authorization': `Bearer ${_authToken}` } });
       _sessionList = res.ok ? await res.json() : [];
@@ -465,17 +280,18 @@
       subEl.textContent = '';
       listEl.innerHTML = `
         <div class="empty-state">
-          <div class="empty-icon">🎤</div>
-          <div class="empty-title">${t('history.empty.title')}</div>
-          <div class="empty-sub">${t('history.empty.sub')}</div>
-          <a class="start-btn" href="/onboarding.html">${t('history.empty.start')}</a>
+          <div class="empty-icon"><i data-lucide="clipboard-x" style="width:32px;height:32px"></i></div>
+          <div class="empty-title">No interviews yet</div>
+          <div class="empty-sub">Start your first mock interview to see it here.</div>
+          <a class="btn btn-primary" href="/onboarding.html">Start new interview</a>
         </div>`;
+      lucide.createIcons();
       return;
     }
 
     const groups = _groupByRole(_sessionList);
     const totalRoles = groups.filter(g => g.jobTitle).length;
-    subEl.textContent = t('history.summary', { count: _sessionList.length, roles: totalRoles });
+    subEl.textContent = `${_sessionList.length} total sessions across ${totalRoles} roles.`;
 
     listEl.innerHTML = '';
 
@@ -487,19 +303,20 @@
       const completedCount = group.sessions.filter(s => s.fase === 'done').length;
       const total          = group.sessions.length;
 
-      // Role header
       const header = document.createElement('div');
-      header.className = isUnknown ? 'role-header unknown' : 'role-header';
+      header.className = 'role-header';
       header.innerHTML = `
-        <div class="role-icon">${isUnknown ? '❓' : '💼'}</div>
+        <div class="role-icon" ${isUnknown ? 'style="background:var(--bg-surface);color:var(--text-tertiary);border-color:var(--bg-surface-border)"' : ''}>
+          <i data-lucide="${isUnknown ? 'help-circle' : 'briefcase'}" style="width:24px;height:24px"></i>
+        </div>
         <div class="role-info">
-          <div class="role-title">${_escHtml(group.jobTitle || t('history.noRoleInfo'))}</div>
+          <div class="role-title" ${isUnknown ? 'style="color:var(--text-secondary);font-style:italic"' : ''}>${_escHtml(group.jobTitle || 'Unknown Role')}</div>
           ${group.company ? `<div class="role-company">${_escHtml(group.company)}</div>` : ''}
-          <div class="role-count">${t('history.roleCount', { total, completed: completedCount })}</div>
+          <div class="role-count">${total} sessions · ${completedCount} completed</div>
         </div>
         <div class="role-actions">
           ${!isUnknown && group.jobSessionId
-            ? `<button class="practice-btn" data-jid="${_escHtml(group.jobSessionId)}" data-title="${_escHtml(group.jobTitle)}" data-company="${_escHtml(group.company)}">🔄 ${t('history.session.practiceAgain')}</button>`
+            ? `<button class="btn btn-secondary practice-btn" style="padding: 6px 12px; font-size: 12px;" data-jid="${_escHtml(group.jobSessionId)}" data-title="${_escHtml(group.jobTitle)}" data-company="${_escHtml(group.company)}"><i data-lucide="refresh-cw" style="width:14px;height:14px"></i> Practice again</button>`
             : ''}
         </div>`;
 
@@ -511,7 +328,6 @@
 
       groupEl.appendChild(header);
 
-      // Session cards under this group (newest first)
       const sessionListEl = document.createElement('div');
       sessionListEl.className = 'session-list';
       const sorted = [...group.sessions].sort((a, b) => (b.startedAt || 0) - (a.startedAt || 0));
@@ -520,42 +336,32 @@
 
       listEl.appendChild(groupEl);
     }
+    lucide.createIcons();
   }
 
-  render();
-</script>
-<script>
-(function(){
-  try {
-    const u = JSON.parse(localStorage.getItem('auth_user')||'null');
-    if(!u) return;
-    const el = document.getElementById('plan-pill');
-    if(!el) return;
-    const isHunter = u.plan === 'hunter';
-    el.className = 'plan-pill ' + (isHunter ? 'hunter' : 'explorer');
-    el.textContent = isHunter ? '🎯 Hunter' : '🗺️ Explorer';
-    el.setAttribute('data-tooltip', 'Your current plan');
-    el.style.display = 'inline-block';
-    el.style.cursor = 'pointer';
-    el.addEventListener('click', () => location.href = '/upgrade.html');
-  } catch(_){}
-})();
-(async function(){
-  try {
-    const tok = localStorage.getItem('auth_token');
-    if (!tok) return;
-    const res = await fetch('/auth/usage', { headers: { 'Authorization': 'Bearer ' + tok } });
-    if (!res.ok) return;
-    const usage = await res.json();
-    const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
-    if (u && u.plan !== usage.plan) { u.plan = usage.plan; localStorage.setItem('auth_user', JSON.stringify(u)); }
-    const el = document.getElementById('plan-pill');
-    if (!el) return;
-    const isHunter = usage.plan === 'hunter';
-    el.className = 'plan-pill ' + (isHunter ? 'hunter' : 'explorer');
-    el.textContent = isHunter ? '🎯 Hunter' : '🗺️ Explorer';
-  } catch(_){}
-})();
+  document.addEventListener('DOMContentLoaded', render);
+
+  // Load user plan info
+  (async function(){
+    try {
+      const res = await fetch('/auth/usage', { headers: { 'Authorization': 'Bearer ' + _authToken } });
+      if (!res.ok) return;
+      const usage = await res.json();
+      const el = document.getElementById('plan-pill');
+      if (!el) return;
+      const isHunter = usage.plan === 'hunter';
+      el.className = 'badge ' + (isHunter ? 'badge-primary' : '');
+      el.innerHTML = isHunter ? '<i data-lucide="target" style="width:12px;height:12px;margin-right:4px"></i> Hunter' : '<i data-lucide="map" style="width:12px;height:12px;margin-right:4px"></i> Explorer';
+      el.setAttribute('data-tooltip', isHunter ? 'Your current plan' : 'Upgrade to Hunter for more sessions');
+      if(!isHunter) {
+        el.style.border = '1px solid var(--bg-surface-border)';
+        el.style.color = 'var(--text-secondary)';
+      }
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', () => location.href = '/upgrade.html');
+      lucide.createIcons();
+    } catch(_){}
+  })();
 </script>
 <script src="/mobile-menu.js"></script>
 <script src="/contact-widget.js"></script>

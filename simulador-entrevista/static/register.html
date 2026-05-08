@@ -4,154 +4,109 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title data-i18n="register.pageTitle">Create Account — Acing Interview</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  
   <script src="/i18n.js"></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0f1117;
-      color: #e2e8f0;
-      min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-    .card {
-      background: #1a1d27;
-      border: 1px solid #2d3148;
-      border-radius: 16px;
-      padding: 40px 36px;
-      width: 100%;
-      max-width: 420px;
-    }
-    .logo {
-      width: 48px; height: 48px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      border-radius: 14px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 24px;
-      margin: 0 auto 20px;
-    }
-    h1 { font-size: 22px; font-weight: 700; color: #f1f5f9; text-align: center; margin-bottom: 6px; }
-    .subtitle { font-size: 13px; color: #64748b; text-align: center; margin-bottom: 28px; }
-    label { display: block; font-size: 13px; font-weight: 500; color: #94a3b8; margin-bottom: 6px; }
-    input, select {
-      width: 100%; padding: 10px 14px;
-      background: #0f1117; border: 1px solid #2d3148;
-      border-radius: 8px; color: #f1f5f9; font-size: 14px;
-      outline: none; transition: border-color 0.2s;
-      margin-bottom: 16px;
-    }
-    input:focus, select:focus { border-color: #6366f1; }
-    input::placeholder { color: #475569; }
-    select option { background: #1a1d27; }
-    .btn {
-      width: 100%; padding: 11px;
-      background: linear-gradient(135deg, #6366f1, #7c3aed);
-      border: none; border-radius: 8px;
-      color: #fff; font-size: 15px; font-weight: 600;
-      cursor: pointer; transition: opacity 0.2s; margin-top: 4px;
-    }
-    .btn:hover { opacity: 0.9; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .error {
-      background: #450a0a; border: 1px solid #7f1d1d;
-      color: #fca5a5; border-radius: 8px;
-      padding: 10px 14px; font-size: 13px;
-      margin-bottom: 16px; display: none;
-    }
-    .footer { text-align: center; font-size: 13px; color: #64748b; margin-top: 24px; }
-    .footer a { color: #818cf8; text-decoration: none; }
-    .footer a:hover { text-decoration: underline; }
-    .spinner {
-      display: inline-block; width: 14px; height: 14px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: #fff; border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      vertical-align: middle; margin-right: 6px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .hint { font-size: 11px; color: #475569; margin-top: -12px; margin-bottom: 16px; }
-    .lang-switcher {
-      display: flex; align-items: center; justify-content: center; gap: 2px;
-      margin-top: 20px;
-    }
-    .lang-btn {
-      font-size: 11px; font-weight: 600; padding: 3px 10px;
-      border-radius: 6px; border: 1px solid #2d3148;
-      background: transparent; color: #475569;
-      cursor: pointer; transition: all 0.15s;
-    }
-    .lang-btn:hover { color: #94a3b8; }
-    .lang-btn.lang-active { background: #2d3148; color: #e2e8f0; border-color: #2d3148; }
-  </style>
 </head>
 <body>
-<div class="card">
-  <a href="/" style="text-decoration:none"><div class="logo">🎯</div></a>
-  <h1 data-i18n="register.title">Create your account</h1>
-  <p class="subtitle" data-i18n="register.subtitle">Practice interviews personalized to your resume and target role</p>
 
-  <div class="error" id="error-msg"></div>
+<div class="auth-wrapper">
+  <div class="glass-card auth-card">
+    <div class="auth-header">
+      <a href="/" style="text-decoration:none">
+        <div class="auth-header-logo">
+          <i data-lucide="target"></i>
+        </div>
+      </a>
+      <h1 data-i18n="register.title">Create your account</h1>
+      <p data-i18n="register.subtitle">Practice interviews personalized to your resume</p>
+    </div>
 
-  <form id="register-form" autocomplete="on">
-    <label for="name" data-i18n="register.name">Full name</label>
-    <input type="text" id="name" name="name" data-i18n-attr="placeholder:register.namePlaceholder" placeholder="Alex Johnson" required autocomplete="name" />
+    <div class="alert alert-error" id="error-msg" style="display:none">
+      <i data-lucide="alert-circle" style="width:18px;height:18px;flex-shrink:0;margin-top:1px"></i>
+      <span id="error-text"></span>
+    </div>
 
-    <label for="email" data-i18n="register.email">Email</label>
-    <input type="email" id="email" name="email" data-i18n-attr="placeholder:register.emailPlaceholder" placeholder="you@example.com" required autocomplete="email" />
+    <form id="register-form" autocomplete="on">
+      <div class="form-group">
+        <label class="form-label" for="name" data-i18n="register.name">Full name</label>
+        <input class="form-input" type="text" id="name" name="name" data-i18n-attr="placeholder:register.namePlaceholder" placeholder="Alex Johnson" required autocomplete="name" />
+      </div>
 
-    <label for="password" data-i18n="register.password">Password</label>
-    <input type="password" id="password" name="password" data-i18n-attr="placeholder:register.passwordPlaceholder" placeholder="At least 8 characters" required autocomplete="new-password" />
-    <p class="hint" data-i18n="register.passwordHint">Minimum 8 characters</p>
+      <div class="form-group">
+        <label class="form-label" for="email" data-i18n="register.email">Email</label>
+        <input class="form-input" type="email" id="email" name="email" data-i18n-attr="placeholder:register.emailPlaceholder" placeholder="you@example.com" required autocomplete="email" />
+      </div>
 
-    <label for="language" data-i18n="register.language">Interview language</label>
-    <select id="language" name="language">
-      <option value="en" selected data-i18n="register.langEn">English</option>
-      <option value="pt" data-i18n="register.langPt">Portuguese</option>
-    </select>
+      <div class="form-group">
+        <label class="form-label" for="password" data-i18n="register.password">Password</label>
+        <input class="form-input" type="password" id="password" name="password" data-i18n-attr="placeholder:register.passwordPlaceholder" placeholder="At least 8 characters" required autocomplete="new-password" />
+        <p style="font-size:11px; margin-top:4px; color:var(--text-tertiary)" data-i18n="register.passwordHint">Minimum 8 characters</p>
+      </div>
 
-    <button class="btn" type="submit" id="submit-btn" data-i18n="register.submit">Create account</button>
-  </form>
+      <div class="form-group">
+        <label class="form-label" for="language" data-i18n="register.language">Interview language</label>
+        <select class="form-input" id="language" name="language" style="appearance:none; padding-right:32px; background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2394a3b8%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22></polyline></svg>'); background-repeat:no-repeat; background-position:right 12px center;">
+          <option value="en" selected data-i18n="register.langEn">English</option>
+          <option value="pt" data-i18n="register.langPt">Portuguese</option>
+        </select>
+      </div>
 
-  <div class="footer">
-    <span data-i18n="register.haveAccount">Already have an account?</span> <a href="/login.html" data-i18n="register.signIn">Sign in →</a>
-  </div>
+      <button class="btn btn-primary" style="width:100%; margin-top:8px;" type="submit" id="submit-btn" data-i18n="register.submit">Create account</button>
+    </form>
 
-  <div class="lang-switcher">
-    <button class="lang-btn" data-lang="en" onclick="i18n.switchLang('en')">EN</button>
-    <button class="lang-btn" data-lang="pt" onclick="i18n.switchLang('pt')">PT</button>
+    <div class="auth-footer">
+      <span data-i18n="register.haveAccount">Already have an account?</span> <a href="/login.html" data-i18n="register.signIn">Sign in &rarr;</a>
+    </div>
+
+    <div class="flex justify-center mt-6">
+      <div class="lang-switcher">
+        <button class="lang-btn" data-lang="en" onclick="i18n.switchLang('en')">EN</button>
+        <button class="lang-btn" data-lang="pt" onclick="i18n.switchLang('pt')">PT</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
+  lucide.createIcons();
+
   const token = localStorage.getItem('auth_token');
   if (token) { location.replace('/index.html'); }
 
   const form      = document.getElementById('register-form');
   const errorMsg  = document.getElementById('error-msg');
+  const errorText = document.getElementById('error-text');
   const submitBtn = document.getElementById('submit-btn');
 
   function showError(msg) {
-    errorMsg.textContent = msg;
-    errorMsg.style.display = 'block';
+    errorText.textContent = msg;
+    errorMsg.style.display = 'flex';
   }
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     errorMsg.style.display = 'none';
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="spinner"></span>' + t('register.creating');
+    submitBtn.innerHTML = '<span class="spinner"></span>' + (window.t ? window.t('register.creating') : 'Creating account...');
 
     const name     = document.getElementById('name').value.trim();
     const email    = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const language = document.getElementById('language').value;
 
-    if (!name) { showError(t('register.errorName')); submitBtn.disabled = false; submitBtn.textContent = t('register.submit'); return; }
-    if (password.length < 8) { showError(t('register.errorPassword')); submitBtn.disabled = false; submitBtn.textContent = t('register.submit'); return; }
+    if (!name) { showError(window.t ? window.t('register.errorName') : 'Name required'); submitBtn.disabled = false; submitBtn.textContent = window.t ? window.t('register.submit') : 'Create account'; return; }
+    if (password.length < 8) { showError(window.t ? window.t('register.errorPassword') : 'Password too short'); submitBtn.disabled = false; submitBtn.textContent = window.t ? window.t('register.submit') : 'Create account'; return; }
 
     try {
       const res = await fetch('/auth/register', {
@@ -161,7 +116,7 @@
       });
       const data = await res.json();
       if (!res.ok) {
-        showError(data.detail || t('register.errorDefault'));
+        showError(data.detail || (window.t ? window.t('register.errorDefault') : 'Error occurred'));
         return;
       }
       localStorage.setItem('auth_token', data.access_token);
@@ -169,10 +124,10 @@
       localStorage.setItem('preferred_lang', language);
       location.replace('/onboarding.html');
     } catch (err) {
-      showError(t('register.errorNetwork'));
+      showError(window.t ? window.t('register.errorNetwork') : 'Network error');
     } finally {
       submitBtn.disabled = false;
-      submitBtn.textContent = t('register.submit');
+      submitBtn.textContent = window.t ? window.t('register.submit') : 'Create account';
     }
   });
 </script>

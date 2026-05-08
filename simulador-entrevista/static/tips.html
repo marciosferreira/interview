@@ -4,330 +4,164 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title data-i18n="tips.pageTitle">Interview Tips — Acing Interview</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  
   <script src="/i18n.js"></script>
+  
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0f1117;
-      color: #e2e8f0;
-      min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* ── Header ── */
-    header {
-      padding: 14px 24px;
-      background: #1a1d27;
-      border-bottom: 1px solid #2d3148;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-shrink: 0;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .logo {
-      width: 36px; height: 36px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; flex-shrink: 0;
-    }
-    header h1 { font-size: 16px; font-weight: 600; color: #f1f5f9; }
-    header p  { font-size: 12px; color: #64748b; margin-top: 1px; }
-    .home-link {
-      display: flex; align-items: center; gap: 12px;
-      text-decoration: none; color: inherit;
-      border-radius: 10px; padding: 2px 6px; margin: -2px -6px;
-      transition: background 0.2s;
-    }
-    .home-link:hover { background: rgba(99,102,241,0.08); }
-
-    .plan-pill {
-      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
-      text-transform: uppercase; padding: 3px 10px; border-radius: 20px;
-      flex-shrink: 0; display: none;
-    }
-    .plan-pill { position: relative; cursor: default; }
-    .plan-pill.hunter  { background: #312e81; color: #a5b4fc; }
-    .plan-pill.explorer { background: #1e293b; color: #64748b; }
-    .plan-pill::after {
-      content: attr(data-tooltip); position: absolute;
-      bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
-      background: #1e2235; border: 1px solid #3d4160; color: #e2e8f0;
-      font-size: 11px; font-weight: 500; text-transform: none; letter-spacing: 0;
-      white-space: nowrap; padding: 5px 10px; border-radius: 8px;
-      pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 999;
-    }
-    .plan-pill:hover::after, .plan-pill.tooltip-open::after { opacity: 1; }
-
-    .hdr-btn {
-      font-size: 11px; font-weight: 500;
-      padding: 5px 12px; border-radius: 20px;
-      background: transparent; border: 1px solid #2d3148;
-      color: #64748b; cursor: pointer; transition: all 0.2s;
-      text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
-      flex-shrink: 0;
-    }
-    .hdr-btn:hover { border-color: #6366f1; color: #a78bfa; }
-    .hdr-spacer { margin-left: auto; }
-
-    /* ── Hamburger button ── */
-    #hamburger-btn {
-      display: none; margin-left: 8px;
-      background: transparent; border: 1px solid #2d3148;
-      color: #94a3b8; border-radius: 8px;
-      width: 36px; height: 36px; font-size: 18px;
-      cursor: pointer; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-
-    /* ── Mobile drawer ── */
-    #mobile-drawer { display: none; position: fixed; inset: 0; z-index: 8000; }
-    #mobile-drawer.open { display: block; }
-    .drawer-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
-    .drawer-panel {
-      position: absolute; top: 0; right: 0; bottom: 0;
-      width: min(280px, 85vw);
-      background: #1a1d27; border-left: 1px solid #2d3148;
-      display: flex; flex-direction: column;
-      padding: 16px; gap: 6px; overflow-y: auto;
-      animation: slideIn 0.22s ease;
-    }
-    @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-    .drawer-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding-bottom: 12px; margin-bottom: 6px; border-bottom: 1px solid #2d3148;
-    }
-    .drawer-header span { font-size: 14px; font-weight: 600; color: #f1f5f9; }
-    .drawer-close { background: transparent; border: none; color: #64748b; font-size: 18px; cursor: pointer; padding: 4px; }
-    .drawer-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 12px 14px; border-radius: 10px;
-      font-size: 14px; font-weight: 500; color: #94a3b8;
-      text-decoration: none; background: transparent;
-      border: none; cursor: pointer; width: 100%; text-align: left;
-      transition: background 0.15s, color 0.15s;
-    }
-    .drawer-item:hover { background: #2d3148; color: #e2e8f0; }
-    .drawer-item .di-icon { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
-    .drawer-divider { height: 1px; background: #2d3148; margin: 4px 0; }
-
-    /* ── Mobile header ── */
-    @media (max-width: 768px) {
-      header { padding: 10px 12px; gap: 8px; }
-      .home-link > div { display: none; }
-      .plan-pill { display: none !important; }
-      .hdr-spacer { display: none; }
-      .lang-switcher { display: none; }
-      .hdr-btn { display: none; }
-      #hamburger-btn { display: flex; margin-left: auto; }
-    }
-
-    /* ── Language switcher ── */
-    .lang-switcher {
-      display: flex; align-items: center; gap: 2px;
-      background: #0f1117; border: 1px solid #2d3148;
-      border-radius: 8px; padding: 2px;
-    }
-    .lang-btn {
-      font-size: 11px; font-weight: 600; padding: 3px 8px;
-      border-radius: 6px; border: none; background: transparent;
-      color: #475569; cursor: pointer; transition: all 0.15s;
-    }
-    .lang-btn:hover { color: #94a3b8; }
-    .lang-btn.lang-active { background: #2d3148; color: #e2e8f0; }
-
-    /* ── Main content ── */
     main {
       flex: 1;
-      padding: 48px 16px 80px;
-      max-width: 760px;
+      padding: 64px 24px 80px;
+      max-width: 800px;
       margin: 0 auto;
       width: 100%;
     }
 
-    /* ── Hero ── */
-    .hero {
-      text-align: center;
-      margin-bottom: 52px;
-    }
-    .hero-badge {
-      display: inline-block;
-      font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
-      text-transform: uppercase; padding: 4px 14px; border-radius: 20px;
-      background: #1e1b4b; color: #818cf8; border: 1px solid #3730a3;
-      margin-bottom: 20px;
-    }
-    .hero h2 {
-      font-size: clamp(22px, 4vw, 32px);
-      font-weight: 800; color: #f1f5f9; line-height: 1.2;
-      margin-bottom: 12px;
-    }
-    .hero p {
-      font-size: 14px;
-      color: #64748b;
-      max-width: 520px;
-      margin: 0 auto;
-      line-height: 1.65;
-    }
+    /* Hero */
+    .hero { text-align: center; margin-bottom: 64px; }
+    .hero-badge { margin-bottom: 24px; }
+    .hero h2 { font-size: clamp(28px, 4vw, 40px); font-weight: 800; color: var(--text-primary); margin-bottom: 16px; }
+    .hero p { font-size: 16px; color: var(--text-secondary); max-width: 600px; margin: 0 auto; line-height: 1.6; }
 
-    /* ── Section card ── */
+    /* Tip Card */
     .tip-card {
-      background: #1a1d27;
-      border: 1px solid #2d3148;
-      border-radius: 16px;
-      padding: 28px 28px 24px;
-      margin-bottom: 24px;
+      background: var(--bg-surface); border: 1px solid var(--bg-surface-border);
+      border-radius: var(--radius-lg); padding: 32px; margin-bottom: 32px;
     }
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 18px;
-    }
+    
+    .card-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
     .card-icon {
-      width: 40px; height: 40px;
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0;
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
-    .card-icon.indigo  { background: #1e1b4b; }
-    .card-icon.green   { background: #052e16; }
-    .card-icon.amber   { background: #1c1407; border: 1px solid #78350f; }
-    .card-icon.red     { background: #1a0f0f; }
-    .card-icon.blue    { background: #0c1a2e; }
-    .card-icon.purple  { background: #1a0f2e; }
+    .card-icon.indigo { background: rgba(99, 102, 241, 0.1); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.2); }
+    .card-icon.green  { background: rgba(16, 185, 129, 0.1); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.2); }
+    .card-icon.amber  { background: rgba(245, 158, 11, 0.1); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.2); }
+    .card-icon.blue   { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); }
+    .card-icon.purple { background: rgba(168, 85, 247, 0.1); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.2); }
+    .card-icon.red    { background: rgba(239, 68, 68, 0.1);  color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
 
-    .card-title { flex: 1; }
-    .card-title h3 { font-size: 16px; font-weight: 700; color: #f1f5f9; margin-bottom: 2px; }
-    .card-title span { font-size: 11px; color: #475569; font-weight: 500; }
+    .card-title flex: 1; }
+    .card-title h3 { font-size: 20px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+    .card-title span { font-size: 13px; color: var(--text-tertiary); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
 
-    .card-body { font-size: 13.5px; line-height: 1.75; color: #94a3b8; }
-    .card-body p { margin-bottom: 12px; }
+    .card-body { font-size: 15px; line-height: 1.7; color: var(--text-secondary); }
+    .card-body p { margin-bottom: 16px; }
     .card-body p:last-child { margin-bottom: 0; }
-    .card-body strong { color: #e2e8f0; }
-    .card-body em { color: #a78bfa; font-style: normal; font-weight: 600; }
+    .card-body strong { color: var(--text-primary); font-weight: 600; }
+    .card-body em { color: var(--brand-secondary); font-style: normal; font-weight: 600; }
 
-    /* ── Structure breakdown ── */
-    .structure { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
-    .structure-row { display: flex; align-items: flex-start; gap: 12px; }
+    /* Structure breakdown */
+    .structure { display: flex; flex-direction: column; gap: 16px; margin: 24px 0; }
+    .structure-row {
+      display: flex; gap: 16px; align-items: flex-start;
+      background: rgba(0,0,0,0.2); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--bg-surface-border);
+    }
     .structure-label {
-      font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
-      text-transform: uppercase; padding: 3px 10px; border-radius: 6px;
-      white-space: nowrap; flex-shrink: 0; margin-top: 1px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 4px 12px; border-radius: var(--radius-sm); white-space: nowrap; flex-shrink: 0;
     }
-    .structure-label.indigo { background: #1e1b4b; color: #818cf8; }
-    .structure-label.green  { background: #052e16; color: #4ade80; }
-    .structure-label.amber  { background: #1c1407; color: #fbbf24; border: 1px solid #78350f; }
-    .structure-label.teal   { background: #042f2e; color: #2dd4bf; }
-    .structure-label.slate  { background: #1e293b; color: #94a3b8; }
-    .structure-row p { font-size: 13px; line-height: 1.65; color: #94a3b8; margin: 0; }
-    .structure-row p strong { color: #e2e8f0; }
+    .structure-label.indigo { background: #312e81; color: #a5b4fc; }
+    .structure-label.green  { background: #14532d; color: #86efac; }
+    .structure-label.amber  { background: #78350f; color: #fde68a; }
+    .structure-label.teal   { background: #134e4a; color: #99f6e4; }
+    .structure-row p { margin: 0; font-size: 14px; }
 
-    /* ── Example block ── */
+    /* Example block */
     .example-block {
-      background: #0f1117; border: 1px solid #2d3148;
-      border-radius: 10px; padding: 16px 18px; margin: 16px 0;
+      background: var(--bg-base); border: 1px solid var(--bg-surface-border);
+      border-radius: var(--radius-md); padding: 20px; margin: 24px 0;
     }
-    .example-label {
-      font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
-      text-transform: uppercase; color: #475569; margin-bottom: 8px;
-    }
-    .example-text { font-size: 13px; line-height: 1.7; color: #c4b5fd; font-style: italic; }
-    .example-text.green { color: #86efac; }
-    .example-text.red   { color: #fca5a5; }
+    .example-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .example-text { font-size: 14px; line-height: 1.7; font-style: italic; }
+    .example-text.green { color: #34d399; }
+    .example-text.red   { color: #f87171; }
 
-    /* ── Do / Don't ── */
-    .do-dont { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
-    @media (max-width: 520px) { .do-dont { grid-template-columns: 1fr; } }
-    .do-block, .dont-block { border-radius: 10px; padding: 14px 16px; }
-    .do-block   { background: #052e16; border: 1px solid #166534; }
-    .dont-block { background: #1a0f0f; border: 1px solid #450a0a; }
-    .do-block .dd-label   { color: #4ade80; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
-    .dont-block .dd-label { color: #f87171; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
-    .do-block ul, .dont-block ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
-    .do-block li   { font-size: 12.5px; color: #86efac; line-height: 1.5; display: flex; gap: 7px; }
-    .dont-block li { font-size: 12.5px; color: #fca5a5; line-height: 1.5; display: flex; gap: 7px; }
-    .do-block li::before   { content: "✓"; font-weight: 700; color: #22c55e; flex-shrink: 0; }
-    .dont-block li::before { content: "✕"; font-weight: 700; color: #ef4444; flex-shrink: 0; }
+    /* Do / Don't */
+    .do-dont { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+    @media (max-width: 600px) { .do-dont { grid-template-columns: 1fr; } }
+    .do-block, .dont-block { border-radius: var(--radius-md); padding: 20px; }
+    .do-block   { background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); }
+    .dont-block { background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); }
+    .dd-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .do-block .dd-label { color: var(--status-success); }
+    .dont-block .dd-label { color: var(--status-error); }
+    .do-block ul, .dont-block ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .do-block li { font-size: 14px; color: #a7f3d0; line-height: 1.5; display: flex; align-items: flex-start; gap: 8px; }
+    .dont-block li { font-size: 14px; color: #fecaca; line-height: 1.5; display: flex; align-items: flex-start; gap: 8px; }
 
-    /* ── Tip list ── */
-    .tip-list { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
-    .tip-item { display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; color: #94a3b8; line-height: 1.65; }
-    .tip-item::before { content: "→"; color: #6366f1; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
-    .tip-item strong { color: #e2e8f0; }
-
-    .divider { border: none; border-top: 1px solid #1e2235; margin: 36px 0; }
-
-    /* ── CTA ── */
+    /* Tip list */
+    .tip-list { display: flex; flex-direction: column; gap: 16px; margin-top: 16px; }
+    .tip-item { display: flex; align-items: flex-start; gap: 12px; font-size: 15px; color: var(--text-secondary); line-height: 1.6; }
+    .tip-item i { color: var(--brand-primary); flex-shrink: 0; margin-top: 2px; }
+    
+    /* CTA */
     .cta-block {
-      background: linear-gradient(135deg, #1e1b4b, #1a1d27);
-      border: 1px solid #4f46e5; border-radius: 16px;
-      padding: 32px 28px; text-align: center;
+      background: var(--brand-gradient);
+      border-radius: var(--radius-xl);
+      padding: 48px; text-align: center;
+      margin-top: 64px; box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.4);
     }
-    .cta-block h3 { font-size: 18px; font-weight: 700; color: #f1f5f9; margin-bottom: 10px; }
-    .cta-block p {
-      font-size: 13.5px; color: #94a3b8; line-height: 1.65;
-      margin-bottom: 24px; max-width: 420px; margin-left: auto; margin-right: auto;
-    }
-    .cta-btn {
-      display: inline-block; padding: 12px 28px; border-radius: 24px;
-      background: linear-gradient(135deg, #6366f1, #7c3aed);
-      color: #fff; font-size: 14px; font-weight: 600;
-      text-decoration: none; transition: opacity 0.2s, transform 0.15s;
-    }
-    .cta-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .cta-block h3 { font-size: 28px; font-weight: 800; color: white; margin-bottom: 16px; }
+    .cta-block p { font-size: 16px; color: rgba(255,255,255,0.8); margin-bottom: 32px; max-width: 500px; margin-left: auto; margin-right: auto; line-height: 1.6; }
   </style>
 </head>
 <body>
 
-<header>
-  <a class="home-link" href="/">
-    <div class="logo">🎯</div>
-    <div>
+<!-- Global Header -->
+<header class="app-header">
+  <a class="header-brand-link" href="/">
+    <div class="header-logo"><i data-lucide="target" style="width: 22px; height: 22px;"></i></div>
+    <div class="header-brand-info">
       <h1>Acing Interview</h1>
-      <p data-i18n="tips.header.tagline">Interview Tips &amp; Frameworks</p>
+      <p data-i18n="tips.header.tagline">Interview Tips & Frameworks</p>
     </div>
   </a>
-  <span class="hdr-spacer"></span>
-  <span id="plan-pill" class="plan-pill"></span>
-  <div class="lang-switcher">
-    <button class="lang-btn" data-lang="en" onclick="i18n.switchLang('en')">EN</button>
-    <button class="lang-btn" data-lang="pt" onclick="i18n.switchLang('pt')">PT</button>
+  
+  <div class="header-actions">
+    <span id="plan-pill" class="badge"></span>
+    <div class="lang-switcher">
+      <button class="lang-btn" data-lang="en" onclick="i18n.switchLang('en')">EN</button>
+      <button class="lang-btn" data-lang="pt" onclick="i18n.switchLang('pt')">PT</button>
+    </div>
+    <a id="hdr-history" class="nav-link" href="/history.html" style="display:none"><i data-lucide="clipboard-list" style="width:16px;height:16px;"></i> History</a>
+    <a id="hdr-practice" class="btn btn-primary" style="padding: 6px 12px; font-size: 13px;" href="/interview.html" data-i18n="tips.nav.practice"><i data-lucide="play" style="width:16px;height:16px;"></i> Practice</a>
+    <a id="hdr-login" class="nav-link" href="/login.html" style="display:none" data-i18n="nav.signin">Log in</a>
   </div>
-  <a id="hdr-history" class="hdr-btn" href="/history.html" style="display:none" data-i18n="tips.nav.history">📋 History</a>
-  <a id="hdr-practice" class="hdr-btn" href="/interview.html" data-i18n="tips.nav.practice">▶ Practice</a>
-  <a id="hdr-login"    class="hdr-btn" href="/login.html"    style="display:none" data-i18n="nav.signin">Log in</a>
-  <button id="hamburger-btn" aria-label="Menu">☰</button>
+  
+  <button class="mobile-menu-btn" id="hamburger-btn" aria-label="Menu"><i data-lucide="menu"></i></button>
 </header>
+
 <div id="mobile-drawer">
-  <div class="drawer-backdrop"></div>
+  <div class="drawer-backdrop" onclick="closeMobileMenu()"></div>
   <nav class="drawer-panel">
     <div class="drawer-header">
       <span>Menu</span>
-      <button class="drawer-close" onclick="closeMobileMenu()">✕</button>
+      <button class="drawer-close" onclick="closeMobileMenu()"><i data-lucide="x"></i></button>
     </div>
-    <a class="drawer-item" href="/"><span class="di-icon">🏠</span> <span data-i18n="nav.homeLabel">Home</span></a>
-    <a class="drawer-item" href="/interview.html"><span class="di-icon">▶</span> <span data-i18n="tips.nav.practice">Practice</span></a>
-    <a class="drawer-item" id="drawer-history" href="/history.html" style="display:none"><span class="di-icon">📋</span> <span data-i18n="tips.nav.history">History</span></a>
+    <a class="drawer-item" href="/"><i data-lucide="home"></i> <span data-i18n="nav.homeLabel">Home</span></a>
+    <a class="drawer-item" href="/interview.html"><i data-lucide="play"></i> <span data-i18n="tips.nav.practice">Practice</span></a>
+    <a class="drawer-item" id="drawer-history" href="/history.html" style="display:none"><i data-lucide="clipboard-list"></i> <span data-i18n="tips.nav.history">History</span></a>
     <div class="drawer-divider"></div>
-    <a class="drawer-item" id="drawer-login" href="/login.html" style="display:none"><span class="di-icon">🔑</span> <span data-i18n="nav.signin">Log in</span></a>
-    <a class="drawer-item" href="/profile.html" id="drawer-settings" style="display:none"><span class="di-icon">⚙️</span> <span data-i18n="nav.settingsLabel">Settings</span></a>
-    <div class="drawer-divider"></div>
-    <button class="drawer-item" onclick="closeMobileMenu(); window.openContactWidget?.()"><span class="di-icon">✉️</span> Contact us</button>
+    <a class="drawer-item" id="drawer-login" href="/login.html" style="display:none"><i data-lucide="log-in"></i> <span data-i18n="nav.signin">Log in</span></a>
+    <a class="drawer-item" href="/profile.html" id="drawer-settings" style="display:none"><i data-lucide="settings"></i> <span data-i18n="nav.settingsLabel">Settings</span></a>
   </nav>
 </div>
 
 <main>
 
   <div class="hero">
-    <div class="hero-badge" data-i18n="tips.hero.badge">Interview Playbook</div>
+    <div class="badge badge-primary hero-badge" data-i18n="tips.hero.badge">Interview Playbook</div>
     <h2 data-i18n="tips.hero.title">How to Ace Any Interview</h2>
     <p data-i18n="tips.hero.sub">Frameworks, structures, and tips used by top candidates — from the first impression to the final question.</p>
   </div>
@@ -335,7 +169,7 @@
   <!-- 1. Elevator Pitch -->
   <div class="tip-card">
     <div class="card-header">
-      <div class="card-icon indigo">🎤</div>
+      <div class="card-icon indigo"><i data-lucide="mic"></i></div>
       <div class="card-title">
         <h3 data-i18n="tips.cards.elevator.title">The Elevator Pitch</h3>
         <span data-i18n="tips.cards.elevator.sub">Your first 90 seconds — make them count</span>
@@ -350,8 +184,8 @@
         <div class="structure-row"><span class="structure-label teal">Why</span><p>Why <em>this role</em>. Connect something real in your background to something real about the company.</p></div>
       </div>
       <div class="do-dont">
-        <div class="do-block"><div class="dd-label">Do say</div><ul><li>Use "I built", "I led", "I designed"</li><li>Include one specific metric</li><li>End with a strong hook</li><li>Practice until it sounds natural</li></ul></div>
-        <div class="dont-block"><div class="dd-label">Avoid</div><ul><li>Reading your resume chronologically</li><li>Going over 2 minutes</li><li>Vague phrases like "passionate about tech"</li><li>Ending without connecting to the role</li></ul></div>
+        <div class="do-block"><div class="dd-label"><i data-lucide="check-circle" style="width:14px;height:14px"></i> Do say</div><ul><li><i data-lucide="check" style="width:16px;height:16px;color:var(--status-success)"></i> Use "I built", "I led", "I designed"</li><li><i data-lucide="check" style="width:16px;height:16px;color:var(--status-success)"></i> Include one specific metric</li><li><i data-lucide="check" style="width:16px;height:16px;color:var(--status-success)"></i> End with a strong hook</li><li><i data-lucide="check" style="width:16px;height:16px;color:var(--status-success)"></i> Practice until it sounds natural</li></ul></div>
+        <div class="dont-block"><div class="dd-label"><i data-lucide="x-circle" style="width:14px;height:14px"></i> Avoid</div><ul><li><i data-lucide="x" style="width:16px;height:16px;color:var(--status-error)"></i> Reading your resume chronologically</li><li><i data-lucide="x" style="width:16px;height:16px;color:var(--status-error)"></i> Going over 2 minutes</li><li><i data-lucide="x" style="width:16px;height:16px;color:var(--status-error)"></i> Vague phrases like "passionate about tech"</li><li><i data-lucide="x" style="width:16px;height:16px;color:var(--status-error)"></i> Ending without connecting to the role</li></ul></div>
       </div>
     </div>
   </div>
@@ -359,30 +193,30 @@
   <!-- 2. CAR Framework -->
   <div class="tip-card">
     <div class="card-header">
-      <div class="card-icon green">🚗</div>
+      <div class="card-icon green"><i data-lucide="car-front"></i></div>
       <div class="card-title">
         <h3 data-i18n="tips.cards.car.title">The CAR Framework</h3>
-        <span data-i18n="tips.cards.car.sub">Challenge → Action → Result</span>
+        <span data-i18n="tips.cards.car.sub">Challenge &rarr; Action &rarr; Result</span>
       </div>
     </div>
     <div class="card-body" data-i18n-html="tips.cards.car.body">
-      <p>Use CAR for every behavioral question: <strong>"Tell me about a time you…"</strong>, <strong>"Describe a challenge…"</strong>, <strong>"Give me an example of…"</strong></p>
+      <p>Use CAR for every behavioral question: <strong>"Tell me about a time you..."</strong>, <strong>"Describe a challenge..."</strong>, <strong>"Give me an example of..."</strong></p>
       <p>It's also called STAR (Situation, Task, Action, Result) — same idea, CAR is tighter. Think of it as a 2-minute story where you're the protagonist who solves a real problem.</p>
       <div class="structure">
         <div class="structure-row"><span class="structure-label indigo">C — Challenge</span><p>Set the scene in 2–3 sentences. What was the problem, the constraint, or the stakes? Make the interviewer understand <em>why it was hard</em>.</p></div>
         <div class="structure-row"><span class="structure-label green">A — Action</span><p>This is the bulk of your answer. What did <strong>you</strong> specifically decide and do? Use "I", not "we."</p></div>
         <div class="structure-row"><span class="structure-label amber">R — Result</span><p>What happened? Quantify where you can. Also mention what you learned if the outcome was mixed.</p></div>
       </div>
-      <p style="margin-top:16px">The most common mistake is spending too long on the Challenge and rushing the Result. Interviewers care most about the Action — your thinking and your decisions.</p>
-      <div class="example-block"><div class="example-label">Weak answer</div><div class="example-text red">"We had performance issues so the team fixed the database queries and things got faster."</div></div>
-      <div class="example-block"><div class="example-label">Strong CAR answer</div><div class="example-text green">"Our API latency was spiking under load, causing timeouts for 8% of users. I profiled the slowest endpoints and found N+1 query patterns in three critical paths. I refactored them to use batch fetching and added a Redis cache layer. Latency dropped from 1.4s to 180ms and the timeout rate went to zero."</div></div>
+      <p style="margin-top:24px">The most common mistake is spending too long on the Challenge and rushing the Result. Interviewers care most about the Action — your thinking and your decisions.</p>
+      <div class="example-block"><div class="example-label"><i data-lucide="thumbs-down" style="width:14px;height:14px;color:var(--status-error)"></i> Weak answer</div><div class="example-text red">"We had performance issues so the team fixed the database queries and things got faster."</div></div>
+      <div class="example-block"><div class="example-label"><i data-lucide="thumbs-up" style="width:14px;height:14px;color:var(--status-success)"></i> Strong CAR answer</div><div class="example-text green">"Our API latency was spiking under load, causing timeouts for 8% of users. I profiled the slowest endpoints and found N+1 query patterns in three critical paths. I refactored them to use batch fetching and added a Redis cache layer. Latency dropped from 1.4s to 180ms and the timeout rate went to zero."</div></div>
     </div>
   </div>
 
   <!-- 3. Behavioral Questions -->
   <div class="tip-card">
     <div class="card-header">
-      <div class="card-icon blue">🧠</div>
+      <div class="card-icon blue"><i data-lucide="brain-circuit"></i></div>
       <div class="card-title">
         <h3 data-i18n="tips.cards.behavioral.title">Behavioral Questions</h3>
         <span data-i18n="tips.cards.behavioral.sub">Prepare stories, not answers</span>
@@ -391,21 +225,21 @@
     <div class="card-body" data-i18n-html="tips.cards.behavioral.body">
       <p>Behavioral questions probe how you've handled real situations. They're predictable — most fall into 6 themes. Prepare <strong>2–3 strong CAR stories</strong> per theme and you can answer almost anything.</p>
       <div class="tip-list">
-        <div class="tip-item"><span><strong>Leadership &amp; influence</strong> — A time you led without authority, changed someone's mind, or rallied a team.</span></div>
-        <div class="tip-item"><span><strong>Conflict &amp; disagreement</strong> — A time you handled a difficult colleague, pushback from a manager, or a team dispute.</span></div>
-        <div class="tip-item"><span><strong>Failure &amp; learning</strong> — A time something went wrong. Own it, explain what you learned, show you grew.</span></div>
-        <div class="tip-item"><span><strong>Ambiguity &amp; problem-solving</strong> — A time you navigated a vague or changing requirement.</span></div>
-        <div class="tip-item"><span><strong>Prioritization &amp; trade-offs</strong> — A time you had too much to do and had to choose.</span></div>
-        <div class="tip-item"><span><strong>Impact &amp; ownership</strong> — A time you went beyond your role and delivered results that mattered.</span></div>
+        <div class="tip-item"><i data-lucide="arrow-right-circle" style="width:18px;height:18px;"></i><span><strong>Leadership & influence</strong> — A time you led without authority, changed someone's mind, or rallied a team.</span></div>
+        <div class="tip-item"><i data-lucide="arrow-right-circle" style="width:18px;height:18px;"></i><span><strong>Conflict & disagreement</strong> — A time you handled a difficult colleague, pushback from a manager, or a team dispute.</span></div>
+        <div class="tip-item"><i data-lucide="arrow-right-circle" style="width:18px;height:18px;"></i><span><strong>Failure & learning</strong> — A time something went wrong. Own it, explain what you learned, show you grew.</span></div>
+        <div class="tip-item"><i data-lucide="arrow-right-circle" style="width:18px;height:18px;"></i><span><strong>Ambiguity & problem-solving</strong> — A time you navigated a vague or changing requirement.</span></div>
+        <div class="tip-item"><i data-lucide="arrow-right-circle" style="width:18px;height:18px;"></i><span><strong>Prioritization & trade-offs</strong> — A time you had too much to do and had to choose.</span></div>
+        <div class="tip-item"><i data-lucide="arrow-right-circle" style="width:18px;height:18px;"></i><span><strong>Impact & ownership</strong> — A time you went beyond your role and delivered results that mattered.</span></div>
       </div>
-      <p style="margin-top:16px"><em>Pro tip:</em> Your best stories can flex across themes. A story about a system failure can answer leadership, problem-solving, and failure questions. Practice telling the same story with a different lens.</p>
+      <p style="margin-top:24px; padding: 16px; background: rgba(255,255,255,0.05); border-radius: var(--radius-md);"><em>Pro tip:</em> Your best stories can flex across themes. A story about a system failure can answer leadership, problem-solving, and failure questions. Practice telling the same story with a different lens.</p>
     </div>
   </div>
 
   <!-- 4. Role-Specific Questions -->
   <div class="tip-card">
     <div class="card-header">
-      <div class="card-icon purple">🔍</div>
+      <div class="card-icon purple"><i data-lucide="search-code"></i></div>
       <div class="card-title">
         <h3 data-i18n="tips.cards.rolespecific.title">Role-Specific Questions</h3>
         <span data-i18n="tips.cards.rolespecific.sub">Show your thinking, not just your answer</span>
@@ -414,11 +248,11 @@
     <div class="card-body" data-i18n-html="tips.cards.rolespecific.body">
       <p>Role-specific questions test how you think under pressure as much as what you know. This structure works across any field — technical, analytical, or strategic:</p>
       <div class="tip-list">
-        <div class="tip-item"><span><strong>Clarify first.</strong> Before answering, ask one or two clarifying questions. This shows you don't jump to solutions without understanding the problem.</span></div>
-        <div class="tip-item"><span><strong>Think aloud.</strong> Narrate your reasoning as you go. Silence is worse than imperfect thinking.</span></div>
-        <div class="tip-item"><span><strong>Start simple, then build.</strong> Give a direct answer first, then add nuance and trade-offs. Never start by overcomplicating.</span></div>
-        <div class="tip-item"><span><strong>Acknowledge edge cases.</strong> After your answer, proactively mention what could break it or what you'd want to validate. This signals maturity.</span></div>
-        <div class="tip-item"><span><strong>When you don't know, say so — then reason.</strong> "I haven't dealt with this directly, but based on how X works, I'd expect…" is far better than silence or guessing.</span></div>
+        <div class="tip-item"><i data-lucide="check-circle-2" style="width:18px;height:18px;color:var(--status-success)"></i><span><strong>Clarify first.</strong> Before answering, ask one or two clarifying questions. This shows you don't jump to solutions without understanding the problem.</span></div>
+        <div class="tip-item"><i data-lucide="check-circle-2" style="width:18px;height:18px;color:var(--status-success)"></i><span><strong>Think aloud.</strong> Narrate your reasoning as you go. Silence is worse than imperfect thinking.</span></div>
+        <div class="tip-item"><i data-lucide="check-circle-2" style="width:18px;height:18px;color:var(--status-success)"></i><span><strong>Start simple, then build.</strong> Give a direct answer first, then add nuance and trade-offs. Never start by overcomplicating.</span></div>
+        <div class="tip-item"><i data-lucide="check-circle-2" style="width:18px;height:18px;color:var(--status-success)"></i><span><strong>Acknowledge edge cases.</strong> After your answer, proactively mention what could break it or what you'd want to validate. This signals maturity.</span></div>
+        <div class="tip-item"><i data-lucide="check-circle-2" style="width:18px;height:18px;color:var(--status-success)"></i><span><strong>When you don't know, say so — then reason.</strong> "I haven't dealt with this directly, but based on how X works, I'd expect..." is far better than silence or guessing.</span></div>
       </div>
     </div>
   </div>
@@ -426,9 +260,9 @@
   <!-- 5. Motivation & Culture Fit -->
   <div class="tip-card">
     <div class="card-header">
-      <div class="card-icon amber">🎯</div>
+      <div class="card-icon amber"><i data-lucide="compass"></i></div>
       <div class="card-title">
-        <h3 data-i18n="tips.cards.motivation.title">Motivation &amp; Culture Fit</h3>
+        <h3 data-i18n="tips.cards.motivation.title">Motivation & Culture Fit</h3>
         <span data-i18n="tips.cards.motivation.sub">Why this company, why this role, why now</span>
       </div>
     </div>
@@ -439,15 +273,15 @@
         <div class="structure-row"><span class="structure-label green">Role</span><p>Show you've read the job description. Connect specific responsibilities to specific things you've done and want to do more of.</p></div>
         <div class="structure-row"><span class="structure-label amber">Timing</span><p>Why now? What's changed in your trajectory or career goals that makes this the right move at this moment?</p></div>
       </div>
-      <div class="example-block"><div class="example-label">Generic (forgettable)</div><div class="example-text red">"I want to grow my career and I think this company does great work."</div></div>
-      <div class="example-block"><div class="example-label">Specific (memorable)</div><div class="example-text green">"I've been building systems that go to production, and the hardest part has always been the gap between a demo and a reliable system at scale — that's the problem I find most interesting. When I read about what your team is doing with [X], it's exactly that problem. That's why this role caught my attention."</div></div>
+      <div class="example-block"><div class="example-label"><i data-lucide="thumbs-down" style="width:14px;height:14px;color:var(--status-error)"></i> Generic (forgettable)</div><div class="example-text red">"I want to grow my career and I think this company does great work."</div></div>
+      <div class="example-block"><div class="example-label"><i data-lucide="thumbs-up" style="width:14px;height:14px;color:var(--status-success)"></i> Specific (memorable)</div><div class="example-text green">"I've been building systems that go to production, and the hardest part has always been the gap between a demo and a reliable system at scale — that's the problem I find most interesting. When I read about what your team is doing with [X], it's exactly that problem. That's why this role caught my attention."</div></div>
     </div>
   </div>
 
   <!-- 6. Questions to Ask -->
   <div class="tip-card">
     <div class="card-header">
-      <div class="card-icon indigo">💬</div>
+      <div class="card-icon indigo"><i data-lucide="message-square-plus"></i></div>
       <div class="card-title">
         <h3 data-i18n="tips.cards.questions.title">Questions to Ask the Interviewer</h3>
         <span data-i18n="tips.cards.questions.sub">Good questions show curiosity and seriousness</span>
@@ -456,21 +290,21 @@
     <div class="card-body" data-i18n-html="tips.cards.questions.body">
       <p>Always have 3–4 questions ready. "I don't have any questions" is a red flag. These are consistently strong:</p>
       <div class="tip-list">
-        <div class="tip-item"><span>"What does success look like in the first 90 days in this role?"</span></div>
-        <div class="tip-item"><span>"What's the biggest challenge the team is currently facing?"</span></div>
-        <div class="tip-item"><span>"How does the team handle competing priorities and trade-offs?"</span></div>
-        <div class="tip-item"><span>"Can you tell me about a time someone on this team grew significantly — what did that look like?"</span></div>
-        <div class="tip-item"><span>"What do you personally enjoy most about working here?"</span></div>
-        <div class="tip-item"><span>"Is there anything in my background you'd like me to expand on?"</span></div>
+        <div class="tip-item"><i data-lucide="message-circle-question" style="width:18px;height:18px;"></i><span>"What does success look like in the first 90 days in this role?"</span></div>
+        <div class="tip-item"><i data-lucide="message-circle-question" style="width:18px;height:18px;"></i><span>"What's the biggest challenge the team is currently facing?"</span></div>
+        <div class="tip-item"><i data-lucide="message-circle-question" style="width:18px;height:18px;"></i><span>"How does the team handle competing priorities and trade-offs?"</span></div>
+        <div class="tip-item"><i data-lucide="message-circle-question" style="width:18px;height:18px;"></i><span>"Can you tell me about a time someone on this team grew significantly — what did that look like?"</span></div>
+        <div class="tip-item"><i data-lucide="message-circle-question" style="width:18px;height:18px;"></i><span>"What do you personally enjoy most about working here?"</span></div>
+        <div class="tip-item"><i data-lucide="message-circle-question" style="width:18px;height:18px;"></i><span>"Is there anything in my background you'd like me to expand on?"</span></div>
       </div>
-      <p style="margin-top:14px"><em>Avoid:</em> questions easily answered by the company website, questions about salary before an offer, and questions that make you sound like you're already negotiating.</p>
+      <p style="margin-top:24px; padding: 16px; background: rgba(239, 68, 68, 0.05); border-radius: var(--radius-md); border: 1px solid rgba(239, 68, 68, 0.2);"><em>Avoid:</em> questions easily answered by the company website, questions about salary before an offer, and questions that make you sound like you're already negotiating.</p>
     </div>
   </div>
 
   <!-- 7. Common Mistakes -->
-  <div class="tip-card" style="border-color: #450a0a; background: #130a0a;">
+  <div class="tip-card" style="border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.02);">
     <div class="card-header">
-      <div class="card-icon red">⚠️</div>
+      <div class="card-icon red"><i data-lucide="alert-triangle"></i></div>
       <div class="card-title">
         <h3 data-i18n="tips.cards.mistakes.title">Common Mistakes That Sink Candidates</h3>
         <span data-i18n="tips.cards.mistakes.sub">Even strong candidates make these</span>
@@ -478,28 +312,28 @@
     </div>
     <div class="card-body" data-i18n-html="tips.cards.mistakes.body">
       <div class="tip-list">
-        <div class="tip-item" style="color:#fca5a5"><span><strong style="color:#f1f5f9">Using "we" instead of "I"</strong> in behavioral answers. Interviewers want to know what <em>you</em> did. "We built the system" raises the question of whether you contributed meaningfully.</span></div>
-        <div class="tip-item" style="color:#fca5a5"><span><strong style="color:#f1f5f9">No quantified results.</strong> "Things improved" is forgettable. "Latency dropped by 60%, error rate went to zero" is memorable. Always try to put a number on the outcome.</span></div>
-        <div class="tip-item" style="color:#fca5a5"><span><strong style="color:#f1f5f9">Rambling.</strong> Answers over 3 minutes lose the interviewer. Practice timing your answers. 90 seconds for the pitch, 2 minutes for CAR stories.</span></div>
-        <div class="tip-item" style="color:#fca5a5"><span><strong style="color:#f1f5f9">Criticizing past employers.</strong> Even if justified, it raises doubts about how you'll talk about <em>this</em> company someday. Keep it neutral and focus on what you learned.</span></div>
-        <div class="tip-item" style="color:#fca5a5"><span><strong style="color:#f1f5f9">Not asking for clarification.</strong> Jumping to an answer before understanding the problem signals poor judgment.</span></div>
-        <div class="tip-item" style="color:#fca5a5"><span><strong style="color:#f1f5f9">Fluency under pressure.</strong> Content can be excellent but if hesitation, filler words, or unclear structure make you hard to follow, it affects the impression. Recording yourself to review is painful but effective.</span></div>
+        <div class="tip-item" style="color:#fca5a5"><i data-lucide="x" style="width:18px;height:18px;color:var(--status-error)"></i><span><strong style="color:white">Using "we" instead of "I"</strong> in behavioral answers. Interviewers want to know what <em>you</em> did. "We built the system" raises the question of whether you contributed meaningfully.</span></div>
+        <div class="tip-item" style="color:#fca5a5"><i data-lucide="x" style="width:18px;height:18px;color:var(--status-error)"></i><span><strong style="color:white">No quantified results.</strong> "Things improved" is forgettable. "Latency dropped by 60%, error rate went to zero" is memorable. Always try to put a number on the outcome.</span></div>
+        <div class="tip-item" style="color:#fca5a5"><i data-lucide="x" style="width:18px;height:18px;color:var(--status-error)"></i><span><strong style="color:white">Rambling.</strong> Answers over 3 minutes lose the interviewer. Practice timing your answers. 90 seconds for the pitch, 2 minutes for CAR stories.</span></div>
+        <div class="tip-item" style="color:#fca5a5"><i data-lucide="x" style="width:18px;height:18px;color:var(--status-error)"></i><span><strong style="color:white">Criticizing past employers.</strong> Even if justified, it raises doubts about how you'll talk about <em>this</em> company someday. Keep it neutral and focus on what you learned.</span></div>
+        <div class="tip-item" style="color:#fca5a5"><i data-lucide="x" style="width:18px;height:18px;color:var(--status-error)"></i><span><strong style="color:white">Not asking for clarification.</strong> Jumping to an answer before understanding the problem signals poor judgment.</span></div>
+        <div class="tip-item" style="color:#fca5a5"><i data-lucide="x" style="width:18px;height:18px;color:var(--status-error)"></i><span><strong style="color:white">Fluency under pressure.</strong> Content can be excellent but if hesitation, filler words, or unclear structure make you hard to follow, it affects the impression. Recording yourself to review is painful but effective.</span></div>
       </div>
     </div>
   </div>
 
-  <hr class="divider" />
-
   <!-- CTA -->
   <div class="cta-block" id="cta-section">
     <h3 data-i18n="tips.cta.title">Ready to put it into practice?</h3>
-    <p  data-i18n="tips.cta.body_loggedin">The best way to internalize these frameworks is to practice them out loud. Our AI interviewer gives you real-time feedback on structure, language, and confidence.</p>
-    <a href="/interview.html" class="cta-btn" id="cta-btn" data-i18n="tips.cta.btn_loggedin">Start Practicing →</a>
+    <p data-i18n="tips.cta.body_loggedin">The best way to internalize these frameworks is to practice them out loud. Our AI interviewer gives you real-time feedback on structure, language, and confidence.</p>
+    <a href="/interview.html" class="btn btn-primary" style="font-size: 16px; padding: 14px 32px; border-radius: var(--radius-pill); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5); background: white; color: var(--brand-primary);" id="cta-btn" data-i18n="tips.cta.btn_loggedin">Start Practicing &rarr;</a>
   </div>
 
 </main>
 
 <script>
+  lucide.createIcons();
+
 (function () {
   try {
     const token = localStorage.getItem('auth_token');
@@ -520,13 +354,18 @@
       if (drawerHistory)  drawerHistory.style.display  = '';
       if (drawerSettings) drawerSettings.style.display = '';
       const isHunter = user.plan === 'hunter';
-      planPill.className = 'plan-pill ' + (isHunter ? 'hunter' : 'explorer');
-      planPill.textContent = isHunter ? '🎯 Hunter' : '🗺️ Explorer';
-      planPill.setAttribute('data-tooltip', 'Your current plan');
-      planPill.style.display = 'inline-block';
+      
+      planPill.className = 'badge ' + (isHunter ? 'badge-primary' : '');
+      planPill.innerHTML = isHunter ? '<i data-lucide="target" style="width:12px;height:12px;margin-right:4px"></i> Hunter' : '<i data-lucide="map" style="width:12px;height:12px;margin-right:4px"></i> Explorer';
+      planPill.setAttribute('data-tooltip', isHunter ? 'Your current plan' : 'Upgrade to Hunter for more sessions');
+      if(!isHunter) {
+        planPill.style.border = '1px solid var(--bg-surface-border)';
+        planPill.style.color = 'var(--text-secondary)';
+      }
+      planPill.style.display = 'inline-flex';
       planPill.style.cursor = 'pointer';
       planPill.addEventListener('click', () => location.href = '/upgrade.html');
-      // Background refresh: sync plan from server in case webhook updated it after login
+      
       (async function(){
         try {
           const res = await fetch('/auth/usage', { headers: { 'Authorization': 'Bearer ' + token } });
@@ -534,19 +373,24 @@
           const usage = await res.json();
           if (user && user.plan !== usage.plan) { user.plan = usage.plan; localStorage.setItem('auth_user', JSON.stringify(user)); }
           const isH = usage.plan === 'hunter';
-          planPill.className = 'plan-pill ' + (isH ? 'hunter' : 'explorer');
-          planPill.textContent = isH ? '🎯 Hunter' : '🗺️ Explorer';
+          planPill.className = 'badge ' + (isH ? 'badge-primary' : '');
+          planPill.innerHTML = isH ? '<i data-lucide="target" style="width:12px;height:12px;margin-right:4px"></i> Hunter' : '<i data-lucide="map" style="width:12px;height:12px;margin-right:4px"></i> Explorer';
+          planPill.setAttribute('data-tooltip', isH ? 'Your current plan' : 'Upgrade to Hunter for more sessions');
+          if(!isH) {
+            planPill.style.border = '1px solid var(--bg-surface-border)';
+            planPill.style.color = 'var(--text-secondary)';
+          }
+          lucide.createIcons();
         } catch(_){}
       })();
     } else {
       hdrLogin.style.display = '';
       if (drawerLogin) drawerLogin.style.display = '';
-      // Swap CTA for logged-out version once i18n is ready
       function applyLoggedOutCta() {
         ctaP.removeAttribute('data-i18n');
         ctaBtn.removeAttribute('data-i18n');
-        ctaP.textContent   = t('tips.cta.body_loggedout');
-        ctaBtn.textContent = t('tips.cta.btn_loggedout');
+        ctaP.textContent   = window.t ? window.t('tips.cta.body_loggedout') : 'Create a free account to practice these frameworks in a realistic mock interview setting.';
+        ctaBtn.textContent = window.t ? window.t('tips.cta.btn_loggedout') : 'Create free account &rarr;';
         ctaBtn.href = '/register.html';
       }
       document.addEventListener('i18n:ready', applyLoggedOutCta);

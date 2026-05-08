@@ -4,257 +4,93 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title data-i18n="profile.pageTitle">Profile Settings — Acing Interview</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  
   <script src="/i18n.js"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0f1117; color: #e2e8f0; min-height: 100dvh;
-      display: flex; flex-direction: column;
-    }
-    header {
-      padding: 14px 24px; background: #1a1d27;
-      border-bottom: 1px solid #2d3148;
-      display: flex; align-items: center; gap: 12px; flex-shrink: 0;
-    }
-    .logo {
-      width: 36px; height: 36px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      border-radius: 10px; display: flex; align-items: center;
-      justify-content: center; font-size: 18px;
-    }
-    .home-link {
-      display: flex; align-items: center; gap: 12px;
-      text-decoration: none; color: inherit; border-radius: 10px;
-      padding: 2px 6px; margin: -2px -6px; transition: background 0.2s;
-    }
-    .home-link:hover { background: rgba(99,102,241,0.08); }
-    header h1 { font-size: 16px; font-weight: 600; color: #f1f5f9; }
-    header p  { font-size: 12px; color: #64748b; margin-top: 1px; }
-    .plan-pill {
-      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
-      text-transform: uppercase; padding: 3px 10px; border-radius: 20px;
-      flex-shrink: 0; display: none; position: relative; cursor: default;
-    }
-    .plan-pill.hunter  { background: #312e81; color: #a5b4fc; }
-    .plan-pill.explorer { background: #1e293b; color: #64748b; }
-    .plan-pill::after {
-      content: attr(data-tooltip); position: absolute;
-      bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
-      background: #1e2235; border: 1px solid #3d4160; color: #e2e8f0;
-      font-size: 11px; font-weight: 500; text-transform: none; letter-spacing: 0;
-      white-space: nowrap; padding: 5px 10px; border-radius: 8px;
-      pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 999;
-    }
-    .plan-pill:hover::after { opacity: 1; }
-    .hdr-btn {
-      font-size: 11px; font-weight: 500;
-      padding: 5px 12px; border-radius: 20px;
-      background: transparent; border: 1px solid #2d3148;
-      color: #64748b; cursor: pointer; transition: all 0.2s;
-      text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
-    }
-    .hdr-btn:hover { border-color: #6366f1; color: #a78bfa; }
-
-    /* ── Hamburger button ── */
-    #hamburger-btn {
-      display: none; margin-left: 8px;
-      background: transparent; border: 1px solid #2d3148;
-      color: #94a3b8; border-radius: 8px;
-      width: 36px; height: 36px; font-size: 18px;
-      cursor: pointer; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-
-    /* ── Mobile drawer ── */
-    #mobile-drawer { display: none; position: fixed; inset: 0; z-index: 8000; }
-    #mobile-drawer.open { display: block; }
-    .drawer-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
-    .drawer-panel {
-      position: absolute; top: 0; right: 0; bottom: 0;
-      width: min(280px, 85vw);
-      background: #1a1d27; border-left: 1px solid #2d3148;
-      display: flex; flex-direction: column;
-      padding: 16px; gap: 6px; overflow-y: auto;
-      animation: slideIn 0.22s ease;
-    }
-    @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-    .drawer-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding-bottom: 12px; margin-bottom: 6px; border-bottom: 1px solid #2d3148;
-    }
-    .drawer-header span { font-size: 14px; font-weight: 600; color: #f1f5f9; }
-    .drawer-close { background: transparent; border: none; color: #64748b; font-size: 18px; cursor: pointer; padding: 4px; }
-    .drawer-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 12px 14px; border-radius: 10px;
-      font-size: 14px; font-weight: 500; color: #94a3b8;
-      text-decoration: none; background: transparent;
-      border: none; cursor: pointer; width: 100%; text-align: left;
-      transition: background 0.15s, color 0.15s;
-    }
-    .drawer-item:hover { background: #2d3148; color: #e2e8f0; }
-    .drawer-item .di-icon { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
-    .drawer-divider { height: 1px; background: #2d3148; margin: 4px 0; }
-
-    /* ── Mobile header ── */
-    @media (max-width: 768px) {
-      header { padding: 10px 12px; gap: 8px; }
-      .home-link > div { display: none; }
-      .plan-pill { display: none !important; }
-      .hdr-btn { display: none; }
-      #hamburger-btn { display: flex; margin-left: auto; }
-    }
-
     main {
-      flex: 1; padding: 32px 24px;
-      max-width: 600px; width: 100%; margin: 0 auto;
+      flex: 1; padding: 40px 24px;
+      max-width: 640px; width: 100%; margin: 0 auto;
     }
-    .page-title { font-size: 20px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px; }
-    .page-sub { font-size: 13px; color: #475569; margin-bottom: 32px; }
+    .page-title { font-size: 24px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+    .page-sub { font-size: 14px; color: var(--text-secondary); margin-bottom: 32px; }
 
-    #verify-banner {
-      display: none; margin-bottom: 24px;
-      background: #1c1700; border: 1px solid #854d0e;
-      border-radius: 12px; padding: 14px 18px;
-      align-items: center; gap: 12px;
-    }
-    #verify-banner.hidden { display: none !important; }
-    #verify-banner.show   { display: flex; }
-    .banner-text { flex: 1; font-size: 13px; color: #fbbf24; line-height: 1.5; }
-    .banner-text strong { display: block; margin-bottom: 2px; }
-    #resend-btn {
-      font-size: 12px; font-weight: 600; padding: 6px 14px;
-      border-radius: 20px; border: 1px solid #854d0e;
-      background: transparent; color: #fbbf24; cursor: pointer;
-      transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
-    }
-    #resend-btn:hover { background: #854d0e; color: #fff; }
-    #resend-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
+    #verify-banner { display: none; margin-bottom: 24px; }
+    #verify-banner.show { display: flex; }
+    
     .section {
-      background: #1a1d27; border: 1px solid #2d3148;
-      border-radius: 16px; padding: 24px; margin-bottom: 20px;
+      background: var(--bg-surface); border: 1px solid var(--bg-surface-border);
+      border-radius: var(--radius-lg); padding: 24px; margin-bottom: 24px;
     }
     .section-title {
-      font-size: 14px; font-weight: 600; color: #94a3b8;
-      text-transform: uppercase; letter-spacing: 0.05em;
-      margin-bottom: 20px;
+      font-size: 14px; font-weight: 700; color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 24px;
     }
-    label { display: block; font-size: 13px; font-weight: 500; color: #94a3b8; margin-bottom: 6px; }
-    input {
-      width: 100%; padding: 10px 14px;
-      background: #0f1117; border: 1px solid #2d3148;
-      border-radius: 8px; color: #f1f5f9; font-size: 14px;
-      outline: none; transition: border-color 0.2s; margin-bottom: 16px;
-    }
-    input:focus { border-color: #6366f1; }
-    input::placeholder { color: #475569; }
-    input:disabled { opacity: 0.5; cursor: not-allowed; }
-    .field-hint { font-size: 11px; color: #475569; margin-top: -12px; margin-bottom: 16px; }
-    .btn {
-      padding: 10px 22px;
-      background: linear-gradient(135deg, #6366f1, #7c3aed);
-      border: none; border-radius: 8px; color: #fff;
-      font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
-    }
-    .btn:hover { opacity: 0.9; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .msg {
-      border-radius: 8px; padding: 10px 14px;
-      font-size: 13px; margin-bottom: 16px; display: none;
-    }
-    .msg.error   { background: #450a0a; border: 1px solid #7f1d1d; color: #fca5a5; }
-    .msg.success { background: #14532d; border: 1px solid #166534; color: #4ade80; }
+    
     .invoice-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .invoice-table th {
-      text-align: left; color: #475569; font-weight: 500;
-      padding: 6px 8px; border-bottom: 1px solid #2d3148; font-size: 11px;
-      text-transform: uppercase; letter-spacing: 0.05em;
+      text-align: left; color: var(--text-secondary); font-weight: 600;
+      padding: 8px; border-bottom: 1px solid var(--bg-surface-border);
+      text-transform: uppercase; letter-spacing: 0.05em; font-size: 11px;
     }
-    .invoice-table td { padding: 10px 8px; color: #94a3b8; border-bottom: 1px solid #1e293b; }
+    .invoice-table td { padding: 12px 8px; color: var(--text-tertiary); border-bottom: 1px solid var(--bg-surface-border); }
     .invoice-table tr:last-child td { border-bottom: none; }
-    .invoice-table td:first-child { color: #e2e8f0; }
+    .invoice-table td:first-child { color: var(--text-primary); font-weight: 500; }
     .invoice-link {
-      font-size: 11px; font-weight: 600; padding: 3px 10px;
-      border-radius: 6px; border: 1px solid #2d3148;
-      color: #94a3b8; text-decoration: none; margin-left: 6px;
-      transition: all 0.15s;
+      font-size: 12px; font-weight: 600; padding: 4px 10px;
+      border-radius: var(--radius-sm); border: 1px solid var(--bg-surface-border);
+      color: var(--text-secondary); text-decoration: none; margin-left: 6px;
+      transition: all 0.2s;
     }
-    .invoice-link:hover { border-color: #6366f1; color: #a5b4fc; }
-    .logout-btn {
-      width: 100%; padding: 10px;
-      background: transparent; border: 1px solid #3d1515;
-      border-radius: 8px; color: #f87171; font-size: 14px;
-      font-weight: 600; cursor: pointer; transition: all 0.2s;
-    }
-    .logout-btn:hover { background: #3d1515; }
-    .spinner {
-      display: inline-block; width: 13px; height: 13px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: #fff; border-radius: 50%;
-      animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 5px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Language switcher */
-    .lang-row { display: flex; gap: 8px; }
-
-    /* Danger zone */
+    .invoice-link:hover { border-color: var(--brand-primary); color: var(--brand-primary); }
+    
     .danger-section {
-      background: #1a1d27; border: 1px solid #3d1515;
-      border-radius: 16px; padding: 24px; margin-bottom: 20px;
+      background: rgba(239, 68, 68, 0.05); border: 1px solid var(--status-error-border);
     }
-    .danger-section .section-title { color: #f87171; }
-    .danger-desc { font-size: 13px; color: #64748b; margin-bottom: 16px; line-height: 1.6; }
-    .btn-danger {
-      padding: 10px 22px; background: transparent;
-      border: 1px solid #7f1d1d; border-radius: 8px; color: #f87171;
-      font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;
-    }
-    .btn-danger:hover:not(:disabled) { background: #3d1515; border-color: #f87171; }
-    .btn-danger:disabled { opacity: 0.4; cursor: not-allowed; }
-    #delete-account-warning {
-      display: none; margin-top: 12px;
-      background: #1c1700; border: 1px solid #854d0e;
-      border-radius: 8px; padding: 10px 14px;
-      font-size: 13px; color: #fbbf24; line-height: 1.5;
-    }
-    .lang-btn {
-      flex: 1; padding: 10px 16px;
-      border: 1px solid #2d3148; border-radius: 8px;
-      background: transparent; color: #64748b;
-      font-size: 13px; font-weight: 500; cursor: pointer;
-      transition: all 0.2s; text-align: center;
-    }
-    .lang-btn:hover { border-color: #6366f1; color: #a78bfa; }
-    .lang-btn.lang-active { background: #312e81; border-color: #6366f1; color: #818cf8; }
+    .danger-section .section-title { color: var(--status-error); }
   </style>
 </head>
 <body>
 
-<header>
-  <a class="home-link" href="/">
-    <div class="logo">🎯</div>
-    <div><h1>Acing Interview</h1><p data-i18n="profile.header.tagline">Account settings</p></div>
+<!-- Global Header -->
+<header class="app-header">
+  <a class="header-brand-link" href="/">
+    <div class="header-logo"><i data-lucide="target" style="width: 22px; height: 22px;"></i></div>
+    <div class="header-brand-info">
+      <h1>Acing Interview</h1>
+      <p data-i18n="profile.header.tagline">Account settings</p>
+    </div>
   </a>
-  <span id="plan-pill" class="plan-pill" style="margin-left:auto"></span>
-  <a class="hdr-btn" href="/interview.html" data-i18n="profile.header.backBtn">← Back to interview</a>
-  <button id="hamburger-btn" aria-label="Menu">☰</button>
+  
+  <div class="header-actions">
+    <span id="plan-pill" class="badge"></span>
+    <a href="/tips.html" class="nav-link"><i data-lucide="lightbulb" style="width:16px;height:16px;"></i> <span data-i18n="nav.tipsLabel">Tips</span></a>
+    <a href="/history.html" class="nav-link"><i data-lucide="clipboard-list" style="width:16px;height:16px;"></i> History</a>
+  </div>
+  
+  <button class="mobile-menu-btn" id="hamburger-btn" aria-label="Menu"><i data-lucide="menu"></i></button>
 </header>
+
 <div id="mobile-drawer">
-  <div class="drawer-backdrop"></div>
+  <div class="drawer-backdrop" onclick="closeMobileMenu()"></div>
   <nav class="drawer-panel">
     <div class="drawer-header">
       <span>Menu</span>
-      <button class="drawer-close" onclick="closeMobileMenu()">✕</button>
+      <button class="drawer-close" onclick="closeMobileMenu()"><i data-lucide="x"></i></button>
     </div>
-    <a class="drawer-item" href="/"><span class="di-icon">🏠</span> <span data-i18n="nav.homeLabel">Home</span></a>
-    <a class="drawer-item" href="/interview.html"><span class="di-icon">←</span> <span data-i18n="profile.header.backBtnLabel">Back to interview</span></a>
-    <a class="drawer-item" href="/history.html"><span class="di-icon">📋</span> History</a>
-    <a class="drawer-item" href="/tips.html"><span class="di-icon">💡</span> <span data-i18n="nav.tipsLabel">Tips</span></a>
-    <div class="drawer-divider"></div>
-    <button class="drawer-item" onclick="closeMobileMenu(); window.openContactWidget?.()"><span class="di-icon">✉️</span> Contact us</button>
+    <a class="drawer-item" href="/"><i data-lucide="home"></i> <span data-i18n="nav.homeLabel">Home</span></a>
+    <a class="drawer-item" href="/history.html"><i data-lucide="clipboard-list"></i> History</a>
+    <a class="drawer-item" href="/tips.html"><i data-lucide="lightbulb"></i> <span data-i18n="nav.tipsLabel">Tips</span></a>
   </nav>
 </div>
 
@@ -263,101 +99,117 @@
   <div class="page-sub" data-i18n="profile.pageSub">Manage your account details and password.</div>
 
   <!-- Plan banner -->
-  <div id="plan-banner" style="display:none;margin-bottom:24px;background:#1a1d27;border:1px solid #2d3148;border-radius:12px;padding:14px 18px;align-items:center;gap:12px">
-    <div style="flex:1">
-      <div id="plan-banner-label" style="font-size:12px;color:#64748b;margin-bottom:2px" data-i18n="profile.plan.currentPlan">Current plan</div>
-      <div id="plan-name" style="font-size:15px;font-weight:700;color:#f1f5f9"></div>
+  <div class="section flex items-center justify-between" id="plan-banner" style="display:none; padding: 20px;">
+    <div>
+      <div id="plan-banner-label" style="font-size:12px;color:var(--text-secondary);margin-bottom:4px" data-i18n="profile.plan.currentPlan">Current plan</div>
+      <div id="plan-name" style="font-size:16px;font-weight:700;color:var(--text-primary); display:flex; align-items:center; gap:8px;"></div>
     </div>
-    <div id="plan-usage" style="font-size:12px;color:#64748b;text-align:right;margin-right:8px"></div>
-    <a id="plan-upgrade-link" href="/upgrade.html" style="display:none;font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;border:1px solid #6366f1;color:#a78bfa;text-decoration:none;white-space:nowrap" data-i18n="profile.plan.upgrade">Upgrade →</a>
-    <button id="plan-cancel-btn" style="display:none;font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;border:1px solid #3d1515;background:transparent;color:#f87171;cursor:pointer;white-space:nowrap" onmouseover="this.style.background='#3d1515'" onmouseout="this.style.background='transparent'">Cancel subscription</button>
-    <button id="plan-downgrade-btn" style="display:none;font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;border:1px solid #3d1515;background:transparent;color:#f87171;cursor:pointer;white-space:nowrap" onmouseover="this.style.background='#3d1515'" onmouseout="this.style.background='transparent'" data-i18n="profile.plan.downgrade">Downgrade</button>
+    <div class="flex items-center gap-4">
+      <div id="plan-usage" style="font-size:13px;color:var(--text-tertiary);"></div>
+      <a id="plan-upgrade-link" class="btn btn-primary" href="/upgrade.html" style="display:none; padding:6px 14px; font-size:13px;" data-i18n="profile.plan.upgrade">Upgrade &rarr;</a>
+      <button id="plan-cancel-btn" class="btn btn-danger" style="display:none; padding:6px 14px; font-size:13px;">Cancel subscription</button>
+      <button id="plan-downgrade-btn" class="btn btn-danger" style="display:none; padding:6px 14px; font-size:13px;" data-i18n="profile.plan.downgrade">Downgrade</button>
+    </div>
   </div>
 
   <!-- Email verification banner -->
-  <div id="verify-banner" class="hidden">
-    <span style="font-size:20px">✉️</span>
-    <div class="banner-text">
-      <strong data-i18n="profile.verify.title">Please verify your email address</strong>
-      <span data-i18n="profile.verify.body">You must verify your email to continue past the Elevator Pitch phase.</span>
+  <div id="verify-banner" class="alert alert-warning hidden" style="background:rgba(245, 158, 11, 0.1); border-color:rgba(245, 158, 11, 0.3); color:#fcd34d;">
+    <i data-lucide="mail-warning" style="width:24px;height:24px;flex-shrink:0;"></i>
+    <div style="flex:1">
+      <strong style="display:block;margin-bottom:4px;color:#fcd34d;" data-i18n="profile.verify.title">Please verify your email address</strong>
+      <span style="font-size:13px;color:#fbbf24;" data-i18n="profile.verify.body">You must verify your email to continue past the Elevator Pitch phase.</span>
     </div>
-    <button id="resend-btn" data-i18n="profile.verify.resend">Resend email</button>
+    <button class="btn btn-secondary" id="resend-btn" style="padding:6px 12px; font-size:12px; border-color:rgba(245, 158, 11, 0.4); color:#fcd34d;" data-i18n="profile.verify.resend">Resend email</button>
   </div>
 
   <!-- Profile section -->
   <div class="section">
     <div class="section-title" data-i18n="profile.sections.profile">Profile</div>
-    <div class="msg" id="profile-msg"></div>
+    <div class="alert alert-success" id="profile-msg" style="display:none"></div>
     <form id="profile-form">
-      <label for="name" data-i18n="profile.fields.name">Full name</label>
-      <input type="text" id="name" data-i18n-attr="placeholder:profile.fields.namePlaceholder" placeholder="Your name" autocomplete="name" />
+      <div class="form-group">
+        <label class="form-label" for="name" data-i18n="profile.fields.name">Full name</label>
+        <input class="form-input" type="text" id="name" data-i18n-attr="placeholder:profile.fields.namePlaceholder" placeholder="Your name" autocomplete="name" />
+      </div>
 
-      <label for="email" data-i18n="profile.fields.email">Email</label>
-      <input type="email" id="email" data-i18n-attr="placeholder:profile.fields.emailPlaceholder" placeholder="you@example.com" autocomplete="email" />
-      <div class="field-hint" data-i18n="profile.fields.emailHint">Changing your email will require re-verification and needs your current password.</div>
+      <div class="form-group">
+        <label class="form-label" for="email" data-i18n="profile.fields.email">Email</label>
+        <input class="form-input" type="email" id="email" data-i18n-attr="placeholder:profile.fields.emailPlaceholder" placeholder="you@example.com" autocomplete="email" />
+        <p style="font-size:11px;color:var(--text-tertiary);margin-top:6px;" data-i18n="profile.fields.emailHint">Changing your email will require re-verification and needs your current password.</p>
+      </div>
 
-      <label for="cur-pw-profile">
-        <span data-i18n="profile.fields.currentPw">Current password</span>
-        <span style="color:#475569"> (<span data-i18n="profile.fields.currentPwHint">required only when changing email</span>)</span>
-      </label>
-      <input type="password" id="cur-pw-profile" data-i18n-attr="placeholder:profile.fields.pwPlaceholder" placeholder="••••••••" autocomplete="current-password" />
+      <div class="form-group">
+        <label class="form-label" for="cur-pw-profile">
+          <span data-i18n="profile.fields.currentPw">Current password</span>
+          <span style="color:var(--text-tertiary)"> (<span data-i18n="profile.fields.currentPwHint">required only when changing email</span>)</span>
+        </label>
+        <input class="form-input" type="password" id="cur-pw-profile" data-i18n-attr="placeholder:profile.fields.pwPlaceholder" placeholder="••••••••" autocomplete="current-password" />
+      </div>
 
-      <button class="btn" type="submit" id="profile-btn" data-i18n="profile.buttons.save">Save changes</button>
+      <button class="btn btn-primary" type="submit" id="profile-btn" data-i18n="profile.buttons.save">Save changes</button>
     </form>
   </div>
 
   <!-- Password section -->
   <div class="section">
     <div class="section-title" data-i18n="profile.sections.password">Change Password</div>
-    <div class="msg" id="pw-msg"></div>
+    <div class="alert alert-success" id="pw-msg" style="display:none"></div>
     <form id="pw-form">
-      <label for="cur-pw" data-i18n="profile.fields.currentPw">Current password</label>
-      <input type="password" id="cur-pw" data-i18n-attr="placeholder:profile.fields.pwPlaceholder" placeholder="••••••••" autocomplete="current-password" />
+      <div class="form-group">
+        <label class="form-label" for="cur-pw" data-i18n="profile.fields.currentPw">Current password</label>
+        <input class="form-input" type="password" id="cur-pw" data-i18n-attr="placeholder:profile.fields.pwPlaceholder" placeholder="••••••••" autocomplete="current-password" />
+      </div>
 
-      <label for="new-pw" data-i18n="profile.fields.newPw">New password</label>
-      <input type="password" id="new-pw" data-i18n-attr="placeholder:profile.fields.newPwPlaceholder" placeholder="At least 8 characters" autocomplete="new-password" />
+      <div class="form-group">
+        <label class="form-label" for="new-pw" data-i18n="profile.fields.newPw">New password</label>
+        <input class="form-input" type="password" id="new-pw" data-i18n-attr="placeholder:profile.fields.newPwPlaceholder" placeholder="At least 8 characters" autocomplete="new-password" />
+      </div>
 
-      <label for="confirm-pw" data-i18n="profile.fields.confirmPw">Confirm new password</label>
-      <input type="password" id="confirm-pw" data-i18n-attr="placeholder:profile.fields.repeatPwPlaceholder" placeholder="Repeat new password" autocomplete="new-password" />
+      <div class="form-group">
+        <label class="form-label" for="confirm-pw" data-i18n="profile.fields.confirmPw">Confirm new password</label>
+        <input class="form-input" type="password" id="confirm-pw" data-i18n-attr="placeholder:profile.fields.repeatPwPlaceholder" placeholder="Repeat new password" autocomplete="new-password" />
+      </div>
 
-      <button class="btn" type="submit" id="pw-btn" data-i18n="profile.buttons.updatePw">Update password</button>
+      <button class="btn btn-primary" type="submit" id="pw-btn" data-i18n="profile.buttons.updatePw">Update password</button>
     </form>
   </div>
 
   <!-- Language section -->
   <div class="section">
     <div class="section-title" data-i18n="profile.sections.language">Language</div>
-    <p style="font-size:13px;color:#64748b;margin-bottom:16px" data-i18n="profile.langHint">Choose the language for the interface.</p>
-    <div class="lang-row">
-      <button class="lang-btn" data-lang="en" onclick="saveLang('en')">🇺🇸 English</button>
-      <button class="lang-btn" data-lang="pt" onclick="saveLang('pt')">🇧🇷 Português</button>
+    <p style="font-size:14px;color:var(--text-secondary);margin-bottom:16px" data-i18n="profile.langHint">Choose the language for the interface.</p>
+    <div class="flex gap-4">
+      <button class="lang-btn" data-lang="en" onclick="saveLang('en')" style="flex:1; padding:12px; border:1px solid var(--bg-surface-border); border-radius:var(--radius-md); background:transparent; color:var(--text-primary); cursor:pointer;">🇺🇸 English</button>
+      <button class="lang-btn" data-lang="pt" onclick="saveLang('pt')" style="flex:1; padding:12px; border:1px solid var(--bg-surface-border); border-radius:var(--radius-md); background:transparent; color:var(--text-primary); cursor:pointer;">🇧🇷 Português</button>
     </div>
   </div>
 
   <!-- Billing history -->
   <div class="section" id="invoices-section" style="display:none">
     <div class="section-title" data-i18n="profile.plan.invoicesTitle">Billing history</div>
-    <div id="invoices-body"><span style="color:#475569;font-size:13px">Loading…</span></div>
+    <div id="invoices-body"><span class="spinner"></span> <span style="color:var(--text-tertiary);font-size:13px;margin-left:8px;">Loading...</span></div>
   </div>
 
   <!-- Logout section -->
   <div class="section">
     <div class="section-title" data-i18n="profile.sections.session">Session</div>
-    <button class="logout-btn" id="logout-btn" data-i18n="profile.buttons.signOut">Sign out of all devices</button>
+    <button class="btn btn-secondary" style="width:100%; border-color:var(--status-error-border); color:var(--status-error);" id="logout-btn" data-i18n="profile.buttons.signOut">Sign out of all devices</button>
   </div>
 
   <!-- Danger zone -->
-  <div class="danger-section">
+  <div class="section danger-section">
     <div class="section-title" data-i18n="profile.sections.dangerZone">Danger Zone</div>
-    <p class="danger-desc" data-i18n="profile.deleteAccount.desc">Permanently delete your account and all interview data. This action cannot be undone.</p>
-    <button class="btn-danger" id="delete-account-btn" data-i18n="profile.deleteAccount.btn">Delete my account</button>
-    <div id="delete-account-warning" data-i18n="profile.deleteAccount.warning">
+    <p style="font-size:14px;color:var(--text-secondary);margin-bottom:20px;line-height:1.6;" data-i18n="profile.deleteAccount.desc">Permanently delete your account and all interview data. This action cannot be undone.</p>
+    <button class="btn btn-danger" id="delete-account-btn" data-i18n="profile.deleteAccount.btn">Delete my account</button>
+    <div class="alert alert-warning" id="delete-account-warning" style="display:none; margin-top:16px; background:transparent; padding:0; border:none;" data-i18n="profile.deleteAccount.warning">
       You have an active Hunter subscription. Please cancel it first before deleting your account.
     </div>
   </div>
 </main>
 
 <script>
+  lucide.createIcons();
+
   const _token = localStorage.getItem('auth_token');
   if (!_token) location.replace('/login.html?next=/profile.html');
 
@@ -365,13 +217,24 @@
 
   function showMsg(id, text, type) {
     const el = document.getElementById(id);
-    el.textContent = text;
-    el.className = `msg ${type}`;
+    el.innerHTML = `<i data-lucide="${type==='success'?'check-circle':'alert-circle'}" style="width:18px;height:18px;margin-right:8px;vertical-align:text-bottom;"></i>${text}`;
+    el.className = `alert alert-${type}`;
     el.style.display = 'block';
+    lucide.createIcons();
   }
 
   async function saveLang(lang) {
     i18n.switchLang(lang);
+    document.querySelectorAll('.lang-btn').forEach(b => {
+      if(b.getAttribute('data-lang') === lang) {
+        b.style.borderColor = 'var(--brand-primary)';
+        b.style.background = 'rgba(99, 102, 241, 0.1)';
+      } else {
+        b.style.borderColor = 'var(--bg-surface-border)';
+        b.style.background = 'transparent';
+      }
+    });
+
     try {
       const res = await fetch('/auth/profile', {
         method: 'PUT',
@@ -399,15 +262,21 @@
 
       document.getElementById('name').value  = user.name  || '';
       document.getElementById('email').value = user.email || '';
+      
+      const lang = user.language || 'en';
+      document.querySelectorAll('.lang-btn').forEach(b => {
+        if(b.getAttribute('data-lang') === lang) {
+          b.style.borderColor = 'var(--brand-primary)';
+          b.style.background = 'rgba(99, 102, 241, 0.1)';
+        }
+      });
 
       if (!user.email_verified) {
-        const banner = document.getElementById('verify-banner');
-        banner.classList.remove('hidden');
-        banner.classList.add('show');
+        document.getElementById('verify-banner').classList.remove('hidden');
+        document.getElementById('verify-banner').classList.add('show');
       }
 
       if (usage) {
-        // Sync plan to localStorage so other pages (interview, history…) show the correct badge
         try {
           const _lu = JSON.parse(localStorage.getItem('auth_user') || 'null');
           if (_lu && _lu.plan !== usage.plan) {
@@ -415,42 +284,47 @@
             localStorage.setItem('auth_user', JSON.stringify(_lu));
           }
         } catch {}
-        const planBanner = document.getElementById('plan-banner');
-        planBanner.style.display = 'flex';
-        // Reset all conditional elements before re-rendering (handles language changes)
+        
+        document.getElementById('plan-banner').style.display = 'flex';
         document.getElementById('plan-upgrade-link').style.display = 'none';
         document.getElementById('plan-cancel-btn').style.display = 'none';
         document.getElementById('plan-downgrade-btn').style.display = 'none';
+        
         const bannerLabel = document.getElementById('plan-banner-label');
-        if (bannerLabel) { bannerLabel.innerHTML = ''; bannerLabel.style.color = ''; }
+        if (bannerLabel) { bannerLabel.innerHTML = window.t ? window.t('profile.plan.currentPlan') : 'Current plan'; bannerLabel.style.color = ''; }
+        
         const isHunter = usage.plan === 'hunter';
-        document.getElementById('plan-name').innerHTML = isHunter
-          ? `🎯 Hunter <span style="font-size:11px;font-weight:500;background:#3730a3;color:#a5b4fc;padding:2px 8px;border-radius:20px;margin-left:6px">${t('profile.plan.active')}</span>`
-          : `🗺️ Explorer <span style="font-size:11px;font-weight:500;background:#1e293b;color:#64748b;padding:2px 8px;border-radius:20px;margin-left:6px">${t('profile.plan.free')}</span>`;
-        document.getElementById('plan-usage').textContent =
-          t('profile.plan.usage', { used: usage.used, limit: usage.limit });
+        const pName = document.getElementById('plan-name');
+        
+        if (isHunter) {
+          pName.innerHTML = `<i data-lucide="target" style="color:var(--brand-primary)"></i> Hunter <span class="badge badge-primary" style="margin-left:8px;">${window.t ? window.t('profile.plan.active') : 'Active'}</span>`;
+        } else {
+          pName.innerHTML = `<i data-lucide="map" style="color:var(--text-secondary)"></i> Explorer <span class="badge" style="border:1px solid var(--bg-surface-border);margin-left:8px;">${window.t ? window.t('profile.plan.free') : 'Free'}</span>`;
+        }
+        lucide.createIcons();
+        
+        document.getElementById('plan-usage').textContent = window.t ? window.t('profile.plan.usage', { used: usage.used, limit: usage.limit }) : `${usage.used} / ${usage.limit} used`;
+        
         if (!isHunter) {
           document.getElementById('plan-upgrade-link').style.display = '';
         } else if (usage.stripe_cancel_at) {
-          // Cancellation already requested — show persistent notice
           const _locale = window.i18n?.currentLang() === 'pt' ? 'pt-BR' : 'en-US';
           const endDate = new Date(usage.stripe_cancel_at * 1000).toLocaleDateString(_locale);
-          const banner = document.getElementById('plan-banner-label');
-          banner.innerHTML = `⚠️ ${t('profile.plan.canceledUntil', { date: endDate })}`;
-          banner.style.color = '#f59e0b';
+          bannerLabel.innerHTML = `⚠️ ${window.t ? window.t('profile.plan.canceledUntil', { date: endDate }) : `Canceled, active until ${endDate}`}`;
+          bannerLabel.style.color = 'var(--status-warning)';
         } else if (usage.has_stripe_subscription) {
           const cancelBtn = document.getElementById('plan-cancel-btn');
-          cancelBtn.textContent = t('profile.plan.cancelSubscription');
+          cancelBtn.textContent = window.t ? window.t('profile.plan.cancelSubscription') : 'Cancel subscription';
           cancelBtn.style.display = '';
         } else {
           document.getElementById('plan-downgrade-btn').style.display = '';
         }
 
-        // Delete account button — blocked if active Hunter with no cancel scheduled, or if admin
         const isAdmin = user.email === 'marciosferreira@yahoo.com.br';
         const canDelete = !isAdmin && (!isHunter || !!usage.stripe_cancel_at);
         const deleteBtn = document.getElementById('delete-account-btn');
         const deleteWarn = document.getElementById('delete-account-warning');
+        
         if (isAdmin) {
           deleteBtn.disabled = true;
           deleteBtn.style.display = 'none';
@@ -467,7 +341,7 @@
   document.getElementById('resend-btn').addEventListener('click', async () => {
     const btn = document.getElementById('resend-btn');
     btn.disabled = true;
-    btn.innerHTML = `<span class="spinner"></span>${t('profile.verify.sending')}`;
+    btn.innerHTML = `<span class="spinner"></span> Sending...`;
     try {
       const res  = await fetch('/auth/send-verification', {
         method: 'POST', headers: { 'Authorization': `Bearer ${_token}` },
@@ -477,15 +351,15 @@
         const link = `${location.origin}/verify-email.html?token=${data.dev_token}`;
         alert(`[DEV] Verification link:\n${link}`);
       } else {
-        btn.textContent = t('profile.verify.sent');
-        setTimeout(() => { btn.disabled = false; btn.textContent = t('profile.verify.resend'); }, 5000);
+        btn.textContent = window.t ? window.t('profile.verify.sent') : 'Sent!';
+        setTimeout(() => { btn.disabled = false; btn.textContent = window.t ? window.t('profile.verify.resend') : 'Resend'; }, 5000);
         return;
       }
     } catch {
-      alert(t('profile.msgs.errorSend'));
+      alert('Error sending verification email');
     }
     btn.disabled = false;
-    btn.textContent = t('profile.verify.resend');
+    btn.textContent = window.t ? window.t('profile.verify.resend') : 'Resend';
   });
 
   document.getElementById('profile-form').addEventListener('submit', async (e) => {
@@ -493,7 +367,7 @@
     document.getElementById('profile-msg').style.display = 'none';
     const btn = document.getElementById('profile-btn');
     btn.disabled = true;
-    btn.innerHTML = `<span class="spinner"></span>${t('profile.msgs.saving')}`;
+    btn.innerHTML = `<span class="spinner"></span> Saving...`;
 
     const body = {
       name:             document.getElementById('name').value.trim() || undefined,
@@ -506,14 +380,13 @@
         method: 'PUT', headers: _authHeader, body: JSON.stringify(body),
       });
       const data = await res.json();
-      if (!res.ok) { showMsg('profile-msg', data.detail || t('profile.msgs.errorDefault'), 'error'); return; }
-      showMsg('profile-msg', data.email_changed
-        ? t('profile.msgs.savedEmailChanged')
-        : t('profile.msgs.savedProfile'), 'success');
+      if (!res.ok) { showMsg('profile-msg', data.detail || 'Error saving profile', 'error'); return; }
+      
+      showMsg('profile-msg', data.email_changed ? 'Profile saved. Please verify your new email.' : 'Profile saved successfully.', 'success');
+      
       if (data.email_changed) {
-        const banner = document.getElementById('verify-banner');
-        banner.classList.remove('hidden');
-        banner.classList.add('show');
+        document.getElementById('verify-banner').classList.remove('hidden');
+        document.getElementById('verify-banner').classList.add('show');
       }
       try {
         const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
@@ -525,10 +398,10 @@
         }
       } catch {}
     } catch {
-      showMsg('profile-msg', t('profile.msgs.errorNetwork'), 'error');
+      showMsg('profile-msg', 'Network error', 'error');
     } finally {
       btn.disabled = false;
-      btn.textContent = t('profile.buttons.save');
+      btn.textContent = window.t ? window.t('profile.buttons.save') : 'Save changes';
     }
   });
 
@@ -537,12 +410,13 @@
     document.getElementById('pw-msg').style.display = 'none';
     const newPw  = document.getElementById('new-pw').value;
     const confPw = document.getElementById('confirm-pw').value;
-    if (newPw !== confPw) { showMsg('pw-msg', t('profile.msgs.mismatch'), 'error'); return; }
-    if (newPw.length < 8) { showMsg('pw-msg', t('profile.msgs.tooShort'), 'error'); return; }
+    
+    if (newPw !== confPw) { showMsg('pw-msg', 'Passwords do not match', 'error'); return; }
+    if (newPw.length < 8) { showMsg('pw-msg', 'Password must be at least 8 characters', 'error'); return; }
 
     const btn = document.getElementById('pw-btn');
     btn.disabled = true;
-    btn.innerHTML = `<span class="spinner"></span>${t('profile.msgs.saving')}`;
+    btn.innerHTML = `<span class="spinner"></span> Updating...`;
 
     try {
       const res  = await fetch('/auth/profile', {
@@ -553,56 +427,56 @@
         }),
       });
       const data = await res.json();
-      if (!res.ok) { showMsg('pw-msg', data.detail || t('profile.msgs.errorDefault'), 'error'); return; }
-      showMsg('pw-msg', t('profile.msgs.savedPw'), 'success');
+      if (!res.ok) { showMsg('pw-msg', data.detail || 'Error updating password', 'error'); return; }
+      showMsg('pw-msg', 'Password updated successfully.', 'success');
       document.getElementById('pw-form').reset();
     } catch {
-      showMsg('pw-msg', t('profile.msgs.errorNetwork'), 'error');
+      showMsg('pw-msg', 'Network error', 'error');
     } finally {
       btn.disabled = false;
-      btn.textContent = t('profile.buttons.updatePw');
+      btn.textContent = window.t ? window.t('profile.buttons.updatePw') : 'Update password';
     }
   });
 
   document.getElementById('plan-cancel-btn').addEventListener('click', async () => {
-    if (!confirm(t('profile.plan.cancelConfirm'))) return;
+    if (!confirm(window.t ? window.t('profile.plan.cancelConfirm') : 'Are you sure you want to cancel?')) return;
     const btn = document.getElementById('plan-cancel-btn');
     btn.disabled = true;
-    btn.textContent = t('profile.plan.canceling');
+    btn.textContent = 'Canceling...';
     try {
       const res  = await fetch('/stripe/cancel', {
         method: 'POST', headers: { 'Authorization': `Bearer ${_token}` },
       });
       const data = await res.json();
-      if (!res.ok) { alert(data.detail || t('profile.msgs.errorDefault')); btn.disabled = false; btn.textContent = t('profile.plan.cancelSubscription'); return; }
+      if (!res.ok) { alert(data.detail || 'Error'); btn.disabled = false; btn.textContent = 'Cancel subscription'; return; }
       location.reload();
     } catch {
-      alert(t('profile.msgs.errorNetwork'));
+      alert('Network error');
       btn.disabled = false;
-      btn.textContent = t('profile.plan.cancelSubscription');
+      btn.textContent = 'Cancel subscription';
     }
   });
 
   document.getElementById('plan-downgrade-btn').addEventListener('click', async () => {
-    if (!confirm(t('profile.confirm.downgrade'))) return;
+    if (!confirm(window.t ? window.t('profile.confirm.downgrade') : 'Are you sure you want to downgrade?')) return;
     const btn = document.getElementById('plan-downgrade-btn');
     btn.disabled = true;
-    btn.textContent = t('profile.plan.downgrading');
+    btn.textContent = 'Downgrading...';
     try {
       const res  = await fetch('/auth/downgrade', {
         method: 'POST', headers: { 'Authorization': `Bearer ${_token}` },
       });
       const data = await res.json();
-      if (!res.ok) { alert(data.detail || t('profile.msgs.errorDefault')); btn.disabled = false; btn.textContent = t('profile.plan.downgrade'); return; }
+      if (!res.ok) { alert(data.detail || 'Error'); btn.disabled = false; btn.textContent = 'Downgrade'; return; }
       try {
         const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
         if (u) { u.plan = 'free'; localStorage.setItem('auth_user', JSON.stringify(u)); }
       } catch {}
       location.reload();
     } catch {
-      alert(t('profile.msgs.errorNetwork'));
+      alert('Network error');
       btn.disabled = false;
-      btn.textContent = t('profile.plan.downgrade');
+      btn.textContent = 'Downgrade';
     }
   });
 
@@ -612,9 +486,12 @@
       const res  = await fetch('/stripe/invoices', { headers: { 'Authorization': `Bearer ${_token}` } });
       if (!res.ok) return;
       const { invoices } = await res.json();
-      if (!invoices.length) return;
+      if (!invoices || !invoices.length) {
+        document.getElementById('invoices-section').style.display = 'none';
+        return;
+      }
 
-      document.getElementById('invoices-section').style.display = '';
+      document.getElementById('invoices-section').style.display = 'block';
       const fmt = new Intl.NumberFormat(undefined, { minimumFractionDigits: 2 });
       const rows = invoices.map(inv => {
         const _locale = window.i18n?.currentLang() === 'pt' ? 'pt-BR' : 'en-US';
@@ -622,15 +499,15 @@
         const amount = fmt.format(inv.amount_paid / 100);
         const curr   = inv.currency.toUpperCase();
         const pdfLink  = inv.invoice_pdf
-          ? `<a class="invoice-link" href="${inv.invoice_pdf}" target="_blank" rel="noopener">${t('profile.plan.invoiceDownload')}</a>`
+          ? `<a class="invoice-link" href="${inv.invoice_pdf}" target="_blank" rel="noopener"><i data-lucide="download" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i>PDF</a>`
           : '';
         const viewLink = inv.hosted_invoice_url
-          ? `<a class="invoice-link" href="${inv.hosted_invoice_url}" target="_blank" rel="noopener">${t('profile.plan.invoiceView')}</a>`
+          ? `<a class="invoice-link" href="${inv.hosted_invoice_url}" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i>View</a>`
           : '';
         return `<tr>
           <td>${date}</td>
           <td>${curr} ${amount}</td>
-          <td style="color:#4ade80">${t('profile.plan.invoiceStatusPaid')}</td>
+          <td><span class="badge badge-primary" style="background:var(--status-success-bg);color:var(--status-success);border:1px solid var(--status-success-border);font-size:10px;">PAID</span></td>
           <td style="text-align:right">${viewLink}${pdfLink}</td>
         </tr>`;
       }).join('');
@@ -638,10 +515,11 @@
       document.getElementById('invoices-body').innerHTML = `
         <table class="invoice-table">
           <thead><tr>
-            <th>${t('profile.plan.invoiceColDate')}</th><th>${t('profile.plan.invoiceColAmount')}</th><th>${t('profile.plan.invoiceColStatus')}</th><th></th>
+            <th>Date</th><th>Amount</th><th>Status</th><th></th>
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>`;
+      lucide.createIcons();
     } catch {}
   }
   document.addEventListener('i18n:ready', loadInvoices);
@@ -654,12 +532,12 @@
   });
 
   document.getElementById('delete-account-btn').addEventListener('click', async () => {
-    const t_confirm = t('profile.deleteAccount.confirm') || 'Type DELETE to confirm account deletion:';
+    const t_confirm = window.t ? window.t('profile.deleteAccount.confirm') : 'Type DELETE to confirm account deletion:';
     const answer = prompt(t_confirm);
     if (answer !== 'DELETE') return;
     const btn = document.getElementById('delete-account-btn');
     btn.disabled = true;
-    btn.textContent = '…';
+    btn.textContent = 'Deleting...';
     try {
       const res = await fetch('/auth/account', {
         method: 'DELETE',
@@ -667,9 +545,9 @@
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        alert(data.detail || t('profile.msgs.errorDefault'));
+        alert(data.detail || 'Error');
         btn.disabled = false;
-        btn.textContent = t('profile.deleteAccount.btn') || 'Delete my account';
+        btn.textContent = 'Delete my account';
         return;
       }
       localStorage.removeItem('auth_token');
@@ -677,9 +555,9 @@
       localStorage.removeItem('interview_v1');
       location.replace('/login.html');
     } catch {
-      alert(t('profile.msgs.errorNetwork'));
+      alert('Network error');
       btn.disabled = false;
-      btn.textContent = t('profile.deleteAccount.btn') || 'Delete my account';
+      btn.textContent = 'Delete my account';
     }
   });
 </script>
@@ -691,12 +569,15 @@
     const el = document.getElementById('plan-pill');
     if(!el) return;
     const isHunter = u.plan === 'hunter';
-    el.className = 'plan-pill ' + (isHunter ? 'hunter' : 'explorer');
-    el.textContent = isHunter ? '🎯 Hunter' : '🗺️ Explorer';
-    el.setAttribute('data-tooltip', 'Your current plan');
-    el.style.display = 'inline-block';
+    el.className = 'badge ' + (isHunter ? 'badge-primary' : '');
+    el.innerHTML = isHunter ? '<i data-lucide="target" style="width:12px;height:12px;margin-right:4px"></i> Hunter' : '<i data-lucide="map" style="width:12px;height:12px;margin-right:4px"></i> Explorer';
+    if(!isHunter) {
+      el.style.border = '1px solid var(--bg-surface-border)';
+      el.style.color = 'var(--text-secondary)';
+    }
     el.style.cursor = 'pointer';
     el.addEventListener('click', () => location.href = '/upgrade.html');
+    lucide.createIcons();
   } catch(_){}
 })();
 </script>

@@ -251,9 +251,6 @@ session_store = SessionStore(_conn)
 if _conn:
     from auth import setup_user_tables
     setup_user_tables(_conn)
-    # Após DDL, desliga autocommit para que DML use transações normais
-    if hasattr(_conn, 'autocommit') and _conn.autocommit:
-        _conn.autocommit = False
 
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages

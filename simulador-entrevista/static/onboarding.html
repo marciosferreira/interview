@@ -4,94 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title data-i18n="onboarding.pageTitle">Prepare Your Interview — Acing Interview</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  
   <script src="/i18n.js"></script>
+  
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0f1117; color: #e2e8f0;
-      min-height: 100dvh; display: flex; flex-direction: column;
-    }
-    header {
-      padding: 14px 24px; background: #1a1d27;
-      border-bottom: 1px solid #2d3148;
-      display: flex; align-items: center; gap: 12px; flex-shrink: 0;
-    }
-    .logo {
-      width: 36px; height: 36px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center; font-size: 18px;
-    }
-    header h1 { font-size: 16px; font-weight: 600; color: #f1f5f9; }
-    header p  { font-size: 12px; color: #64748b; margin-top: 1px; }
-    .home-link {
-      display: flex; align-items: center; gap: 12px;
-      text-decoration: none; color: inherit;
-      border-radius: 10px; padding: 2px 6px; margin: -2px -6px;
-      transition: background 0.2s;
-    }
-    .home-link:hover { background: rgba(99,102,241,0.08); }
-    .user-pill {
-      margin-left: auto; display: flex; align-items: center; gap: 10px;
-      font-size: 13px; color: #94a3b8;
-    }
-    .logout-btn {
-      font-size: 12px; color: #475569; background: none; border: none;
-      cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: color 0.2s;
-    }
-    .logout-btn:hover { color: #f87171; }
-
-    /* ── Hamburger button ── */
-    #hamburger-btn {
-      display: none; margin-left: 4px;
-      background: transparent; border: 1px solid #2d3148;
-      color: #94a3b8; border-radius: 8px;
-      width: 36px; height: 36px; font-size: 18px;
-      cursor: pointer; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-
-    /* ── Mobile drawer ── */
-    #mobile-drawer { display: none; position: fixed; inset: 0; z-index: 8000; }
-    #mobile-drawer.open { display: block; }
-    .drawer-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
-    .drawer-panel {
-      position: absolute; top: 0; right: 0; bottom: 0;
-      width: min(280px, 85vw);
-      background: #1a1d27; border-left: 1px solid #2d3148;
-      display: flex; flex-direction: column;
-      padding: 16px; gap: 6px; overflow-y: auto;
-      animation: slideIn 0.22s ease;
-    }
-    @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-    .drawer-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding-bottom: 12px; margin-bottom: 6px; border-bottom: 1px solid #2d3148;
-    }
-    .drawer-header span { font-size: 14px; font-weight: 600; color: #f1f5f9; }
-    .drawer-close { background: transparent; border: none; color: #64748b; font-size: 18px; cursor: pointer; padding: 4px; }
-    .drawer-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 12px 14px; border-radius: 10px;
-      font-size: 14px; font-weight: 500; color: #94a3b8;
-      text-decoration: none; background: transparent;
-      border: none; cursor: pointer; width: 100%; text-align: left;
-      transition: background 0.15s, color 0.15s;
-    }
-    .drawer-item:hover { background: #2d3148; color: #e2e8f0; }
-    .drawer-item .di-icon { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
-    .drawer-divider { height: 1px; background: #2d3148; margin: 4px 0; }
-
-    /* ── Mobile header ── */
-    @media (max-width: 768px) {
-      header { padding: 10px 12px; gap: 8px; }
-      .home-link > div { display: none; }
-      .plan-pill { display: none !important; }
-      .user-pill { display: none !important; }
-      #hamburger-btn { display: flex; margin-left: auto; }
-    }
-
     main {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; padding: 40px 24px 60px; gap: 0;
@@ -104,166 +31,116 @@
     }
     .step-item {
       display: flex; align-items: center; gap: 8px;
-      font-size: 13px; font-weight: 500; color: #475569;
+      font-size: 13px; font-weight: 500; color: var(--text-tertiary);
     }
-    .step-item.active { color: #818cf8; }
-    .step-item.done   { color: #4ade80; }
+    .step-item.active { color: var(--brand-primary); }
+    .step-item.done   { color: var(--status-success); }
+    
     .step-dot {
       width: 24px; height: 24px; border-radius: 50%;
-      background: #1e293b; border: 1.5px solid #2d3148;
+      background: var(--bg-surface); border: 1px solid var(--bg-surface-border);
       display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 700; color: #475569;
-      flex-shrink: 0;
+      font-size: 11px; font-weight: 700; color: var(--text-tertiary);
+      flex-shrink: 0; transition: all 0.2s;
     }
-    .step-item.active .step-dot { background: #312e81; border-color: #6366f1; color: #818cf8; }
-    .step-item.done .step-dot   { background: #14532d; border-color: #22c55e; color: #4ade80; }
-    .step-line { width: 40px; height: 1px; background: #2d3148; flex-shrink: 0; }
+    .step-item.active .step-dot { background: rgba(99, 102, 241, 0.15); border-color: var(--brand-primary); color: #818cf8; }
+    .step-item.done .step-dot   { background: rgba(16, 185, 129, 0.15); border-color: var(--status-success); color: #34d399; }
+    
+    .step-line { width: 40px; height: 1px; background: var(--bg-surface-border); flex-shrink: 0; transition: background 0.2s; }
+    .step-item.done + .step-line { background: var(--status-success); }
 
     /* Form card */
     .form-card {
-      background: #1a1d27; border: 1px solid #2d3148; border-radius: 16px;
-      padding: 32px; width: 100%; max-width: 720px;
+      width: 100%; max-width: 720px;
     }
     .step-panel { display: none; }
-    .step-panel.active { display: block; }
+    .step-panel.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-    h2 { font-size: 20px; font-weight: 700; color: #f1f5f9; margin-bottom: 8px; }
-    .desc { font-size: 14px; color: #64748b; line-height: 1.6; margin-bottom: 24px; }
+    .step-header { margin-bottom: 24px; text-align: center; }
+    .step-header h2 { font-size: 24px; margin-bottom: 8px; }
+    .step-header p { font-size: 14px; color: var(--text-secondary); max-width: 500px; margin: 0 auto; }
 
     .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     @media (max-width: 560px) { .row-2 { grid-template-columns: 1fr; } }
 
-    label { display: block; font-size: 13px; font-weight: 500; color: #94a3b8; margin-bottom: 6px; }
-    input[type="text"], textarea {
-      width: 100%; padding: 10px 14px;
-      background: #0f1117; border: 1px solid #2d3148;
-      border-radius: 8px; color: #f1f5f9; font-size: 14px;
-      outline: none; transition: border-color 0.2s; resize: vertical;
-    }
-    input[type="text"]:focus, textarea:focus { border-color: #6366f1; }
-    input[type="text"]::placeholder, textarea::placeholder { color: #475569; }
-    .field { margin-bottom: 20px; }
-    .field-hint { font-size: 11px; color: #475569; margin-top: 5px; }
+    textarea.form-input { min-height: 240px; resize: vertical; line-height: 1.5; }
 
-    .btn-row { display: flex; gap: 12px; justify-content: flex-end; margin-top: 28px; }
-    .btn-back {
-      padding: 10px 20px; background: transparent;
-      border: 1px solid #2d3148; border-radius: 8px;
-      color: #64748b; font-size: 14px; font-weight: 500;
-      cursor: pointer; transition: all 0.2s;
-    }
-    .btn-back:hover { border-color: #4f4f6f; color: #94a3b8; }
-    .btn-next {
-      padding: 10px 24px;
-      background: linear-gradient(135deg, #6366f1, #7c3aed);
-      border: none; border-radius: 8px;
-      color: #fff; font-size: 14px; font-weight: 600;
-      cursor: pointer; transition: opacity 0.2s;
-    }
-    .btn-next:hover { opacity: 0.9; }
-    .btn-next:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .spinner {
-      display: inline-block; width: 14px; height: 14px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: #fff; border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      vertical-align: middle; margin-right: 6px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .error {
-      background: #450a0a; border: 1px solid #7f1d1d; color: #fca5a5;
-      border-radius: 8px; padding: 10px 14px; font-size: 13px;
-      margin-bottom: 16px; display: none;
-    }
-
+    .btn-row { display: flex; gap: 12px; justify-content: space-between; margin-top: 24px; }
+    
     .upload-btn {
       display: inline-flex; align-items: center; gap: 6px;
-      font-size: 12px; font-weight: 500; padding: 5px 12px;
-      border-radius: 8px; background: transparent;
-      border: 1px solid #2d3148; color: #64748b;
-      cursor: pointer; transition: all 0.15s; margin-bottom: 8px;
+      font-size: 12px; font-weight: 500; padding: 6px 12px;
+      border-radius: var(--radius-sm); background: var(--bg-surface);
+      border: 1px solid var(--bg-surface-border); color: var(--text-secondary);
+      cursor: pointer; transition: all 0.2s; margin-bottom: 8px;
     }
-    .upload-btn:hover { border-color: #6366f1; color: #a78bfa; }
+    .upload-btn:hover { border-color: var(--brand-primary); color: var(--brand-primary); }
     .upload-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .upload-btn .up-spinner {
-      display: none; width: 10px; height: 10px;
-      border: 2px solid rgba(99,102,241,0.3); border-top-color: #6366f1;
-      border-radius: 50%; animation: spin 0.7s linear infinite;
-    }
-    .upload-btn.loading .up-spinner { display: inline-block; }
-    .upload-btn.loading .up-icon { display: none; }
 
     /* Step 3 — generating */
-    .generating-card {
-      text-align: center; padding: 48px 32px;
-    }
+    .generating-card { text-align: center; padding: 48px 32px; }
     .big-spinner {
-      width: 48px; height: 48px;
-      border: 3px solid #2d3148; border-top-color: #6366f1;
+      width: 56px; height: 56px;
+      border: 3px solid var(--bg-surface-border); border-top-color: var(--brand-primary);
       border-radius: 50%; animation: spin 1s linear infinite;
-      margin: 0 auto 20px;
+      margin: 0 auto 24px;
     }
-    .generating-card h3 { font-size: 18px; font-weight: 600; color: #f1f5f9; margin-bottom: 8px; }
-    .generating-card p  { font-size: 14px; color: #64748b; line-height: 1.6; }
-    .tip-list { list-style: none; text-align: left; margin-top: 20px; display: inline-block; }
+    .generating-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .generating-card p  { font-size: 14px; color: var(--text-secondary); }
+    
+    .tip-list {
+      list-style: none; text-align: left; margin: 32px auto 0;
+      display: inline-flex; flex-direction: column; gap: 12px;
+      background: var(--bg-surface); padding: 24px; border-radius: var(--radius-md); border: 1px solid var(--bg-surface-border);
+    }
     .tip-list li {
-      font-size: 13px; color: #475569; padding: 4px 0;
+      font-size: 14px; color: var(--text-secondary);
+      display: flex; align-items: center; gap: 8px;
     }
-    .tip-list li::before { content: "✓ "; color: #4ade80; }
-    .plan-pill {
-      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
-      text-transform: uppercase; padding: 3px 10px; border-radius: 20px;
-      flex-shrink: 0; display: none;
-    }
-    .plan-pill { position: relative; cursor: default; }
-    .plan-pill.hunter  { background: #312e81; color: #a5b4fc; }
-    .plan-pill.explorer { background: #1e293b; color: #64748b; }
-    .plan-pill::after {
-      content: attr(data-tooltip); position: absolute;
-      bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
-      background: #1e2235; border: 1px solid #3d4160; color: #e2e8f0;
-      font-size: 11px; font-weight: 500; text-transform: none; letter-spacing: 0;
-      white-space: nowrap; padding: 5px 10px; border-radius: 8px;
-      pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 999;
-    }
-    .plan-pill:hover::after, .plan-pill.tooltip-open::after { opacity: 1; }
+    .tip-list li i { color: var(--status-success); flex-shrink: 0; width: 16px; height: 16px; }
   </style>
 </head>
 <body>
 
-<header>
-  <a class="home-link" href="/">
-    <div class="logo">🎯</div>
-    <div>
+<!-- Global Header -->
+<header class="app-header">
+  <a class="header-brand-link" href="/">
+    <div class="header-logo"><i data-lucide="target" style="width: 22px; height: 22px;"></i></div>
+    <div class="header-brand-info">
       <h1>Acing Interview</h1>
       <p data-i18n="header.tagline">AI-powered mock interview preparation</p>
     </div>
   </a>
-  <div class="user-pill">
-    <span id="plan-pill" class="plan-pill"></span>
-    <a href="/profile.html" class="hdr-settings" style="font-size:12px;color:#475569;text-decoration:none;padding:4px 8px;border-radius:6px;transition:color 0.2s" onmouseover="this.style.color='#a78bfa'" onmouseout="this.style.color='#475569'">⚙️ Settings</a>
-    <span id="user-name-display"></span>
-    <button class="logout-btn" onclick="logout()">Sign out</button>
+  
+  <div class="header-actions">
+    <span id="plan-pill" class="badge"></span>
+    <div class="lang-switcher">
+      <button class="lang-btn" data-lang="en" onclick="i18n.switchLang('en')">EN</button>
+      <button class="lang-btn" data-lang="pt" onclick="i18n.switchLang('pt')">PT</button>
+    </div>
+    <a href="/tips.html" class="nav-link"><i data-lucide="lightbulb" style="width:16px;height:16px;"></i> <span data-i18n="nav.tipsLabel">Tips</span></a>
+    <a href="/profile.html" class="nav-link"><i data-lucide="settings" style="width:16px;height:16px;"></i> <span data-i18n="nav.settingsLabel">Settings</span></a>
+    <span id="user-name-display" class="nav-link" style="color:var(--text-tertiary); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
+    <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 13px;" onclick="logout()">Sign out</button>
   </div>
-  <button id="hamburger-btn" aria-label="Menu">☰</button>
+  
+  <button class="mobile-menu-btn" id="hamburger-btn" aria-label="Menu"><i data-lucide="menu"></i></button>
 </header>
+
 <div id="mobile-drawer">
-  <div class="drawer-backdrop"></div>
+  <div class="drawer-backdrop" onclick="closeMobileMenu()"></div>
   <nav class="drawer-panel">
     <div class="drawer-header">
       <span>Menu</span>
-      <button class="drawer-close" onclick="closeMobileMenu()">✕</button>
+      <button class="drawer-close" onclick="closeMobileMenu()"><i data-lucide="x"></i></button>
     </div>
-    <a class="drawer-item" href="/"><span class="di-icon">🏠</span> <span data-i18n="nav.homeLabel">Home</span></a>
-    <a class="drawer-item" href="/profile.html"><span class="di-icon">⚙️</span> <span data-i18n="nav.settingsLabel">Settings</span></a>
-    <a class="drawer-item" href="/tips.html"><span class="di-icon">💡</span> <span data-i18n="nav.tipsLabel">Tips</span></a>
-    <a class="drawer-item" href="/history.html"><span class="di-icon">📋</span> History</a>
+    <a class="drawer-item" href="/"><i data-lucide="home"></i> <span data-i18n="nav.homeLabel">Home</span></a>
+    <a class="drawer-item" href="/tips.html"><i data-lucide="lightbulb"></i> <span data-i18n="nav.tipsLabel">Tips</span></a>
+    <a class="drawer-item" href="/history.html"><i data-lucide="clipboard-list"></i> History</a>
+    <a class="drawer-item" href="/profile.html"><i data-lucide="settings"></i> <span data-i18n="nav.settingsLabel">Settings</span></a>
     <div class="drawer-divider"></div>
-    <button class="drawer-item" onclick="closeMobileMenu(); logout()"><span class="di-icon">🚪</span> Sign out</button>
-    <div class="drawer-divider"></div>
-    <button class="drawer-item" onclick="closeMobileMenu(); window.openContactWidget?.()"><span class="di-icon">✉️</span> Contact us</button>
+    <button class="drawer-item" onclick="closeMobileMenu(); logout()"><i data-lucide="log-out"></i> Sign out</button>
   </nav>
 </div>
 
@@ -286,64 +163,65 @@
     </div>
   </div>
 
-  <div class="form-card">
-    <div class="error" id="error-msg"></div>
+  <div class="glass-card form-card" style="padding: 40px;">
+    <div class="alert alert-error" id="error-msg" style="display:none">
+      <i data-lucide="alert-circle" style="width:18px;height:18px;flex-shrink:0;margin-top:1px"></i>
+      <span id="error-text"></span>
+    </div>
 
     <!-- Step 1: Job Description -->
     <div class="step-panel active" id="panel-1">
-      <h2 data-i18n="onboarding.step1.title">What role are you interviewing for?</h2>
-      <p class="desc" data-i18n="onboarding.step1.desc">Paste the job description below. The more detail you provide, the more targeted your mock interview will be.</p>
+      <div class="step-header">
+        <h2 data-i18n="onboarding.step1.title">What role are you interviewing for?</h2>
+        <p data-i18n="onboarding.step1.desc">Paste the job description below. The more detail you provide, the more targeted your mock interview will be.</p>
+      </div>
 
       <div class="row-2">
-        <div class="field">
-          <label for="job-title" data-i18n="onboarding.step1.jobTitle">Job title *</label>
-          <input type="text" id="job-title" data-i18n-attr="placeholder:onboarding.step1.jobTitlePlaceholder" placeholder="e.g. Senior AI Engineer" />
+        <div class="form-group">
+          <label class="form-label" for="job-title" data-i18n="onboarding.step1.jobTitle">Job title *</label>
+          <input class="form-input" type="text" id="job-title" data-i18n-attr="placeholder:onboarding.step1.jobTitlePlaceholder" placeholder="e.g. Senior AI Engineer" />
         </div>
-        <div class="field">
-          <label for="company" data-i18n="onboarding.step1.company">Company name</label>
-          <input type="text" id="company" data-i18n-attr="placeholder:onboarding.step1.companyPlaceholder" placeholder="e.g. Acme Corp" />
+        <div class="form-group">
+          <label class="form-label" for="company" data-i18n="onboarding.step1.company">Company name</label>
+          <input class="form-input" type="text" id="company" data-i18n-attr="placeholder:onboarding.step1.companyPlaceholder" placeholder="e.g. Acme Corp" />
         </div>
       </div>
 
-      <div class="field">
-        <label for="job-description" data-i18n="onboarding.step1.jobDescLabel">Job description *</label>
+      <div class="form-group mb-2">
+        <label class="form-label" for="job-description" data-i18n="onboarding.step1.jobDescLabel">Job description *</label>
         <button type="button" class="upload-btn" onclick="triggerUpload('job-description')">
-          <span class="up-icon">📎</span>
-          <span class="up-spinner"></span>
+          <i data-lucide="paperclip" style="width:14px;height:14px"></i>
           <span data-i18n="onboarding.upload">Upload PDF or DOCX</span>
         </button>
-        <textarea id="job-description" rows="12"
-          data-i18n-attr="placeholder:onboarding.step1.jobDescPlaceholder"
-          placeholder="Paste the full job description here — responsibilities, requirements, qualifications, and any other relevant details…"></textarea>
-        <p class="field-hint" data-i18n="onboarding.minChars">Minimum 50 characters required</p>
+        <textarea class="form-input" id="job-description" data-i18n-attr="placeholder:onboarding.step1.jobDescPlaceholder" placeholder="Paste the full job description here..."></textarea>
+        <p style="font-size: 11px; color: var(--text-tertiary); margin-top: 6px;" data-i18n="onboarding.minChars">Minimum 50 characters required</p>
       </div>
 
-      <div class="btn-row">
-        <button class="btn-next" onclick="goToStep2()" data-i18n="onboarding.step1.next">Next: Add your resume →</button>
+      <div class="btn-row" style="justify-content: flex-end;">
+        <button class="btn btn-primary" onclick="goToStep2()" data-i18n="onboarding.step1.next">Next: Add your resume &rarr;</button>
       </div>
     </div>
 
     <!-- Step 2: Resume -->
     <div class="step-panel" id="panel-2">
-      <h2 data-i18n="onboarding.step2.title">Paste your resume</h2>
-      <p class="desc" data-i18n="onboarding.step2.desc">Copy and paste your resume below. Include your work experience, education, projects, and skills. The AI will use this to personalize every phase of your mock interview.</p>
+      <div class="step-header">
+        <h2 data-i18n="onboarding.step2.title">Paste your resume</h2>
+        <p data-i18n="onboarding.step2.desc">Copy and paste your resume below. The AI will use this to personalize every phase of your mock interview.</p>
+      </div>
 
-      <div class="field">
-        <label for="resume-text" data-i18n="onboarding.step2.resumeLabel">Resume text *</label>
+      <div class="form-group mb-2">
+        <label class="form-label" for="resume-text" data-i18n="onboarding.step2.resumeLabel">Resume text *</label>
         <button type="button" class="upload-btn" onclick="triggerUpload('resume-text')">
-          <span class="up-icon">📎</span>
-          <span class="up-spinner"></span>
+          <i data-lucide="paperclip" style="width:14px;height:14px"></i>
           <span data-i18n="onboarding.upload">Upload PDF or DOCX</span>
         </button>
-        <textarea id="resume-text" rows="16"
-          data-i18n-attr="placeholder:onboarding.step2.resumePlaceholder"
-          placeholder="Paste your resume here — work experience, education, projects, skills, publications, etc.…"></textarea>
-        <p class="field-hint" data-i18n="onboarding.minChars">Minimum 50 characters required</p>
+        <textarea class="form-input" id="resume-text" data-i18n-attr="placeholder:onboarding.step2.resumePlaceholder" placeholder="Paste your resume here..."></textarea>
+        <p style="font-size: 11px; color: var(--text-tertiary); margin-top: 6px;" data-i18n="onboarding.minChars">Minimum 50 characters required</p>
       </div>
 
       <div class="btn-row">
-        <button class="btn-back" onclick="goToStep1()" data-i18n="onboarding.step2.back">← Back</button>
-        <button class="btn-next" onclick="startPreparing()" data-i18n="onboarding.step2.start">Prepare my interview →</button>
+        <button class="btn btn-secondary" onclick="goToStep1()" data-i18n="onboarding.step2.back">&larr; Back</button>
+        <button class="btn btn-primary" onclick="startPreparing()" id="btn-start" data-i18n="onboarding.step2.start">Prepare my interview &rarr;</button>
       </div>
     </div>
 
@@ -351,22 +229,24 @@
     <div class="step-panel" id="panel-3">
       <div class="generating-card">
         <div class="big-spinner"></div>
-        <h3 data-i18n="onboarding.step3.title">Preparing your personalized interview…</h3>
+        <h3 data-i18n="onboarding.step3.title">Preparing your personalized interview...</h3>
         <p data-i18n="onboarding.step3.sub">Our AI is analyzing your resume and the job description to create a tailored mock interview experience.</p>
+        
         <ul class="tip-list">
-          <li data-i18n="onboarding.step3.item1">Reading your background and key achievements</li>
-          <li data-i18n="onboarding.step3.item2">Analyzing what the role requires</li>
-          <li data-i18n="onboarding.step3.item3">Crafting interview phases specific to you</li>
-          <li data-i18n="onboarding.step3.item4">Preparing evaluation criteria for each phase</li>
+          <li><i data-lucide="check"></i> <span data-i18n="onboarding.step3.item1">Reading your background and key achievements</span></li>
+          <li><i data-lucide="check"></i> <span data-i18n="onboarding.step3.item2">Analyzing what the role requires</span></li>
+          <li><i data-lucide="check"></i> <span data-i18n="onboarding.step3.item3">Crafting interview phases specific to you</span></li>
+          <li><i data-lucide="check"></i> <span data-i18n="onboarding.step3.item4">Preparing evaluation criteria for each phase</span></li>
         </ul>
-        <p style="margin-top: 20px; font-size: 12px; color: #334155;" data-i18n="onboarding.step3.time">This usually takes 10–20 seconds.</p>
+        <p style="margin-top: 24px; font-size: 12px; color: var(--text-tertiary);" data-i18n="onboarding.step3.time">This usually takes 10-20 seconds.</p>
       </div>
     </div>
   </div>
 </main>
 
 <script>
-  // ── Auth check ────────────────────────────────────────────────────────────
+  lucide.createIcons();
+
   const token = localStorage.getItem('auth_token');
   if (!token) { location.replace('/login.html?next=/onboarding.html'); }
 
@@ -384,7 +264,6 @@
     location.replace('/login.html');
   }
 
-  // ── Document upload ───────────────────────────────────────────────────────
   const _fileInput = document.createElement('input');
   _fileInput.type = 'file';
   _fileInput.accept = '.pdf,.docx';
@@ -399,8 +278,9 @@
     _fileInput.value = '';
     if (!file || !_uploadTarget) return;
 
+    const originalHtml = _uploadBtn.innerHTML;
     _uploadBtn.disabled = true;
-    _uploadBtn.classList.add('loading');
+    _uploadBtn.innerHTML = '<span class="spinner"></span> Uploading...';
 
     const form = new FormData();
     form.append('file', file);
@@ -413,7 +293,8 @@
       showError(err.message);
     } finally {
       _uploadBtn.disabled = false;
-      _uploadBtn.classList.remove('loading');
+      _uploadBtn.innerHTML = originalHtml;
+      lucide.createIcons();
     }
   });
 
@@ -423,7 +304,6 @@
     _fileInput.click();
   }
 
-  // ── Step navigation ───────────────────────────────────────────────────────
   function setStep(n) {
     for (let i = 1; i <= 3; i++) {
       document.getElementById(`panel-${i}`).classList.toggle('active', i === n);
@@ -436,8 +316,8 @@
 
   function showError(msg) {
     const el = document.getElementById('error-msg');
-    el.innerHTML = msg;
-    el.style.display = 'block';
+    document.getElementById('error-text').innerHTML = msg;
+    el.style.display = 'flex';
   }
 
   function hideError() {
@@ -450,8 +330,8 @@
     hideError();
     const title = document.getElementById('job-title').value.trim();
     const desc  = document.getElementById('job-description').value.trim();
-    if (!title) { showError(t('onboarding.errors.noTitle')); return; }
-    if (desc.length < 50) { showError(t('onboarding.errors.shortDesc')); return; }
+    if (!title) { showError(window.t ? window.t('onboarding.errors.noTitle') : 'Job title required'); return; }
+    if (desc.length < 50) { showError(window.t ? window.t('onboarding.errors.shortDesc') : 'Job description too short'); return; }
     setStep(2);
   }
 
@@ -462,7 +342,7 @@
     const desc   = document.getElementById('job-description').value.trim();
     const resume = document.getElementById('resume-text').value.trim();
 
-    if (resume.length < 50) { showError(t('onboarding.errors.shortResume')); return; }
+    if (resume.length < 50) { showError(window.t ? window.t('onboarding.errors.shortResume') : 'Resume too short'); return; }
 
     setStep(3);
 
@@ -482,9 +362,7 @@
       });
 
       if (res.status === 401) {
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('auth_user');
-        location.replace('/login.html?next=/onboarding.html');
+        logout();
         return;
       }
 
@@ -494,53 +372,28 @@
         if (res.status === 429 && data.detail?.code === 'weekly_limit_reached') {
           const plan  = data.detail.plan;
           const limit = data.detail.limit;
-          const used  = data.detail.used;
-          showError(
-            `You've used all ${limit} interviews this week on your ${plan === 'hunter' ? '🎯 Hunter' : 'Explorer'} plan. ` +
-            (plan === 'free'
-              ? `<a href="/upgrade.html" style="color:#a78bfa;font-weight:600">Upgrade to Hunter</a> for 15 per week.`
-              : `Your limit resets every 7 days.`)
-          );
+          showError(`You've used all ${limit} interviews this week. <a href="/upgrade.html" style="color:#a78bfa;font-weight:600;text-decoration:underline">Upgrade</a> for more.`);
         } else {
-          showError(data.detail || t('onboarding.errors.default'));
+          showError(data.detail || 'Error occurred');
         }
         return;
       }
 
-      // Save job session info for the interview page
       localStorage.setItem('pending_job_session', JSON.stringify({
         jobSessionId:  data.job_session_id,
         candidateName: data.candidate_name,
         jobTitle:      data.job_title,
         company:       data.company,
       }));
-
-      // Clear any old interview session so a fresh one starts
       localStorage.removeItem('interview_v1');
-
       location.replace('/interview.html');
     } catch (err) {
       setStep(2);
-      showError(t('onboarding.errors.network'));
+      showError('Network error');
     }
   }
 </script>
 <script>
-(function(){
-  try {
-    const u = JSON.parse(localStorage.getItem('auth_user')||'null');
-    if(!u) return;
-    const el = document.getElementById('plan-pill');
-    if(!el) return;
-    const isHunter = u.plan === 'hunter';
-    el.className = 'plan-pill ' + (isHunter ? 'hunter' : 'explorer');
-    el.textContent = isHunter ? '🎯 Hunter' : '🗺️ Explorer';
-    el.setAttribute('data-tooltip', 'Your current plan');
-    el.style.display = 'inline-block';
-    el.style.cursor = 'pointer';
-    el.addEventListener('click', () => location.href = '/upgrade.html');
-  } catch(_){}
-})();
 (async function(){
   try {
     const tok = localStorage.getItem('auth_token');
@@ -548,13 +401,18 @@
     const res = await fetch('/auth/usage', { headers: { 'Authorization': 'Bearer ' + tok } });
     if (!res.ok) return;
     const usage = await res.json();
-    const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
-    if (u && u.plan !== usage.plan) { u.plan = usage.plan; localStorage.setItem('auth_user', JSON.stringify(u)); }
     const el = document.getElementById('plan-pill');
     if (!el) return;
     const isHunter = usage.plan === 'hunter';
-    el.className = 'plan-pill ' + (isHunter ? 'hunter' : 'explorer');
-    el.textContent = isHunter ? '🎯 Hunter' : '🗺️ Explorer';
+    el.className = 'badge ' + (isHunter ? 'badge-primary' : '');
+    el.innerHTML = isHunter ? '<i data-lucide="target" style="width:12px;height:12px;margin-right:4px"></i> Hunter' : '<i data-lucide="map" style="width:12px;height:12px;margin-right:4px"></i> Explorer';
+    if(!isHunter) {
+      el.style.border = '1px solid var(--bg-surface-border)';
+      el.style.color = 'var(--text-secondary)';
+    }
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', () => location.href = '/upgrade.html');
+    lucide.createIcons();
   } catch(_){}
 })();
 </script>
