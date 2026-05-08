@@ -504,9 +504,9 @@ class TechnicalPhase(BaseModel):
 
 
 class LeadershipPhase(BaseModel):
-    starts_with_data_assessment: bool
+    starts_with_situation_assessment: bool
     identifies_primary_risk: bool
-    pilot_to_production_awareness: bool
+    execution_realism: bool
     concrete_mitigation_plan: bool
     stakeholder_management: bool
     connects_to_real_experience: bool
@@ -1001,9 +1001,9 @@ def make_initial_state(
             "english_adequate": False,
         },
         "checklist_leadership": {
-            "starts_with_data_assessment": False,
+            "starts_with_situation_assessment": False,
             "identifies_primary_risk": False,
-            "pilot_to_production_awareness": False,
+            "execution_realism": False,
             "concrete_mitigation_plan": False,
             "stakeholder_management": False,
             "connects_to_real_experience": False,

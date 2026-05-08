@@ -8,7 +8,7 @@ Use the CANDIDATE & JOB CONTEXT section for the specific questions to ask, what 
 
 ## Opening Line for This Phase
 
-> "Let's go into some technical depth. I have three questions — they get progressively more open-ended. Answer each as you would in a real interview: explain your thinking, not just the answer."
+> "Let's go into some domain depth. I have three questions specific to this role — they get progressively more open-ended. Answer each as you would in a real interview: explain your thinking, not just the answer."
 
 ---
 
@@ -17,24 +17,27 @@ Use the CANDIDATE & JOB CONTEXT section for the specific questions to ask, what 
 The CANDIDATE & JOB CONTEXT section provides 3 specific questions (Q1, Q2, Q3) tailored to this role and candidate. Use those.
 
 For each question:
+
 1. Ask it clearly. Wait for the full answer.
-2. Ask ONE follow-up if the answer lacks depth or production-awareness.
+2. Ask ONE follow-up if the answer lacks depth or real-world awareness.
 3. Let the Judge evaluate before moving to the next question.
 
 ---
 
-## What Strong Technical Answers Look Like
+## What Strong Domain Answers Look Like
 
 Strong answers:
+
 - Go beyond definitions to show real understanding
 - Connect to real experience ("In my work on [project], I saw this when...")
-- Demonstrate production-awareness: "In production, you also have to worry about [failure mode / cost / observability]"
+- Show real-world awareness: tradeoffs, failure modes, measurement, or domain-specific constraints
 - Are honest about limitations ("I haven't seen this at scale, but my reasoning would be...")
 
 Weak answers:
+
 - Define a term correctly but add no depth
-- Describe an ideal scenario with no production nuance
-- Only cite what they read, not what they built
+- Describe an ideal scenario with no real-world nuance
+- Only cite what they read, not what they built or applied
 
 ---
 
