@@ -120,7 +120,6 @@
     successText.textContent = tpl.replace('{email}', email);
     form.style.display = 'none';
     successPanel.style.display = 'block';
-    if (window.i18n) window.i18n.apply();
     lucide.createIcons();
   }
 
@@ -138,7 +137,9 @@
       });
       if (res.status === 429) {
         const data = await res.json();
-        resendStatus.textContent = data.detail || 'Please wait before requesting another email.';
+        const secs = data.detail?.wait_seconds;
+        const tpl = window.t ? window.t('register.errorResendWait') : 'Please wait {seconds} seconds before requesting another email.';
+        resendStatus.textContent = secs ? tpl.replace('{seconds}', secs) : (window.t ? window.t('register.errorResendWaitGeneric') : 'Please wait a moment before requesting another email.');
         setTimeout(() => { resendLink.style.pointerEvents = ''; resendStatus.style.display = 'none'; }, 10000);
       } else {
         resendStatus.textContent = window.t ? window.t('register.successResendOk') : 'Email resent!';

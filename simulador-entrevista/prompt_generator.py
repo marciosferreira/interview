@@ -22,7 +22,7 @@ def _get_model() -> ChatAnthropic:
         )
     return _gen_model
 
-_SYSTEM = """You are an expert acing interview and technical recruiter.
+_SYSTEM = """You are an expert acing interviews and technical recruiter.
 Your job is to analyze a job description and a candidate's resume, then create a comprehensive
 interview preparation document used by an AI interviewer named Alex.
 

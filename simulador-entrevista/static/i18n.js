@@ -39,6 +39,20 @@
     return val;
   }
 
+  function applyMetaTags() {
+    const title = t('seo.title');
+    const desc  = t('seo.description');
+    if (title !== 'seo.title') {
+      document.title = title;
+      document.querySelectorAll('meta[property="og:title"], meta[name="twitter:title"]')
+        .forEach(el => el.setAttribute('content', title));
+    }
+    if (desc !== 'seo.description') {
+      document.querySelectorAll('meta[name="description"], meta[property="og:description"], meta[name="twitter:description"]')
+        .forEach(el => el.setAttribute('content', desc));
+    }
+  }
+
   function applyTranslations() {
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const val = t(el.dataset.i18n);
@@ -53,6 +67,7 @@
       const val = t(key);
       if (val !== key) el.setAttribute(attr, val);
     });
+    applyMetaTags();
     // Update <html lang>
     document.documentElement.lang = _lang;
     // Update switcher buttons

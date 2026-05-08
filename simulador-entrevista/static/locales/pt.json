@@ -1,4 +1,8 @@
 {
+  "seo": {
+    "title": "acing interviews — Simulador de Entrevistas com IA",
+    "description": "Treine entrevistas de emprego com um entrevistador de IA personalizado para o seu currículo e vaga. Receba feedback em tempo real, melhore suas respostas e conquiste o emprego que quer."
+  },
   "header": {
     "tagline": "Preparação para entrevistas com IA"
   },
@@ -375,7 +379,9 @@
     "errorCredentials": "Falha no login. Verifique suas credenciais.",
     "errorNetwork": "Erro de rede — tente novamente.",
     "errorEmailNotVerified": "Confirme seu e-mail antes de entrar.",
-    "resendVerification": "Reenviar e-mail de confirmação"
+    "resendVerification": "Reenviar e-mail de confirmação",
+    "errorResendWait": "Aguarde {seconds} segundos antes de solicitar outro e-mail.",
+    "errorResendWaitGeneric": "Aguarde um momento antes de solicitar outro e-mail."
   },
   "register": {
     "pageTitle": "Criar Conta — Acing Interview",
@@ -403,7 +409,9 @@
     "successText": "Enviamos um link de confirmação para {email}. Clique nele para ativar sua conta.",
     "successNote": "Não recebeu? Verifique o spam ou",
     "successResend": "reenvie o e-mail",
-    "successResendOk": "E-mail reenviado! Verifique sua caixa de entrada."
+    "successResendOk": "E-mail reenviado! Verifique sua caixa de entrada.",
+    "errorResendWait": "Aguarde {seconds} segundos antes de solicitar outro e-mail.",
+    "errorResendWaitGeneric": "Aguarde um momento antes de solicitar outro e-mail."
   },
   "upgrade": {
     "pageTitle": "Planos & Preços — Acing Interview",

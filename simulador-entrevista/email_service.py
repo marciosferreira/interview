@@ -46,7 +46,7 @@ def _send(to: str, subject: str, html: str, text: str) -> None:
 
 _VERIFY_COPY = {
     "en": {
-        "subject": "Verify your Acing Interview account",
+        "subject": "Verify your acing interviews account",
         "heading": "Verify your email",
         "body":    "Click the button below to verify your email address.",
         "button":  "Verify my email",
@@ -65,7 +65,7 @@ _VERIFY_COPY = {
 
 _RESET_COPY = {
     "en": {
-        "subject": "Reset your Acing Interview password",
+        "subject": "Reset your acing interviews password",
         "heading": "Reset your password",
         "body":    "We received a password reset request for your account.",
         "button":  "Reset my password",
@@ -133,7 +133,7 @@ def send_contact_reply(to_email: str, to_name: str, original_subject: str, reply
   <p>Hello {to_name},</p>
   <p style="white-space:pre-wrap">{reply_text}</p>
   <hr style="border:none;border-top:1px solid #2d3148;margin:24px 0"/>
-  <p style="color:#64748b;font-size:13px">Acing Interview &mdash; <a href="{_BASE}" style="color:#6366f1">{_BASE}</a></p>
+  <p style="color:#64748b;font-size:13px">acing interviews &mdash; <a href="{_BASE}" style="color:#6366f1">{_BASE}</a></p>
 </div>"""
     if _MOCK:
         print(f"\n{'='*60}")

@@ -29,7 +29,7 @@
         </div>
       </a>
       <h1 data-i18n="login.title">Welcome back</h1>
-      <p data-i18n="login.subtitle">Sign in to your acing interview account</p>
+      <p data-i18n="login.subtitle">Sign in to your acing interviews account</p>
     </div>
 
     <div class="alert alert-error" id="error-msg" style="display:none">
@@ -103,7 +103,6 @@
   function showUnverified() {
     errorMsg.style.display = 'none';
     unverifiedMsg.style.display = 'block';
-    if (window.i18n) window.i18n.apply();
   }
 
   resendFromLogin.addEventListener('click', async (e) => {
@@ -120,7 +119,9 @@
       });
       if (res.status === 429) {
         const data = await res.json();
-        resendLoginStatus.textContent = data.detail || 'Please wait before requesting another email.';
+        const secs = data.detail?.wait_seconds;
+        const tpl = window.t ? window.t('login.errorResendWait') : 'Please wait {seconds} seconds before requesting another email.';
+        resendLoginStatus.textContent = secs ? tpl.replace('{seconds}', secs) : (window.t ? window.t('login.errorResendWaitGeneric') : 'Please wait a moment before requesting another email.');
         setTimeout(() => { resendFromLogin.style.pointerEvents = ''; resendLoginStatus.style.display = 'none'; }, 10000);
       } else {
         resendLoginStatus.textContent = window.t ? window.t('register.successResendOk') : 'Email resent!';

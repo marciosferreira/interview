@@ -250,10 +250,10 @@ async def resend_verification_public(body: ResendVerificationPublicRequest):
     expires = user.get("verification_expires")
     if expires:
         now_ms = int(time.time() * 1000)
-        token_age_ms = VERIFICATION_TOKEN_EXPIRES_HOURS * 3_600_000 - (expires - now_ms)
+        token_age_ms = VERIFICATION_TOKEN_EXPIRES_HOURS * 3_600_000 - (int(expires) - now_ms)
         if token_age_ms < _RESEND_COOLDOWN_SECONDS * 1000:
-            wait_s = (_RESEND_COOLDOWN_SECONDS * 1000 - token_age_ms) // 1000
-            raise HTTPException(status_code=429, detail=f"Please wait {wait_s} seconds before requesting another email.")
+            wait_s = max(1, -(-(_RESEND_COOLDOWN_SECONDS * 1000 - token_age_ms) // 1000))  # ceiling div
+            raise HTTPException(status_code=429, detail={"message": f"Please wait {wait_s} seconds before requesting another email.", "wait_seconds": wait_s})
     token = await loop.run_in_executor(None, lambda: create_verification_token(_conn, user["id"]))
     try:
         await loop.run_in_executor(None, lambda: send_verification_email(user["email"], token, user.get("language", "en")))

@@ -1,4 +1,8 @@
 {
+  "seo": {
+    "title": "acing interviews — AI-Powered Mock Interviews",
+    "description": "Practice job interviews with an AI interviewer tailored to your CV and target role. Get real-time feedback, improve your answers, and land the job you want."
+  },
   "header": {
     "tagline": "AI-powered mock interview preparation"
   },
@@ -362,7 +366,7 @@
   "login": {
     "pageTitle": "Sign In — Acing Interview",
     "title": "Welcome back",
-    "subtitle": "Sign in to your acing interview account",
+    "subtitle": "Sign in to your acing interviews account",
     "email": "Email",
     "emailPlaceholder": "you@example.com",
     "password": "Password",
@@ -375,7 +379,9 @@
     "errorCredentials": "Login failed. Please check your credentials.",
     "errorNetwork": "Network error — please try again.",
     "errorEmailNotVerified": "Please confirm your email before signing in.",
-    "resendVerification": "Resend confirmation email"
+    "resendVerification": "Resend confirmation email",
+    "errorResendWait": "Please wait {seconds} seconds before requesting another email.",
+    "errorResendWaitGeneric": "Please wait a moment before requesting another email."
   },
   "register": {
     "pageTitle": "Create Account — Acing Interview",
@@ -403,7 +409,9 @@
     "successText": "We sent a confirmation link to {email}. Click it to activate your account.",
     "successNote": "Didn't receive it? Check your spam folder or",
     "successResend": "resend the email",
-    "successResendOk": "Email resent! Check your inbox."
+    "successResendOk": "Email resent! Check your inbox.",
+    "errorResendWait": "Please wait {seconds} seconds before requesting another email.",
+    "errorResendWaitGeneric": "Please wait a moment before requesting another email."
   },
   "upgrade": {
     "pageTitle": "Plans & Pricing — Acing Interview",
