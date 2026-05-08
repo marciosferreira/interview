@@ -79,6 +79,7 @@ class _CacheMiddleware:
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] != "http":
+            print(f"[middleware] passing through scope type: {scope['type']}")
             await self.app(scope, receive, send)
             return
 
@@ -890,7 +891,9 @@ async def _stream_to_client(ws: WebSocket, messages: list, system_prompt: str,
 
 @app.websocket("/ws")
 async def interview_ws(ws: WebSocket):
+    print(f"[ws] incoming connection request from {ws.client}")
     await ws.accept()
+    print("[ws] connection accepted")
     loop = asyncio.get_running_loop()
 
     # ── Initial handshake ──────────────────────────────────────────────────

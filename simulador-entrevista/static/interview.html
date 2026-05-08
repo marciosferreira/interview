@@ -2202,28 +2202,32 @@
       }
     });
 
-    input.addEventListener('input', autoResize);
+    if (input) input.addEventListener('input', autoResize);
 
     // Toggle recording — click once to start, click again to stop.
-    micBtn.addEventListener('click', () => {
-      if (mediaRecorder && mediaRecorder.state === 'recording') {
-        stopRecording();
-      } else {
-        startRecording();
-      }
-    });
+    if (micBtn) {
+      micBtn.addEventListener('click', () => {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+          stopRecording();
+        } else {
+          startRecording();
+        }
+      });
+    }
 
-    cancelRecBtn.addEventListener('click', cancelRecording);
+    if (cancelRecBtn) cancelRecBtn.addEventListener('click', cancelRecording);
 
     // ── New-interview popover ─────────────────────────────────────────────
     const newPopover = document.getElementById('new-popover');
 
-    document.getElementById('new-btn').addEventListener('click', (e) => {
+    const _newBtn = document.getElementById('new-btn');
+    if (_newBtn) _newBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       newPopover.classList.toggle('open');
     });
 
-    document.getElementById('pop-same-role').addEventListener('click', () => {
+    const _popSame = document.getElementById('pop-same-role');
+    if (_popSame) _popSame.addEventListener('click', () => {
       const raw = _loadRaw();
       if (raw?.jobSessionId) {
         // Keep the job context, start a fresh thread
@@ -2237,7 +2241,8 @@
       window.location.href = '/interview.html';
     });
 
-    document.getElementById('pop-new-role').addEventListener('click', () => {
+    const _popNew = document.getElementById('pop-new-role');
+    if (_popNew) _popNew.addEventListener('click', () => {
       clearSession();
       window.location.href = '/onboarding.html';
     });
