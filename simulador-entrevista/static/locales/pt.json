@@ -11,6 +11,7 @@
     "getStarted": "Começar grátis",
     "settings": "⚙️ Configurações",
     "settingsLabel": "Configurações",
+    "historyLabel": "Histórico",
     "signout": "Sair"
   },
   "landing": {
@@ -29,18 +30,54 @@
       "label": "Como funciona",
       "title": "6 fases. Uma entrevista completa.",
       "sub": "Funciona para qualquer área — tecnologia, finanças, consultoria, marketing, operações e mais. A IA adapta cada pergunta ao seu currículo e à vaga real.",
-      "p1": { "num": "FASE 1", "name": "Elevator Pitch",         "desc": "Apresente-se em 90 segundos. Receba feedback imediato sobre clareza, estrutura e como você posiciona seu background para essa vaga específica." },
-      "p2": { "num": "FASE 2", "name": "História CAR",           "desc": "Conte uma história estruturada — Contexto, Ação, Resultado — sobre um projeto real. Funciona para qualquer área: uma campanha, uma negociação, uma migração, um lançamento." },
-      "p3": { "num": "FASE 3", "name": "Perguntas da Vaga",     "desc": "3 perguntas geradas a partir da descrição real da vaga — não genéricas. Engenheiro, analista, gestor ou consultor: cada entrevista é diferente." },
-      "p4": { "num": "FASE 4", "name": "Liderança e Abordagem", "desc": "Como você lidera, lida com ambiguidade e conduz projetos até o fim — avaliado pelo que a vaga realmente exige." },
-      "p5": { "num": "FASE 5", "name": "Fit e Motivação",       "desc": "Por que essa vaga, por que essa empresa, por que agora — treinado até sua resposta soar genuína, não decorada." },
-      "p6": { "num": "FASE 6", "name": "Suas Perguntas",        "desc": "Treine fazer perguntas inteligentes e bem fundamentadas. O que você pergunta diz tanto quanto o que você responde." }
+      "p1": {
+        "num": "FASE 1",
+        "name": "Elevator Pitch",
+        "desc": "Apresente-se em 90 segundos. Receba feedback imediato sobre clareza, estrutura e como você posiciona seu background para essa vaga específica."
+      },
+      "p2": {
+        "num": "FASE 2",
+        "name": "História CAR",
+        "desc": "Conte uma história estruturada — Contexto, Ação, Resultado — sobre um projeto real. Funciona para qualquer área: uma campanha, uma negociação, uma migração, um lançamento."
+      },
+      "p3": {
+        "num": "FASE 3",
+        "name": "Perguntas da Vaga",
+        "desc": "3 perguntas geradas a partir da descrição real da vaga — não genéricas. Engenheiro, analista, gestor ou consultor: cada entrevista é diferente."
+      },
+      "p4": {
+        "num": "FASE 4",
+        "name": "Liderança e Abordagem",
+        "desc": "Como você lidera, lida com ambiguidade e conduz projetos até o fim — avaliado pelo que a vaga realmente exige."
+      },
+      "p5": {
+        "num": "FASE 5",
+        "name": "Fit e Motivação",
+        "desc": "Por que essa vaga, por que essa empresa, por que agora — treinado até sua resposta soar genuína, não decorada."
+      },
+      "p6": {
+        "num": "FASE 6",
+        "name": "Suas Perguntas",
+        "desc": "Treine fazer perguntas inteligentes e bem fundamentadas. O que você pergunta diz tanto quanto o que você responde."
+      }
     },
     "features": {
-      "f1": { "title": "Qualquer área, qualquer vaga",       "desc": "Engenharia, finanças, consultoria, produto, marketing, operações — a IA se adapta à descrição da vaga que você cola. Não é um roteiro genérico." },
-      "f2": { "title": "Coaching de inglês incluído",        "desc": "Cada sessão avalia sua escolha de palavras, estrutura de frases, registro e fluência — não só o conteúdo. Valioso até para nativos que querem uma linguagem mais executiva." },
-      "f3": { "title": "Voz ou texto",                       "desc": "Responda falando ou digitando. O entrevistador responde com áudio realista — para você treinar a experiência real, não só o conteúdo." },
-      "f4": { "title": "Repita até ficar automático",        "desc": "Cada rodada é uma entrevista nova. Mesma vaga ou outra — construa fluência pela repetição até suas respostas saírem naturais sob pressão." }
+      "f1": {
+        "title": "Qualquer área, qualquer vaga",
+        "desc": "Engenharia, finanças, consultoria, produto, marketing, operações — a IA se adapta à descrição da vaga que você cola. Não é um roteiro genérico."
+      },
+      "f2": {
+        "title": "Coaching de inglês incluído",
+        "desc": "Cada sessão avalia sua escolha de palavras, estrutura de frases, registro e fluência — não só o conteúdo. Valioso até para nativos que querem uma linguagem mais executiva."
+      },
+      "f3": {
+        "title": "Voz ou texto",
+        "desc": "Responda falando ou digitando. O entrevistador responde com áudio realista — para você treinar a experiência real, não só o conteúdo."
+      },
+      "f4": {
+        "title": "Repita até ficar automático",
+        "desc": "Cada rodada é uma entrevista nova. Mesma vaga ou outra — construa fluência pela repetição até suas respostas saírem naturais sob pressão."
+      }
     },
     "cta": {
       "title": "Não deixe a primeira etapa ser a última.",
@@ -64,7 +101,11 @@
   },
   "profile": {
     "pageTitle": "Configurações — Acing Interview",
-    "header": { "tagline": "Configurações da conta", "backBtn": "← Voltar para a entrevista", "backBtnLabel": "Voltar para a entrevista" },
+    "header": {
+      "tagline": "Configurações da conta",
+      "backBtn": "← Voltar para a entrevista",
+      "backBtnLabel": "Voltar para a entrevista"
+    },
     "pageHeading": "Configurações do Perfil",
     "pageSub": "Gerencie seus dados e senha.",
     "plan": {
@@ -146,10 +187,13 @@
   },
   "history": {
     "pageTitle": "Histórico de Entrevistas — Acing Interview",
-    "header": { "tagline": "Histórico de entrevistas" },
+    "header": {
+      "tagline": "Histórico de entrevistas"
+    },
     "nav": {
-      "current": "← Entrevista atual", "currentLabel": "Entrevista atual",
-      "newInterview": "＋ Nova entrevista"
+      "current": "← Entrevista atual",
+      "currentLabel": "Entrevista atual",
+      "newInterview": "Nova entrevista"
     },
     "pageHeading": "Entrevistas anteriores",
     "summary": "{{count}} entrevistas em {{roles}} vagas",
@@ -176,7 +220,10 @@
       "done": "Concluída",
       "starting": "Iniciando…"
     },
-    "badges": { "completed": "Concluída", "inProgress": "Em andamento" },
+    "badges": {
+      "completed": "Concluída",
+      "inProgress": "Em andamento"
+    },
     "session": {
       "answers": "respostas",
       "answer": "resposta",
@@ -259,10 +306,13 @@
       "newRoleSub": "Insira outra descrição de vaga e currículo"
     },
     "input": {
-      "placeholder": "Digite sua resposta ou pressione 🎙️ para falar…",
+      "placeholder": "Digite ou pressione 🎙️",
       "hint": "Clique em <strong>🎙️</strong> para gravar/parar · <strong>Enter</strong> para enviar · <strong>Shift+Enter</strong> para nova linha"
     },
-    "audio": { "discard": "✕ Descartar", "send": "➤ Enviar" },
+    "audio": {
+      "discard": "✕ Descartar",
+      "send": "➤ Enviar"
+    },
     "doneBanner": "Entrevista concluída — role para baixo para ver seu scorecard ↓",
     "sessionRestored": "— sessão restaurada —",
     "tapToEnable": "Toque em qualquer lugar para ativar o áudio",

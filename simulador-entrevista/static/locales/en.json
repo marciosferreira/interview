@@ -11,6 +11,7 @@
     "getStarted": "Get started free",
     "settings": "⚙️ Settings",
     "settingsLabel": "Settings",
+    "historyLabel": "History",
     "signout": "Sign out"
   },
   "landing": {
@@ -29,18 +30,54 @@
       "label": "How it works",
       "title": "6 phases. One complete interview.",
       "sub": "Works for any field — tech, finance, consulting, marketing, operations, and more. The AI adapts every question to your resume and the actual job description.",
-      "p1": { "num": "PHASE 1", "name": "Elevator Pitch",          "desc": "Introduce yourself in 90 seconds. Get instant feedback on clarity, structure, and how well you frame your background for this specific role." },
-      "p2": { "num": "PHASE 2", "name": "CAR Story",               "desc": "Tell a structured story — Challenge, Action, Result — about a real project. Works for any industry: a campaign, a deal, a migration, a product launch." },
-      "p3": { "num": "PHASE 3", "name": "Role-Specific Questions",  "desc": "3 targeted questions generated from the actual job description — not generic. Engineer, analyst, manager, or consultant: each interview is different." },
-      "p4": { "num": "PHASE 4", "name": "Leadership & Approach",    "desc": "How you lead, handle ambiguity, and drive work to completion — assessed against what the role actually requires." },
-      "p5": { "num": "PHASE 5", "name": "Fit & Motivation",         "desc": "Why this role, why this company, why now — coached until your answer sounds genuine, not rehearsed." },
-      "p6": { "num": "PHASE 6", "name": "Your Questions",           "desc": "Practice asking smart, well-researched questions. The questions you ask signal as much as the answers you give." }
+      "p1": {
+        "num": "PHASE 1",
+        "name": "Elevator Pitch",
+        "desc": "Introduce yourself in 90 seconds. Get instant feedback on clarity, structure, and how well you frame your background for this specific role."
+      },
+      "p2": {
+        "num": "PHASE 2",
+        "name": "CAR Story",
+        "desc": "Tell a structured story — Challenge, Action, Result — about a real project. Works for any industry: a campaign, a deal, a migration, a product launch."
+      },
+      "p3": {
+        "num": "PHASE 3",
+        "name": "Role-Specific Questions",
+        "desc": "3 targeted questions generated from the actual job description — not generic. Engineer, analyst, manager, or consultant: each interview is different."
+      },
+      "p4": {
+        "num": "PHASE 4",
+        "name": "Leadership & Approach",
+        "desc": "How you lead, handle ambiguity, and drive work to completion — assessed against what the role actually requires."
+      },
+      "p5": {
+        "num": "PHASE 5",
+        "name": "Fit & Motivation",
+        "desc": "Why this role, why this company, why now — coached until your answer sounds genuine, not rehearsed."
+      },
+      "p6": {
+        "num": "PHASE 6",
+        "name": "Your Questions",
+        "desc": "Practice asking smart, well-researched questions. The questions you ask signal as much as the answers you give."
+      }
     },
     "features": {
-      "f1": { "title": "Any field, any role",            "desc": "Engineering, finance, consulting, product, marketing, operations — the AI adapts to the job description you paste. Not a generic script." },
-      "f2": { "title": "English coaching included",      "desc": "Every session evaluates your word choice, sentence structure, register, and fluency — not just your content. Valuable even for native speakers who want sharper, more executive language." },
-      "f3": { "title": "Voice or text",                  "desc": "Answer by speaking or typing. The interviewer responds with realistic audio — so you practice the actual experience, not just the content." },
-      "f4": { "title": "Repeat until it's automatic",   "desc": "Each round is a fresh interview. Same role, different role — build fluency through repetition until your answers feel natural under pressure." }
+      "f1": {
+        "title": "Any field, any role",
+        "desc": "Engineering, finance, consulting, product, marketing, operations — the AI adapts to the job description you paste. Not a generic script."
+      },
+      "f2": {
+        "title": "English coaching included",
+        "desc": "Every session evaluates your word choice, sentence structure, register, and fluency — not just your content. Valuable even for native speakers who want sharper, more executive language."
+      },
+      "f3": {
+        "title": "Voice or text",
+        "desc": "Answer by speaking or typing. The interviewer responds with realistic audio — so you practice the actual experience, not just the content."
+      },
+      "f4": {
+        "title": "Repeat until it's automatic",
+        "desc": "Each round is a fresh interview. Same role, different role — build fluency through repetition until your answers feel natural under pressure."
+      }
     },
     "cta": {
       "title": "Don't let the first round be the last.",
@@ -64,7 +101,11 @@
   },
   "profile": {
     "pageTitle": "Profile Settings — Acing Interview",
-    "header": { "tagline": "Account settings", "backBtn": "← Back to interview", "backBtnLabel": "Back to interview" },
+    "header": {
+      "tagline": "Account settings",
+      "backBtn": "← Back to interview",
+      "backBtnLabel": "Back to interview"
+    },
     "pageHeading": "Profile Settings",
     "pageSub": "Manage your account details and password.",
     "plan": {
@@ -146,10 +187,13 @@
   },
   "history": {
     "pageTitle": "Interview History — Acing Interview",
-    "header": { "tagline": "Interview history" },
+    "header": {
+      "tagline": "Interview history"
+    },
     "nav": {
-      "current": "← Current interview", "currentLabel": "Current interview",
-      "newInterview": "＋ New interview"
+      "current": "← Current interview",
+      "currentLabel": "Current interview",
+      "newInterview": "New interview"
     },
     "pageHeading": "Past interviews",
     "summary": "{{count}} interviews across {{roles}} roles",
@@ -176,7 +220,10 @@
       "done": "Completed",
       "starting": "Starting…"
     },
-    "badges": { "completed": "Completed", "inProgress": "In progress" },
+    "badges": {
+      "completed": "Completed",
+      "inProgress": "In progress"
+    },
     "session": {
       "answers": "answers",
       "answer": "answer",
@@ -259,10 +306,13 @@
       "newRoleSub": "Enter a different job description & resume"
     },
     "input": {
-      "placeholder": "Type your answer or press 🎙️ to speak…",
+      "placeholder": "Type or press 🎙️",
       "hint": "Click <strong>🎙️</strong> to start/stop recording · <strong>Enter</strong> to send text · <strong>Shift+Enter</strong> for new line"
     },
-    "audio": { "discard": "✕ Discard", "send": "➤ Send" },
+    "audio": {
+      "discard": "✕ Discard",
+      "send": "➤ Send"
+    },
     "doneBanner": "Interview complete — scroll down to see your scorecard ↓",
     "sessionRestored": "— session restored —",
     "tapToEnable": "Tap anywhere to enable audio",

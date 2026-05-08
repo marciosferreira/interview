@@ -74,8 +74,11 @@
   
   <div class="header-actions">
     <span id="plan-pill" class="badge"></span>
+    <button class="btn btn-primary" style="padding: 6px 12px; font-size: 13px;" onclick="newInterview()">
+      <i data-lucide="plus" style="width:16px;height:16px"></i> <span data-i18n="history.nav.newInterview">New interview</span>
+    </button>
     <a href="/tips.html" class="nav-link"><i data-lucide="lightbulb" style="width:16px;height:16px;"></i> <span data-i18n="nav.tipsLabel">Tips</span></a>
-    <a href="/history.html" class="nav-link"><i data-lucide="clipboard-list" style="width:16px;height:16px;"></i> History</a>
+    <a href="/history.html" class="nav-link"><i data-lucide="clipboard-list" style="width:16px;height:16px;"></i> <span data-i18n="nav.historyLabel">History</span></a>
   </div>
   
   <button class="mobile-menu-btn" id="hamburger-btn" aria-label="Menu"><i data-lucide="menu"></i></button>
@@ -89,7 +92,8 @@
       <button class="drawer-close" onclick="closeMobileMenu()"><i data-lucide="x"></i></button>
     </div>
     <a class="drawer-item" href="/"><i data-lucide="home"></i> <span data-i18n="nav.homeLabel">Home</span></a>
-    <a class="drawer-item" href="/history.html"><i data-lucide="clipboard-list"></i> History</a>
+    <button class="drawer-item" onclick="closeMobileMenu(); newInterview()"><i data-lucide="plus"></i> <span data-i18n="history.nav.newInterview">New interview</span></button>
+    <a class="drawer-item" href="/history.html"><i data-lucide="clipboard-list"></i> <span data-i18n="nav.historyLabel">History</span></a>
     <a class="drawer-item" href="/tips.html"><i data-lucide="lightbulb"></i> <span data-i18n="nav.tipsLabel">Tips</span></a>
   </nav>
 </div>
@@ -214,6 +218,12 @@
   if (!_token) location.replace('/login.html?next=/profile.html');
 
   const _authHeader = { 'Authorization': `Bearer ${_token}`, 'Content-Type': 'application/json' };
+  const SESSION_KEY = 'interview_v1';
+
+  function newInterview() {
+    localStorage.removeItem(SESSION_KEY);
+    window.location.href = '/onboarding.html';
+  }
 
   function showMsg(id, text, type) {
     const el = document.getElementById(id);
@@ -285,6 +295,19 @@
           }
         } catch {}
         
+        const pill = document.getElementById('plan-pill');
+        if (pill) {
+          const isH = usage.plan === 'hunter';
+          pill.className = 'badge ' + (isH ? 'badge-primary' : '');
+          pill.innerHTML = isH ? '<i data-lucide="target" style="width:12px;height:12px;margin-right:4px"></i> Hunter' : '<i data-lucide="map" style="width:12px;height:12px;margin-right:4px"></i> Explorer';
+          pill.setAttribute('data-tooltip', isH ? 'Your current plan' : 'Upgrade to Hunter for more sessions');
+          if(!isH) {
+            pill.style.border = '1px solid var(--bg-surface-border)';
+            pill.style.color = 'var(--text-secondary)';
+          }
+          lucide.createIcons();
+        }
+
         document.getElementById('plan-banner').style.display = 'flex';
         document.getElementById('plan-upgrade-link').style.display = 'none';
         document.getElementById('plan-cancel-btn').style.display = 'none';
@@ -571,6 +594,7 @@
     const isHunter = u.plan === 'hunter';
     el.className = 'badge ' + (isHunter ? 'badge-primary' : '');
     el.innerHTML = isHunter ? '<i data-lucide="target" style="width:12px;height:12px;margin-right:4px"></i> Hunter' : '<i data-lucide="map" style="width:12px;height:12px;margin-right:4px"></i> Explorer';
+    el.setAttribute('data-tooltip', isHunter ? 'Your current plan' : 'Upgrade to Hunter for more sessions');
     if(!isHunter) {
       el.style.border = '1px solid var(--bg-surface-border)';
       el.style.color = 'var(--text-secondary)';

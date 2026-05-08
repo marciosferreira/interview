@@ -134,8 +134,11 @@
       <button class="lang-btn" data-lang="en" onclick="i18n.switchLang('en')">EN</button>
       <button class="lang-btn" data-lang="pt" onclick="i18n.switchLang('pt')">PT</button>
     </div>
-    <a id="hdr-history" class="nav-link" href="/history.html" style="display:none"><i data-lucide="clipboard-list" style="width:16px;height:16px;"></i> History</a>
-    <a id="hdr-practice" class="btn btn-primary" style="padding: 6px 12px; font-size: 13px;" href="/interview.html" data-i18n="tips.nav.practice"><i data-lucide="play" style="width:16px;height:16px;"></i> Practice</a>
+    <a id="hdr-history" class="nav-link" href="/history.html" style="display:none"><i data-lucide="clipboard-list" style="width:16px;height:16px;"></i> <span data-i18n="nav.historyLabel">History</span></a>
+    <button id="hdr-new" class="btn btn-primary" style="display:none; padding: 6px 12px; font-size: 13px;" onclick="newInterview()">
+      <i data-lucide="plus" style="width:16px;height:16px"></i> <span data-i18n="history.nav.newInterview">New</span>
+    </button>
+    <a id="hdr-settings" class="nav-link" href="/profile.html" style="display:none"><i data-lucide="settings" style="width:16px;height:16px;"></i> <span data-i18n="nav.settingsLabel">Settings</span></a>
     <a id="hdr-login" class="nav-link" href="/login.html" style="display:none" data-i18n="nav.signin">Log in</a>
   </div>
   
@@ -150,8 +153,9 @@
       <button class="drawer-close" onclick="closeMobileMenu()"><i data-lucide="x"></i></button>
     </div>
     <a class="drawer-item" href="/"><i data-lucide="home"></i> <span data-i18n="nav.homeLabel">Home</span></a>
-    <a class="drawer-item" href="/interview.html"><i data-lucide="play"></i> <span data-i18n="tips.nav.practice">Practice</span></a>
-    <a class="drawer-item" id="drawer-history" href="/history.html" style="display:none"><i data-lucide="clipboard-list"></i> <span data-i18n="tips.nav.history">History</span></a>
+
+    <button class="drawer-item" id="drawer-new" style="display:none" onclick="closeMobileMenu(); newInterview()"><i data-lucide="plus"></i> <span data-i18n="history.nav.newInterview">New interview</span></button>
+    <a class="drawer-item" id="drawer-history" href="/history.html" style="display:none"><i data-lucide="clipboard-list"></i> <span data-i18n="nav.historyLabel">History</span></a>
     <div class="drawer-divider"></div>
     <a class="drawer-item" id="drawer-login" href="/login.html" style="display:none"><i data-lucide="log-in"></i> <span data-i18n="nav.signin">Log in</span></a>
     <a class="drawer-item" href="/profile.html" id="drawer-settings" style="display:none"><i data-lucide="settings"></i> <span data-i18n="nav.settingsLabel">Settings</span></a>
@@ -338,20 +342,31 @@
   try {
     const token = localStorage.getItem('auth_token');
     const user  = JSON.parse(localStorage.getItem('auth_user') || 'null');
+    const SESSION_KEY = 'interview_v1';
+    window.newInterview = function() {
+      localStorage.removeItem(SESSION_KEY);
+      window.location.href = '/onboarding.html';
+    };
 
     const hdrHistory = document.getElementById('hdr-history');
+    const hdrNew     = document.getElementById('hdr-new');
+    const hdrSettings = document.getElementById('hdr-settings');
     const hdrLogin   = document.getElementById('hdr-login');
     const planPill   = document.getElementById('plan-pill');
     const ctaP       = document.querySelector('#cta-section p');
     const ctaBtn     = document.getElementById('cta-btn');
 
     const drawerHistory  = document.getElementById('drawer-history');
+    const drawerNew      = document.getElementById('drawer-new');
     const drawerLogin    = document.getElementById('drawer-login');
     const drawerSettings = document.getElementById('drawer-settings');
 
     if (token && user) {
       hdrHistory.style.display = '';
+      hdrNew.style.display     = '';
+      hdrSettings.style.display = '';
       if (drawerHistory)  drawerHistory.style.display  = '';
+      if (drawerNew)      drawerNew.style.display      = 'flex';
       if (drawerSettings) drawerSettings.style.display = '';
       const isHunter = user.plan === 'hunter';
       

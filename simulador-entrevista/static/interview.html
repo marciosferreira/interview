@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,7 +9,13 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -29,22 +36,46 @@
       gap: 12px;
       flex-shrink: 0;
     }
+
     header .logo {
-      width: 36px; height: 36px;
+      width: 36px;
+      height: 36px;
       background: linear-gradient(135deg, #6366f1, #8b5cf6);
       border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 18px;
     }
-    header h1 { font-size: 16px; font-weight: 600; color: #f1f5f9; }
-    header p  { font-size: 12px; color: #64748b; margin-top: 1px; }
+
+    header h1 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    header p {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 1px;
+    }
+
     .home-link {
-      display: flex; align-items: center; gap: 12px;
-      text-decoration: none; color: inherit;
-      border-radius: 10px; padding: 2px 6px; margin: -2px -6px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+      border-radius: 10px;
+      padding: 2px 6px;
+      margin: -2px -6px;
       transition: background 0.2s;
     }
-    .home-link:hover { background: rgba(99,102,241,0.08); }
+
+    .home-link:hover {
+      background: rgba(99, 102, 241, 0.08);
+    }
+
     #status-badge {
       margin-left: auto;
       font-size: 11px;
@@ -55,137 +86,260 @@
       color: #64748b;
       transition: all 0.3s;
     }
-    #status-badge.connected   { background: #14532d; color: #4ade80; }
-    #status-badge.recording   { background: #450a0a; color: #f87171; }
-    #status-badge.processing  { background: #1e1b4b; color: #a78bfa; }
-    #home-btn, #new-btn, #history-btn {
+
+    #status-badge.connected {
+      background: #14532d;
+      color: #4ade80;
+    }
+
+    #status-badge.recording {
+      background: #450a0a;
+      color: #f87171;
+    }
+
+    #status-badge.processing {
+      background: #1e1b4b;
+      color: #a78bfa;
+    }
+
+    #home-btn,
+    #history-btn {
       margin-left: 8px;
-      font-size: 11px; font-weight: 500;
-      padding: 4px 10px; border-radius: 20px;
-      background: transparent; border: 1px solid #2d3148;
-      color: #64748b; cursor: pointer; transition: all 0.2s;
-      text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: transparent;
+      border: 1px solid #2d3148;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
-    #home-btn:hover    { border-color: #6366f1; color: #a78bfa; }
-    #new-btn:hover     { border-color: #f87171; color: #f87171; }
-    #history-btn:hover { border-color: #6366f1; color: #a78bfa; }
-    #tips-btn-hdr, #profile-btn-hdr {
-      font-size: 11px; font-weight: 500; padding: 5px 12px; border-radius: 20px;
-      background: transparent; border: 1px solid #2d3148; color: #64748b;
-      text-decoration: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+
+    #home-btn:hover {
+      border-color: #6366f1;
+      color: #a78bfa;
     }
-    #tips-btn-hdr:hover, #profile-btn-hdr:hover { border-color: #6366f1; color: #a78bfa; }
+
+    #history-btn:hover {
+      border-color: #6366f1;
+      color: #a78bfa;
+    }
+
+    #tips-btn-hdr,
+    #profile-btn-hdr {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 5px 12px;
+      border-radius: 20px;
+      background: transparent;
+      border: 1px solid #2d3148;
+      color: #64748b;
+      text-decoration: none;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    #tips-btn-hdr:hover,
+    #profile-btn-hdr:hover {
+      border-color: #6366f1;
+      color: #a78bfa;
+    }
 
     /* ── Hamburger button ── */
     #hamburger-btn {
-      display: none; margin-left: auto;
-      background: transparent; border: 1px solid #2d3148;
-      color: #94a3b8; border-radius: 8px;
-      width: 36px; height: 36px; font-size: 18px;
-      cursor: pointer; align-items: center; justify-content: center;
+      display: none;
+      margin-left: auto;
+      background: transparent;
+      border: 1px solid #2d3148;
+      color: #94a3b8;
+      border-radius: 8px;
+      width: 36px;
+      height: 36px;
+      font-size: 18px;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
     }
 
     /* ── Mobile drawer ── */
     #mobile-drawer {
-      display: none; position: fixed; inset: 0; z-index: 8000;
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 8000;
     }
-    #mobile-drawer.open { display: block; }
+
+    #mobile-drawer.open {
+      display: block;
+    }
+
     .drawer-backdrop {
-      position: absolute; inset: 0; background: rgba(0,0,0,0.6);
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
     }
+
     .drawer-panel {
-      position: absolute; top: 0; right: 0; bottom: 0;
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
       width: min(280px, 85vw);
-      background: #1a1d27; border-left: 1px solid #2d3148;
-      display: flex; flex-direction: column;
-      padding: 16px; gap: 6px;
+      background: #1a1d27;
+      border-left: 1px solid #2d3148;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      gap: 6px;
       overflow-y: auto;
       animation: slideIn 0.22s ease;
     }
-    @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+      }
+
+      to {
+        transform: translateX(0);
+      }
+    }
+
     .drawer-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding-bottom: 12px; margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      margin-bottom: 6px;
       border-bottom: 1px solid #2d3148;
     }
-    .drawer-header span { font-size: 14px; font-weight: 600; color: #f1f5f9; }
-    .drawer-close {
-      background: transparent; border: none; color: #64748b;
-      font-size: 18px; cursor: pointer; padding: 4px;
+
+    .drawer-header span {
+      font-size: 14px;
+      font-weight: 600;
+      color: #f1f5f9;
     }
+
+    .drawer-close {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
     .drawer-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 12px 14px; border-radius: 10px;
-      font-size: 14px; font-weight: 500; color: #94a3b8;
-      text-decoration: none; background: transparent;
-      border: none; cursor: pointer; width: 100%; text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #94a3b8;
+      text-decoration: none;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
       transition: background 0.15s, color 0.15s;
     }
-    .drawer-item:hover { background: #2d3148; color: #e2e8f0; }
-    .drawer-item .di-icon { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
-    .drawer-divider { height: 1px; background: #2d3148; margin: 4px 0; }
+
+    .drawer-item:hover {
+      background: #2d3148;
+      color: #e2e8f0;
+    }
+
+    .drawer-item .di-icon {
+      font-size: 18px;
+      width: 24px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .drawer-divider {
+      height: 1px;
+      background: #2d3148;
+      margin: 4px 0;
+    }
 
     /* ── Mobile header ── */
     /* ── Phase mobile label ── */
     #phase-mobile-label {
       display: none;
     }
+
     @media (max-width: 768px) {
-      header { padding: 10px 12px; gap: 8px; }
-      .home-link > div { display: none; }
-      .plan-pill { display: none !important; }
-      #status-badge { margin-left: auto; }
-      #profile-btn-hdr, #tips-btn-hdr, #history-btn, #new-btn-wrap { display: none; }
-      #hamburger-btn { display: flex; }
+      header {
+        padding: 10px 12px;
+        gap: 8px;
+      }
+
+      .home-link>div {
+        display: none;
+      }
+
+      .plan-pill {
+        display: none !important;
+      }
+
+      #status-badge {
+        margin-left: auto;
+      }
+
+      #profile-btn-hdr,
+      #tips-btn-hdr,
+      #history-btn {
+        display: none;
+      }
+
+      #hamburger-btn {
+        display: flex;
+      }
+
       /* Phase bar: dots only */
-      .ps-label { display: none; }
-      .phase-connector { min-width: 4px; max-width: 16px; }
-      #phase-bar { padding: 0 12px; }
+      .ps-label {
+        display: none;
+      }
+
+      .phase-connector {
+        min-width: 4px;
+        max-width: 16px;
+      }
+
+      #phase-bar {
+        padding: 0 12px;
+      }
+
       /* Current phase label below bar */
       #phase-mobile-label {
         display: block;
         text-align: center;
-        font-size: 11px; font-weight: 600;
+        font-size: 11px;
+        font-weight: 600;
         color: #a78bfa;
         padding: 3px 12px 5px;
         background: #13151f;
         border-bottom: 1px solid #2d3148;
         letter-spacing: 0.03em;
       }
+
       /* Input area */
-      #input-area { padding: 10px 12px; }
+      #input-area {
+        padding: 10px 12px;
+      }
     }
 
-    /* ── New-interview popover ── */
-    #new-popover {
-      display: none;
-      position: absolute;
-      top: calc(100% + 8px);
-      right: 0;
-      background: #1e2235;
-      border: 1px solid #2d3148;
-      border-radius: 14px;
-      padding: 8px;
-      z-index: 600;
-      min-width: 220px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    }
-    #new-popover.open { display: block; }
-    .pop-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .pop-item:hover { background: #2d3148; }
-    .pop-item-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
-    .pop-item-text strong { display: block; font-size: 13px; color: #e2e8f0; }
-    .pop-item-text span   { font-size: 11px; color: #64748b; }
-    #new-btn-wrap { position: relative; display: inline-flex; margin-left: 8px; }
 
     /* ── Phase progress bar ── */
     #phase-bar {
@@ -196,7 +350,11 @@
       overflow-x: auto;
       scrollbar-width: none;
     }
-    #phase-bar::-webkit-scrollbar { display: none; }
+
+    #phase-bar::-webkit-scrollbar {
+      display: none;
+    }
+
     .phase-steps {
       display: flex;
       align-items: center;
@@ -204,6 +362,7 @@
       margin: 0 auto;
       height: 36px;
     }
+
     .phase-step {
       display: flex;
       align-items: center;
@@ -211,13 +370,16 @@
       flex-shrink: 0;
       cursor: default;
     }
+
     .phase-step .ps-dot {
-      width: 7px; height: 7px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: #2d3148;
       transition: background 0.3s;
       flex-shrink: 0;
     }
+
     .phase-step .ps-label {
       font-size: 10px;
       color: #475569;
@@ -226,10 +388,25 @@
       transition: color 0.3s;
       white-space: nowrap;
     }
-    .phase-step.active .ps-dot  { background: #6366f1; box-shadow: 0 0 6px #6366f180; }
-    .phase-step.active .ps-label { color: #a78bfa; font-weight: 700; }
-    .phase-step.done   .ps-dot  { background: #22c55e; }
-    .phase-step.done   .ps-label { color: #4ade80; }
+
+    .phase-step.active .ps-dot {
+      background: #6366f1;
+      box-shadow: 0 0 6px #6366f180;
+    }
+
+    .phase-step.active .ps-label {
+      color: #a78bfa;
+      font-weight: 700;
+    }
+
+    .phase-step.done .ps-dot {
+      background: #22c55e;
+    }
+
+    .phase-step.done .ps-label {
+      color: #4ade80;
+    }
+
     .phase-connector {
       flex: 1;
       height: 1px;
@@ -239,7 +416,10 @@
       transition: background 0.3s;
       flex-shrink: 1;
     }
-    .phase-connector.done { background: #22c55e; }
+
+    .phase-connector.done {
+      background: #22c55e;
+    }
 
     /* ── Chat area ── */
     #chat {
@@ -250,9 +430,19 @@
       flex-direction: column;
       gap: 16px;
     }
-    #chat::-webkit-scrollbar { width: 6px; }
-    #chat::-webkit-scrollbar-track { background: transparent; }
-    #chat::-webkit-scrollbar-thumb { background: #2d3148; border-radius: 3px; }
+
+    #chat::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #chat::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    #chat::-webkit-scrollbar-thumb {
+      background: #2d3148;
+      border-radius: 3px;
+    }
 
     .bubble-row {
       display: flex;
@@ -260,18 +450,43 @@
       max-width: 780px;
       width: 100%;
     }
-    .bubble-row.ai       { align-self: flex-start; }
-    .bubble-row.user     { align-self: flex-end; flex-direction: row-reverse; }
-    .bubble-row.feedback { align-self: center; width: 100%; max-width: 820px; }
+
+    .bubble-row.ai {
+      align-self: flex-start;
+    }
+
+    .bubble-row.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .bubble-row.feedback {
+      align-self: center;
+      width: 100%;
+      max-width: 820px;
+    }
 
     .avatar {
-      width: 32px; height: 32px; border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
       flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
     }
-    .avatar.ai   { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; }
-    .avatar.user { background: #1e3a5f; color: #93c5fd; }
+
+    .avatar.ai {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+    }
+
+    .avatar.user {
+      background: #1e3a5f;
+      color: #93c5fd;
+    }
 
     .bubble {
       padding: 12px 16px;
@@ -283,39 +498,108 @@
       word-break: break-word;
       min-width: 0;
     }
-    .bubble-row.ai   .bubble { background: #1e2235; border-top-left-radius: 4px; }
-    .bubble-row.user .bubble { background: #1e3a5f; border-top-right-radius: 4px; color: #bfdbfe; }
+
+    .bubble-row.ai .bubble {
+      background: #1e2235;
+      border-top-left-radius: 4px;
+    }
+
+    .bubble-row.user .bubble {
+      background: #1e3a5f;
+      border-top-right-radius: 4px;
+      color: #bfdbfe;
+    }
 
     .replay-btn {
-      display: inline-flex; align-items: center; gap: 4px;
-      margin-top: 6px; padding: 3px 8px;
-      background: transparent; border: 1px solid #2d3148;
-      border-radius: 12px; color: #64748b; font-size: 11px;
-      cursor: pointer; transition: color .15s, border-color .15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 6px;
+      padding: 3px 8px;
+      background: transparent;
+      border: 1px solid #2d3148;
+      border-radius: 12px;
+      color: #64748b;
+      font-size: 11px;
+      cursor: pointer;
+      transition: color .15s, border-color .15s;
     }
-    .replay-btn:hover { color: #a78bfa; border-color: #a78bfa; }
-    .replay-btn.user  { border-color: #1e3a5f; color: #475569; }
-    .replay-btn.user:hover { color: #93c5fd; border-color: #93c5fd; }
+
+    .replay-btn:hover {
+      color: #a78bfa;
+      border-color: #a78bfa;
+    }
+
+    .replay-btn.user {
+      border-color: #1e3a5f;
+      color: #475569;
+    }
+
+    .replay-btn.user:hover {
+      color: #93c5fd;
+      border-color: #93c5fd;
+    }
 
     /* Markdown rendering inside bubbles */
-    .bubble p, .feedback-card p { margin: 0 0 8px 0; }
-    .bubble p:last-child, .feedback-card p:last-child { margin-bottom: 0; }
-    .bubble strong, .feedback-card strong { color: #e2e8f0; }
-    .bubble em, .feedback-card em { color: #94a3b8; font-style: italic; }
-    .bubble ul, .bubble ol, .feedback-card ul, .feedback-card ol {
-      margin: 6px 0 6px 18px; padding: 0;
+    .bubble p,
+    .feedback-card p {
+      margin: 0 0 8px 0;
     }
-    .bubble li, .feedback-card li { margin-bottom: 4px; }
-    .bubble hr, .feedback-card hr {
-      border: none; border-top: 1px solid #2d3148; margin: 12px 0;
+
+    .bubble p:last-child,
+    .feedback-card p:last-child {
+      margin-bottom: 0;
     }
-    .bubble h1, .bubble h2, .bubble h3,
-    .feedback-card h1, .feedback-card h2, .feedback-card h3 {
-      color: #a78bfa; margin: 12px 0 6px 0; font-size: 14px;
+
+    .bubble strong,
+    .feedback-card strong {
+      color: #e2e8f0;
     }
-    .bubble code, .feedback-card code {
-      background: #0f1117; border-radius: 4px;
-      padding: 1px 5px; font-size: 12px; color: #7dd3fc;
+
+    .bubble em,
+    .feedback-card em {
+      color: #94a3b8;
+      font-style: italic;
+    }
+
+    .bubble ul,
+    .bubble ol,
+    .feedback-card ul,
+    .feedback-card ol {
+      margin: 6px 0 6px 18px;
+      padding: 0;
+    }
+
+    .bubble li,
+    .feedback-card li {
+      margin-bottom: 4px;
+    }
+
+    .bubble hr,
+    .feedback-card hr {
+      border: none;
+      border-top: 1px solid #2d3148;
+      margin: 12px 0;
+    }
+
+    .bubble h1,
+    .bubble h2,
+    .bubble h3,
+    .feedback-card h1,
+    .feedback-card h2,
+    .feedback-card h3 {
+      color: #a78bfa;
+      margin: 12px 0 6px 0;
+      font-size: 14px;
+    }
+
+    .bubble code,
+    .feedback-card code {
+      background: #0f1117;
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 12px;
+      color: #7dd3fc;
     }
 
     /* Feedback card */
@@ -326,6 +610,7 @@
       padding: 24px;
       width: 100%;
     }
+
     .feedback-card {
       font-size: 13px;
       line-height: 1.7;
@@ -334,24 +619,45 @@
 
     /* Typing indicator */
     .typing-indicator {
-      display: flex; align-items: center; gap: 5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
       padding: 12px 16px;
       background: #1e2235;
       border-radius: 16px;
       border-top-left-radius: 4px;
       width: fit-content;
     }
+
     .typing-indicator span {
-      width: 7px; height: 7px;
+      width: 7px;
+      height: 7px;
       background: #6366f1;
       border-radius: 50%;
       animation: bounce 1.2s infinite;
     }
-    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+    .typing-indicator span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-indicator span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
     @keyframes bounce {
-      0%, 60%, 100% { transform: translateY(0); opacity: .5; }
-      30%            { transform: translateY(-6px); opacity: 1; }
+
+      0%,
+      60%,
+      100% {
+        transform: translateY(0);
+        opacity: .5;
+      }
+
+      30% {
+        transform: translateY(-6px);
+        opacity: 1;
+      }
     }
 
     /* ── Input area ── */
@@ -361,6 +667,7 @@
       border-top: 1px solid #2d3148;
       flex-shrink: 0;
     }
+
     #input-row {
       display: flex;
       gap: 10px;
@@ -368,6 +675,7 @@
       max-width: 820px;
       margin: 0 auto;
     }
+
     #text-input {
       flex: 1;
       background: #0f1117;
@@ -383,33 +691,69 @@
       transition: border-color 0.2s;
       line-height: 1.5;
     }
-    #text-input:focus    { border-color: #6366f1; }
-    #text-input:disabled { opacity: 0.4; cursor: not-allowed; }
-    #text-input::placeholder { color: #475569; }
+
+    #text-input:focus {
+      border-color: #6366f1;
+    }
+
+    #text-input:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    #text-input::placeholder {
+      color: #475569;
+    }
 
     .icon-btn {
-      width: 48px; height: 48px;
-      border: none; border-radius: 12px;
+      width: 48px;
+      height: 48px;
+      border: none;
+      border-radius: 12px;
       cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
       font-size: 20px;
       transition: all 0.2s;
     }
+
     #mic-btn {
       background: #1e2235;
       color: #94a3b8;
     }
-    #mic-btn:hover    { background: #2d3148; color: #e2e8f0; }
-    #mic-btn.active   { background: #450a0a; color: #f87171; animation: pulse 1.5s infinite; }
-    #mic-btn:disabled { opacity: 0.3; cursor: not-allowed; animation: none; }
+
+    #mic-btn:hover {
+      background: #2d3148;
+      color: #e2e8f0;
+    }
+
+    #mic-btn.active {
+      background: #450a0a;
+      color: #f87171;
+      animation: pulse 1.5s infinite;
+    }
+
+    #mic-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      animation: none;
+    }
 
     #send-btn {
       background: #6366f1;
       color: #fff;
     }
-    #send-btn:hover    { background: #4f46e5; }
-    #send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    #send-btn:hover {
+      background: #4f46e5;
+    }
+
+    #send-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
 
     /* ── TTS bar (sits between phase-bar and chat, no overlap) ── */
     #tts-player {
@@ -423,29 +767,48 @@
       padding: 7px 24px;
       animation: tts-fadein 0.15s ease;
     }
+
     @keyframes tts-fadein {
-      from { opacity: 0; }
-      to   { opacity: 1; }
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
     }
+
     #tts-label {
       font-size: 12px;
       font-weight: 500;
       color: #a78bfa;
       white-space: nowrap;
     }
+
     #tts-label .tts-dot {
       display: inline-block;
-      width: 7px; height: 7px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: #6366f1;
       margin-right: 6px;
       animation: tts-pulse 1.2s ease-in-out infinite;
     }
+
     @keyframes tts-pulse {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.3; }
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.3;
+      }
     }
-    #pause-btn, #skip-btn {
+
+    #pause-btn,
+    #skip-btn {
       background: transparent;
       border: 1px solid #3d4160;
       color: #94a3b8;
@@ -457,8 +820,17 @@
       transition: all 0.15s;
       white-space: nowrap;
     }
-    #pause-btn:hover { background: #3d4160; color: #a78bfa; border-color: #6366f1; }
-    #skip-btn:hover  { background: #3d4160; color: #e2e8f0; }
+
+    #pause-btn:hover {
+      background: #3d4160;
+      color: #a78bfa;
+      border-color: #6366f1;
+    }
+
+    #skip-btn:hover {
+      background: #3d4160;
+      color: #e2e8f0;
+    }
 
     #cancel-rec-btn {
       background: #2d3148;
@@ -466,7 +838,10 @@
       display: none;
       font-size: 18px;
     }
-    #cancel-rec-btn:hover { background: #3d4160; }
+
+    #cancel-rec-btn:hover {
+      background: #3d4160;
+    }
 
     /* ── Audio preview bar (shown after recording, before send) ── */
     #audio-preview {
@@ -476,45 +851,95 @@
       max-width: 820px;
       margin: 0 auto;
     }
+
     #ap-play {
-      width: 44px; height: 44px; border-radius: 50%;
-      background: #6366f1; color: #fff; border: none;
-      font-size: 18px; cursor: pointer; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: background 0.2s;
     }
-    #ap-play:hover { background: #4f46e5; }
+
+    #ap-play:hover {
+      background: #4f46e5;
+    }
+
     #ap-track {
       flex: 1;
-      display: flex; flex-direction: column; gap: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
+
     #ap-progress {
-      width: 100%; height: 4px; border-radius: 2px;
-      background: #2d3148; appearance: none; cursor: pointer;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: #2d3148;
+      appearance: none;
+      cursor: pointer;
       accent-color: #6366f1;
     }
+
     #ap-times {
-      display: flex; justify-content: space-between;
-      font-size: 10px; color: #64748b;
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: #64748b;
     }
+
     #ap-discard {
-      background: #2d3148; color: #f87171;
-      border: none; border-radius: 10px;
-      padding: 6px 12px; font-size: 12px; font-weight: 600;
-      cursor: pointer; white-space: nowrap; transition: background 0.2s;
+      background: #2d3148;
+      color: #f87171;
+      border: none;
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
     }
-    #ap-discard:hover { background: #3d4160; }
+
+    #ap-discard:hover {
+      background: #3d4160;
+    }
+
     #ap-send {
-      background: #6366f1; color: #fff;
-      border: none; border-radius: 10px;
-      padding: 6px 14px; font-size: 12px; font-weight: 600;
-      cursor: pointer; white-space: nowrap; transition: background 0.2s;
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
     }
-    #ap-send:hover { background: #4f46e5; }
+
+    #ap-send:hover {
+      background: #4f46e5;
+    }
 
     @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,.4); }
-      50%       { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, .4);
+      }
+
+      50% {
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+      }
     }
 
     #hint {
@@ -536,1066 +961,1152 @@
       border-radius: 8px;
       margin-bottom: 10px;
     }
-  .plan-pill {
-    font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
-    text-transform: uppercase; padding: 3px 10px; border-radius: 20px;
-    flex-shrink: 0; display: none;
-  }
-  .plan-pill { position: relative; cursor: default; }
-  .plan-pill.hunter  { background: #312e81; color: #a5b4fc; }
-  .plan-pill.explorer { background: #1e293b; color: #64748b; }
-  .plan-pill::after {
-    content: attr(data-tooltip); position: absolute;
-    bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
-    background: #1e2235; border: 1px solid #3d4160; color: #e2e8f0;
-    font-size: 11px; font-weight: 500; text-transform: none; letter-spacing: 0;
-    white-space: nowrap; padding: 5px 10px; border-radius: 8px;
-    pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 999;
-  }
-  .plan-pill:hover::after, .plan-pill.tooltip-open::after { opacity: 1; }
 
-  /* ── Scorecard panel ── */
-  #scorecard-panel {
-    padding: 8px 16px 20px;
-  }
-  #scorecard-panel .sc-inner {
-    max-width: 820px;
-    margin: 0 auto;
-    background: #1a1d27;
-    border: 1px solid #4f46e5;
-    border-radius: 16px;
-    padding: 24px 28px;
-  }
-  #scorecard-panel .sc-inner h1,
-  #scorecard-panel .sc-inner h2,
-  #scorecard-panel .sc-inner h3 { color: #a78bfa; margin: 16px 0 8px; font-size: 14px; }
-  #scorecard-panel .sc-inner h1 { font-size: 16px; color: #f1f5f9; margin-top: 0; }
-  #scorecard-panel .sc-inner p  { font-size: 13.5px; color: #94a3b8; line-height: 1.75; margin-bottom: 10px; }
-  #scorecard-panel .sc-inner strong { color: #e2e8f0; }
-  #scorecard-panel .sc-inner ul,
-  #scorecard-panel .sc-inner ol { padding-left: 20px; margin-bottom: 10px; }
-  #scorecard-panel .sc-inner li { font-size: 13.5px; color: #94a3b8; line-height: 1.7; }
-  #scorecard-panel .sc-inner hr { border: none; border-top: 1px solid #2d3148; margin: 16px 0; }
-  #scorecard-panel .sc-loading { text-align: center; color: #475569; font-size: 13px; padding: 24px; }
+    .plan-pill {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 20px;
+      flex-shrink: 0;
+      display: none;
+    }
+
+    .plan-pill {
+      position: relative;
+      cursor: default;
+    }
+
+    .plan-pill.hunter {
+      background: #312e81;
+      color: #a5b4fc;
+    }
+
+    .plan-pill.explorer {
+      background: #1e293b;
+      color: #64748b;
+    }
+
+    .plan-pill::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e2235;
+      border: 1px solid #3d4160;
+      color: #e2e8f0;
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+      white-space: nowrap;
+      padding: 5px 10px;
+      border-radius: 8px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 999;
+    }
+
+    .plan-pill:hover::after,
+    .plan-pill.tooltip-open::after {
+      opacity: 1;
+    }
+
+    /* ── Scorecard panel ── */
+    #scorecard-panel {
+      padding: 8px 16px 20px;
+    }
+
+    #scorecard-panel .sc-inner {
+      max-width: 820px;
+      margin: 0 auto;
+      background: #1a1d27;
+      border: 1px solid #4f46e5;
+      border-radius: 16px;
+      padding: 24px 28px;
+    }
+
+    #scorecard-panel .sc-inner h1,
+    #scorecard-panel .sc-inner h2,
+    #scorecard-panel .sc-inner h3 {
+      color: #a78bfa;
+      margin: 16px 0 8px;
+      font-size: 14px;
+    }
+
+    #scorecard-panel .sc-inner h1 {
+      font-size: 16px;
+      color: #f1f5f9;
+      margin-top: 0;
+    }
+
+    #scorecard-panel .sc-inner p {
+      font-size: 13.5px;
+      color: #94a3b8;
+      line-height: 1.75;
+      margin-bottom: 10px;
+    }
+
+    #scorecard-panel .sc-inner strong {
+      color: #e2e8f0;
+    }
+
+    #scorecard-panel .sc-inner ul,
+    #scorecard-panel .sc-inner ol {
+      padding-left: 20px;
+      margin-bottom: 10px;
+    }
+
+    #scorecard-panel .sc-inner li {
+      font-size: 13.5px;
+      color: #94a3b8;
+      line-height: 1.7;
+    }
+
+    #scorecard-panel .sc-inner hr {
+      border: none;
+      border-top: 1px solid #2d3148;
+      margin: 16px 0;
+    }
+
+    #scorecard-panel .sc-loading {
+      text-align: center;
+      color: #475569;
+      font-size: 13px;
+      padding: 24px;
+    }
   </style>
 </head>
+
 <body>
 
-<header>
-  <a class="home-link" href="/">
-    <div class="logo"><i data-lucide="target" style="width:22px;height:22px;"></i></div>
-    <div>
-      <h1>Acing Interview</h1>
-      <p id="header-subtitle">Connecting…</p>
-    </div>
-  </a>
-  <div id="status-badge">Connecting…</div>
-  <span id="plan-pill" class="plan-pill"></span>
-  <a id="profile-btn-hdr" href="/profile.html" title="Account settings"><i data-lucide="settings" style="width:14px;height:14px;"></i> <span class="btn-label">Settings</span></a>
-  <a id="tips-btn-hdr" href="/tips.html" title="Interview tips &amp; frameworks"><i data-lucide="lightbulb" style="width:14px;height:14px;"></i> <span class="btn-label">Tips</span></a>
-  <a id="history-btn" href="/history.html" title="View all past interviews"><i data-lucide="clipboard-list" style="width:14px;height:14px;"></i> <span class="btn-label">History</span></a>
-  <div id="new-btn-wrap">
-    <button id="new-btn" title="Start a new interview"><i data-lucide="plus" style="width:14px;height:14px;"></i> New</button>
-    <div id="new-popover">
-      <div class="pop-item" id="pop-same-role">
-        <div class="pop-item-icon"><i data-lucide="refresh-cw" style="width:18px;height:18px;"></i></div>
-        <div class="pop-item-text">
-          <strong data-i18n="interview.popover.sameRole">New round — same role</strong>
-          <span data-i18n="interview.popover.sameRoleSub">Practice again with the same job &amp; resume</span>
-        </div>
+  <header>
+    <a class="home-link" href="/">
+      <div class="logo"><i data-lucide="target" style="width:22px;height:22px;"></i></div>
+      <div>
+        <h1>Acing Interview</h1>
+        <p id="header-subtitle">Connecting…</p>
       </div>
-      <div class="pop-item" id="pop-new-role">
-        <div class="pop-item-icon"><i data-lucide="file-edit" style="width:18px;height:18px;"></i></div>
-        <div class="pop-item-text">
-          <strong data-i18n="interview.popover.newRole">New role</strong>
-          <span data-i18n="interview.popover.newRoleSub">Enter a different job description &amp; resume</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  <button id="hamburger-btn" aria-label="Menu"><i data-lucide="menu"></i></button>
-</header>
+    </a>
+    <div id="status-badge">Connecting…</div>
+    <span id="plan-pill" class="plan-pill"></span>
+    <a id="profile-btn-hdr" href="/profile.html" title="Account settings"><i data-lucide="settings"
+        style="width:14px;height:14px;"></i> <span class="btn-label">Settings</span></a>
+    <a id="tips-btn-hdr" href="/tips.html" title="Interview tips &amp; frameworks"><i data-lucide="lightbulb"
+        style="width:14px;height:14px;"></i> <span class="btn-label">Tips</span></a>
+    <a id="history-btn" href="/history.html" title="View all past interviews"><i data-lucide="clipboard-list"
+        style="width:14px;height:14px;"></i> <span class="btn-label">History</span></a>
+    <button id="hamburger-btn" aria-label="Menu"><i data-lucide="menu"></i></button>
+  </header>
 
-<!-- Mobile drawer -->
-<div id="mobile-drawer">
-  <div class="drawer-backdrop"></div>
-  <nav class="drawer-panel">
-    <div class="drawer-header">
-      <span>Menu</span>
-      <button class="drawer-close"><i data-lucide="x" style="width:20px;height:20px"></i></button>
+  <!-- Mobile drawer -->
+  <div id="mobile-drawer">
+    <div class="drawer-backdrop"></div>
+    <nav class="drawer-panel">
+      <div class="drawer-header">
+        <span>Menu</span>
+        <button class="drawer-close"><i data-lucide="x" style="width:20px;height:20px"></i></button>
+      </div>
+      <a class="drawer-item" href="/"><span class="di-icon"><i data-lucide="home"></i></span> <span
+          data-i18n="nav.homeLabel">Home</span></a>
+      <a class="drawer-item" href="/profile.html"><span class="di-icon"><i data-lucide="settings"></i></span> <span
+          data-i18n="nav.settingsLabel">Settings</span></a>
+      <a class="drawer-item" href="/tips.html"><span class="di-icon"><i data-lucide="lightbulb"></i></span> <span
+          data-i18n="nav.tipsLabel">Tips</span></a>
+      <a class="drawer-item" href="/history.html"><span class="di-icon"><i data-lucide="clipboard-list"></i></span>
+        <span data-i18n="nav.historyLabel">History</span></a>
+      <div class="drawer-divider"></div>
+      <button class="drawer-item" id="drawer-new-same"><span class="di-icon"><i data-lucide="refresh-cw"></i></span>
+        <span data-i18n="interview.popover.sameRole">New round — same role</span></button>
+      <button class="drawer-item" id="drawer-new-role"><span class="di-icon"><i data-lucide="file-edit"></i></span>
+        <span data-i18n="interview.popover.newRole">New role</span></button>
+      <div class="drawer-divider"></div>
+      <button class="drawer-item" onclick="closeMobileMenu(); window.openContactWidget?.()"><span class="di-icon"><i
+            data-lucide="mail"></i></span> Contact us</button>
+    </nav>
+  </div>
+
+  <nav id="phase-bar">
+    <div class="phase-steps">
+      <div class="phase-step" data-step="0"><span class="ps-dot"></span><span class="ps-label"
+          data-i18n="interview.phases.elevatorPitch">Elevator Pitch</span></div>
+      <div class="phase-connector" data-conn="0"></div>
+      <div class="phase-step" data-step="1"><span class="ps-dot"></span><span class="ps-label"
+          data-i18n="interview.phases.CAR">CAR Story</span></div>
+      <div class="phase-connector" data-conn="1"></div>
+      <div class="phase-step" data-step="2"><span class="ps-dot"></span><span class="ps-label"
+          data-i18n="interview.phases.technical">Role-Specific</span></div>
+      <div class="phase-connector" data-conn="2"></div>
+      <div class="phase-step" data-step="3"><span class="ps-dot"></span><span class="ps-label"
+          data-i18n="interview.phases.leadership">Leadership</span></div>
+      <div class="phase-connector" data-conn="3"></div>
+      <div class="phase-step" data-step="4"><span class="ps-dot"></span><span class="ps-label"
+          data-i18n="interview.phases.motivation">Motivation</span></div>
+      <div class="phase-connector" data-conn="4"></div>
+      <div class="phase-step" data-step="5"><span class="ps-dot"></span><span class="ps-label"
+          data-i18n="interview.phases.yourQuestions">Your Questions</span></div>
+      <div class="phase-connector" data-conn="5"></div>
+      <div class="phase-step" data-step="6"><span class="ps-dot"></span><span class="ps-label"
+          data-i18n="interview.phases.scorecard">Scorecard</span></div>
     </div>
-    <a class="drawer-item" href="/"><span class="di-icon"><i data-lucide="home"></i></span> <span data-i18n="nav.homeLabel">Home</span></a>
-    <a class="drawer-item" href="/profile.html"><span class="di-icon"><i data-lucide="settings"></i></span> <span data-i18n="nav.settingsLabel">Settings</span></a>
-    <a class="drawer-item" href="/tips.html"><span class="di-icon"><i data-lucide="lightbulb"></i></span> <span data-i18n="nav.tipsLabel">Tips</span></a>
-    <a class="drawer-item" href="/history.html"><span class="di-icon"><i data-lucide="clipboard-list"></i></span> <span data-i18n="history.nav.current">History</span></a>
-    <div class="drawer-divider"></div>
-    <button class="drawer-item" id="drawer-new-same"><span class="di-icon"><i data-lucide="refresh-cw"></i></span> <span data-i18n="interview.popover.sameRole">New round — same role</span></button>
-    <button class="drawer-item" id="drawer-new-role"><span class="di-icon"><i data-lucide="file-edit"></i></span> <span data-i18n="interview.popover.newRole">New role</span></button>
-    <div class="drawer-divider"></div>
-    <button class="drawer-item" onclick="closeMobileMenu(); window.openContactWidget?.()"><span class="di-icon"><i data-lucide="mail"></i></span> Contact us</button>
   </nav>
-</div>
+  <div id="phase-mobile-label"></div>
 
-<nav id="phase-bar">
-  <div class="phase-steps">
-    <div class="phase-step" data-step="0"><span class="ps-dot"></span><span class="ps-label" data-i18n="interview.phases.elevatorPitch">Elevator Pitch</span></div>
-    <div class="phase-connector" data-conn="0"></div>
-    <div class="phase-step" data-step="1"><span class="ps-dot"></span><span class="ps-label" data-i18n="interview.phases.CAR">CAR Story</span></div>
-    <div class="phase-connector" data-conn="1"></div>
-    <div class="phase-step" data-step="2"><span class="ps-dot"></span><span class="ps-label" data-i18n="interview.phases.technical">Role-Specific</span></div>
-    <div class="phase-connector" data-conn="2"></div>
-    <div class="phase-step" data-step="3"><span class="ps-dot"></span><span class="ps-label" data-i18n="interview.phases.leadership">Leadership</span></div>
-    <div class="phase-connector" data-conn="3"></div>
-    <div class="phase-step" data-step="4"><span class="ps-dot"></span><span class="ps-label" data-i18n="interview.phases.motivation">Motivation</span></div>
-    <div class="phase-connector" data-conn="4"></div>
-    <div class="phase-step" data-step="5"><span class="ps-dot"></span><span class="ps-label" data-i18n="interview.phases.yourQuestions">Your Questions</span></div>
-    <div class="phase-connector" data-conn="5"></div>
-    <div class="phase-step" data-step="6"><span class="ps-dot"></span><span class="ps-label" data-i18n="interview.phases.scorecard">Scorecard</span></div>
+  <!-- Floating TTS player pill -->
+  <div id="tts-player">
+    <span id="tts-label"><span class="tts-dot"></span><span data-i18n="interview.tts.speaking">Alex is
+        speaking…</span></span>
+    <button id="pause-btn" title="Pause / Resume audio"><i data-lucide="pause" style="width:14px;height:14px"></i> <span
+        data-i18n="interview.tts.pause">Pause</span></button>
+    <button id="skip-btn" title="Skip audio"><i data-lucide="skip-forward" style="width:14px;height:14px"></i> <span
+        data-i18n="interview.tts.skip">Skip</span></button>
   </div>
-</nav>
-<div id="phase-mobile-label"></div>
 
-<!-- Floating TTS player pill -->
-<div id="tts-player">
-  <span id="tts-label"><span class="tts-dot"></span><span data-i18n="interview.tts.speaking">Alex is speaking…</span></span>
-  <button id="pause-btn" title="Pause / Resume audio"><i data-lucide="pause" style="width:14px;height:14px"></i> <span data-i18n="interview.tts.pause">Pause</span></button>
-  <button id="skip-btn" title="Skip audio"><i data-lucide="skip-forward" style="width:14px;height:14px"></i> <span data-i18n="interview.tts.skip">Skip</span></button>
-</div>
-
-<div id="chat">
-  <!-- Scorecard panel — rendered from server, never stored in localStorage -->
-  <div id="scorecard-panel" style="display:none"></div>
-</div>
-
-<div id="input-area">
-  <div id="done-banner" onclick="document.getElementById('scorecard-panel').scrollIntoView({behavior:'smooth',block:'start'})" style="cursor:pointer" title="Click to scroll to scorecard" data-i18n="interview.doneBanner">Interview complete — scroll down to see your scorecard ↓</div>
-  <div id="input-row">
-    <button id="mic-btn" class="icon-btn" disabled title="Click to start/stop recording"><i data-lucide="mic"></i></button>
-    <button id="cancel-rec-btn" class="icon-btn" title="Cancel recording"><i data-lucide="x"></i></button>
-    <textarea id="text-input" data-i18n-attr="placeholder:interview.input.placeholder" placeholder="Type your answer or press 🎙️ to speak…"
-              rows="1" disabled></textarea>
-    <button id="send-btn" class="icon-btn" disabled title="Send (Enter)"><i data-lucide="send"></i></button>
+  <div id="chat">
+    <!-- Scorecard panel — rendered from server, never stored in localStorage -->
+    <div id="scorecard-panel" style="display:none"></div>
   </div>
-  <div id="audio-preview">
-    <button id="ap-play" title="Play / Pause"><i data-lucide="play" style="width:20px;height:20px"></i></button>
-    <div id="ap-track">
-      <input id="ap-progress" type="range" min="0" max="100" value="0" step="0.1">
-      <div id="ap-times"><span id="ap-cur">0:00</span><span id="ap-dur">0:00</span></div>
+
+  <div id="input-area">
+    <div id="done-banner"
+      onclick="document.getElementById('scorecard-panel').scrollIntoView({behavior:'smooth',block:'start'})"
+      style="cursor:pointer" title="Click to scroll to scorecard" data-i18n="interview.doneBanner">Interview complete —
+      scroll down to see your scorecard ↓</div>
+    <div id="input-row">
+      <button id="mic-btn" class="icon-btn" disabled title="Click to start/stop recording"><i
+          data-lucide="mic"></i></button>
+      <button id="cancel-rec-btn" class="icon-btn" title="Cancel recording"><i data-lucide="x"></i></button>
+      <textarea id="text-input" data-i18n-attr="placeholder:interview.input.placeholder" placeholder="Type or press 🎙️"
+        rows="1" disabled></textarea>
+      <button id="send-btn" class="icon-btn" disabled title="Send (Enter)"><i data-lucide="send"></i></button>
     </div>
-    <button id="ap-discard"><i data-lucide="x" style="width:14px;height:14px"></i> <span data-i18n="interview.audio.discard">Discard</span></button>
-    <button id="ap-send"><i data-lucide="send" style="width:14px;height:14px"></i> <span data-i18n="interview.audio.send">Send</span></button>
+    <div id="audio-preview">
+      <button id="ap-play" title="Play / Pause"><i data-lucide="play" style="width:20px;height:20px"></i></button>
+      <div id="ap-track">
+        <input id="ap-progress" type="range" min="0" max="100" value="0" step="0.1">
+        <div id="ap-times"><span id="ap-cur">0:00</span><span id="ap-dur">0:00</span></div>
+      </div>
+      <button id="ap-discard"><i data-lucide="x" style="width:14px;height:14px"></i> <span
+          data-i18n="interview.audio.discard">Discard</span></button>
+      <button id="ap-send"><i data-lucide="send" style="width:14px;height:14px"></i> <span
+          data-i18n="interview.audio.send">Send</span></button>
+    </div>
+    <p id="hint" data-i18n-html="interview.input.hint">Click <strong><i data-lucide="mic"
+          style="width:14px;height:14px;vertical-align:middle"></i></strong> to start/stop recording ·
+      <strong>Enter</strong> to send text · <strong>Shift+Enter</strong> for new line</p>
   </div>
-  <p id="hint" data-i18n-html="interview.input.hint">Click <strong><i data-lucide="mic" style="width:14px;height:14px;vertical-align:middle"></i></strong> to start/stop recording · <strong>Enter</strong> to send text · <strong>Shift+Enter</strong> for new line</p>
-</div>
 
-<script>
-  // ── Phase progress bar ───────────────────────────────────────────────
-  const FASE_TO_STEP = {
-    elevator_pitch:        0,
-    elevator_pitch_report: 0,
-    CAR:                   1,
-    CAR_report:            1,
-    technical:             2,
-    technical_report:      2,
-    leadership:            3,
-    leadership_report:     3,
-    motivation:            4,
-    motivation_report:     4,
-    candidate_questions:   5,
-    feedback:              6,
-    done:                  6,
-  };
-  const phaseSteps = document.querySelectorAll('.phase-step');
-  const phaseConns = document.querySelectorAll('.phase-connector');
+  <script>
+    // ── Phase progress bar ───────────────────────────────────────────────
+    const FASE_TO_STEP = {
+      elevator_pitch: 0,
+      elevator_pitch_report: 0,
+      CAR: 1,
+      CAR_report: 1,
+      technical: 2,
+      technical_report: 2,
+      leadership: 3,
+      leadership_report: 3,
+      motivation: 4,
+      motivation_report: 4,
+      candidate_questions: 5,
+      feedback: 6,
+      done: 6,
+    };
+    const phaseSteps = document.querySelectorAll('.phase-step');
+    const phaseConns = document.querySelectorAll('.phase-connector');
 
-  // ── Phase progress bar + fase tracking ─────────────────────────────
-  let _currentFase = '';
+    // ── Phase progress bar + fase tracking ─────────────────────────────
+    let _currentFase = '';
 
-  const _mobilePhaseLbl = document.getElementById('phase-mobile-label');
-  function setPhase(fase) {
-    _currentFase = fase;
-    const active = FASE_TO_STEP[fase] ?? -1;
-    phaseSteps.forEach((el) => {
-      const s = parseInt(el.dataset.step, 10);
-      el.classList.toggle('active', s === active);
-      el.classList.toggle('done',   s < active);
-    });
-    phaseConns.forEach((el) => {
-      const c = parseInt(el.dataset.conn, 10);
-      el.classList.toggle('done', c < active);
-    });
-    if (_mobilePhaseLbl) {
-      const activeStep = document.querySelector('.phase-step.active .ps-label');
-      _mobilePhaseLbl.textContent = activeStep ? activeStep.textContent : '';
+    const _mobilePhaseLbl = document.getElementById('phase-mobile-label');
+    function setPhase(fase) {
+      _currentFase = fase;
+      const active = FASE_TO_STEP[fase] ?? -1;
+      phaseSteps.forEach((el) => {
+        const s = parseInt(el.dataset.step, 10);
+        el.classList.toggle('active', s === active);
+        el.classList.toggle('done', s < active);
+      });
+      phaseConns.forEach((el) => {
+        const c = parseInt(el.dataset.conn, 10);
+        el.classList.toggle('done', c < active);
+      });
+      if (_mobilePhaseLbl) {
+        const activeStep = document.querySelector('.phase-step.active .ps-label');
+        _mobilePhaseLbl.textContent = activeStep ? activeStep.textContent : '';
+      }
+      // Persist phase into SESSION_KEY + HISTORY_KEY
+      const raw = _loadRaw();
+      if (raw) {
+        raw.fase = fase;
+        localStorage.setItem(SESSION_KEY, JSON.stringify(raw));
+        _syncToServer();
+      }
+      // Scroll the active step into view on small screens
+      const activeEl = document.querySelector('.phase-step.active');
+      if (activeEl) activeEl.scrollIntoView({ inline: 'center', behavior: 'smooth' });
     }
-    // Persist phase into SESSION_KEY + HISTORY_KEY
-    const raw = _loadRaw();
-    if (raw) {
-      raw.fase = fase;
+
+    // ── Auth check ─────────────────────────────────────────────────────
+    const _authToken = localStorage.getItem('auth_token');
+    if (!_authToken) { location.replace('/login.html?next=/interview.html'); }
+    const _lang = localStorage.getItem('preferred_lang') || 'en';
+
+    // Load pending job session (set by onboarding.html)
+    let _pendingJobSession = null;
+    try {
+      const pjs = localStorage.getItem('pending_job_session');
+      if (pjs) { _pendingJobSession = JSON.parse(pjs); localStorage.removeItem('pending_job_session'); }
+    } catch (_) { }
+
+    // Update header subtitle with job title + company
+    function _updateHeaderSubtitle() {
+      const subtitle = document.getElementById('header-subtitle');
+      if (!subtitle) return;
+      const src = _pendingJobSession || _loadRaw();
+      const title = src?.jobTitle || '';
+      const company = src?.company || '';
+      if (title && company) subtitle.textContent = `${title} · ${company}`;
+      else if (title) subtitle.textContent = title;
+      else subtitle.textContent = 'AI-powered mock interview';
+    }
+
+    // ── Session persistence (localStorage) ──────────────────────────────
+    // SESSION_KEY  → active session: { threadId, savedAt, fase, history[], jobSessionId, jobTitle }
+    const SESSION_KEY = 'interview_v1';
+    const SESSION_TTL = 48 * 60 * 60 * 1000;
+
+    // ── Server sync ──────────────────────────────────────────────────────
+    // Debounced PUT /sessions/{threadId} so any device/browser shares history.
+    let _syncDebounceTimer = null;
+    function _syncToServer(immediate = false) {
+      if (_syncDebounceTimer) clearTimeout(_syncDebounceTimer);
+      const doSync = async () => {
+        const raw = _loadRaw();
+        if (!raw?.threadId) return;
+        try {
+          await fetch(`/sessions/${encodeURIComponent(raw.threadId)}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${_authToken}`,
+            },
+            body: JSON.stringify({
+              startedAt: raw.startedAt || Date.now(),
+              lastActiveAt: Date.now(),
+              fase: raw.fase || '',
+              history: raw.history || [],
+              jobSessionId: raw.jobSessionId || '',
+            }),
+          });
+        } catch { /* ignore — server picks it up on next sync */ }
+      };
+      if (immediate) { doSync(); }
+      else { _syncDebounceTimer = setTimeout(doSync, 3000); }
+    }
+    window.addEventListener('beforeunload', () => _syncToServer(true));
+
+    function _saveSession(threadId) {
+      const existing = _loadRaw() || {};
+      existing.threadId = threadId;
+      existing.savedAt = Date.now();
+      if (!existing.startedAt) existing.startedAt = Date.now();
+      // Carry over job session info from pending (first time) or existing session
+      if (_pendingJobSession) {
+        existing.jobSessionId = _pendingJobSession.jobSessionId;
+        existing.jobTitle = _pendingJobSession.jobTitle;
+        existing.company = _pendingJobSession.company;
+      }
+      localStorage.setItem(SESSION_KEY, JSON.stringify(existing));
+      _syncToServer();
+      _updateHeaderSubtitle();
+    }
+
+    function _loadRaw() {
+      try {
+        const d = JSON.parse(localStorage.getItem(SESSION_KEY));
+        if (!d) return null;
+        if (Date.now() - d.savedAt > SESSION_TTL) { localStorage.removeItem(SESSION_KEY); return null; }
+        return d;
+      } catch { return null; }
+    }
+
+    function _loadThreadId() {
+      return _loadRaw()?.threadId || null;
+    }
+
+    // Append a message record to the stored history (capped at 300 entries).
+    function _persistMsg(type, text, voice) {
+      const raw = _loadRaw();
+      if (!raw) return;
+      if (!raw.history) raw.history = [];
+      raw.history.push({ type, text, voice: voice || 'nova' });
+      if (raw.history.length > 300) raw.history = raw.history.slice(-300);
       localStorage.setItem(SESSION_KEY, JSON.stringify(raw));
       _syncToServer();
     }
-    // Scroll the active step into view on small screens
-    const activeEl = document.querySelector('.phase-step.active');
-    if (activeEl) activeEl.scrollIntoView({ inline: 'center', behavior: 'smooth' });
-  }
 
-  // ── Auth check ─────────────────────────────────────────────────────
-  const _authToken = localStorage.getItem('auth_token');
-  if (!_authToken) { location.replace('/login.html?next=/interview.html'); }
-  const _lang = localStorage.getItem('preferred_lang') || 'en';
-
-  // Load pending job session (set by onboarding.html)
-  let _pendingJobSession = null;
-  try {
-    const pjs = localStorage.getItem('pending_job_session');
-    if (pjs) { _pendingJobSession = JSON.parse(pjs); localStorage.removeItem('pending_job_session'); }
-  } catch (_) {}
-
-  // Update header subtitle with job title + company
-  function _updateHeaderSubtitle() {
-    const subtitle = document.getElementById('header-subtitle');
-    if (!subtitle) return;
-    const src = _pendingJobSession || _loadRaw();
-    const title   = src?.jobTitle || '';
-    const company = src?.company  || '';
-    if (title && company) subtitle.textContent = `${title} · ${company}`;
-    else if (title)       subtitle.textContent = title;
-    else                  subtitle.textContent = 'AI-powered mock interview';
-  }
-
-  // ── Session persistence (localStorage) ──────────────────────────────
-  // SESSION_KEY  → active session: { threadId, savedAt, fase, history[], jobSessionId, jobTitle }
-  const SESSION_KEY   = 'interview_v1';
-  const SESSION_TTL   = 48 * 60 * 60 * 1000;
-
-  // ── Server sync ──────────────────────────────────────────────────────
-  // Debounced PUT /sessions/{threadId} so any device/browser shares history.
-  let _syncDebounceTimer = null;
-  function _syncToServer(immediate = false) {
-    if (_syncDebounceTimer) clearTimeout(_syncDebounceTimer);
-    const doSync = async () => {
-      const raw = _loadRaw();
-      if (!raw?.threadId) return;
-      try {
-        await fetch(`/sessions/${encodeURIComponent(raw.threadId)}`, {
-          method:  'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${_authToken}`,
-          },
-          body: JSON.stringify({
-            startedAt:    raw.startedAt    || Date.now(),
-            lastActiveAt: Date.now(),
-            fase:         raw.fase         || '',
-            history:      raw.history      || [],
-            jobSessionId: raw.jobSessionId || '',
-          }),
-        });
-      } catch { /* ignore — server picks it up on next sync */ }
-    };
-    if (immediate) { doSync(); }
-    else { _syncDebounceTimer = setTimeout(doSync, 3000); }
-  }
-  window.addEventListener('beforeunload', () => _syncToServer(true));
-
-  function _saveSession(threadId) {
-    const existing      = _loadRaw() || {};
-    existing.threadId   = threadId;
-    existing.savedAt    = Date.now();
-    if (!existing.startedAt) existing.startedAt = Date.now();
-    // Carry over job session info from pending (first time) or existing session
-    if (_pendingJobSession) {
-      existing.jobSessionId = _pendingJobSession.jobSessionId;
-      existing.jobTitle     = _pendingJobSession.jobTitle;
-      existing.company      = _pendingJobSession.company;
-    }
-    localStorage.setItem(SESSION_KEY, JSON.stringify(existing));
-    _syncToServer();
-    _updateHeaderSubtitle();
-  }
-
-  function _loadRaw() {
-    try {
-      const d = JSON.parse(localStorage.getItem(SESSION_KEY));
-      if (!d) return null;
-      if (Date.now() - d.savedAt > SESSION_TTL) { localStorage.removeItem(SESSION_KEY); return null; }
-      return d;
-    } catch { return null; }
-  }
-
-  function _loadThreadId() {
-    return _loadRaw()?.threadId || null;
-  }
-
-  // Append a message record to the stored history (capped at 300 entries).
-  function _persistMsg(type, text, voice) {
-    const raw = _loadRaw();
-    if (!raw) return;
-    if (!raw.history) raw.history = [];
-    raw.history.push({ type, text, voice: voice || 'nova' });
-    if (raw.history.length > 300) raw.history = raw.history.slice(-300);
-    localStorage.setItem(SESSION_KEY, JSON.stringify(raw));
-    _syncToServer();
-  }
-
-  function clearSession() {
-    // Remove only the active-session pointer; history entries remain browsable.
-    localStorage.removeItem(SESSION_KEY);
-  }
-
-  const chat         = document.getElementById('chat');
-  const input        = document.getElementById('text-input');
-  const micBtn       = document.getElementById('mic-btn');
-  const cancelRecBtn = document.getElementById('cancel-rec-btn');
-  const sendBtn      = document.getElementById('send-btn');
-  const ttsPlayer    = document.getElementById('tts-player');
-  const skipBtn      = document.getElementById('skip-btn');
-  const pauseBtn     = document.getElementById('pause-btn');
-  const badge        = document.getElementById('status-badge');
-  const doneBanner   = document.getElementById('done-banner');
-
-  let ws = null;
-  let mediaRecorder = null;
-  let audioChunks = [];
-  let recTimerInterval = null;
-  let recStartTime = 0;
-  let typingEl = null;
-  let currentAudio = null;
-
-  // Streaming state
-  let streamBubbleEl  = null;   // the growing bubble element during streaming
-  let streamWrapperEl = null;   // flex column wrapper that holds bubble + replay btn
-  let streamRawText  = '';     // full raw text accumulated so far (for bubble rendering)
-  let streamTTSBuf   = '';     // text not yet dispatched to TTS
-  let streamVoice    = 'nova'; // TTS voice for the current streaming session
-  let streamLang     = _lang;  // TTS lang for the current streaming session
-
-  // ── Mobile audio unlock ──────────────────────────────────────────────
-  // iOS and Android block autoplay until after a user gesture.
-  // Desktop browsers allow autoplay freely, so we start unlocked there.
-  // On touch devices we queue any speech that fires before the first
-  // interaction and flush it the moment the user taps/clicks anything.
-  const _isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  let audioUnlocked  = !_isTouchDevice;
-  let pendingSpeakArgs = null;   // {text, voice} waiting for unlock
-
-  function _unlockAudio() {
-    if (audioUnlocked) return;
-    audioUnlocked = true;
-    // Remove the tap-to-start overlay if present
-    const overlay = document.getElementById('tap-overlay');
-    if (overlay) overlay.remove();
-    // Play whatever was queued before the first gesture
-    if (pendingSpeakArgs) {
-      const { text, voice, lang } = pendingSpeakArgs;
-      pendingSpeakArgs = null;
-      speak(text, voice, lang);
-    }
-  }
-  document.addEventListener('click',      _unlockAudio, { capture: true });
-  document.addEventListener('touchstart', _unlockAudio, { capture: true });
-  document.addEventListener('keydown',    _unlockAudio, { capture: true });
-
-  // ── TTS — chunked parallel fetch, sequential playback ────────────────
-  // Strategy: split text into sentence-sized chunks, fire ALL fetches
-  // immediately in parallel, then play chunks in order via a promise chain.
-  // Result: first chunk starts playing in ~0.5s; rest arrive while it plays.
-
-  let ttsChain = Promise.resolve();
-  let ttsToken  = 0;   // incremented on stopTTS/new speak to cancel in-flight chunks
-  let ttsActiveSpeaks = 0;  // counts concurrent speak() calls; button hides only when 0
-  let ttsPaused = false;
-
-  function _stripMarkdown(text) {
-    return text
-      .replace(/\*\*(.*?)\*\*/g, '$1')
-      .replace(/\*(.*?)\*/g, '$1')
-      .replace(/#{1,6}\s+/g, '')
-      .replace(/---+/g, '. ')
-      .replace(/^\s*[-*•]\s+/gm, '')
-      .replace(/`([^`]+)`/g, '$1')
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-      .replace(/\n{2,}/g, '. ')
-      .replace(/\n/g, ' ')
-      .replace(/\s{2,}/g, ' ')
-      .trim();
-  }
-
-  function _splitChunks(text) {
-    const plain = _stripMarkdown(text);
-    // Split on sentence-ending punctuation followed by whitespace
-    const parts = plain.split(/(?<=[.!?:])\s+/).filter(p => p.trim().length > 0);
-    // Merge very short parts so we don't make dozens of tiny API calls
-    const chunks = [];
-    let current = '';
-    for (const part of parts) {
-      const merged = current ? current + ' ' + part : part;
-      if (merged.length <= 220) { current = merged; }
-      else { if (current) chunks.push(current); current = part; }
-    }
-    if (current) chunks.push(current);
-    return chunks.length > 0 ? chunks : [plain];
-  }
-
-  async function _fetchAudioUrl(text, voice = 'nova') {
-    try {
-      const res = await fetch(`/tts?text=${encodeURIComponent(text)}&voice=${voice}&lang=${_lang}&nocache=1`);
-      if (!res.ok) return null;
-      return URL.createObjectURL(await res.blob());
-    } catch { return null; }
-  }
-
-  function speak(text, voice = 'nova', lang = _lang) {
-    // On mobile, audio is blocked until after a user gesture.
-    // Queue the most recent speak() call and play it once unlocked.
-    if (!audioUnlocked) {
-      pendingSpeakArgs = { text, voice, lang };
-      return ttsChain;   // caller gets the existing (resolved) chain
+    function clearSession() {
+      // Remove only the active-session pointer; history entries remain browsable.
+      localStorage.removeItem(SESSION_KEY);
     }
 
-    const myToken = ttsToken;   // read current token — only stopTTS() increments it
-    const chunks  = _splitChunks(text);
+    const chat = document.getElementById('chat');
+    const input = document.getElementById('text-input');
+    const micBtn = document.getElementById('mic-btn');
+    const cancelRecBtn = document.getElementById('cancel-rec-btn');
+    const sendBtn = document.getElementById('send-btn');
+    const ttsPlayer = document.getElementById('tts-player');
+    const skipBtn = document.getElementById('skip-btn');
+    const pauseBtn = document.getElementById('pause-btn');
+    const badge = document.getElementById('status-badge');
+    const doneBanner = document.getElementById('done-banner');
 
-    // Fire ALL fetches NOW in parallel — they complete while earlier chunks play
-    const fetches = chunks.map(c => _fetchAudioUrl(c, voice, lang));
-    ttsPlayer.style.display = 'flex';
-    ttsPaused = false;
-    pauseBtn.innerHTML = '<i data-lucide="pause" style="width:14px;height:14px"></i> Pause'; lucide.createIcons();
-    ttsActiveSpeaks++;
+    let ws = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let recTimerInterval = null;
+    let recStartTime = 0;
+    let typingEl = null;
+    let currentAudio = null;
 
-    for (let i = 0; i < chunks.length; i++) {
-      const fetch_i = fetches[i];
-      const isLast  = i === chunks.length - 1;
+    // Streaming state
+    let streamBubbleEl = null;   // the growing bubble element during streaming
+    let streamWrapperEl = null;   // flex column wrapper that holds bubble + replay btn
+    let streamRawText = '';     // full raw text accumulated so far (for bubble rendering)
+    let streamTTSBuf = '';     // text not yet dispatched to TTS
+    let streamVoice = 'nova'; // TTS voice for the current streaming session
+    let streamLang = _lang;  // TTS lang for the current streaming session
 
-      ttsChain = ttsChain.then(async () => {
-        if (ttsToken !== myToken) return;          // aborted by skip / newer speak
-        const url = await fetch_i;
-        if (ttsToken !== myToken || !url) { if (url) URL.revokeObjectURL(url); return; }
+    // ── Mobile audio unlock ──────────────────────────────────────────────
+    // iOS and Android block autoplay until after a user gesture.
+    // Desktop browsers allow autoplay freely, so we start unlocked there.
+    // On touch devices we queue any speech that fires before the first
+    // interaction and flush it the moment the user taps/clicks anything.
+    const _isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    let audioUnlocked = !_isTouchDevice;
+    let pendingSpeakArgs = null;   // {text, voice} waiting for unlock
 
-        const audio = new Audio(url);
-        currentAudio = audio;
-        await new Promise(r => { audio.onended = r; audio.onerror = r; audio.play().catch(r); });
-        URL.revokeObjectURL(url);
-        currentAudio = null;
-        if (isLast && ttsToken === myToken) {
-          ttsActiveSpeaks = Math.max(0, ttsActiveSpeaks - 1);
-          if (ttsActiveSpeaks === 0) {
-            ttsPlayer.style.display = 'none';
-            ttsPaused = false;
-          }
-        }
-      }).catch(() => {});
-    }
-
-    return ttsChain;   // caller can .then() — resolves when last chunk finishes
-  }
-
-  function stopTTS() {
-    ttsToken++;                                    // invalidates all queued chunks
-    ttsActiveSpeaks = 0;
-    ttsPaused = false;
-    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-    ttsChain = Promise.resolve();
-    ttsPlayer.style.display = 'none';
-  }
-
-  function togglePauseTTS() {
-    if (!currentAudio) return;
-    if (ttsPaused) {
-      currentAudio.play().catch(() => {});
-      ttsPaused = false;
-      pauseBtn.innerHTML = '<i data-lucide="pause" style="width:14px;height:14px"></i> ' + t('interview.tts.pause'); lucide.createIcons();
-    } else {
-      currentAudio.pause();
-      ttsPaused = true;
-      pauseBtn.innerHTML = '<i data-lucide="play" style="width:14px;height:14px"></i> ' + t('interview.tts.resume'); lucide.createIcons();
-    }
-  }
-
-  // ── Disconnection beep ───────────────────────────────────────────────
-  // Two short descending tones played via Web Audio API — no file needed.
-  function playDisconnectBeep() {
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      [[440, 0.00], [330, 0.18]].forEach(([freq, start]) => {
-        const osc  = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = 'sine';
-        osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.4, ctx.currentTime + start);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + 0.15);
-        osc.start(ctx.currentTime + start);
-        osc.stop(ctx.currentTime + start + 0.15);
-      });
-    } catch (_) {}
-  }
-
-  // ── Pause / Resume / Skip TTS ─────────────────────────────────────────
-  pauseBtn.addEventListener('click', togglePauseTTS);
-
-  skipBtn.addEventListener('click', () => {
-    stopTTS();
-    enableInput();
-  });
-
-  // ── Streaming helpers ────────────────────────────────────────────────
-
-  function _drainStreamTTS(flush) {
-    // Extract complete sentences from streamTTSBuf and speak them.
-    // If flush=true, speak whatever remains even without sentence-end punctuation.
-    const parts = streamTTSBuf.split(/(?<=[.!?:])\s+/);
-    if (parts.length > 1) {
-      for (let i = 0; i < parts.length - 1; i++) {
-        const s = _stripMarkdown(parts[i]).trim();
-        if (s) speak(s, streamVoice, streamLang);
+    function _unlockAudio() {
+      if (audioUnlocked) return;
+      audioUnlocked = true;
+      // Remove the tap-to-start overlay if present
+      const overlay = document.getElementById('tap-overlay');
+      if (overlay) overlay.remove();
+      // Play whatever was queued before the first gesture
+      if (pendingSpeakArgs) {
+        const { text, voice, lang } = pendingSpeakArgs;
+        pendingSpeakArgs = null;
+        speak(text, voice, lang);
       }
-      streamTTSBuf = parts[parts.length - 1];
     }
-    if (flush && streamTTSBuf.trim()) {
-      speak(_stripMarkdown(streamTTSBuf).trim(), streamVoice, streamLang);
+    document.addEventListener('click', _unlockAudio, { capture: true });
+    document.addEventListener('touchstart', _unlockAudio, { capture: true });
+    document.addEventListener('keydown', _unlockAudio, { capture: true });
+
+    // ── TTS — chunked parallel fetch, sequential playback ────────────────
+    // Strategy: split text into sentence-sized chunks, fire ALL fetches
+    // immediately in parallel, then play chunks in order via a promise chain.
+    // Result: first chunk starts playing in ~0.5s; rest arrive while it plays.
+
+    let ttsChain = Promise.resolve();
+    let ttsToken = 0;   // incremented on stopTTS/new speak to cancel in-flight chunks
+    let ttsActiveSpeaks = 0;  // counts concurrent speak() calls; button hides only when 0
+    let ttsPaused = false;
+
+    function _stripMarkdown(text) {
+      return text
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        .replace(/\*(.*?)\*/g, '$1')
+        .replace(/#{1,6}\s+/g, '')
+        .replace(/---+/g, '. ')
+        .replace(/^\s*[-*•]\s+/gm, '')
+        .replace(/`([^`]+)`/g, '$1')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        .replace(/\n{2,}/g, '. ')
+        .replace(/\n/g, ' ')
+        .replace(/\s{2,}/g, ' ')
+        .trim();
+    }
+
+    function _splitChunks(text) {
+      const plain = _stripMarkdown(text);
+      // Split on sentence-ending punctuation followed by whitespace
+      const parts = plain.split(/(?<=[.!?:])\s+/).filter(p => p.trim().length > 0);
+      // Merge very short parts so we don't make dozens of tiny API calls
+      const chunks = [];
+      let current = '';
+      for (const part of parts) {
+        const merged = current ? current + ' ' + part : part;
+        if (merged.length <= 220) { current = merged; }
+        else { if (current) chunks.push(current); current = part; }
+      }
+      if (current) chunks.push(current);
+      return chunks.length > 0 ? chunks : [plain];
+    }
+
+    async function _fetchAudioUrl(text, voice = 'nova') {
+      try {
+        const res = await fetch(`/tts?text=${encodeURIComponent(text)}&voice=${voice}&lang=${_lang}&nocache=1`);
+        if (!res.ok) return null;
+        return URL.createObjectURL(await res.blob());
+      } catch { return null; }
+    }
+
+    function speak(text, voice = 'nova', lang = _lang) {
+      // On mobile, audio is blocked until after a user gesture.
+      // Queue the most recent speak() call and play it once unlocked.
+      if (!audioUnlocked) {
+        pendingSpeakArgs = { text, voice, lang };
+        return ttsChain;   // caller gets the existing (resolved) chain
+      }
+
+      const myToken = ttsToken;   // read current token — only stopTTS() increments it
+      const chunks = _splitChunks(text);
+
+      // Fire ALL fetches NOW in parallel — they complete while earlier chunks play
+      const fetches = chunks.map(c => _fetchAudioUrl(c, voice, lang));
+      ttsPlayer.style.display = 'flex';
+      ttsPaused = false;
+      pauseBtn.innerHTML = '<i data-lucide="pause" style="width:14px;height:14px"></i> Pause'; lucide.createIcons();
+      ttsActiveSpeaks++;
+
+      for (let i = 0; i < chunks.length; i++) {
+        const fetch_i = fetches[i];
+        const isLast = i === chunks.length - 1;
+
+        ttsChain = ttsChain.then(async () => {
+          if (ttsToken !== myToken) return;          // aborted by skip / newer speak
+          const url = await fetch_i;
+          if (ttsToken !== myToken || !url) { if (url) URL.revokeObjectURL(url); return; }
+
+          const audio = new Audio(url);
+          currentAudio = audio;
+          await new Promise(r => { audio.onended = r; audio.onerror = r; audio.play().catch(r); });
+          URL.revokeObjectURL(url);
+          currentAudio = null;
+          if (isLast && ttsToken === myToken) {
+            ttsActiveSpeaks = Math.max(0, ttsActiveSpeaks - 1);
+            if (ttsActiveSpeaks === 0) {
+              ttsPlayer.style.display = 'none';
+              ttsPaused = false;
+            }
+          }
+        }).catch(() => { });
+      }
+
+      return ttsChain;   // caller can .then() — resolves when last chunk finishes
+    }
+
+    function stopTTS() {
+      ttsToken++;                                    // invalidates all queued chunks
+      ttsActiveSpeaks = 0;
+      ttsPaused = false;
+      if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+      ttsChain = Promise.resolve();
+      ttsPlayer.style.display = 'none';
+    }
+
+    function togglePauseTTS() {
+      if (!currentAudio) return;
+      if (ttsPaused) {
+        currentAudio.play().catch(() => { });
+        ttsPaused = false;
+        pauseBtn.innerHTML = '<i data-lucide="pause" style="width:14px;height:14px"></i> ' + t('interview.tts.pause'); lucide.createIcons();
+      } else {
+        currentAudio.pause();
+        ttsPaused = true;
+        pauseBtn.innerHTML = '<i data-lucide="play" style="width:14px;height:14px"></i> ' + t('interview.tts.resume'); lucide.createIcons();
+      }
+    }
+
+    // ── Disconnection beep ───────────────────────────────────────────────
+    // Two short descending tones played via Web Audio API — no file needed.
+    function playDisconnectBeep() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        [[440, 0.00], [330, 0.18]].forEach(([freq, start]) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.4, ctx.currentTime + start);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + 0.15);
+          osc.start(ctx.currentTime + start);
+          osc.stop(ctx.currentTime + start + 0.15);
+        });
+      } catch (_) { }
+    }
+
+    // ── Pause / Resume / Skip TTS ─────────────────────────────────────────
+    pauseBtn.addEventListener('click', togglePauseTTS);
+
+    skipBtn.addEventListener('click', () => {
+      stopTTS();
+      enableInput();
+    });
+
+    // ── Streaming helpers ────────────────────────────────────────────────
+
+    function _drainStreamTTS(flush) {
+      // Extract complete sentences from streamTTSBuf and speak them.
+      // If flush=true, speak whatever remains even without sentence-end punctuation.
+      const parts = streamTTSBuf.split(/(?<=[.!?:])\s+/);
+      if (parts.length > 1) {
+        for (let i = 0; i < parts.length - 1; i++) {
+          const s = _stripMarkdown(parts[i]).trim();
+          if (s) speak(s, streamVoice, streamLang);
+        }
+        streamTTSBuf = parts[parts.length - 1];
+      }
+      if (flush && streamTTSBuf.trim()) {
+        speak(_stripMarkdown(streamTTSBuf).trim(), streamVoice, streamLang);
+        streamTTSBuf = '';
+      }
+    }
+
+    function _appendStreamChunk(text, voice = 'nova', lang = _lang) {
+      streamVoice = voice;   // all chunks in a session share the same voice
+      streamLang = lang;
+      streamRawText += text;
+      streamTTSBuf += text;
+
+      // Create bubble on first chunk
+      if (!streamBubbleEl) {
+        removeTyping();
+        const row = document.createElement('div');
+        row.className = 'bubble-row ai';
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar ai';
+        avatar.textContent = 'I';
+        streamWrapperEl = document.createElement('div');
+        streamWrapperEl.style.display = 'flex';
+        streamWrapperEl.style.flexDirection = 'column';
+        streamWrapperEl.style.alignItems = 'flex-start';
+        streamWrapperEl.style.minWidth = '0';
+        streamWrapperEl.style.flex = '1';
+        streamBubbleEl = document.createElement('div');
+        streamBubbleEl.className = 'bubble';
+        streamWrapperEl.appendChild(streamBubbleEl);
+        row.appendChild(avatar);
+        row.appendChild(streamWrapperEl);
+        chat.appendChild(row);
+      }
+
+      // Update bubble with formatted markdown
+      streamBubbleEl.innerHTML = renderMd(streamRawText);
+      scrollBottom();
+
+      // Speak complete sentences as they arrive
+      _drainStreamTTS(false);
+    }
+
+    function _finalizeStream() {
+      _drainStreamTTS(true);   // flush any remaining text
+
+      // Add replay button now that the full text is known
+      if (streamWrapperEl && streamRawText) {
+        const finalText = streamRawText;
+        const finalVoice = streamVoice;   // capture before reset
+        const finalLang = streamLang;
+        const btn = document.createElement('button');
+        btn.className = 'replay-btn';
+        btn.innerHTML = '<i data-lucide="volume-2" style="width:14px;height:14px"></i> replay';
+        btn.title = 'Replay audio';
+        btn.addEventListener('click', () => {
+          stopTTS();
+          speak(_stripMarkdown(finalText), finalVoice, finalLang);
+        });
+        streamWrapperEl.appendChild(btn);
+        // Persist the streamed report so it reappears in history on resume.
+        _persistMsg('ai', finalText, finalVoice);
+      }
+
+      streamBubbleEl = null;
+      streamWrapperEl = null;
+      streamRawText = '';
       streamTTSBuf = '';
+      streamVoice = 'nova';  // reset to default for next streaming session
+      streamLang = _lang;
     }
-  }
 
-  function _appendStreamChunk(text, voice = 'nova', lang = _lang) {
-    streamVoice   = voice;   // all chunks in a session share the same voice
-    streamLang    = lang;
-    streamRawText += text;
-    streamTTSBuf  += text;
+    // ── STT via MediaRecorder + Whisper ──────────────────────────────────
+    // After recording stops, a preview bar lets the user listen before sending.
 
-    // Create bubble on first chunk
-    if (!streamBubbleEl) {
-      removeTyping();
+    const audioPreview = document.getElementById('audio-preview');
+    const inputRow = document.getElementById('input-row');
+    const apPlay = document.getElementById('ap-play');
+    const apProgress = document.getElementById('ap-progress');
+    const apCur = document.getElementById('ap-cur');
+    const apDur = document.getElementById('ap-dur');
+    const apDiscard = document.getElementById('ap-discard');
+    const apSend = document.getElementById('ap-send');
+
+    let previewAudio = null;   // HTMLAudioElement for the preview
+    let previewBlob = null;   // kept so we can send it
+
+    // On every page load (new interview or resume) the very first AI question
+    // should NOT auto-play — user triggers TTS manually via the replay button.
+    let _skipNextAutoTTS = true;
+
+    // Voice used to read back the user's own answers.
+    // Kept distinct from nova (Maria) and onyx (Judge).
+    const USER_TTS_VOICE = 'echo';
+
+    function _fmtSecs(s) {
+      s = Math.floor(s || 0);
+      return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+    }
+
+    function _showPreview(blob) {
+      previewBlob = blob;
+      const url = URL.createObjectURL(blob);
+      previewAudio = new Audio(url);
+
+      previewAudio.addEventListener('loadedmetadata', () => {
+        apDur.textContent = _fmtSecs(previewAudio.duration);
+        apProgress.max = previewAudio.duration || 100;
+      });
+      previewAudio.addEventListener('timeupdate', () => {
+        apProgress.value = previewAudio.currentTime;
+        apCur.textContent = _fmtSecs(previewAudio.currentTime);
+      });
+      previewAudio.addEventListener('ended', () => {
+        apPlay.innerHTML = '<i data-lucide="play" style="width:20px;height:20px"></i>'; lucide.createIcons();
+        apProgress.value = 0;
+        apCur.textContent = _fmtSecs(0);
+      });
+
+      apProgress.value = 0;
+      apCur.textContent = '0:00';
+      apDur.textContent = '…';
+      apPlay.innerHTML = '<i data-lucide="play" style="width:20px;height:20px"></i>'; lucide.createIcons();
+
+      inputRow.style.display = 'none';
+      audioPreview.style.display = 'flex';
+      badge.innerHTML = '<i data-lucide="send" style="width:14px;height:14px"></i> Ready to send'; lucide.createIcons();
+      badge.className = 'connected';
+    }
+
+    function _hidePreview() {
+      if (previewAudio) {
+        previewAudio.pause();
+        URL.revokeObjectURL(previewAudio.src);
+        previewAudio = null;
+      }
+      previewBlob = null;
+      audioPreview.style.display = 'none';
+      inputRow.style.display = '';
+      badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Connected'; lucide.createIcons();
+      badge.className = 'connected';
+      input.placeholder = 'Type or press 🎙️';
+    }
+
+    apPlay.addEventListener('click', () => {
+      if (!previewAudio) return;
+      if (previewAudio.paused) {
+        previewAudio.play();
+        apPlay.innerHTML = '<i data-lucide="pause" style="width:20px;height:20px"></i>'; lucide.createIcons();
+      } else {
+        previewAudio.pause();
+        apPlay.innerHTML = '<i data-lucide="play" style="width:20px;height:20px"></i>'; lucide.createIcons();
+      }
+    });
+
+    apProgress.addEventListener('input', () => {
+      if (previewAudio) previewAudio.currentTime = apProgress.value;
+    });
+
+    apDiscard.addEventListener('click', () => {
+      _hidePreview();
+    });
+
+    apSend.addEventListener('click', () => {
+      if (!previewBlob) return;
+      _transcribeAndSend(previewBlob);
+      _hidePreview();
+    });
+
+    async function _transcribeAndSend(blob) {
+      badge.innerHTML = '<i data-lucide="loader" class="spinner" style="width:14px;height:14px"></i> Transcribing...'; lucide.createIcons();
+      badge.className = 'processing';
+      input.placeholder = 'Transcribing…';
+      disableInput(true);
+
+      const form = new FormData();
+      form.append('audio', blob, 'recording.webm');
+      try {
+        const res = await fetch(`/stt?lang=${_lang}`, { method: 'POST', body: form });
+        const data = await res.json();
+        input.value = data.text || '';
+        autoResize();
+        badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Connected'; lucide.createIcons();
+        badge.className = 'connected';
+        input.placeholder = 'Type or press 🎙️';
+        if (input.value.trim()) sendMessage();
+        else enableInput();
+      } catch (err) {
+        console.error('STT error:', err);
+        badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Connected'; lucide.createIcons();
+        badge.className = 'connected';
+        input.placeholder = 'Type or press 🎙️';
+        enableInput();
+      }
+    }
+
+    async function startRecording() {
+      if (micBtn.disabled) return;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
+        mediaRecorder.start();
+
+        micBtn.classList.add('active');
+        cancelRecBtn.style.display = 'flex';
+        badge.className = 'recording';
+        input.placeholder = 'Recording… click 🎙️ to stop';
+        input.value = '';
+
+        recStartTime = Date.now();
+        const _tickTimer = () => {
+          const s = Math.floor((Date.now() - recStartTime) / 1000);
+          const mm = String(Math.floor(s / 60)).padStart(2, '0');
+          const ss = String(s % 60).padStart(2, '0');
+          badge.innerHTML = `<i data-lucide="mic" style="width:14px;height:14px"></i> ${mm}:${ss}`; lucide.createIcons();
+        };
+        _tickTimer();
+        recTimerInterval = setInterval(_tickTimer, 1000);
+      } catch (err) {
+        console.error('Mic error:', err);
+      }
+    }
+
+    function _stopMediaRecorder() {
+      if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+      clearInterval(recTimerInterval);
+      recTimerInterval = null;
+      mediaRecorder.stop();
+      mediaRecorder.stream.getTracks().forEach(t => t.stop());
+      micBtn.classList.remove('active');
+      cancelRecBtn.style.display = 'none';
+    }
+
+    function cancelRecording() {
+      if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+      mediaRecorder._cancelled = true;
+      _stopMediaRecorder();
+      badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Connected'; lucide.createIcons();
+      badge.className = 'connected';
+      input.placeholder = 'Type or press 🎙️';
+    }
+
+    async function stopRecording() {
+      if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+      _stopMediaRecorder();
+
+      // Wait for final dataavailable before reading chunks
+      await new Promise(r => mediaRecorder.addEventListener('stop', r, { once: true }));
+
+      if (mediaRecorder._cancelled) {
+        mediaRecorder._cancelled = false;
+        return;
+      }
+
+      const blob = new Blob(audioChunks, { type: 'audio/webm' });
+      _showPreview(blob);
+    }
+
+    // ── WebSocket ─────────────────────────────────────────────────────────
+    let pingInterval = null;
+
+    function connect() {
+      const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+      ws = new WebSocket(`${proto}://${location.host}/ws`);
+
+      ws.onopen = () => {
+        badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Connected'; lucide.createIcons();
+        badge.className = 'connected';
+        clearInterval(pingInterval);
+        pingInterval = setInterval(() => {
+          if (ws && ws.readyState === WebSocket.OPEN)
+            ws.send(JSON.stringify({ type: 'ping' }));
+        }, 25_000);
+        // Send init message with auth token and job session info.
+        // If resuming an existing session, include the thread_id.
+        const tid = _loadThreadId();
+        const raw = _loadRaw();
+        const jobSid = _pendingJobSession?.jobSessionId || raw?.jobSessionId || '';
+        if (tid && !_pendingJobSession) {
+          ws.send(JSON.stringify({ type: 'resume', thread_id: tid, token: _authToken, job_session_id: jobSid }));
+        } else {
+          ws.send(JSON.stringify({ type: 'new', token: _authToken, job_session_id: jobSid }));
+        }
+      };
+
+      ws.onmessage = (e) => {
+        const msg = JSON.parse(e.data);
+        removeTyping();
+
+        switch (msg.type) {
+          case 'session':
+            // Server confirmed the thread_id — persist it for future reconnects.
+            _saveSession(msg.thread_id);
+            break;
+
+          case 'resumed': {
+            // Restore the stored chat history so the user can see prior turns.
+            const raw = _loadRaw();
+            if (raw?.history?.length) {
+              removeTyping();
+              const notice = document.createElement('div');
+              notice.style.cssText = 'text-align:center;font-size:11px;color:#475569;padding:6px 0 2px';
+              notice.textContent = t('interview.sessionRestored');
+              chat.appendChild(notice);
+              // Drop the last 'ai' entry — the server is about to re-send the
+              // current pending question.  We also write the trimmed history back
+              // to localStorage so the server's re-send doesn't create a duplicate
+              // (otherwise the entry accumulates on every refresh).
+              let history = raw.history;
+              if (history.length > 0 && history[history.length - 1].type === 'ai') {
+                history = history.slice(0, -1);
+                raw.history = history;
+                localStorage.setItem(SESSION_KEY, JSON.stringify(raw));
+              }
+              for (const m of history) {
+                if (m.type === 'ai') addBubble('ai', m.text, m.voice, true);
+                else if (m.type === 'user') addBubble('user', m.text, USER_TTS_VOICE, true);
+                else if (m.type === 'feedback') _addFeedbackSilent(m.text);
+              }
+              scrollBottom();
+            }
+            break;
+          }
+
+          case 'phase':
+            setPhase(msg.fase);
+            break;
+
+          case 'stream_chunk':
+            _appendStreamChunk(msg.text, msg.voice || 'nova', msg.lang || _lang);
+            break;
+
+          case 'stream_done':
+            _finalizeStream();
+            break;
+
+          case 'await_input':
+            // Streaming already showed the bubble — wait for TTS chain to drain, then enable input
+            ttsChain.then(() => enableInput());
+            break;
+
+          case 'phase_question':
+            // First question of a new phase. Stop any ongoing TTS (transition feedback)
+            // immediately so the new question appears cleanly, then enable input only
+            // after the question finishes speaking.
+            stopTTS();
+            addBubble('ai', msg.text);
+            speak(msg.text).then(() => enableInput());
+            break;
+
+          case 'ai':
+            addBubble('ai', msg.text);
+            _persistMsg('ai', msg.text, 'nova');
+            if (_skipNextAutoTTS) {
+              // First AI message on page load — don't auto-play, let user replay manually.
+              _skipNextAutoTTS = false;
+              enableInput();
+            } else {
+              speak(msg.text).then(() => enableInput());
+            }
+            break;
+
+          case 'transition':
+            addBubble('ai', msg.text, 'onyx');
+            _persistMsg('ai', msg.text, 'onyx');
+            speak(msg.text, 'onyx');
+            showTyping(true);
+            break;
+
+          case 'user':
+            _persistMsg('user', msg.text, 'nova');
+            break;
+
+          case 'feedback':
+            addFeedback(msg.text);
+            _persistMsg('feedback', msg.text, 'onyx');
+            break;
+
+          case 'scorecard_ready':
+            _fetchAndRenderScorecard(_loadRaw()?.threadId);
+            break;
+
+          case 'error':
+            addBubble('ai', '⚠️ ' + msg.text);
+            disableInput(true);
+            badge.innerHTML = '<i data-lucide="alert-triangle" style="width:14px;height:14px"></i> Error'; lucide.createIcons();
+            badge.className = '';
+            break;
+
+          case 'done':
+            doneBanner.style.display = 'block';
+            disableInput(true);
+            badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Done'; lucide.createIcons();
+            badge.className = '';
+            break;
+        }
+      };
+
+      ws.onclose = (e) => {
+        clearInterval(pingInterval);
+        // Don't reconnect if the interview is already finished.
+        const _closeRaw = _loadRaw();
+        if (e.code === 1000 || _closeRaw?.fase === 'done') {
+          badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Done'; lucide.createIcons();
+          badge.className = '';
+          return;
+        }
+        playDisconnectBeep();
+        badge.innerHTML = '<i data-lucide="refresh-cw" class="spinner" style="width:14px;height:14px"></i> Reconnecting...'; lucide.createIcons();
+        badge.className = '';
+        disableInput(true);
+        // Reload the page instead of calling connect() again.
+        // Re-using the same JS context would leave the chat populated and cause
+        // the resumed handler to render history on top of existing bubbles,
+        // duplicating messages. A reload starts clean: localStorage + DB preserve
+        // all history and the normal boot path restores the session correctly.
+        setTimeout(() => window.location.reload(), 2000);
+      };
+
+      ws.onerror = () => {
+        badge.innerHTML = '<i data-lucide="alert-triangle" style="width:14px;height:14px"></i> Error'; lucide.createIcons();
+        badge.className = '';
+        // onclose fires right after onerror — reconnect logic runs there.
+      };
+    }
+
+    // ── UI helpers ────────────────────────────────────────────────────────
+    function renderMd(text) {
+      return marked.parse(text, { breaks: true });
+    }
+
+    function addBubble(role, text, voice = 'nova', autoReplay = true) {
       const row = document.createElement('div');
-      row.className = 'bubble-row ai';
+      row.className = `bubble-row ${role}`;
+
       const avatar = document.createElement('div');
-      avatar.className = 'avatar ai';
-      avatar.textContent = 'I';
-      streamWrapperEl = document.createElement('div');
-      streamWrapperEl.style.display = 'flex';
-      streamWrapperEl.style.flexDirection = 'column';
-      streamWrapperEl.style.alignItems = 'flex-start';
-      streamWrapperEl.style.minWidth = '0';
-      streamWrapperEl.style.flex = '1';
-      streamBubbleEl = document.createElement('div');
-      streamBubbleEl.className = 'bubble';
-      streamWrapperEl.appendChild(streamBubbleEl);
+      avatar.className = `avatar ${role}`;
+      avatar.textContent = role === 'ai' ? 'I' : 'Y';
+
+      const wrapper = document.createElement('div');
+      wrapper.style.display = 'flex';
+      wrapper.style.flexDirection = 'column';
+      // AI bubbles: align left; user bubbles: align right (matches bubble side)
+      wrapper.style.alignItems = role === 'user' ? 'flex-end' : 'flex-start';
+      wrapper.style.minWidth = '0';
+      wrapper.style.flex = '1';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.innerHTML = renderMd(text);
+      wrapper.appendChild(bubble);
+
+      if (autoReplay) {
+        const btn = document.createElement('button');
+        btn.className = role === 'user' ? 'replay-btn user' : 'replay-btn';
+        btn.innerHTML = '<i data-lucide="volume-2" style="width:14px;height:14px"></i> replay';
+        btn.title = role === 'user' ? 'Listen to your answer (TTS)' : 'Replay audio';
+        btn.addEventListener('click', () => {
+          stopTTS();
+          speak(_stripMarkdown(text), voice);
+        });
+        wrapper.appendChild(btn);
+      }
+
       row.appendChild(avatar);
-      row.appendChild(streamWrapperEl);
+      row.appendChild(wrapper);
       chat.appendChild(row);
+      scrollBottom();
     }
 
-    // Update bubble with formatted markdown
-    streamBubbleEl.innerHTML = renderMd(streamRawText);
-    scrollBottom();
+    function addFeedback(text) {
+      const row = document.createElement('div');
+      row.className = 'bubble-row feedback';
 
-    // Speak complete sentences as they arrive
-    _drainStreamTTS(false);
-  }
+      const cardWrapper = document.createElement('div');
+      cardWrapper.style.display = 'flex';
+      cardWrapper.style.flexDirection = 'column';
+      cardWrapper.style.alignItems = 'flex-start';
+      cardWrapper.style.width = '100%';
 
-  function _finalizeStream() {
-    _drainStreamTTS(true);   // flush any remaining text
+      const card = document.createElement('div');
+      card.className = 'feedback-card';
+      card.innerHTML = renderMd(text);
+      cardWrapper.appendChild(card);
 
-    // Add replay button now that the full text is known
-    if (streamWrapperEl && streamRawText) {
-      const finalText  = streamRawText;
-      const finalVoice = streamVoice;   // capture before reset
-      const finalLang  = streamLang;
       const btn = document.createElement('button');
       btn.className = 'replay-btn';
       btn.innerHTML = '<i data-lucide="volume-2" style="width:14px;height:14px"></i> replay';
       btn.title = 'Replay audio';
       btn.addEventListener('click', () => {
         stopTTS();
-        speak(_stripMarkdown(finalText), finalVoice, finalLang);
+        speak(_stripMarkdown(text), 'onyx');
       });
-      streamWrapperEl.appendChild(btn);
-      // Persist the streamed report so it reappears in history on resume.
-      _persistMsg('ai', finalText, finalVoice);
-    }
+      cardWrapper.appendChild(btn);
 
-    streamBubbleEl  = null;
-    streamWrapperEl = null;
-    streamRawText   = '';
-    streamTTSBuf    = '';
-    streamVoice     = 'nova';  // reset to default for next streaming session
-    streamLang      = _lang;
-  }
+      row.appendChild(cardWrapper);
+      chat.appendChild(row);
+      scrollBottom();
 
-  // ── STT via MediaRecorder + Whisper ──────────────────────────────────
-  // After recording stops, a preview bar lets the user listen before sending.
-
-  const audioPreview = document.getElementById('audio-preview');
-  const inputRow     = document.getElementById('input-row');
-  const apPlay       = document.getElementById('ap-play');
-  const apProgress   = document.getElementById('ap-progress');
-  const apCur        = document.getElementById('ap-cur');
-  const apDur        = document.getElementById('ap-dur');
-  const apDiscard    = document.getElementById('ap-discard');
-  const apSend       = document.getElementById('ap-send');
-
-  let previewAudio   = null;   // HTMLAudioElement for the preview
-  let previewBlob    = null;   // kept so we can send it
-
-  // On every page load (new interview or resume) the very first AI question
-  // should NOT auto-play — user triggers TTS manually via the replay button.
-  let _skipNextAutoTTS = true;
-
-  // Voice used to read back the user's own answers.
-  // Kept distinct from nova (Maria) and onyx (Judge).
-  const USER_TTS_VOICE = 'echo';
-
-  function _fmtSecs(s) {
-    s = Math.floor(s || 0);
-    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-  }
-
-  function _showPreview(blob) {
-    previewBlob = blob;
-    const url   = URL.createObjectURL(blob);
-    previewAudio = new Audio(url);
-
-    previewAudio.addEventListener('loadedmetadata', () => {
-      apDur.textContent = _fmtSecs(previewAudio.duration);
-      apProgress.max    = previewAudio.duration || 100;
-    });
-    previewAudio.addEventListener('timeupdate', () => {
-      apProgress.value  = previewAudio.currentTime;
-      apCur.textContent = _fmtSecs(previewAudio.currentTime);
-    });
-    previewAudio.addEventListener('ended', () => {
-      apPlay.innerHTML = '<i data-lucide="play" style="width:20px;height:20px"></i>'; lucide.createIcons();
-      apProgress.value   = 0;
-      apCur.textContent  = _fmtSecs(0);
-    });
-
-    apProgress.value   = 0;
-    apCur.textContent  = '0:00';
-    apDur.textContent  = '…';
-    apPlay.innerHTML = '<i data-lucide="play" style="width:20px;height:20px"></i>'; lucide.createIcons();
-
-    inputRow.style.display    = 'none';
-    audioPreview.style.display = 'flex';
-    badge.innerHTML = '<i data-lucide="send" style="width:14px;height:14px"></i> Ready to send'; lucide.createIcons();
-    badge.className   = 'connected';
-  }
-
-  function _hidePreview() {
-    if (previewAudio) {
-      previewAudio.pause();
-      URL.revokeObjectURL(previewAudio.src);
-      previewAudio = null;
-    }
-    previewBlob = null;
-    audioPreview.style.display = 'none';
-    inputRow.style.display     = '';
-    badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Connected'; lucide.createIcons();
-    badge.className   = 'connected';
-    input.placeholder = 'Type your answer or press 🎙️ to speak…';
-  }
-
-  apPlay.addEventListener('click', () => {
-    if (!previewAudio) return;
-    if (previewAudio.paused) {
-      previewAudio.play();
-      apPlay.innerHTML = '<i data-lucide="pause" style="width:20px;height:20px"></i>'; lucide.createIcons();
-    } else {
-      previewAudio.pause();
-      apPlay.innerHTML = '<i data-lucide="play" style="width:20px;height:20px"></i>'; lucide.createIcons();
-    }
-  });
-
-  apProgress.addEventListener('input', () => {
-    if (previewAudio) previewAudio.currentTime = apProgress.value;
-  });
-
-  apDiscard.addEventListener('click', () => {
-    _hidePreview();
-  });
-
-  apSend.addEventListener('click', () => {
-    if (!previewBlob) return;
-    _transcribeAndSend(previewBlob);
-    _hidePreview();
-  });
-
-  async function _transcribeAndSend(blob) {
-    badge.innerHTML = '<i data-lucide="loader" class="spinner" style="width:14px;height:14px"></i> Transcribing...'; lucide.createIcons();
-    badge.className   = 'processing';
-    input.placeholder = 'Transcribing…';
-    disableInput(true);
-
-    const form = new FormData();
-    form.append('audio', blob, 'recording.webm');
-    try {
-      const res  = await fetch(`/stt?lang=${_lang}`, { method: 'POST', body: form });
-      const data = await res.json();
-      input.value = data.text || '';
-      autoResize();
-      badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Connected'; lucide.createIcons();
-      badge.className   = 'connected';
-      input.placeholder = 'Type your answer or press 🎙️ to speak…';
-      if (input.value.trim()) sendMessage();
-      else enableInput();
-    } catch (err) {
-      console.error('STT error:', err);
-      badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Connected'; lucide.createIcons();
-      badge.className   = 'connected';
-      input.placeholder = 'Type your answer or press 🎙️ to speak…';
-      enableInput();
-    }
-  }
-
-  async function startRecording() {
-    if (micBtn.disabled) return;
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioChunks  = [];
-      mediaRecorder = new MediaRecorder(stream);
-      mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
-      mediaRecorder.start();
-
-      micBtn.classList.add('active');
-      cancelRecBtn.style.display = 'flex';
-      badge.className = 'recording';
-      input.placeholder = 'Recording… click 🎙️ to stop';
-      input.value = '';
-
-      recStartTime = Date.now();
-      const _tickTimer = () => {
-        const s  = Math.floor((Date.now() - recStartTime) / 1000);
-        const mm = String(Math.floor(s / 60)).padStart(2, '0');
-        const ss = String(s % 60).padStart(2, '0');
-        badge.innerHTML = `<i data-lucide="mic" style="width:14px;height:14px"></i> ${mm}:${ss}`; lucide.createIcons();
-      };
-      _tickTimer();
-      recTimerInterval = setInterval(_tickTimer, 1000);
-    } catch (err) {
-      console.error('Mic error:', err);
-    }
-  }
-
-  function _stopMediaRecorder() {
-    if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
-    clearInterval(recTimerInterval);
-    recTimerInterval = null;
-    mediaRecorder.stop();
-    mediaRecorder.stream.getTracks().forEach(t => t.stop());
-    micBtn.classList.remove('active');
-    cancelRecBtn.style.display = 'none';
-  }
-
-  function cancelRecording() {
-    if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
-    mediaRecorder._cancelled = true;
-    _stopMediaRecorder();
-    badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Connected'; lucide.createIcons();
-    badge.className   = 'connected';
-    input.placeholder = 'Type your answer or press 🎙️ to speak…';
-  }
-
-  async function stopRecording() {
-    if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
-    _stopMediaRecorder();
-
-    // Wait for final dataavailable before reading chunks
-    await new Promise(r => mediaRecorder.addEventListener('stop', r, { once: true }));
-
-    if (mediaRecorder._cancelled) {
-      mediaRecorder._cancelled = false;
-      return;
-    }
-
-    const blob = new Blob(audioChunks, { type: 'audio/webm' });
-    _showPreview(blob);
-  }
-
-  // ── WebSocket ─────────────────────────────────────────────────────────
-  let pingInterval = null;
-
-  function connect() {
-    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-    ws = new WebSocket(`${proto}://${location.host}/ws`);
-
-    ws.onopen = () => {
-      badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Connected'; lucide.createIcons();
-      badge.className = 'connected';
-      clearInterval(pingInterval);
-      pingInterval = setInterval(() => {
-        if (ws && ws.readyState === WebSocket.OPEN)
-          ws.send(JSON.stringify({ type: 'ping' }));
-      }, 25_000);
-      // Send init message with auth token and job session info.
-      // If resuming an existing session, include the thread_id.
-      const tid    = _loadThreadId();
-      const raw    = _loadRaw();
-      const jobSid = _pendingJobSession?.jobSessionId || raw?.jobSessionId || '';
-      if (tid && !_pendingJobSession) {
-        ws.send(JSON.stringify({ type: 'resume', thread_id: tid, token: _authToken, job_session_id: jobSid }));
-      } else {
-        ws.send(JSON.stringify({ type: 'new', token: _authToken, job_session_id: jobSid }));
-      }
-    };
-
-    ws.onmessage = (e) => {
-      const msg = JSON.parse(e.data);
-      removeTyping();
-
-      switch (msg.type) {
-        case 'session':
-          // Server confirmed the thread_id — persist it for future reconnects.
-          _saveSession(msg.thread_id);
-          break;
-
-        case 'resumed': {
-          // Restore the stored chat history so the user can see prior turns.
-          const raw = _loadRaw();
-          if (raw?.history?.length) {
-            removeTyping();
-            const notice = document.createElement('div');
-            notice.style.cssText = 'text-align:center;font-size:11px;color:#475569;padding:6px 0 2px';
-            notice.textContent = t('interview.sessionRestored');
-            chat.appendChild(notice);
-            // Drop the last 'ai' entry — the server is about to re-send the
-            // current pending question.  We also write the trimmed history back
-            // to localStorage so the server's re-send doesn't create a duplicate
-            // (otherwise the entry accumulates on every refresh).
-            let history = raw.history;
-            if (history.length > 0 && history[history.length - 1].type === 'ai') {
-              history = history.slice(0, -1);
-              raw.history = history;
-              localStorage.setItem(SESSION_KEY, JSON.stringify(raw));
-            }
-            for (const m of history) {
-              if (m.type === 'ai')            addBubble('ai',   m.text, m.voice,        true);
-              else if (m.type === 'user')     addBubble('user', m.text, USER_TTS_VOICE, true);
-              else if (m.type === 'feedback') _addFeedbackSilent(m.text);
-            }
-            scrollBottom();
-          }
-          break;
-        }
-
-        case 'phase':
-          setPhase(msg.fase);
-          break;
-
-        case 'stream_chunk':
-          _appendStreamChunk(msg.text, msg.voice || 'nova', msg.lang || _lang);
-          break;
-
-        case 'stream_done':
-          _finalizeStream();
-          break;
-
-        case 'await_input':
-          // Streaming already showed the bubble — wait for TTS chain to drain, then enable input
-          ttsChain.then(() => enableInput());
-          break;
-
-        case 'phase_question':
-          // First question of a new phase. Stop any ongoing TTS (transition feedback)
-          // immediately so the new question appears cleanly, then enable input only
-          // after the question finishes speaking.
-          stopTTS();
-          addBubble('ai', msg.text);
-          speak(msg.text).then(() => enableInput());
-          break;
-
-        case 'ai':
-          addBubble('ai', msg.text);
-          _persistMsg('ai', msg.text, 'nova');
-          if (_skipNextAutoTTS) {
-            // First AI message on page load — don't auto-play, let user replay manually.
-            _skipNextAutoTTS = false;
-            enableInput();
-          } else {
-            speak(msg.text).then(() => enableInput());
-          }
-          break;
-
-        case 'transition':
-          addBubble('ai', msg.text, 'onyx');
-          _persistMsg('ai', msg.text, 'onyx');
-          speak(msg.text, 'onyx');
-          showTyping(true);
-          break;
-
-        case 'user':
-          _persistMsg('user', msg.text, 'nova');
-          break;
-
-        case 'feedback':
-          addFeedback(msg.text);
-          _persistMsg('feedback', msg.text, 'onyx');
-          break;
-
-        case 'scorecard_ready':
-          _fetchAndRenderScorecard(_loadRaw()?.threadId);
-          break;
-
-        case 'error':
-          addBubble('ai', '⚠️ ' + msg.text);
-          disableInput(true);
-          badge.innerHTML = '<i data-lucide="alert-triangle" style="width:14px;height:14px"></i> Error'; lucide.createIcons();
-          badge.className = '';
-          break;
-
-        case 'done':
-          doneBanner.style.display = 'block';
-          disableInput(true);
-          badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Done'; lucide.createIcons();
-          badge.className = '';
-          break;
-      }
-    };
-
-    ws.onclose = (e) => {
-      clearInterval(pingInterval);
-      // Don't reconnect if the interview is already finished.
-      const _closeRaw = _loadRaw();
-      if (e.code === 1000 || _closeRaw?.fase === 'done') {
-        badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Done'; lucide.createIcons();
-        badge.className = '';
-        return;
-      }
-      playDisconnectBeep();
-      badge.innerHTML = '<i data-lucide="refresh-cw" class="spinner" style="width:14px;height:14px"></i> Reconnecting...'; lucide.createIcons();
-      badge.className = '';
-      disableInput(true);
-      // Reload the page instead of calling connect() again.
-      // Re-using the same JS context would leave the chat populated and cause
-      // the resumed handler to render history on top of existing bubbles,
-      // duplicating messages. A reload starts clean: localStorage + DB preserve
-      // all history and the normal boot path restores the session correctly.
-      setTimeout(() => window.location.reload(), 2000);
-    };
-
-    ws.onerror = () => {
-      badge.innerHTML = '<i data-lucide="alert-triangle" style="width:14px;height:14px"></i> Error'; lucide.createIcons();
-      badge.className = '';
-      // onclose fires right after onerror — reconnect logic runs there.
-    };
-  }
-
-  // ── UI helpers ────────────────────────────────────────────────────────
-  function renderMd(text) {
-    return marked.parse(text, { breaks: true });
-  }
-
-  function addBubble(role, text, voice = 'nova', autoReplay = true) {
-    const row = document.createElement('div');
-    row.className = `bubble-row ${role}`;
-
-    const avatar = document.createElement('div');
-    avatar.className = `avatar ${role}`;
-    avatar.textContent = role === 'ai' ? 'I' : 'Y';
-
-    const wrapper = document.createElement('div');
-    wrapper.style.display = 'flex';
-    wrapper.style.flexDirection = 'column';
-    // AI bubbles: align left; user bubbles: align right (matches bubble side)
-    wrapper.style.alignItems = role === 'user' ? 'flex-end' : 'flex-start';
-    wrapper.style.minWidth = '0';
-    wrapper.style.flex = '1';
-
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-    bubble.innerHTML = renderMd(text);
-    wrapper.appendChild(bubble);
-
-    if (autoReplay) {
-      const btn = document.createElement('button');
-      btn.className = role === 'user' ? 'replay-btn user' : 'replay-btn';
-      btn.innerHTML = '<i data-lucide="volume-2" style="width:14px;height:14px"></i> replay';
-      btn.title = role === 'user' ? 'Listen to your answer (TTS)' : 'Replay audio';
-      btn.addEventListener('click', () => {
-        stopTTS();
-        speak(_stripMarkdown(text), voice);
-      });
-      wrapper.appendChild(btn);
-    }
-
-    row.appendChild(avatar);
-    row.appendChild(wrapper);
-    chat.appendChild(row);
-    scrollBottom();
-  }
-
-  function addFeedback(text) {
-    const row = document.createElement('div');
-    row.className = 'bubble-row feedback';
-
-    const cardWrapper = document.createElement('div');
-    cardWrapper.style.display = 'flex';
-    cardWrapper.style.flexDirection = 'column';
-    cardWrapper.style.alignItems = 'flex-start';
-    cardWrapper.style.width = '100%';
-
-    const card = document.createElement('div');
-    card.className = 'feedback-card';
-    card.innerHTML = renderMd(text);
-    cardWrapper.appendChild(card);
-
-    const btn = document.createElement('button');
-    btn.className = 'replay-btn';
-    btn.innerHTML = '<i data-lucide="volume-2" style="width:14px;height:14px"></i> replay';
-    btn.title = 'Replay audio';
-    btn.addEventListener('click', () => {
-      stopTTS();
+      // Speak feedback automatically with male Judge voice
       speak(_stripMarkdown(text), 'onyx');
-    });
-    cardWrapper.appendChild(btn);
+    }
 
-    row.appendChild(cardWrapper);
-    chat.appendChild(row);
-    scrollBottom();
+    // Render a feedback card without speaking (used when restoring history).
+    function _addFeedbackSilent(text) {
+      const row = document.createElement('div');
+      row.className = 'bubble-row feedback';
+      const card = document.createElement('div');
+      card.className = 'feedback-card';
+      card.innerHTML = renderMd(text);
+      row.appendChild(card);
+      chat.appendChild(row);
+    }
 
-    // Speak feedback automatically with male Judge voice
-    speak(_stripMarkdown(text), 'onyx');
-  }
+    const scorecardPanel = document.getElementById('scorecard-panel');
 
-  // Render a feedback card without speaking (used when restoring history).
-  function _addFeedbackSilent(text) {
-    const row = document.createElement('div');
-    row.className = 'bubble-row feedback';
-    const card = document.createElement('div');
-    card.className = 'feedback-card';
-    card.innerHTML = renderMd(text);
-    row.appendChild(card);
-    chat.appendChild(row);
-  }
-
-  const scorecardPanel = document.getElementById('scorecard-panel');
-
-  function _fetchAndRenderScorecard(threadId) {
-    if (!threadId || !_authToken) return;
-    scorecardPanel.style.display = 'block';
-    scorecardPanel.innerHTML = `<div class="sc-loading"><span class="spinner" style="width:32px;height:32px;border-width:3px;border-top-color:var(--brand-primary);"></span>${t('interview.scorecard.loading')}</div>`;
-    fetch(`/sessions/${encodeURIComponent(threadId)}/scorecard`, {
-      headers: { 'Authorization': `Bearer ${_authToken}` },
-    })
-      .then(r => ({ ok: r.ok, status: r.status, json: r.json() }))
-      .then(async ({ ok, status, json }) => {
-        const data = await json.catch(() => null);
-        if (ok && data?.scorecard) {
-          scorecardPanel.innerHTML = `
+    function _fetchAndRenderScorecard(threadId) {
+      if (!threadId || !_authToken) return;
+      scorecardPanel.style.display = 'block';
+      scorecardPanel.innerHTML = `<div class="sc-loading"><span class="spinner" style="width:32px;height:32px;border-width:3px;border-top-color:var(--brand-primary);"></span>${t('interview.scorecard.loading')}</div>`;
+      fetch(`/sessions/${encodeURIComponent(threadId)}/scorecard`, {
+        headers: { 'Authorization': `Bearer ${_authToken}` },
+      })
+        .then(r => ({ ok: r.ok, status: r.status, json: r.json() }))
+        .then(async ({ ok, status, json }) => {
+          const data = await json.catch(() => null);
+          if (ok && data?.scorecard) {
+            scorecardPanel.innerHTML = `
             <div class="sc-inner">
               <div style="text-align:right;margin-bottom:12px">
                 <button class="replay-btn" id="sc-tts-btn" title="Read scorecard aloud"><i data-lucide="volume-2" style="width:14px;height:14px"></i> ${t('interview.scorecard.readAloud')}</button>
               </div>
               ${renderMd(data.scorecard)}
             </div>`;
-          lucide.createIcons();
-          document.getElementById('sc-tts-btn').addEventListener('click', () => {
-            stopTTS();
-            speak(data.scorecard, 'nova');
-          });
-        } else if (status === 403) {
-          scorecardPanel.innerHTML = `<div class="sc-inner" style="border-color:#3d4160;text-align:center;padding:32px 24px">
+            lucide.createIcons();
+            document.getElementById('sc-tts-btn').addEventListener('click', () => {
+              stopTTS();
+              speak(data.scorecard, 'nova');
+            });
+          } else if (status === 403) {
+            scorecardPanel.innerHTML = `<div class="sc-inner" style="border-color:#3d4160;text-align:center;padding:32px 24px">
             <div style="margin-bottom:16px;color:var(--brand-primary)"><i data-lucide="file-text" style="width:48px;height:48px"></i></div>
             <h2 style="font-size:18px;color:var(--text-primary);margin-bottom:12px">${t('interview.scorecard.upgradeTitle')}</h2>
             <p style="color:var(--text-secondary);font-size:15px;max-width:460px;margin:0 auto 24px;line-height:1.6">
@@ -1605,236 +2116,237 @@
               ${t('interview.scorecard.upgradeBtn')}
             </a>
           </div>`;
-        } else {
-          scorecardPanel.style.display = 'none';
-        }
-        scrollBottom();
-      })
-      .catch(() => { scorecardPanel.style.display = 'none'; });
-  }
-
-  function showTyping(visible) {
-    if (!visible) return;
-    if (typingEl) return;
-
-    const row = document.createElement('div');
-    row.className = 'bubble-row ai';
-    row.id = 'typing-row';
-
-    const avatar = document.createElement('div');
-    avatar.className = 'avatar ai';
-    avatar.textContent = 'I';
-
-    const indicator = document.createElement('div');
-    indicator.className = 'typing-indicator';
-    indicator.innerHTML = '<span></span><span></span><span></span>';
-
-    row.appendChild(avatar);
-    row.appendChild(indicator);
-    chat.appendChild(row);
-    typingEl = row;
-    scrollBottom();
-  }
-
-  function removeTyping() {
-    if (typingEl) { typingEl.remove(); typingEl = null; }
-  }
-
-  function scrollBottom() {
-    chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
-  }
-
-  function enableInput() {
-    input.disabled = false;
-    sendBtn.disabled = false;
-    micBtn.disabled = false;
-    input.focus();
-    badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Connected'; lucide.createIcons();
-    badge.className = 'connected';
-  }
-
-  function disableInput(permanent = false) {
-    input.disabled = true;
-    sendBtn.disabled = true;
-    micBtn.disabled = true;
-    if (!permanent) {
-      badge.innerHTML = '<i data-lucide="loader" class="spinner" style="width:14px;height:14px"></i> Processing...'; lucide.createIcons();
-      badge.className = 'processing';
+          } else {
+            scorecardPanel.style.display = 'none';
+          }
+          scrollBottom();
+        })
+        .catch(() => { scorecardPanel.style.display = 'none'; });
     }
-  }
 
-  function autoResize() {
-    input.style.height = 'auto';
-    input.style.height = Math.min(input.scrollHeight, 140) + 'px';
-  }
+    function showTyping(visible) {
+      if (!visible) return;
+      if (typingEl) return;
 
-  // ── Send ──────────────────────────────────────────────────────────────
-  function sendMessage() {
-    const text = input.value.trim();
-    if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
+      const row = document.createElement('div');
+      row.className = 'bubble-row ai';
+      row.id = 'typing-row';
 
-    addBubble('user', text, USER_TTS_VOICE);
-    ws.send(JSON.stringify({ text }));
-    input.value = '';
-    input.style.height = 'auto';
-    disableInput();
-    showTyping(true);
-  }
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar ai';
+      avatar.textContent = 'I';
 
-  // ── Events ────────────────────────────────────────────────────────────
-  sendBtn.addEventListener('click', sendMessage);
+      const indicator = document.createElement('div');
+      indicator.className = 'typing-indicator';
+      indicator.innerHTML = '<span></span><span></span><span></span>';
 
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  });
-
-  input.addEventListener('input', autoResize);
-
-  // Toggle recording — click once to start, click again to stop.
-  micBtn.addEventListener('click', () => {
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
-      stopRecording();
-    } else {
-      startRecording();
-    }
-  });
-
-  cancelRecBtn.addEventListener('click', cancelRecording);
-
-  // ── New-interview popover ─────────────────────────────────────────────
-  const newPopover = document.getElementById('new-popover');
-
-  document.getElementById('new-btn').addEventListener('click', (e) => {
-    e.stopPropagation();
-    newPopover.classList.toggle('open');
-  });
-
-  document.getElementById('pop-same-role').addEventListener('click', () => {
-    const raw = _loadRaw();
-    if (raw?.jobSessionId) {
-      // Keep the job context, start a fresh thread
-      localStorage.setItem('pending_job_session', JSON.stringify({
-        jobSessionId: raw.jobSessionId,
-        jobTitle:     raw.jobTitle  || '',
-        company:      raw.company   || '',
-      }));
-    }
-    clearSession();
-    window.location.href = '/interview.html';
-  });
-
-  document.getElementById('pop-new-role').addEventListener('click', () => {
-    clearSession();
-    window.location.href = '/onboarding.html';
-  });
-
-  // Drawer buttons — same logic as popover items
-  document.getElementById('drawer-new-same').addEventListener('click', () => {
-    window.closeMobileMenu?.();
-    document.getElementById('pop-same-role').click();
-  });
-  document.getElementById('drawer-new-role').addEventListener('click', () => {
-    window.closeMobileMenu?.();
-    document.getElementById('pop-new-role').click();
-  });
-
-  // Close popover when clicking outside
-  document.addEventListener('click', () => newPopover.classList.remove('open'));
-
-  // ── Boot ──────────────────────────────────────────────────────────────
-  _updateHeaderSubtitle();
-
-  // If the stored session is already finished, just show the done banner
-  // without opening a WebSocket — avoids an infinite reconnect loop.
-  const _bootRaw = _loadRaw();
-  if (_bootRaw?.fase === 'done' && !_pendingJobSession) {
-    badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Done'; lucide.createIcons();
-    badge.className = '';
-    doneBanner.style.display = 'block';
-    disableInput(true);
-    // Restore chat history (scorecard is NOT stored here — fetched from server below).
-    if (_bootRaw.history?.length) {
-      for (const m of _bootRaw.history) {
-        if (m.type === 'ai' || m.type === 'transition') addBubble('ai', m.text, m.voice || 'nova', true);
-        else if (m.type === 'user') addBubble('user', m.text, 'nova', false);
-        else if (m.type === 'feedback' && !m.text?.includes('INTERVIEW SCORECARD')) addFeedback(m.text);
-      }
+      row.appendChild(avatar);
+      row.appendChild(indicator);
+      chat.appendChild(row);
+      typingEl = row;
       scrollBottom();
     }
-    // Always fetch scorecard from server — it enforces plan gating.
-    // Hunter → renders in scorecard panel. Free/downgraded → 403, panel stays hidden.
-    _fetchAndRenderScorecard(_bootRaw.threadId);
-  } else {
-    connect();
-    showTyping(true);   // waiting for first AI message
-  }
 
-  // Show a "tap to enable audio" overlay on touch devices.
-  // Removed automatically on first tap by _unlockAudio().
-  if (_isTouchDevice) {
-    const overlay = document.createElement('div');
-    overlay.id = 'tap-overlay';
-    overlay.style.cssText = [
-      'position:fixed', 'inset:0', 'z-index:9999',
-      'display:flex', 'align-items:flex-end', 'justify-content:center',
-      'padding-bottom:32px', 'pointer-events:none',
-    ].join(';');
-    const pill = document.createElement('div');
-    pill.style.cssText = [
-      'background:rgba(0,0,0,0.65)', 'color:#fff',
-      'font-size:13px', 'padding:8px 20px', 'border-radius:99px',
-      'backdrop-filter:blur(6px)', '-webkit-backdrop-filter:blur(6px)',
-    ].join(';');
-    pill.textContent = t('interview.tapToEnable');
-    overlay.appendChild(pill);
-    document.body.appendChild(overlay);
-    document.addEventListener('i18n:ready', () => {
+    function removeTyping() {
+      if (typingEl) { typingEl.remove(); typingEl = null; }
+    }
+
+    function scrollBottom() {
+      chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+    }
+
+    function enableInput() {
+      input.disabled = false;
+      sendBtn.disabled = false;
+      micBtn.disabled = false;
+      input.focus();
+      badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Connected'; lucide.createIcons();
+      badge.className = 'connected';
+    }
+
+    function disableInput(permanent = false) {
+      input.disabled = true;
+      sendBtn.disabled = true;
+      micBtn.disabled = true;
+      if (!permanent) {
+        badge.innerHTML = '<i data-lucide="loader" class="spinner" style="width:14px;height:14px"></i> Processing...'; lucide.createIcons();
+        badge.className = 'processing';
+      }
+    }
+
+    function autoResize() {
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 140) + 'px';
+    }
+
+    // ── Send ──────────────────────────────────────────────────────────────
+    function sendMessage() {
+      const text = input.value.trim();
+      if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
+
+      addBubble('user', text, USER_TTS_VOICE);
+      ws.send(JSON.stringify({ text }));
+      input.value = '';
+      input.style.height = 'auto';
+      disableInput();
+      showTyping(true);
+    }
+
+    // ── Events ────────────────────────────────────────────────────────────
+    sendBtn.addEventListener('click', sendMessage);
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    input.addEventListener('input', autoResize);
+
+    // Toggle recording — click once to start, click again to stop.
+    micBtn.addEventListener('click', () => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    });
+
+    cancelRecBtn.addEventListener('click', cancelRecording);
+
+    // ── New-interview popover ─────────────────────────────────────────────
+    const newPopover = document.getElementById('new-popover');
+
+    document.getElementById('new-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      newPopover.classList.toggle('open');
+    });
+
+    document.getElementById('pop-same-role').addEventListener('click', () => {
+      const raw = _loadRaw();
+      if (raw?.jobSessionId) {
+        // Keep the job context, start a fresh thread
+        localStorage.setItem('pending_job_session', JSON.stringify({
+          jobSessionId: raw.jobSessionId,
+          jobTitle: raw.jobTitle || '',
+          company: raw.company || '',
+        }));
+      }
+      clearSession();
+      window.location.href = '/interview.html';
+    });
+
+    document.getElementById('pop-new-role').addEventListener('click', () => {
+      clearSession();
+      window.location.href = '/onboarding.html';
+    });
+
+    // Drawer buttons — same logic as popover items
+    document.getElementById('drawer-new-same').addEventListener('click', () => {
+      window.closeMobileMenu?.();
+      document.getElementById('pop-same-role').click();
+    });
+    document.getElementById('drawer-new-role').addEventListener('click', () => {
+      window.closeMobileMenu?.();
+      document.getElementById('pop-new-role').click();
+    });
+
+    // Close popover when clicking outside
+    document.addEventListener('click', () => newPopover.classList.remove('open'));
+
+    // ── Boot ──────────────────────────────────────────────────────────────
+    _updateHeaderSubtitle();
+
+    // If the stored session is already finished, just show the done banner
+    // without opening a WebSocket — avoids an infinite reconnect loop.
+    const _bootRaw = _loadRaw();
+    if (_bootRaw?.fase === 'done' && !_pendingJobSession) {
+      badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Done'; lucide.createIcons();
+      badge.className = '';
+      doneBanner.style.display = 'block';
+      disableInput(true);
+      // Restore chat history (scorecard is NOT stored here — fetched from server below).
+      if (_bootRaw.history?.length) {
+        for (const m of _bootRaw.history) {
+          if (m.type === 'ai' || m.type === 'transition') addBubble('ai', m.text, m.voice || 'nova', true);
+          else if (m.type === 'user') addBubble('user', m.text, 'nova', false);
+          else if (m.type === 'feedback' && !m.text?.includes('INTERVIEW SCORECARD')) addFeedback(m.text);
+        }
+        scrollBottom();
+      }
+      // Always fetch scorecard from server — it enforces plan gating.
+      // Hunter → renders in scorecard panel. Free/downgraded → 403, panel stays hidden.
+      _fetchAndRenderScorecard(_bootRaw.threadId);
+    } else {
+      connect();
+      showTyping(true);   // waiting for first AI message
+    }
+
+    // Show a "tap to enable audio" overlay on touch devices.
+    // Removed automatically on first tap by _unlockAudio().
+    if (_isTouchDevice) {
+      const overlay = document.createElement('div');
+      overlay.id = 'tap-overlay';
+      overlay.style.cssText = [
+        'position:fixed', 'inset:0', 'z-index:9999',
+        'display:flex', 'align-items:flex-end', 'justify-content:center',
+        'padding-bottom:32px', 'pointer-events:none',
+      ].join(';');
+      const pill = document.createElement('div');
+      pill.style.cssText = [
+        'background:rgba(0,0,0,0.65)', 'color:#fff',
+        'font-size:13px', 'padding:8px 20px', 'border-radius:99px',
+        'backdrop-filter:blur(6px)', '-webkit-backdrop-filter:blur(6px)',
+      ].join(';');
       pill.textContent = t('interview.tapToEnable');
-    }, { once: true });
-  }
-</script>
-<script>
-(function(){
-  try {
-    const u = JSON.parse(localStorage.getItem('auth_user')||'null');
-    if(!u) return;
-    const el = document.getElementById('plan-pill');
-    if(!el) return;
-    const isHunter = u.plan === 'hunter';
-    el.className = 'badge ' + (isHunter ? 'badge-primary' : '');
-    if(!isHunter) { el.style.border = '1px solid var(--bg-surface-border)'; el.style.color = 'var(--text-secondary)'; }
-    el.innerHTML = isHunter ? '<i data-lucide="target" style="width:12px;height:12px;margin-right:4px"></i> Hunter' : '<i data-lucide="map" style="width:12px;height:12px;margin-right:4px"></i> Explorer';
+      overlay.appendChild(pill);
+      document.body.appendChild(overlay);
+      document.addEventListener('i18n:ready', () => {
+        pill.textContent = t('interview.tapToEnable');
+      }, { once: true });
+    }
+  </script>
+  <script>
+    (function () {
+      try {
+        const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
+        if (!u) return;
+        const el = document.getElementById('plan-pill');
+        if (!el) return;
+        const isHunter = u.plan === 'hunter';
+        el.className = 'badge ' + (isHunter ? 'badge-primary' : '');
+        if (!isHunter) { el.style.border = '1px solid var(--bg-surface-border)'; el.style.color = 'var(--text-secondary)'; }
+        el.innerHTML = isHunter ? '<i data-lucide="target" style="width:12px;height:12px;margin-right:4px"></i> Hunter' : '<i data-lucide="map" style="width:12px;height:12px;margin-right:4px"></i> Explorer';
+        lucide.createIcons();
+        el.setAttribute('data-tooltip', 'Your current plan');
+        el.style.display = 'inline-block';
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', () => location.href = '/upgrade.html');
+      } catch (_) { }
+    })();
+    (async function () {
+      try {
+        const tok = localStorage.getItem('auth_token');
+        if (!tok) return;
+        const res = await fetch('/auth/usage', { headers: { 'Authorization': 'Bearer ' + tok } });
+        if (!res.ok) return;
+        const usage = await res.json();
+        const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
+        if (u && u.plan !== usage.plan) { u.plan = usage.plan; localStorage.setItem('auth_user', JSON.stringify(u)); }
+        const el = document.getElementById('plan-pill');
+        if (!el) return;
+        const isHunter = usage.plan === 'hunter';
+        el.className = 'badge ' + (isHunter ? 'badge-primary' : '');
+        if (!isHunter) { el.style.border = '1px solid var(--bg-surface-border)'; el.style.color = 'var(--text-secondary)'; }
+        el.innerHTML = isHunter ? '<i data-lucide="target" style="width:12px;height:12px;margin-right:4px"></i> Hunter' : '<i data-lucide="map" style="width:12px;height:12px;margin-right:4px"></i> Explorer';
+        lucide.createIcons();
+      } catch (_) { }
+    })();
     lucide.createIcons();
-    el.setAttribute('data-tooltip', 'Your current plan');
-    el.style.display = 'inline-block';
-    el.style.cursor = 'pointer';
-    el.addEventListener('click', () => location.href = '/upgrade.html');
-  } catch(_){}
-})();
-(async function(){
-  try {
-    const tok = localStorage.getItem('auth_token');
-    if (!tok) return;
-    const res = await fetch('/auth/usage', { headers: { 'Authorization': 'Bearer ' + tok } });
-    if (!res.ok) return;
-    const usage = await res.json();
-    const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
-    if (u && u.plan !== usage.plan) { u.plan = usage.plan; localStorage.setItem('auth_user', JSON.stringify(u)); }
-    const el = document.getElementById('plan-pill');
-    if (!el) return;
-    const isHunter = usage.plan === 'hunter';
-    el.className = 'badge ' + (isHunter ? 'badge-primary' : '');
-    if(!isHunter) { el.style.border = '1px solid var(--bg-surface-border)'; el.style.color = 'var(--text-secondary)'; }
-    el.innerHTML = isHunter ? '<i data-lucide="target" style="width:12px;height:12px;margin-right:4px"></i> Hunter' : '<i data-lucide="map" style="width:12px;height:12px;margin-right:4px"></i> Explorer';
-    lucide.createIcons();
-  } catch(_){}
-})();
-  lucide.createIcons();
-</script>
-<script src="/mobile-menu.js"></script>
-<script src="/contact-widget.js"></script>
+  </script>
+  <script src="/mobile-menu.js"></script>
+  <script src="/contact-widget.js"></script>
 </body>
+
 </html>

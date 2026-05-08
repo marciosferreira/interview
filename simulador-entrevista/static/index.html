@@ -402,7 +402,8 @@
     <div id="drawer-auth" style="display:none;flex-direction:column;gap:6px">
       <a class="drawer-item" href="/"><i data-lucide="home"></i> <span data-i18n="nav.homeLabel">Home</span></a>
       <a class="drawer-item" href="/tips.html"><i data-lucide="lightbulb"></i> <span data-i18n="nav.tipsLabel">Tips</span></a>
-      <a class="drawer-item" href="/history.html"><i data-lucide="clipboard-list"></i> History</a>
+      <button class="drawer-item" onclick="closeMobileMenu(); newInterview()"><i data-lucide="plus"></i> <span data-i18n="history.nav.newInterview">New interview</span></button>
+      <a class="drawer-item" href="/history.html"><i data-lucide="clipboard-list"></i> <span data-i18n="nav.historyLabel">History</span></a>
       <a class="drawer-item" href="/profile.html"><i data-lucide="settings"></i> <span data-i18n="nav.settingsLabel">Settings</span></a>
       <div class="drawer-divider"></div>
       <button class="drawer-item" onclick="closeMobileMenu(); logout()"><i data-lucide="log-out"></i> <span data-i18n="nav.signout">Sign out</span></button>
@@ -603,6 +604,11 @@
 
   // Dashboard logic
   const SESSION_KEY = 'interview_v1';
+  function newInterview() {
+    localStorage.removeItem(SESSION_KEY);
+    window.location.href = '/onboarding.html';
+  }
+  window.newInterview = newInterview;
   const SESSION_TTL = 48 * 60 * 60 * 1000;
   const FASE_LABEL = {
     elevator_pitch: 'Elevator Pitch', elevator_pitch_report: 'Elevator Pitch — review',
