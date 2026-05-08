@@ -9,10 +9,8 @@ Generate a structured feedback report using EXACTLY this format. Be specific —
 ## Report Format
 
 ```
-============================================
-📋 PHASE REPORT
-============================================
-
+=========📋 PHASE REPORT
+=========
 CONTENT FEEDBACK
 
 Strength:
@@ -55,8 +53,7 @@ Checklist status:
 [List each checklist item with ✅ (passed) or ❌ (not met)]
 
 Overall: [Strong / Adequate / Weak — one sentence summary]
-============================================
-```
+=========```
 
 ---
 

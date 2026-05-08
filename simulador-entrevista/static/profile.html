@@ -183,8 +183,31 @@
     <div class="section-title" data-i18n="profile.sections.language">Language</div>
     <p style="font-size:14px;color:var(--text-secondary);margin-bottom:16px" data-i18n="profile.langHint">Choose the language for the interface.</p>
     <div class="flex gap-4">
-      <button class="lang-btn" data-lang="en" onclick="saveLang('en')" style="flex:1; padding:12px; border:1px solid var(--bg-surface-border); border-radius:var(--radius-md); background:transparent; color:var(--text-primary); cursor:pointer;">🇺🇸 English</button>
-      <button class="lang-btn" data-lang="pt" onclick="saveLang('pt')" style="flex:1; padding:12px; border:1px solid var(--bg-surface-border); border-radius:var(--radius-md); background:transparent; color:var(--text-primary); cursor:pointer;">🇧🇷 Português</button>
+      <button class="profile-lang-btn" data-lang="en" onclick="saveLang('en')" style="flex:1; padding:12px; border:1px solid var(--bg-surface-border); border-radius:var(--radius-md); background:transparent; color:var(--text-primary); cursor:pointer;">🇺🇸 English</button>
+      <button class="profile-lang-btn" data-lang="pt" onclick="saveLang('pt')" style="flex:1; padding:12px; border:1px solid var(--bg-surface-border); border-radius:var(--radius-md); background:transparent; color:var(--text-primary); cursor:pointer;">🇧🇷 Português</button>
+    </div>
+  </div>
+
+  <!-- Preferences section -->
+  <div class="section">
+    <div class="section-title" data-i18n="profile.sections.preferences">Preferences</div>
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
+      <div>
+        <div style="font-size:14px; font-weight:600; color:var(--text-primary); margin-bottom:4px;" data-i18n="profile.preferences.autoPlayLabel">Auto-play voice</div>
+        <div style="font-size:13px; color:var(--text-secondary);" data-i18n-html="profile.preferences.autoPlayDesc">Automatically speak Alex's messages. When off, click <strong>replay</strong> on each bubble to listen.</div>
+      </div>
+      <button id="auto-tts-toggle" onclick="toggleAutoTTS()" style="
+        position:relative; width:52px; height:28px; border-radius:99px;
+        border:none; cursor:pointer; flex-shrink:0; transition:background 0.2s;
+        background: var(--brand-primary);
+      " aria-label="Toggle auto-play voice">
+        <span id="auto-tts-knob" style="
+          position:absolute; top:3px; left:3px;
+          width:22px; height:22px; border-radius:50%;
+          background:#fff; transition:transform 0.2s;
+          transform: translateX(24px);
+        "></span>
+      </button>
     </div>
   </div>
 
@@ -217,6 +240,25 @@
   const _token = localStorage.getItem('auth_token');
   if (!_token) location.replace('/login.html?next=/profile.html');
 
+  // ── Auto-TTS toggle ────────────────────────────────────────────────────
+  (function initAutoTTSToggle() {
+    const isOn = localStorage.getItem('pref_auto_tts') !== 'false';
+    const btn   = document.getElementById('auto-tts-toggle');
+    const knob  = document.getElementById('auto-tts-knob');
+    if (!btn) return;
+    function applyState(on) {
+      btn.style.background  = on ? 'var(--brand-primary)' : '#374151';
+      knob.style.transform  = on ? 'translateX(24px)' : 'translateX(0)';
+    }
+    applyState(isOn);
+    window.toggleAutoTTS = function () {
+      const current = localStorage.getItem('pref_auto_tts') !== 'false';
+      const next = !current;
+      localStorage.setItem('pref_auto_tts', next ? 'true' : 'false');
+      applyState(next);
+    };
+  })();
+
   const _authHeader = { 'Authorization': `Bearer ${_token}`, 'Content-Type': 'application/json' };
   const SESSION_KEY = 'interview_v1';
 
@@ -235,7 +277,7 @@
 
   async function saveLang(lang) {
     i18n.switchLang(lang);
-    document.querySelectorAll('.lang-btn').forEach(b => {
+    document.querySelectorAll('.profile-lang-btn').forEach(b => {
       if(b.getAttribute('data-lang') === lang) {
         b.style.borderColor = 'var(--brand-primary)';
         b.style.background = 'rgba(99, 102, 241, 0.1)';
@@ -274,10 +316,13 @@
       document.getElementById('email').value = user.email || '';
       
       const lang = user.language || 'en';
-      document.querySelectorAll('.lang-btn').forEach(b => {
+      document.querySelectorAll('.profile-lang-btn').forEach(b => {
         if(b.getAttribute('data-lang') === lang) {
           b.style.borderColor = 'var(--brand-primary)';
           b.style.background = 'rgba(99, 102, 241, 0.1)';
+        } else {
+          b.style.borderColor = 'var(--bg-surface-border)';
+          b.style.background = 'transparent';
         }
       });
 
@@ -359,7 +404,7 @@
       }
     } catch {}
   }
-  document.addEventListener('i18n:ready', loadUser);
+  document.addEventListener('i18n:ready', loadUser, { once: true });
 
   document.getElementById('resend-btn').addEventListener('click', async () => {
     const btn = document.getElementById('resend-btn');
@@ -522,15 +567,15 @@
         const amount = fmt.format(inv.amount_paid / 100);
         const curr   = inv.currency.toUpperCase();
         const pdfLink  = inv.invoice_pdf
-          ? `<a class="invoice-link" href="${inv.invoice_pdf}" target="_blank" rel="noopener"><i data-lucide="download" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i>PDF</a>`
+          ? `<a class="invoice-link" href="${inv.invoice_pdf}" target="_blank" rel="noopener"><i data-lucide="download" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i>${window.t('profile.plan.invoiceDownload')}</a>`
           : '';
         const viewLink = inv.hosted_invoice_url
-          ? `<a class="invoice-link" href="${inv.hosted_invoice_url}" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i>View</a>`
+          ? `<a class="invoice-link" href="${inv.hosted_invoice_url}" target="_blank" rel="noopener"><i data-lucide="external-link" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i>${window.t('profile.plan.invoiceView')}</a>`
           : '';
         return `<tr>
           <td>${date}</td>
           <td>${curr} ${amount}</td>
-          <td><span class="badge badge-primary" style="background:var(--status-success-bg);color:var(--status-success);border:1px solid var(--status-success-border);font-size:10px;">PAID</span></td>
+          <td><span class="badge badge-primary" style="background:var(--status-success-bg);color:var(--status-success);border:1px solid var(--status-success-border);font-size:10px;">${window.t('profile.plan.invoiceStatusPaid')}</span></td>
           <td style="text-align:right">${viewLink}${pdfLink}</td>
         </tr>`;
       }).join('');
@@ -538,7 +583,7 @@
       document.getElementById('invoices-body').innerHTML = `
         <table class="invoice-table">
           <thead><tr>
-            <th>Date</th><th>Amount</th><th>Status</th><th></th>
+            <th>${window.t('profile.plan.invoiceColDate')}</th><th>${window.t('profile.plan.invoiceColAmount')}</th><th>${window.t('profile.plan.invoiceColStatus')}</th><th></th>
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>`;

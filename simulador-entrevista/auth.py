@@ -55,6 +55,11 @@ class TokenResponse(BaseModel):
     user: dict
 
 
+class RegisterResponse(BaseModel):
+    registered: bool = True
+    email: str
+
+
 class ProfileUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[str] = None
@@ -618,14 +623,18 @@ def get_user_by_stripe_customer(conn: Any, customer_id: str) -> Optional[dict]:
 def get_user_by_email(conn: Any, email: str) -> Optional[dict]:
     cur = conn.cursor()
     cur.execute(
-        "SELECT id, email, name, plan FROM users WHERE email = %s",
+        "SELECT id, email, name, plan, language, email_verified, verification_expires FROM users WHERE email = %s",
         (email.lower(),),
     )
     row = cur.fetchone()
     cur.close()
     if not row:
         return None
-    return {"id": row[0], "email": row[1], "name": row[2], "plan": row[3]}
+    return {
+        "id": row[0], "email": row[1], "name": row[2], "plan": row[3],
+        "language": row[4], "email_verified": bool(row[5]),
+        "verification_expires": row[6],
+    }
 
 
 def get_stripe_info(conn: Any, user_id: str) -> dict:

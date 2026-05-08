@@ -142,7 +142,12 @@
       "password": "Change Password",
       "language": "Language",
       "session": "Session",
-      "dangerZone": "Danger Zone"
+      "dangerZone": "Danger Zone",
+      "preferences": "Preferences"
+    },
+    "preferences": {
+      "autoPlayLabel": "Auto-play voice",
+      "autoPlayDesc": "Automatically speak Alex's messages. When off, click <strong>replay</strong> on each bubble to listen."
     },
     "deleteAccount": {
       "desc": "Permanently delete your account and all interview data. This action cannot be undone.",
@@ -313,7 +318,7 @@
       "discard": "✕ Discard",
       "send": "➤ Send"
     },
-    "doneBanner": "Interview complete — scroll down to see your scorecard ↓",
+    "doneBanner": "Interview complete — click here to see your scorecard ",
     "sessionRestored": "— session restored —",
     "tapToEnable": "Tap anywhere to enable audio",
     "scorecard": {
@@ -368,7 +373,9 @@
     "noAccount": "Don't have an account?",
     "createOne": "Create one →",
     "errorCredentials": "Login failed. Please check your credentials.",
-    "errorNetwork": "Network error — please try again."
+    "errorNetwork": "Network error — please try again.",
+    "errorEmailNotVerified": "Please confirm your email before signing in.",
+    "resendVerification": "Resend confirmation email"
   },
   "register": {
     "pageTitle": "Create Account — Acing Interview",
@@ -391,7 +398,12 @@
     "errorName": "Name is required.",
     "errorPassword": "Password must be at least 8 characters.",
     "errorDefault": "Registration failed. Please try again.",
-    "errorNetwork": "Network error — please try again."
+    "errorNetwork": "Network error — please try again.",
+    "successTitle": "Check your inbox",
+    "successText": "We sent a confirmation link to {email}. Click it to activate your account.",
+    "successNote": "Didn't receive it? Check your spam folder or",
+    "successResend": "resend the email",
+    "successResendOk": "Email resent! Check your inbox."
   },
   "upgrade": {
     "pageTitle": "Plans & Pricing — Acing Interview",

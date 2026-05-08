@@ -308,6 +308,12 @@ _PHASE_FILES  = {
 }
 
 
+_LANG_REMINDER = {
+    "en": "\n\n---\n\n**FINAL REMINDER:** Respond in English only. If the candidate writes in another language, redirect them to English before continuing.",
+    "pt": "\n\n---\n\n**LEMBRETE FINAL:** Responda SOMENTE em Português do Brasil. Se o candidato escrever em outro idioma, redirecione-o gentilmente antes de continuar.",
+}
+
+
 def _build_interview_system(interview_context: str, phase: str, language: str = "en") -> str:
     """Compose: persona + candidate context + phase guide."""
     phase_guide = _PHASE_FILES.get(phase, "")
@@ -317,7 +323,8 @@ def _build_interview_system(interview_context: str, phase: str, language: str = 
         + interview_context
         + "\n\n---\n\n"
     ) if interview_context else "\n\n---\n\n"
-    return _PERSONA + lang_block + context_block + phase_guide
+    lang_reminder = _LANG_REMINDER.get(language, _LANG_REMINDER["en"])
+    return _PERSONA + lang_block + context_block + phase_guide + lang_reminder
 
 
 _REPORT_PHASE_SECTIONS = {
@@ -359,7 +366,8 @@ def _build_report_system(interview_context: str, phase: str, language: str = "en
         + slim_context
         + "\n\n---\n\n"
     ) if slim_context else "\n\n---\n\n"
-    return _REPORT_BASE + lang_block + context_block + phase_guide
+    lang_reminder = _LANG_REMINDER.get(language, _LANG_REMINDER["en"])
+    return _REPORT_BASE + lang_block + context_block + phase_guide + lang_reminder
 
 
 def _build_scorecard_system(interview_context: str, language: str = "en") -> str:
@@ -369,7 +377,8 @@ def _build_scorecard_system(interview_context: str, language: str = "en") -> str
         + interview_context
         + "\n\n---\n\n"
     ) if interview_context else "\n\n---\n\n"
-    return _SCORECARD + lang_block + context_block
+    lang_reminder = _LANG_REMINDER.get(language, _LANG_REMINDER["en"])
+    return _SCORECARD + lang_block + context_block + lang_reminder
 
 
 def _cached_system(prompt: str) -> SystemMessage:
@@ -386,12 +395,23 @@ def _cached_system(prompt: str) -> SystemMessage:
 
 _LANG_DIRECTIVE = {
     "en": (
-        "**Language:** Conduct the entire interview in English. "
-        "All your messages must be in English."
+        "## LANGUAGE REQUIREMENT — ENGLISH\n\n"
+        "**This entire interview must be conducted in English.** "
+        "Every message you send — opening lines, questions, follow-ups, coaching nudges, phase transitions, and closings — must be in English. "
+        "Adapt any template phrasing from the phase guide to English if needed (they are already written in English). "
+        "If the candidate responds in a language other than English, acknowledge their answer briefly and remind them: "
+        "'Just a reminder — this interview is in English. Please continue in English.' "
+        "Then ask your follow-up in English. Never switch to another language under any circumstances."
     ),
     "pt": (
-        "**Idioma:** Conduza toda a entrevista em Português do Brasil. "
-        "Todas as suas mensagens devem estar em Português do Brasil. "
+        "## REQUISITO DE IDIOMA — PORTUGUÊS DO BRASIL\n\n"
+        "**Toda esta entrevista deve ser conduzida em Português do Brasil.** "
+        "Todas as suas mensagens devem estar em Português do Brasil — linhas de abertura, perguntas, follow-ups, dicas de coaching, transições de fase e encerramento. "
+        "Adapte TODAS as frases de exemplo dos guias de fase para o Português do Brasil. "
+        "NUNCA reproduza as linhas de abertura em inglês — elas são apenas referências de conteúdo, não de idioma. "
+        "Se o candidato responder em inglês ou qualquer outro idioma, reconheça a resposta e lembre-o gentilmente: "
+        "'Só um aviso — esta entrevista está sendo conduzida em Português do Brasil. Por favor, continue respondendo em Português.' "
+        "Em seguida, faça sua pergunta em Português. Nunca mude de idioma, independentemente do que o candidato faça. "
         "O campo `english_adequate` deve avaliar a qualidade da comunicação em Português do candidato."
     ),
 }

@@ -1,7 +1,10 @@
 import asyncio
 import functools
 import hashlib
+import mimetypes
 import os
+import struct
+import time
 import traceback
 import uuid
 from pathlib import Path
@@ -12,7 +15,7 @@ load_dotenv()
 
 import stripe as _stripe
 
-from fastapi import FastAPI, HTTPException, Request, UploadFile, WebSocket, WebSocketDisconnect, Depends
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, UploadFile, WebSocket, WebSocketDisconnect, Depends
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp, Receive, Scope, Send
 from fastapi.responses import Response
@@ -27,7 +30,8 @@ from simulator import (
     _build_report_system, REPORT_PHASE_MAP, _conn,
 )
 from auth import (
-    UserCreate, UserLogin, TokenResponse, ProfileUpdate,
+    UserCreate, UserLogin, TokenResponse, RegisterResponse, ProfileUpdate,
+    VERIFICATION_TOKEN_EXPIRES_HOURS,
     create_user, authenticate_user, get_user_by_id, update_profile,
     create_verification_token, verify_email_token,
     create_reset_token, reset_password_with_token,
@@ -52,7 +56,15 @@ def _db_exec(sql: str, params=()):
         return cur
     return _conn.execute(sql, params)
 
-openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+_openai_api_key = os.getenv("OPENAI_API_KEY")
+openai_client = AsyncOpenAI(api_key=_openai_api_key) if _openai_api_key else None
+
+from google import genai as _genai
+from google.genai import types as _genai_types
+_gemini_client = _genai.Client(api_key=os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"))
+
+_TTS_PROVIDER = os.getenv("TTS_PROVIDER", "openai").lower()
+_GEMINI_TTS_VOICE = os.getenv("GEMINI_TTS_VOICE", "Zephyr")
 
 _stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 _STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
@@ -103,8 +115,8 @@ app.add_middleware(_CacheMiddleware)
 
 # ── Auth endpoints ────────────────────────────────────────────────────────────
 
-@app.post("/auth/register", response_model=TokenResponse)
-async def register(body: UserCreate):
+@app.post("/auth/register", response_model=RegisterResponse)
+async def register(body: UserCreate, background_tasks: BackgroundTasks):
     if not body.name.strip():
         raise HTTPException(status_code=422, detail="Name is required")
     if not body.email.strip() or "@" not in body.email:
@@ -117,16 +129,13 @@ async def register(body: UserCreate):
         lambda: create_user(_conn, body.name.strip(), body.email.strip(),
                             body.password, body.language),
     )
-    # Send verification email
     token = await loop.run_in_executor(
         None, lambda: create_verification_token(_conn, user["id"])
     )
-    try:
-        await loop.run_in_executor(None, lambda: send_verification_email(user["email"], token, user.get("language", "en")))
-    except Exception as exc:
-        print(f"[register] Failed to send verification email: {exc}")
-    access_token = create_access_token(user["id"], user["email"])
-    return TokenResponse(access_token=access_token, user=user)
+    background_tasks.add_task(
+        send_verification_email, user["email"], token, user.get("language", "en")
+    )
+    return RegisterResponse(email=user["email"])
 
 
 @app.post("/auth/login", response_model=TokenResponse)
@@ -138,6 +147,8 @@ async def login(body: UserLogin):
     )
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
+    if not user.get("email_verified") and user.get("email") != ADMIN_EMAIL:
+        raise HTTPException(status_code=403, detail="email_not_verified")
     token = create_access_token(user["id"], user["email"])
     return TokenResponse(access_token=token, user=user)
 
@@ -219,6 +230,37 @@ async def send_verification(current_user: dict = Depends(get_current_user)):
     if mock:
         response["dev_token"] = token  # expose token in dev mode for manual testing
     return response
+
+
+class ResendVerificationPublicRequest(BaseModel):
+    email: str
+
+
+_RESEND_COOLDOWN_SECONDS = 300  # 5 minutes between resend attempts
+
+
+@app.post("/auth/resend-verification-public")
+async def resend_verification_public(body: ResendVerificationPublicRequest):
+    """Public endpoint — resend verification email without auth (used on register success screen)."""
+    loop = asyncio.get_running_loop()
+    user = await loop.run_in_executor(None, lambda: get_user_by_email(_conn, body.email.strip().lower()))
+    if not user or user.get("email_verified"):
+        return {"ok": True}
+    # Rate limit: refuse if last token was issued less than _RESEND_COOLDOWN_SECONDS ago
+    expires = user.get("verification_expires")
+    if expires:
+        now_ms = int(time.time() * 1000)
+        token_age_ms = VERIFICATION_TOKEN_EXPIRES_HOURS * 3_600_000 - (expires - now_ms)
+        if token_age_ms < _RESEND_COOLDOWN_SECONDS * 1000:
+            wait_s = (_RESEND_COOLDOWN_SECONDS * 1000 - token_age_ms) // 1000
+            raise HTTPException(status_code=429, detail=f"Please wait {wait_s} seconds before requesting another email.")
+    token = await loop.run_in_executor(None, lambda: create_verification_token(_conn, user["id"]))
+    try:
+        await loop.run_in_executor(None, lambda: send_verification_email(user["email"], token, user.get("language", "en")))
+    except Exception as exc:
+        print(f"[resend-verification-public] Failed: {exc}")
+        raise HTTPException(status_code=503, detail="Failed to send email — please try again")
+    return {"ok": True}
 
 
 @app.get("/auth/verify-email")
@@ -544,6 +586,8 @@ async def prepare(body: PrepareRequest, current_user: dict = Depends(get_current
     user = await loop.run_in_executor(
         None, lambda: get_user_by_id(_conn, current_user["id"])
     )
+    if user and not user.get("email_verified") and current_user.get("email") != ADMIN_EMAIL:
+        raise HTTPException(status_code=403, detail="email_not_verified")
     language = user.get("language", "en") if user else "en"
     plan     = user.get("plan", "free")   if user else "free"
 
@@ -811,22 +855,120 @@ _TTS_LANG_INSTRUCTIONS = {
     "en": "",
 }
 
+
+def _parse_audio_mime_type(mime_type: str) -> dict:
+    bits_per_sample, rate = 16, 24000
+    for param in mime_type.split(";"):
+        param = param.strip()
+        if param.lower().startswith("rate="):
+            try:
+                rate = int(param.split("=", 1)[1])
+            except (ValueError, IndexError):
+                pass
+        elif param.startswith("audio/L"):
+            try:
+                bits_per_sample = int(param.split("L", 1)[1])
+            except (ValueError, IndexError):
+                pass
+    return {"bits_per_sample": bits_per_sample, "rate": rate}
+
+
+def _convert_to_wav(audio_data: bytes, mime_type: str) -> bytes:
+    p = _parse_audio_mime_type(mime_type)
+    bps, rate, ch = p["bits_per_sample"], p["rate"], 1
+    block_align = ch * (bps // 8)
+    header = struct.pack(
+        "<4sI4s4sIHHIIHH4sI",
+        b"RIFF", 36 + len(audio_data), b"WAVE",
+        b"fmt ", 16, 1, ch, rate, rate * block_align, block_align, bps,
+        b"data", len(audio_data),
+    )
+    return header + audio_data
+
+
+_GEMINI_TTS_PROMPT = """\
+Read the following transcript based on the audio profile and director's note.
+
+# Audio Profile
+An experienced technical recruiter conducting a structured job interview.
+
+# Director's note
+Style: Natural. Pace: Measured. Accent: American (Gen).
+
+## Scene:
+A professional online job interview. The speaker is an experienced technical recruiter \
+conducting a mock interview session to help candidates prepare for real job interviews. \
+The interviewer is knowledgeable, organized, and genuinely invested in the candidate's success.
+
+## Sample Context:
+Speak with clear pronunciation and a calm, professional cadence. Use a warm but authoritative \
+tone — encouraging without being casual. Pause naturally between questions to give the candidate \
+space to think. Vary intonation to signal transitions between topics. Sound like a real interviewer, not a narrator.
+
+## Transcript:
+{text}"""
+
+
+def _gemini_tts_sync(text: str) -> bytes:
+    contents = [
+        _genai_types.Content(
+            role="user",
+            parts=[_genai_types.Part.from_text(text=_GEMINI_TTS_PROMPT.format(text=text))],
+        )
+    ]
+    config = _genai_types.GenerateContentConfig(
+        temperature=1,
+        response_modalities=["audio"],
+        speech_config=_genai_types.SpeechConfig(
+            voice_config=_genai_types.VoiceConfig(
+                prebuilt_voice_config=_genai_types.PrebuiltVoiceConfig(
+                    voice_name=_GEMINI_TTS_VOICE,
+                )
+            )
+        ),
+    )
+    chunks = []
+    mime_used = "audio/L16;rate=24000"
+    for chunk in _gemini_client.models.generate_content_stream(
+        model="gemini-3.1-flash-tts-preview",
+        contents=contents,
+        config=config,
+    ):
+        if chunk.parts is None:
+            continue
+        part = chunk.parts[0]
+        if part.inline_data and part.inline_data.data:
+            mime_used = part.inline_data.mime_type
+            chunks.append(part.inline_data.data)
+
+    raw = b"".join(chunks)
+    if mimetypes.guess_extension(mime_used) is None:
+        return _convert_to_wav(raw, mime_used)
+    return raw
+
+
 @app.get("/tts")
 async def tts(text: str, voice: str = "nova", lang: str = "en", nocache: bool = False):
-    allowed = {"alloy", "echo", "fable", "onyx", "nova", "shimmer"}
-    if voice not in allowed:
-        voice = "nova"
-
-    instructions = _TTS_LANG_INSTRUCTIONS.get(lang, "")
-    use_mini = bool(instructions)  # gpt-4o-mini-tts only needed when we have instructions
-    tts_model = "gpt-4o-mini-tts" if use_mini else "tts-1"
-    cache_key_str = f"{tts_model}:{voice}:{lang}:{text}"
+    if _TTS_PROVIDER == "gemini":
+        cache_key_str = f"gemini:{_GEMINI_TTS_VOICE}:{text}"
+        ext = "wav"
+        media_type = "audio/wav"
+    else:
+        allowed = {"alloy", "echo", "fable", "onyx", "nova", "shimmer"}
+        if voice not in allowed:
+            voice = "nova"
+        instructions = _TTS_LANG_INSTRUCTIONS.get(lang, "")
+        use_mini = bool(instructions)
+        tts_model = "gpt-4o-mini-tts" if use_mini else "tts-1"
+        cache_key_str = f"{tts_model}:{voice}:{lang}:{text}"
+        ext = "mp3"
+        media_type = "audio/mpeg"
 
     if not nocache:
         cache_key  = hashlib.md5(cache_key_str.encode()).hexdigest()
-        cache_file = TTS_CACHE_DIR / f"{cache_key}.mp3"
+        cache_file = TTS_CACHE_DIR / f"{cache_key}.{ext}"
         if cache_file.exists():
-            return Response(content=cache_file.read_bytes(), media_type="audio/mpeg",
+            return Response(content=cache_file.read_bytes(), media_type=media_type,
                             headers=_TTS_CACHE_HEADERS)
     else:
         cache_file = None
@@ -834,15 +976,19 @@ async def tts(text: str, voice: str = "nova", lang: str = "en", nocache: bool = 
     last_exc: Exception | None = None
     for attempt in range(3):
         try:
-            kwargs = dict(model=tts_model, voice=voice, input=text)
-            if instructions:
-                kwargs["instructions"] = instructions
-            response = await openai_client.audio.speech.create(**kwargs)
-            audio_bytes = response.content
+            if _TTS_PROVIDER == "gemini":
+                audio_bytes = await asyncio.to_thread(_gemini_tts_sync, text)
+            else:
+                kwargs = dict(model=tts_model, voice=voice, input=text)
+                if instructions:
+                    kwargs["instructions"] = instructions
+                response = await openai_client.audio.speech.create(**kwargs)
+                audio_bytes = response.content
+
             if cache_file is not None:
                 cache_file.write_bytes(audio_bytes)
             headers = _TTS_CACHE_HEADERS if cache_file is not None else {}
-            return Response(content=audio_bytes, media_type="audio/mpeg", headers=headers)
+            return Response(content=audio_bytes, media_type=media_type, headers=headers)
         except Exception as exc:
             last_exc = exc
             if attempt < 2:
@@ -923,9 +1069,8 @@ async def interview_ws(ws: WebSocket):
     user_id = user_info["id"]
     job_session_id = init.get("job_session_id", "")
 
-    # Load user status — email_verified gates phase 2+; plan gates scorecard
+    # Load user status — plan gates scorecard
     user_db = await loop.run_in_executor(None, lambda: get_user_by_id(_conn, user_id))
-    email_verified: bool = bool(user_db.get("email_verified")) if user_db else False
     user_plan: str     = user_db.get("plan", "free")     if user_db else "free"
     user_language: str = user_db.get("language", "en")   if user_db else "en"
 
@@ -1142,23 +1287,6 @@ async def interview_ws(ws: WebSocket):
 
             await ws.send_json({"type": "user", "text": user_text})
             prev_msg_count = len(messages)
-
-            # Block advancing past Elevator Pitch if email not verified
-            if fase == "elevator_pitch_report" and not email_verified:
-                # Re-fetch in case user verified during the session
-                user_db = await loop.run_in_executor(None, lambda: get_user_by_id(_conn, user_id))
-                email_verified = bool(user_db.get("email_verified")) if user_db else False
-                if not email_verified:
-                    await ws.send_json({
-                        "type": "ai",
-                        "text": (
-                            "⚠️ **Email verification required.**\n\n"
-                            "To continue to the next phase, please verify your email address first. "
-                            "Check your inbox for the verification link, or go to **Settings → Resend verification email**.\n\n"
-                            "Once verified, send any message here to continue."
-                        ),
-                    })
-                    continue  # wait for the next message, re-check at top of loop
 
             try:
                 result = await loop.run_in_executor(

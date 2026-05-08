@@ -37,6 +37,20 @@
       <span id="error-text"></span>
     </div>
 
+    <!-- Success state: shown after registration -->
+    <div id="success-panel" style="display:none; text-align:center; padding: 8px 0 16px;">
+      <div style="width:56px;height:56px;border-radius:50%;background:rgba(74,222,128,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+        <i data-lucide="mail-check" style="width:28px;height:28px;color:#4ade80"></i>
+      </div>
+      <h2 id="success-title" style="font-size:1.25rem;font-weight:700;margin-bottom:10px" data-i18n="register.successTitle">Check your inbox</h2>
+      <p id="success-text" style="color:var(--text-secondary);margin-bottom:16px;line-height:1.6"></p>
+      <p style="font-size:13px;color:var(--text-tertiary)">
+        <span id="success-note" data-i18n="register.successNote">Didn't receive it? Check your spam folder or</span>
+        <a href="#" id="resend-link" data-i18n="register.successResend" style="color:var(--accent);text-decoration:underline;cursor:pointer">resend the email</a>.
+      </p>
+      <p id="resend-status" style="font-size:12px;color:var(--text-tertiary);margin-top:8px;display:none"></p>
+    </div>
+
     <form id="register-form" autocomplete="on">
       <div class="form-group">
         <label class="form-label" for="name" data-i18n="register.name">Full name</label>
@@ -84,15 +98,57 @@
   const token = localStorage.getItem('auth_token');
   if (token) { location.replace('/index.html'); }
 
-  const form      = document.getElementById('register-form');
-  const errorMsg  = document.getElementById('error-msg');
-  const errorText = document.getElementById('error-text');
-  const submitBtn = document.getElementById('submit-btn');
+  const form         = document.getElementById('register-form');
+  const errorMsg     = document.getElementById('error-msg');
+  const errorText    = document.getElementById('error-text');
+  const submitBtn    = document.getElementById('submit-btn');
+  const successPanel = document.getElementById('success-panel');
+  const successText  = document.getElementById('success-text');
+  const resendLink   = document.getElementById('resend-link');
+  const resendStatus = document.getElementById('resend-status');
+
+  let registeredEmail = '';
 
   function showError(msg) {
     errorText.textContent = msg;
     errorMsg.style.display = 'flex';
   }
+
+  function showSuccess(email) {
+    registeredEmail = email;
+    const tpl = (window.t ? window.t('register.successText') : 'We sent a confirmation link to {email}. Click it to activate your account.');
+    successText.textContent = tpl.replace('{email}', email);
+    form.style.display = 'none';
+    successPanel.style.display = 'block';
+    if (window.i18n) window.i18n.apply();
+    lucide.createIcons();
+  }
+
+  resendLink.addEventListener('click', async (e) => {
+    e.preventDefault();
+    if (!registeredEmail) return;
+    resendLink.style.pointerEvents = 'none';
+    resendStatus.style.display = 'block';
+    resendStatus.textContent = '...';
+    try {
+      const res = await fetch('/auth/resend-verification-public', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: registeredEmail }),
+      });
+      if (res.status === 429) {
+        const data = await res.json();
+        resendStatus.textContent = data.detail || 'Please wait before requesting another email.';
+        setTimeout(() => { resendLink.style.pointerEvents = ''; resendStatus.style.display = 'none'; }, 10000);
+      } else {
+        resendStatus.textContent = window.t ? window.t('register.successResendOk') : 'Email resent!';
+        setTimeout(() => { resendLink.style.pointerEvents = ''; }, 30000);
+      }
+    } catch {
+      resendStatus.textContent = window.t ? window.t('register.errorNetwork') : 'Network error';
+      resendLink.style.pointerEvents = '';
+    }
+  });
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -119,10 +175,8 @@
         showError(data.detail || (window.t ? window.t('register.errorDefault') : 'Error occurred'));
         return;
       }
-      localStorage.setItem('auth_token', data.access_token);
-      localStorage.setItem('auth_user', JSON.stringify(data.user));
       localStorage.setItem('preferred_lang', language);
-      location.replace('/onboarding.html');
+      showSuccess(data.email || email);
     } catch (err) {
       showError(window.t ? window.t('register.errorNetwork') : 'Network error');
     } finally {

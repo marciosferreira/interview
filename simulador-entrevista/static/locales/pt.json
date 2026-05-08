@@ -142,7 +142,12 @@
       "password": "Alterar Senha",
       "language": "Idioma",
       "session": "Sessão",
-      "dangerZone": "Zona de Perigo"
+      "dangerZone": "Zona de Perigo",
+      "preferences": "Preferências"
+    },
+    "preferences": {
+      "autoPlayLabel": "Reprodução automática de voz",
+      "autoPlayDesc": "Falar automaticamente as mensagens do Alex. Quando desativado, clique em <strong>reproduzir</strong> em cada balão para ouvir."
     },
     "deleteAccount": {
       "desc": "Exclui permanentemente sua conta e todos os dados de entrevista. Esta ação não pode ser desfeita.",
@@ -313,7 +318,7 @@
       "discard": "✕ Descartar",
       "send": "➤ Enviar"
     },
-    "doneBanner": "Entrevista concluída — role para baixo para ver seu scorecard ↓",
+    "doneBanner": "Entrevista concluída — clique aqui para ver seu scorecard ",
     "sessionRestored": "— sessão restaurada —",
     "tapToEnable": "Toque em qualquer lugar para ativar o áudio",
     "scorecard": {
@@ -368,7 +373,9 @@
     "noAccount": "Não tem uma conta?",
     "createOne": "Crie uma →",
     "errorCredentials": "Falha no login. Verifique suas credenciais.",
-    "errorNetwork": "Erro de rede — tente novamente."
+    "errorNetwork": "Erro de rede — tente novamente.",
+    "errorEmailNotVerified": "Confirme seu e-mail antes de entrar.",
+    "resendVerification": "Reenviar e-mail de confirmação"
   },
   "register": {
     "pageTitle": "Criar Conta — Acing Interview",
@@ -391,7 +398,12 @@
     "errorName": "Nome é obrigatório.",
     "errorPassword": "A senha deve ter no mínimo 8 caracteres.",
     "errorDefault": "Falha no cadastro. Tente novamente.",
-    "errorNetwork": "Erro de rede — tente novamente."
+    "errorNetwork": "Erro de rede — tente novamente.",
+    "successTitle": "Verifique sua caixa de entrada",
+    "successText": "Enviamos um link de confirmação para {email}. Clique nele para ativar sua conta.",
+    "successNote": "Não recebeu? Verifique o spam ou",
+    "successResend": "reenvie o e-mail",
+    "successResendOk": "E-mail reenviado! Verifique sua caixa de entrada."
   },
   "upgrade": {
     "pageTitle": "Planos & Preços — Acing Interview",

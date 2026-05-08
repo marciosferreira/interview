@@ -755,27 +755,37 @@
       cursor: not-allowed;
     }
 
-    /* ── TTS bar (sits between phase-bar and chat, no overlap) ── */
+    /* ── TTS bar (always visible — shows toggle; expands when speaking) ── */
     #tts-player {
-      display: none;
+      display: flex;
       flex-shrink: 0;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
       gap: 10px;
       background: #13151f;
-      border-bottom: 1px solid #4f46e5;
-      padding: 7px 24px;
+      border-bottom: 1px solid #2d3148;
+      padding: 5px 16px;
+      min-height: 34px;
+    }
+
+    #tts-player.speaking {
+      border-bottom-color: #4f46e5;
       animation: tts-fadein 0.15s ease;
     }
 
     @keyframes tts-fadein {
-      from {
-        opacity: 0;
-      }
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
 
-      to {
-        opacity: 1;
-      }
+    #tts-speaking {
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #tts-player.speaking #tts-speaking {
+      display: flex;
     }
 
     #tts-label {
@@ -796,15 +806,8 @@
     }
 
     @keyframes tts-pulse {
-
-      0%,
-      100% {
-        opacity: 1;
-      }
-
-      50% {
-        opacity: 0.3;
-      }
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
     }
 
     #pause-btn,
@@ -830,6 +833,32 @@
     #skip-btn:hover {
       background: #3d4160;
       color: #e2e8f0;
+    }
+
+    #tts-auto-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: 1px solid #3d4160;
+      border-radius: 99px;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+      margin-left: auto;
+    }
+
+    #tts-auto-btn:hover {
+      background: #3d4160;
+    }
+
+    #tts-auto-btn.on {
+      border-color: #6366f1;
+      color: #a78bfa;
     }
 
     #cancel-rec-btn {
@@ -1155,14 +1184,18 @@
   </nav>
   <div id="phase-mobile-label"></div>
 
-  <!-- Floating TTS player pill -->
+  <!-- TTS bar — always visible; speaking controls shown only when active -->
   <div id="tts-player">
-    <span id="tts-label"><span class="tts-dot"></span><span data-i18n="interview.tts.speaking">Alex is
-        speaking…</span></span>
-    <button id="pause-btn" title="Pause / Resume audio"><i data-lucide="pause" style="width:14px;height:14px"></i> <span
-        data-i18n="interview.tts.pause">Pause</span></button>
-    <button id="skip-btn" title="Skip audio"><i data-lucide="skip-forward" style="width:14px;height:14px"></i> <span
-        data-i18n="interview.tts.skip">Skip</span></button>
+    <div id="tts-speaking">
+      <span id="tts-label"><span class="tts-dot"></span><span data-i18n="interview.tts.speaking">Alex is speaking…</span></span>
+      <button id="pause-btn" title="Pause / Resume audio"><i data-lucide="pause" style="width:14px;height:14px"></i> <span data-i18n="interview.tts.pause">Pause</span></button>
+      <button id="skip-btn" title="Skip audio"><i data-lucide="skip-forward" style="width:14px;height:14px"></i> <span data-i18n="interview.tts.skip">Skip</span></button>
+    </div>
+    <button id="tts-auto-btn" title="Toggle auto-play voice" onclick="toggleAutoTTS()">
+      <i data-lucide="volume-2" style="width:12px;height:12px"></i>
+      <span>Auto</span>
+      <span id="tts-auto-state"></span>
+    </button>
   </div>
 
   <div id="chat">
@@ -1470,7 +1503,7 @@
 
       // Fire ALL fetches NOW in parallel — they complete while earlier chunks play
       const fetches = chunks.map(c => _fetchAudioUrl(c, voice, lang));
-      ttsPlayer.style.display = 'flex';
+      ttsPlayer.classList.add('speaking');
       ttsPaused = false;
       pauseBtn.innerHTML = '<i data-lucide="pause" style="width:14px;height:14px"></i> Pause'; lucide.createIcons();
       ttsActiveSpeaks++;
@@ -1492,7 +1525,7 @@
           if (isLast && ttsToken === myToken) {
             ttsActiveSpeaks = Math.max(0, ttsActiveSpeaks - 1);
             if (ttsActiveSpeaks === 0) {
-              ttsPlayer.style.display = 'none';
+              ttsPlayer.classList.remove('speaking');
               ttsPaused = false;
             }
           }
@@ -1508,7 +1541,7 @@
       ttsPaused = false;
       if (currentAudio) { currentAudio.pause(); currentAudio = null; }
       ttsChain = Promise.resolve();
-      ttsPlayer.style.display = 'none';
+      ttsPlayer.classList.remove('speaking');
     }
 
     function togglePauseTTS() {
@@ -1604,11 +1637,11 @@
       scrollBottom();
 
       // Speak complete sentences as they arrive
-      _drainStreamTTS(false);
+      if (_autoTTS) _drainStreamTTS(false);
     }
 
     function _finalizeStream() {
-      _drainStreamTTS(true);   // flush any remaining text
+      if (_autoTTS) _drainStreamTTS(true);   // flush any remaining text
 
       // Add replay button now that the full text is known
       if (streamWrapperEl && streamRawText) {
@@ -1651,9 +1684,30 @@
     let previewAudio = null;   // HTMLAudioElement for the preview
     let previewBlob = null;   // kept so we can send it
 
-    // On every page load (new interview or resume) the very first AI question
-    // should NOT auto-play — user triggers TTS manually via the replay button.
-    let _skipNextAutoTTS = true;
+    // Auto-TTS preference: read from localStorage, default on.
+    let _autoTTS = localStorage.getItem('pref_auto_tts') !== 'false';
+
+    function _updateAutoTTSBtn() {
+      const btn   = document.getElementById('tts-auto-btn');
+      const state = document.getElementById('tts-auto-state');
+      if (!btn) return;
+      if (_autoTTS) {
+        btn.classList.add('on');
+        if (state) state.textContent = 'ON';
+      } else {
+        btn.classList.remove('on');
+        if (state) state.textContent = 'OFF';
+      }
+    }
+
+    function toggleAutoTTS() {
+      _autoTTS = !_autoTTS;
+      localStorage.setItem('pref_auto_tts', _autoTTS ? 'true' : 'false');
+      _updateAutoTTSBtn();
+    }
+
+    // Initialize button state on load
+    _updateAutoTTSBtn();
 
     // Voice used to read back the user's own answers.
     // Kept distinct from nova (Maria) and onyx (Judge).
@@ -1919,19 +1973,17 @@
           case 'ai':
             addBubble('ai', msg.text);
             _persistMsg('ai', msg.text, 'nova');
-            if (_skipNextAutoTTS) {
-              // First AI message on page load — don't auto-play, let user replay manually.
-              _skipNextAutoTTS = false;
-              enableInput();
-            } else {
+            if (_autoTTS) {
               speak(msg.text).then(() => enableInput());
+            } else {
+              enableInput();
             }
             break;
 
           case 'transition':
             addBubble('ai', msg.text, 'onyx');
             _persistMsg('ai', msg.text, 'onyx');
-            speak(msg.text, 'onyx');
+            if (_autoTTS) speak(msg.text, 'onyx');
             showTyping(true);
             break;
 
@@ -2066,7 +2118,7 @@
       scrollBottom();
 
       // Speak feedback automatically with male Judge voice
-      speak(_stripMarkdown(text), 'onyx');
+      if (_autoTTS) speak(_stripMarkdown(text), 'onyx');
     }
 
     // Render a feedback card without speaking (used when restoring history).
@@ -2348,6 +2400,15 @@
         lucide.createIcons();
       } catch (_) { }
     })();
+    // Prevent Lucide from re-processing already-rendered icons on repeated createIcons() calls.
+    // Lucide copies data-lucide to the output SVG, so global calls would duplicate icons.
+    const _lucideCreate = lucide.createIcons.bind(lucide);
+    lucide.createIcons = function(opts) {
+      document.querySelectorAll('[data-lucide]').forEach(el => {
+        if (el.tagName === 'svg' || el.querySelector('svg')) el.removeAttribute('data-lucide');
+      });
+      return _lucideCreate(opts);
+    };
     lucide.createIcons();
   </script>
   <script src="/mobile-menu.js"></script>

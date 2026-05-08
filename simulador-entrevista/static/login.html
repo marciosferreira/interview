@@ -37,6 +37,13 @@
       <span id="error-text"></span>
     </div>
 
+    <!-- Unverified email warning (separate from generic error) -->
+    <div id="unverified-msg" style="display:none; background:rgba(234,179,8,0.12); border:1px solid rgba(234,179,8,0.35); border-radius:10px; padding:14px 16px; margin-bottom:16px; font-size:14px; color:#fbbf24; line-height:1.6;">
+      <div style="font-weight:600; margin-bottom:6px;" data-i18n="login.errorEmailNotVerified">Please confirm your email before signing in.</div>
+      <a id="resend-from-login" href="#" style="color:#4ade80;text-decoration:underline;font-size:13px" data-i18n="login.resendVerification">Resend confirmation email</a>
+      <span id="resend-login-status" style="display:none; font-size:12px; color:var(--text-tertiary); margin-left:8px;"></span>
+    </div>
+
     <form id="login-form" autocomplete="on">
       <div class="form-group">
         <label class="form-label" for="email" data-i18n="login.email">Email</label>
@@ -77,24 +84,64 @@
     location.replace(returnTo);
   }
 
-  const form      = document.getElementById('login-form');
-  const errorMsg  = document.getElementById('error-msg');
-  const errorText = document.getElementById('error-text');
-  const submitBtn = document.getElementById('submit-btn');
+  const form           = document.getElementById('login-form');
+  const errorMsg       = document.getElementById('error-msg');
+  const errorText      = document.getElementById('error-text');
+  const submitBtn      = document.getElementById('submit-btn');
+  const unverifiedMsg  = document.getElementById('unverified-msg');
+  const resendFromLogin = document.getElementById('resend-from-login');
+  const resendLoginStatus = document.getElementById('resend-login-status');
+
+  let lastEmail = '';
 
   function showError(msg) {
+    unverifiedMsg.style.display = 'none';
     errorText.textContent = msg;
     errorMsg.style.display = 'flex';
   }
 
+  function showUnverified() {
+    errorMsg.style.display = 'none';
+    unverifiedMsg.style.display = 'block';
+    if (window.i18n) window.i18n.apply();
+  }
+
+  resendFromLogin.addEventListener('click', async (e) => {
+    e.preventDefault();
+    if (!lastEmail) return;
+    resendFromLogin.style.pointerEvents = 'none';
+    resendLoginStatus.style.display = 'inline';
+    resendLoginStatus.textContent = '...';
+    try {
+      const res = await fetch('/auth/resend-verification-public', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: lastEmail }),
+      });
+      if (res.status === 429) {
+        const data = await res.json();
+        resendLoginStatus.textContent = data.detail || 'Please wait before requesting another email.';
+        setTimeout(() => { resendFromLogin.style.pointerEvents = ''; resendLoginStatus.style.display = 'none'; }, 10000);
+      } else {
+        resendLoginStatus.textContent = window.t ? window.t('register.successResendOk') : 'Email resent!';
+        setTimeout(() => { resendFromLogin.style.pointerEvents = ''; }, 30000);
+      }
+    } catch {
+      resendLoginStatus.textContent = window.t ? window.t('login.errorNetwork') : 'Network error';
+      resendFromLogin.style.pointerEvents = '';
+    }
+  });
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     errorMsg.style.display = 'none';
+    unverifiedMsg.style.display = 'none';
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="spinner"></span>' + (window.t ? window.t('login.signingIn') : 'Signing in...');
 
     const email    = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
+    lastEmail = email;
 
     try {
       const res = await fetch('/auth/login', {
@@ -104,7 +151,11 @@
       });
       const data = await res.json();
       if (!res.ok) {
-        showError(data.detail || (window.t ? window.t('login.errorCredentials') : 'Invalid credentials'));
+        if (res.status === 403 && data.detail === 'email_not_verified') {
+          showUnverified();
+        } else {
+          showError(data.detail || (window.t ? window.t('login.errorCredentials') : 'Invalid credentials'));
+        }
         return;
       }
       localStorage.setItem('auth_token', data.access_token);
