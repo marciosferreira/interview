@@ -49,10 +49,16 @@
     .invoice-link {
       font-size: 12px; font-weight: 600; padding: 4px 10px;
       border-radius: var(--radius-sm); border: 1px solid var(--bg-surface-border);
-      color: var(--text-secondary); text-decoration: none; margin-left: 6px;
-      transition: all 0.2s;
+      color: var(--text-secondary); text-decoration: none;
+      transition: all 0.2s; white-space: nowrap;
     }
     .invoice-link:hover { border-color: var(--brand-primary); color: var(--brand-primary); }
+    .invoice-actions {
+      display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end;
+    }
+    @media (max-width: 480px) {
+      .invoice-actions { flex-direction: column; align-items: flex-end; }
+    }
     
     .danger-section {
       background: rgba(239, 68, 68, 0.05); border: 1px solid var(--status-error-border);
@@ -145,28 +151,15 @@
       <div class="form-group">
         <label class="form-label" for="cur-pw-profile">
           <span data-i18n="profile.fields.currentPw">Current password</span>
-          <span style="color:var(--text-tertiary)"> (<span data-i18n="profile.fields.currentPwHint">required only when changing email</span>)</span>
+          <span style="color:var(--text-tertiary)"> (<span data-i18n="profile.fields.currentPwHint">required when changing email or password</span>)</span>
         </label>
         <input class="form-input" type="password" id="cur-pw-profile" data-i18n-attr="placeholder:profile.fields.pwPlaceholder" placeholder="••••••••" autocomplete="current-password" />
-      </div>
-
-      <button class="btn btn-primary" type="submit" id="profile-btn" data-i18n="profile.buttons.save">Save changes</button>
-    </form>
-  </div>
-
-  <!-- Password section -->
-  <div class="section">
-    <div class="section-title" data-i18n="profile.sections.password">Change Password</div>
-    <div class="alert alert-success" id="pw-msg" style="display:none"></div>
-    <form id="pw-form">
-      <div class="form-group">
-        <label class="form-label" for="cur-pw" data-i18n="profile.fields.currentPw">Current password</label>
-        <input class="form-input" type="password" id="cur-pw" data-i18n-attr="placeholder:profile.fields.pwPlaceholder" placeholder="••••••••" autocomplete="current-password" />
       </div>
 
       <div class="form-group">
         <label class="form-label" for="new-pw" data-i18n="profile.fields.newPw">New password</label>
         <input class="form-input" type="password" id="new-pw" data-i18n-attr="placeholder:profile.fields.newPwPlaceholder" placeholder="At least 8 characters" autocomplete="new-password" />
+        <p style="font-size:11px;color:var(--text-tertiary);margin-top:6px;" data-i18n="profile.fields.newPwHint">Leave blank to keep your current password.</p>
       </div>
 
       <div class="form-group">
@@ -174,7 +167,7 @@
         <input class="form-input" type="password" id="confirm-pw" data-i18n-attr="placeholder:profile.fields.repeatPwPlaceholder" placeholder="Repeat new password" autocomplete="new-password" />
       </div>
 
-      <button class="btn btn-primary" type="submit" id="pw-btn" data-i18n="profile.buttons.updatePw">Update password</button>
+      <button class="btn btn-primary" type="submit" id="profile-btn" data-i18n="profile.buttons.save">Save changes</button>
     </form>
   </div>
 
@@ -433,14 +426,30 @@
   document.getElementById('profile-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     document.getElementById('profile-msg').style.display = 'none';
+
+    const newPw  = document.getElementById('new-pw').value;
+    const confPw = document.getElementById('confirm-pw').value;
+
+    if (newPw || confPw) {
+      if (newPw !== confPw) {
+        showMsg('profile-msg', window.t ? window.t('profile.msgs.mismatch') : 'Passwords do not match.', 'error');
+        return;
+      }
+      if (newPw.length < 8) {
+        showMsg('profile-msg', window.t ? window.t('profile.msgs.tooShort') : 'Password must be at least 8 characters.', 'error');
+        return;
+      }
+    }
+
     const btn = document.getElementById('profile-btn');
     btn.disabled = true;
-    btn.innerHTML = `<span class="spinner"></span> Saving...`;
+    btn.innerHTML = `<span class="spinner"></span> ${window.t ? window.t('profile.msgs.saving') : 'Saving…'}`;
 
     const body = {
       name:             document.getElementById('name').value.trim() || undefined,
       email:            document.getElementById('email').value.trim() || undefined,
       current_password: document.getElementById('cur-pw-profile').value || undefined,
+      new_password:     newPw || undefined,
     };
 
     try {
@@ -448,13 +457,21 @@
         method: 'PUT', headers: _authHeader, body: JSON.stringify(body),
       });
       const data = await res.json();
-      if (!res.ok) { showMsg('profile-msg', data.detail || 'Error saving profile', 'error'); return; }
-      
-      showMsg('profile-msg', data.email_changed ? 'Profile saved. Please verify your new email.' : 'Profile saved successfully.', 'success');
-      
+      if (!res.ok) { showMsg('profile-msg', data.detail || (window.t ? window.t('profile.msgs.errorDefault') : 'Update failed.'), 'error'); return; }
+
+      let msg = window.t ? window.t('profile.msgs.savedProfile') : 'Profile updated successfully.';
+      if (data.email_changed) msg = window.t ? window.t('profile.msgs.savedEmailChanged') : 'Profile updated. Please verify your new email.';
+      else if (newPw) msg = window.t ? window.t('profile.msgs.savedPw') : 'Password updated successfully.';
+      showMsg('profile-msg', msg, 'success');
+
       if (data.email_changed) {
         document.getElementById('verify-banner').classList.remove('hidden');
         document.getElementById('verify-banner').classList.add('show');
+      }
+      if (newPw) {
+        document.getElementById('cur-pw-profile').value = '';
+        document.getElementById('new-pw').value = '';
+        document.getElementById('confirm-pw').value = '';
       }
       try {
         const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
@@ -466,43 +483,10 @@
         }
       } catch {}
     } catch {
-      showMsg('profile-msg', 'Network error', 'error');
+      showMsg('profile-msg', window.t ? window.t('profile.msgs.errorNetwork') : 'Network error — please try again.', 'error');
     } finally {
       btn.disabled = false;
       btn.textContent = window.t ? window.t('profile.buttons.save') : 'Save changes';
-    }
-  });
-
-  document.getElementById('pw-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    document.getElementById('pw-msg').style.display = 'none';
-    const newPw  = document.getElementById('new-pw').value;
-    const confPw = document.getElementById('confirm-pw').value;
-    
-    if (newPw !== confPw) { showMsg('pw-msg', 'Passwords do not match', 'error'); return; }
-    if (newPw.length < 8) { showMsg('pw-msg', 'Password must be at least 8 characters', 'error'); return; }
-
-    const btn = document.getElementById('pw-btn');
-    btn.disabled = true;
-    btn.innerHTML = `<span class="spinner"></span> Updating...`;
-
-    try {
-      const res  = await fetch('/auth/profile', {
-        method: 'PUT', headers: _authHeader,
-        body: JSON.stringify({
-          current_password: document.getElementById('cur-pw').value,
-          new_password:     newPw,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) { showMsg('pw-msg', data.detail || 'Error updating password', 'error'); return; }
-      showMsg('pw-msg', 'Password updated successfully.', 'success');
-      document.getElementById('pw-form').reset();
-    } catch {
-      showMsg('pw-msg', 'Network error', 'error');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = window.t ? window.t('profile.buttons.updatePw') : 'Update password';
     }
   });
 
@@ -576,7 +560,7 @@
           <td>${date}</td>
           <td>${curr} ${amount}</td>
           <td><span class="badge badge-primary" style="background:var(--status-success-bg);color:var(--status-success);border:1px solid var(--status-success-border);font-size:10px;">${window.t('profile.plan.invoiceStatusPaid')}</span></td>
-          <td style="text-align:right">${viewLink}${pdfLink}</td>
+          <td><div class="invoice-actions">${viewLink}${pdfLink}</div></td>
         </tr>`;
       }).join('');
 

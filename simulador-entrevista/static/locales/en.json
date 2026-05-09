@@ -20,9 +20,9 @@
   },
   "landing": {
     "hero": {
-      "badge": "Any Industry · AI-Powered · Fully Personalized",
-      "title": "The interview round that <span>filters you out</span><br>before the next rounds.",
-      "sub": "Most candidates fail before showing their skills. This round — behavioral, communication, fit — is the gate. Pass it, and you move to the next rounds. Don't, and it's over. Practice it until it's automatic.",
+      "badge": "Mock Interview Simulator · AI-Powered · Fully Personalized",
+      "title": "Pass the round that decides<br>if your skills <span>ever get evaluated.</span>",
+      "sub": "Most candidates fail before showing their skills. This round — behavioral, communication, fit — is the gate. Pass it, and you're close. Don't, and it's over. Practice it until it's automatic.",
       "cta": "Start for free →",
       "ctaSignin": "Sign in"
     },
@@ -30,8 +30,16 @@
       "title": "Why this round is the one that matters most",
       "body": "In most hiring processes — tech, finance, consulting, marketing — the behavioral interview is the <strong style=\"color:#4ade80\">first filter</strong>. Only candidates who clear it move on to the next rounds. Failing here means your skills never even get evaluated. This tool prepares you for exactly that round — so you arrive knowing what to say, how to say it, and how you'll be judged."
     },
-    "phases": {
+    "howto": {
       "label": "How it works",
+      "title": "Built around your resume and the actual job",
+      "sub": "Before the interview starts, you paste the job description and your resume. The AI reads both and builds a mock interview tailored to your background, that specific role, and that company — not a generic script.",
+      "s1": { "title": "Paste the job description", "desc": "Copy it from any job board or company website" },
+      "s2": { "title": "Add your resume", "desc": "Paste the text or upload a PDF" },
+      "s3": { "title": "Get your personalized interview", "desc": "The AI generates every question around you and the role" }
+    },
+    "phases": {
+      "label": "The 6 phases",
       "title": "6 phases. One complete interview.",
       "sub": "Works for any field — tech, finance, consulting, marketing, operations, and more. The AI adapts every question to your resume and the actual job description.",
       "p1": {
@@ -136,7 +144,7 @@
     },
     "verify": {
       "title": "Please verify your email address",
-      "body": "You must verify your email to continue past the Elevator Pitch phase.",
+      "body": "Please check your inbox and confirm your email address.",
       "resend": "Resend email",
       "sending": "Sending…",
       "sent": "✓ Email sent"
@@ -167,10 +175,11 @@
       "emailPlaceholder": "you@example.com",
       "emailHint": "Changing your email will require re-verification and needs your current password.",
       "currentPw": "Current password",
-      "currentPwHint": "required only when changing email",
+      "currentPwHint": "required when changing email or password",
       "pwPlaceholder": "••••••••",
       "newPw": "New password",
       "newPwPlaceholder": "At least 8 characters",
+      "newPwHint": "Leave blank to keep your current password.",
       "confirmPw": "Confirm new password",
       "repeatPwPlaceholder": "Repeat new password"
     },

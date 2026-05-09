@@ -20,9 +20,9 @@
   },
   "landing": {
     "hero": {
-      "badge": "Qualquer Área · Com IA · Totalmente Personalizado",
-      "title": "A etapa que <span>te elimina</span><br>antes das próximas rodadas.",
-      "sub": "A maioria dos candidatos falha antes de mostrar suas habilidades. Essa etapa — comportamental, comunicação, fit — é o filtro. Passe, e você avança. Não passe, e acabou. Treine até ficar automático.",
+      "badge": "Simulador de Entrevistas · Com IA · Totalmente Personalizado",
+      "title": "Passe a etapa que decide<br>se suas habilidades <span>chegam a ser avaliadas.</span>",
+      "sub": "A maioria dos candidatos falha antes de mostrar suas habilidades. Essa etapa — comportamental, comunicação, fit — é o filtro. Passe, e você está perto. Não passe, e acabou. Treine até ficar automático.",
       "cta": "Começar grátis →",
       "ctaSignin": "Entrar"
     },
@@ -30,8 +30,16 @@
       "title": "Por que essa etapa é a que mais importa",
       "body": "Na maioria dos processos seletivos — tecnologia, finanças, consultoria, marketing — a entrevista comportamental é o <strong style=\"color:#4ade80\">primeiro filtro</strong>. Só quem passa avança para as próximas etapas. Quem não passa nunca chega a mostrar suas habilidades técnicas. Esta ferramenta te prepara exatamente para essa etapa — para que você chegue sabendo o que dizer, como dizer, e como será avaliado."
     },
-    "phases": {
+    "howto": {
       "label": "Como funciona",
+      "title": "Gerado a partir do seu currículo e da vaga real",
+      "sub": "Antes da entrevista começar, você cola a descrição da vaga e o seu currículo. A IA lê os dois e monta uma entrevista feita para você — seu histórico, aquela vaga, aquela empresa. Nada de roteiro genérico.",
+      "s1": { "title": "Cole a descrição da vaga", "desc": "Copie de qualquer site de vagas ou da empresa" },
+      "s2": { "title": "Adicione seu currículo", "desc": "Cole o texto ou faça upload do PDF" },
+      "s3": { "title": "Receba sua entrevista personalizada", "desc": "A IA gera cada pergunta com base em você e na vaga" }
+    },
+    "phases": {
+      "label": "As 6 fases",
       "title": "6 fases. Uma entrevista completa.",
       "sub": "Funciona para qualquer área — tecnologia, finanças, consultoria, marketing, operações e mais. A IA adapta cada pergunta ao seu currículo e à vaga real.",
       "p1": {
@@ -136,7 +144,7 @@
     },
     "verify": {
       "title": "Verifique seu endereço de e-mail",
-      "body": "É necessário verificar seu e-mail para continuar além da fase de Elevator Pitch.",
+      "body": "Verifique sua caixa de entrada e confirme seu endereço de e-mail.",
       "resend": "Reenviar e-mail",
       "sending": "Enviando…",
       "sent": "✓ E-mail enviado"
@@ -167,10 +175,11 @@
       "emailPlaceholder": "voce@exemplo.com",
       "emailHint": "Alterar o e-mail exige nova verificação e requer sua senha atual.",
       "currentPw": "Senha atual",
-      "currentPwHint": "obrigatório apenas ao alterar o e-mail",
+      "currentPwHint": "obrigatório ao alterar e-mail ou senha",
       "pwPlaceholder": "••••••••",
       "newPw": "Nova senha",
       "newPwPlaceholder": "Mínimo 8 caracteres",
+      "newPwHint": "Deixe em branco para manter a senha atual.",
       "confirmPw": "Confirmar nova senha",
       "repeatPwPlaceholder": "Repita a nova senha"
     },
