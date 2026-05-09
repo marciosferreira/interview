@@ -10,7 +10,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
-  
+  <script src="/i18n.js"></script>
+
   <!-- Styles -->
   <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/components.css">
@@ -26,8 +27,8 @@
       <div class="spinner" style="width:36px;height:36px;border-width:3px;border-top-color:var(--brand-primary);border-color:var(--bg-surface-border)"></div>
     </div>
     <div class="auth-header">
-      <h1>Verifying...</h1>
-      <p>Please wait a moment.</p>
+      <h1 data-i18n="verifyEmail.loading">Verifying...</h1>
+      <p data-i18n="verifyEmail.loadingDesc">Please wait a moment.</p>
     </div>
   </div>
 </div>
@@ -38,6 +39,8 @@
   const token = new URLSearchParams(location.search).get('token');
   const card  = document.getElementById('card');
 
+  const t = (k) => window.t ? window.t(k) : k;
+
   async function verify() {
     if (!token) {
       card.innerHTML = `
@@ -45,10 +48,10 @@
           <i data-lucide="x-circle" style="width:48px;height:48px;"></i>
         </div>
         <div class="auth-header">
-          <h1>Invalid link</h1>
-          <p>This verification link is missing a token.</p>
+          <h1>${t('verifyEmail.invalidTitle')}</h1>
+          <p>${t('verifyEmail.invalidDesc')}</p>
         </div>
-        <a class="btn btn-secondary" style="width:100%" href="/login.html">Go to sign in</a>
+        <a class="btn btn-secondary" style="width:100%" href="/login.html">${t('verifyEmail.goSignIn')}</a>
       `;
       lucide.createIcons();
       return;
@@ -67,10 +70,10 @@
             <i data-lucide="check-circle" style="width:48px;height:48px;"></i>
           </div>
           <div class="auth-header">
-            <h1>Email verified!</h1>
-            <p>Your account is fully activated. You can now continue your interviews.</p>
+            <h1>${t('verifyEmail.successTitle')}</h1>
+            <p>${t('verifyEmail.successDesc')}</p>
           </div>
-          <a class="btn btn-primary" style="width:100%" href="/interview.html">Continue &rarr;</a>
+          <a class="btn btn-primary" style="width:100%" href="/">${t('verifyEmail.successBtn')}</a>
         `;
       } else {
         card.innerHTML = `
@@ -78,10 +81,10 @@
             <i data-lucide="alert-triangle" style="width:48px;height:48px;"></i>
           </div>
           <div class="auth-header">
-            <h1>Link expired</h1>
-            <p>${data.detail || 'This verification link has expired or already been used.'}</p>
+            <h1>${t('verifyEmail.expiredTitle')}</h1>
+            <p>${t('verifyEmail.expiredDesc')}</p>
           </div>
-          <a class="btn btn-secondary" style="width:100%" href="/login.html">Go to sign in</a>
+          <a class="btn btn-secondary" style="width:100%" href="/login.html">${t('verifyEmail.goSignIn')}</a>
         `;
       }
     } catch {
@@ -90,16 +93,17 @@
           <i data-lucide="x-circle" style="width:48px;height:48px;"></i>
         </div>
         <div class="auth-header">
-          <h1>Network error</h1>
-          <p>Could not verify your email. Please try again.</p>
+          <h1>${t('verifyEmail.errorTitle')}</h1>
+          <p>${t('verifyEmail.errorDesc')}</p>
         </div>
-        <a class="btn btn-secondary" style="width:100%" href="/login.html">Go to sign in</a>
+        <a class="btn btn-secondary" style="width:100%" href="/login.html">${t('verifyEmail.goSignIn')}</a>
       `;
     }
     lucide.createIcons();
   }
 
-  verify();
+  document.addEventListener('i18n:ready', verify, { once: true });
+  if (document.readyState !== 'loading') verify();
 </script>
 <script src="/contact-widget.js"></script>
 </body>

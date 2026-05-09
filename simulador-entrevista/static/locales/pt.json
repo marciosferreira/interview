@@ -1,4 +1,18 @@
 {
+  "verifyEmail": {
+    "loading": "Verificando...",
+    "loadingDesc": "Aguarde um momento.",
+    "invalidTitle": "Link inválido",
+    "invalidDesc": "Este link de verificação não contém um token válido.",
+    "successTitle": "E-mail verificado!",
+    "successDesc": "Sua conta está totalmente ativada. Você já pode continuar suas entrevistas.",
+    "successBtn": "Continuar →",
+    "expiredTitle": "Link expirado",
+    "expiredDesc": "Este link de verificação expirou ou já foi usado.",
+    "errorTitle": "Erro de rede",
+    "errorDesc": "Não foi possível verificar seu e-mail. Tente novamente.",
+    "goSignIn": "Ir para o login"
+  },
   "seo": {
     "title": "acing interviews — Simulador de Entrevistas com IA",
     "description": "Treine entrevistas de emprego com um entrevistador de IA personalizado para o seu currículo e vaga. Receba feedback em tempo real, melhore suas respostas e conquiste o emprego que quer."
@@ -247,7 +261,8 @@
       "answer": "resposta",
       "review": "📖 Revisar",
       "continue": "▶ Continuar",
-      "practiceAgain": "Praticar novamente"
+      "practiceAgain": "Praticar novamente",
+      "scorecard": "Scorecard"
     },
     "empty": {
       "title": "Nenhuma entrevista ainda",
@@ -331,6 +346,7 @@
       "discard": "✕ Descartar",
       "send": "➤ Enviar"
     },
+    "scorecardGenerating": "Gerando seu scorecard…",
     "doneBanner": "Entrevista concluída — clique aqui para ver seu scorecard ",
     "sessionRestored": "— sessão restaurada —",
     "tapToEnable": "Toque em qualquer lugar para ativar o áudio",

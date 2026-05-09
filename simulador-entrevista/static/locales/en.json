@@ -1,4 +1,18 @@
 {
+  "verifyEmail": {
+    "loading": "Verifying...",
+    "loadingDesc": "Please wait a moment.",
+    "invalidTitle": "Invalid link",
+    "invalidDesc": "This verification link is missing a token.",
+    "successTitle": "Email verified!",
+    "successDesc": "Your account is fully activated. You can now continue your interviews.",
+    "successBtn": "Continue →",
+    "expiredTitle": "Link expired",
+    "expiredDesc": "This verification link has expired or already been used.",
+    "errorTitle": "Network error",
+    "errorDesc": "Could not verify your email. Please try again.",
+    "goSignIn": "Go to sign in"
+  },
   "seo": {
     "title": "acing interviews — AI-Powered Mock Interviews",
     "description": "Practice job interviews with an AI interviewer tailored to your CV and target role. Get real-time feedback, improve your answers, and land the job you want."
@@ -247,7 +261,8 @@
       "answer": "answer",
       "review": "📖 Review",
       "continue": "▶ Continue",
-      "practiceAgain": "Practice again"
+      "practiceAgain": "Practice again",
+      "scorecard": "Scorecard"
     },
     "empty": {
       "title": "No interviews yet",
@@ -331,6 +346,7 @@
       "discard": "✕ Discard",
       "send": "➤ Send"
     },
+    "scorecardGenerating": "Generating your scorecard…",
     "doneBanner": "Interview complete — click here to see your scorecard ",
     "sessionRestored": "— session restored —",
     "tapToEnable": "Tap anywhere to enable audio",

@@ -18,7 +18,7 @@ import stripe as _stripe
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, UploadFile, WebSocket, WebSocketDisconnect, Depends
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp, Receive, Scope, Send
-from fastapi.responses import Response
+from fastapi.responses import Response, FileResponse
 from fastapi.staticfiles import StaticFiles
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langgraph.types import Command
@@ -1148,7 +1148,7 @@ async def interview_ws(ws: WebSocket):
                 result["__interrupt__"] = interrupts_list
                 prev_msg_count       = len(state_snap.values.get("messages", []))
                 prev_report_streamed = False
-                await ws.send_json({"type": "resumed"})
+                await ws.send_json({"type": "resumed", "message_count": prev_msg_count})
                 await ws.send_json({"type": "phase", "fase": result.get("fase", "")})
             else:
                 is_resuming = False
@@ -1180,7 +1180,7 @@ async def interview_ws(ws: WebSocket):
 
             new_messages = messages[prev_msg_count:]
 
-            # ── Scorecard gate (Hunter plan only) ─────────────────────────
+            # ── Scorecard gate ─────────────────────────────────────────────
             if fase == "done":
                 user_db = await loop.run_in_executor(
                     None, lambda: _with_conn(lambda c: get_user_by_id(c, user_id))
@@ -1199,10 +1199,27 @@ async def interview_ws(ws: WebSocket):
                         lambda: session_store.save_scorecard(thread_id, user_id, scorecard_msg),
                     )
 
-                if user_plan != "hunter":
-                    await ws.send_json({"type": "scorecard_ready"})
-                    await ws.send_json({"type": "done"})
-                    break
+                # Send closing/skip message as feedback (triggers spinner in UI)
+                closing_msgs = [
+                    m.content for m in new_messages
+                    if isinstance(m, AIMessage)
+                    and m.content
+                    and m.content not in ("[no_report]",)
+                    and "INTERVIEW SCORECARD" not in m.content
+                ]
+                for text in closing_msgs:
+                    await ws.send_json({"type": "feedback", "text": text})
+
+                # If nothing to show (candidate_questions was skipped), send skip notice
+                if not closing_msgs:
+                    _skip_msg = {
+                        "pt": "⏭ Fase pulada — seguindo em frente.",
+                    }.get(user_language, "⏭ Phase skipped — moving on.")
+                    await ws.send_json({"type": "feedback", "text": _skip_msg})
+
+                await ws.send_json({"type": "scorecard_ready"})
+                await ws.send_json({"type": "done"})
+                break
 
             first_ai_idx = next(
                 (i for i, m in enumerate(new_messages) if isinstance(m, AIMessage)), None
@@ -1246,6 +1263,7 @@ async def interview_ws(ws: WebSocket):
             if question == "[report_ready]":
                 phase_key = REPORT_PHASE_MAP.get(fase, "")
                 phase_messages = result.get("phase_messages") or []
+                lang = result.get("language") or user_language
 
                 # Detect if the candidate skipped this phase
                 was_skipped = any(
@@ -1265,11 +1283,13 @@ async def interview_ws(ws: WebSocket):
                 if was_skipped:
                     full_text    = "[no_report]"
                     skip_advance = True
-                    await ws.send_json({"type": "ai", "text": "⏭ Phase skipped — moving on."})
+                    _skip_msg = {
+                        "pt": "⏭ Fase pulada — seguindo em frente.",
+                    }.get(lang, "⏭ Phase skipped — moving on.")
+                    await ws.send_json({"type": "ai", "text": _skip_msg})
                 elif phase_key:
                     # Build dynamic report system prompt with per-session context
                     ctx = result.get("interview_context") or interview_context
-                    lang = result.get("language") or user_language
                     report_system = _build_report_system(ctx, phase_key, lang)
                     full_text = await _stream_to_client(
                         ws, phase_messages, report_system, voice="onyx", lang=lang
@@ -1435,6 +1455,11 @@ async def admin_delete_contact(msg_id: str, current_user: dict = Depends(get_cur
     if not deleted:
         raise HTTPException(status_code=404, detail="Message not found")
     return {"ok": True}
+
+
+@app.get("/scorecard/{thread_id}")
+async def scorecard_page(thread_id: str):
+    return FileResponse(Path(__file__).parent / "static" / "scorecard.html")
 
 
 # Serve the frontend — mount last so API routes are registered first

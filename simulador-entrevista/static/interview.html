@@ -1119,69 +1119,6 @@
       opacity: 1;
     }
 
-    /* ── Scorecard panel ── */
-    #scorecard-panel {
-      padding: 8px 16px 20px;
-    }
-
-    #scorecard-panel .sc-inner {
-      max-width: 820px;
-      margin: 0 auto;
-      background: #1a1d27;
-      border: 1px solid #4f46e5;
-      border-radius: 16px;
-      padding: 24px 28px;
-    }
-
-    #scorecard-panel .sc-inner h1,
-    #scorecard-panel .sc-inner h2,
-    #scorecard-panel .sc-inner h3 {
-      color: #a78bfa;
-      margin: 16px 0 8px;
-      font-size: 14px;
-    }
-
-    #scorecard-panel .sc-inner h1 {
-      font-size: 16px;
-      color: #f1f5f9;
-      margin-top: 0;
-    }
-
-    #scorecard-panel .sc-inner p {
-      font-size: 13.5px;
-      color: #94a3b8;
-      line-height: 1.75;
-      margin-bottom: 10px;
-    }
-
-    #scorecard-panel .sc-inner strong {
-      color: #e2e8f0;
-    }
-
-    #scorecard-panel .sc-inner ul,
-    #scorecard-panel .sc-inner ol {
-      padding-left: 20px;
-      margin-bottom: 10px;
-    }
-
-    #scorecard-panel .sc-inner li {
-      font-size: 13.5px;
-      color: #94a3b8;
-      line-height: 1.7;
-    }
-
-    #scorecard-panel .sc-inner hr {
-      border: none;
-      border-top: 1px solid #2d3148;
-      margin: 16px 0;
-    }
-
-    #scorecard-panel .sc-loading {
-      text-align: center;
-      color: #475569;
-      font-size: 13px;
-      padding: 24px;
-    }
   </style>
   <!-- TikTok Pixel -->
   <script src="/tiktok-pixel.js"></script>
@@ -1275,16 +1212,17 @@
     </button>
   </div>
 
-  <div id="chat">
-    <!-- Scorecard panel — rendered from server, never stored in localStorage -->
-    <div id="scorecard-panel" style="display:none"></div>
-  </div>
+  <div id="chat"></div>
 
   <div id="input-area">
+    <div id="scorecard-generating" style="display:none;align-items:center;justify-content:center;gap:8px;padding:12px;font-size:13px;color:var(--text-secondary);">
+      <span class="spinner" style="border-top-color:var(--brand-primary);"></span>
+      <span data-i18n="interview.scorecardGenerating">Generating your scorecard…</span>
+    </div>
     <div id="done-banner"
-      onclick="document.getElementById('scorecard-panel').scrollIntoView({behavior:'smooth',block:'start'})"
-      style="cursor:pointer" title="Click to scroll to scorecard" data-i18n="interview.doneBanner">Interview complete —
-      scroll down to see your scorecard ↓</div>
+      onclick="_openScorecard()"
+      style="cursor:pointer" title="Click to view scorecard" data-i18n="interview.doneBanner">Interview complete —
+      click here to see your scorecard →</div>
     <div id="input-row">
       <button id="mic-btn" class="icon-btn" disabled title="Click to start/stop recording"><i
           data-lucide="mic"></i></button>
@@ -1336,14 +1274,15 @@
     function setPhase(fase) {
       _currentFase = fase;
       const active = FASE_TO_STEP[fase] ?? -1;
+      const allDone = fase === 'done';
       phaseSteps.forEach((el) => {
         const s = parseInt(el.dataset.step, 10);
-        el.classList.toggle('active', s === active);
-        el.classList.toggle('done', s < active);
+        el.classList.toggle('active', !allDone && s === active);
+        el.classList.toggle('done', allDone || s < active);
       });
       phaseConns.forEach((el) => {
         const c = parseInt(el.dataset.conn, 10);
-        el.classList.toggle('done', c < active);
+        el.classList.toggle('done', allDone || c < active);
       });
       if (_mobilePhaseLbl) {
         const activeStep = document.querySelector('.phase-step.active .ps-label');
@@ -2004,6 +1943,18 @@
             // Restore the stored chat history so the user can see prior turns.
             const raw = _loadRaw();
             if (raw?.history?.length) {
+              // Detect stale history: server is at the very beginning (message_count ≤ 1)
+              // but client has more history entries — this happens after a server restart
+              // that lost the graph state and recreated a fresh session with the same
+              // thread_id. Discard the stale history to avoid showing old turns + a
+              // duplicate opening message.
+              const serverMsgCount = msg.message_count ?? Infinity;
+              if (serverMsgCount <= 1 && raw.history.length > 1) {
+                raw.history = [];
+                localStorage.setItem(SESSION_KEY, JSON.stringify(raw));
+                break;
+              }
+
               removeTyping();
               const notice = document.createElement('div');
               notice.style.cssText = 'text-align:center;font-size:11px;color:#475569;padding:6px 0 2px';
@@ -2079,10 +2030,11 @@
           case 'feedback':
             addFeedback(msg.text);
             _persistMsg('feedback', msg.text, 'onyx');
+            document.getElementById('scorecard-generating').style.display = 'flex';
             break;
 
           case 'scorecard_ready':
-            _fetchAndRenderScorecard(_loadRaw()?.threadId);
+            document.getElementById('scorecard-generating').style.display = 'flex';
             break;
 
           case 'error':
@@ -2093,6 +2045,7 @@
             break;
 
           case 'done':
+            document.getElementById('scorecard-generating').style.display = 'none';
             doneBanner.style.display = 'block';
             disableInput(true);
             badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Done'; lucide.createIcons();
@@ -2217,48 +2170,9 @@
       chat.appendChild(row);
     }
 
-    const scorecardPanel = document.getElementById('scorecard-panel');
-
-    function _fetchAndRenderScorecard(threadId) {
-      if (!threadId || !_authToken) return;
-      scorecardPanel.style.display = 'block';
-      scorecardPanel.innerHTML = `<div class="sc-loading"><span class="spinner" style="width:32px;height:32px;border-width:3px;border-top-color:var(--brand-primary);"></span>${t('interview.scorecard.loading')}</div>`;
-      fetch(`/sessions/${encodeURIComponent(threadId)}/scorecard`, {
-        headers: { 'Authorization': `Bearer ${_authToken}` },
-      })
-        .then(r => ({ ok: r.ok, status: r.status, json: r.json() }))
-        .then(async ({ ok, status, json }) => {
-          const data = await json.catch(() => null);
-          if (ok && data?.scorecard) {
-            scorecardPanel.innerHTML = `
-            <div class="sc-inner">
-              <div style="text-align:right;margin-bottom:12px">
-                <button class="replay-btn" id="sc-tts-btn" title="Read scorecard aloud"><i data-lucide="volume-2" style="width:14px;height:14px"></i> ${t('interview.scorecard.readAloud')}</button>
-              </div>
-              ${renderMd(data.scorecard)}
-            </div>`;
-            lucide.createIcons();
-            document.getElementById('sc-tts-btn').addEventListener('click', () => {
-              stopTTS();
-              speak(data.scorecard, _scorecardVoice);
-            });
-          } else if (status === 403) {
-            scorecardPanel.innerHTML = `<div class="sc-inner" style="border-color:#3d4160;text-align:center;padding:32px 24px">
-            <div style="margin-bottom:16px;color:var(--brand-primary)"><i data-lucide="file-text" style="width:48px;height:48px"></i></div>
-            <h2 style="font-size:18px;color:var(--text-primary);margin-bottom:12px">${t('interview.scorecard.upgradeTitle')}</h2>
-            <p style="color:var(--text-secondary);font-size:15px;max-width:460px;margin:0 auto 24px;line-height:1.6">
-              ${t('interview.scorecard.upgradeBody')}
-            </p>
-            <a href="/upgrade.html" class="btn btn-primary" style="padding:12px 24px;font-size:15px">
-              ${t('interview.scorecard.upgradeBtn')}
-            </a>
-          </div>`;
-          } else {
-            scorecardPanel.style.display = 'none';
-          }
-          scrollBottom();
-        })
-        .catch(() => { scorecardPanel.style.display = 'none'; });
+    function _openScorecard() {
+      const threadId = _loadRaw()?.threadId;
+      if (threadId) window.location.href = `/scorecard/${threadId}`;
     }
 
     function showTyping(visible) {
@@ -2404,6 +2318,7 @@
     // without opening a WebSocket — avoids an infinite reconnect loop.
     const _bootRaw = _loadRaw();
     if (_bootRaw?.fase === 'done' && !_pendingJobSession) {
+      setPhase('done');
       badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Done'; lucide.createIcons();
       badge.className = '';
       doneBanner.style.display = 'block';
@@ -2417,9 +2332,6 @@
         }
         scrollBottom();
       }
-      // Always fetch scorecard from server — it enforces plan gating.
-      // Hunter → renders in scorecard panel. Free/downgraded → 403, panel stays hidden.
-      _fetchAndRenderScorecard(_bootRaw.threadId);
     } else {
       connect();
       showTyping(true);   // waiting for first AI message

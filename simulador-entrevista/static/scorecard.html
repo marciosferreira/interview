@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scorecard — Acing Interview</title>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/layout.css">
+
+  <script src="/i18n.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <style>
+    main {
+      flex: 1;
+      padding: 40px 24px;
+      max-width: 760px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--text-secondary); text-decoration: none;
+      margin-bottom: 28px; transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--brand-primary); }
+
+    .page-title {
+      font-size: 24px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;
+    }
+    .page-sub {
+      font-size: 14px; color: var(--text-secondary); margin-bottom: 32px;
+    }
+
+    /* Loading */
+    #loading-spinner {
+      display: flex; justify-content: center; align-items: center; height: 200px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Scorecard content */
+    #scorecard-content {
+      display: none;
+    }
+
+    .scorecard-pre {
+      background: var(--bg-surface);
+      border: 1px solid var(--bg-surface-border);
+      border-radius: var(--radius-md);
+      padding: 28px 32px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      line-height: 1.75;
+      color: var(--text-primary);
+      word-break: break-word;
+      overflow-x: auto;
+    }
+
+    /* Markdown rendered content */
+    .scorecard-pre h1 { font-size: 22px; font-weight: 700; margin: 0 0 20px; color: var(--text-primary); }
+    .scorecard-pre h2 { font-size: 17px; font-weight: 600; margin: 28px 0 12px; color: var(--text-primary); }
+    .scorecard-pre h3 { font-size: 15px; font-weight: 600; margin: 20px 0 8px; color: var(--text-secondary); }
+    .scorecard-pre p  { margin: 0 0 10px; }
+    .scorecard-pre ul, .scorecard-pre ol { padding-left: 20px; margin: 6px 0 12px; }
+    .scorecard-pre li { margin-bottom: 4px; }
+    .scorecard-pre hr { border: none; border-top: 1px solid var(--bg-surface-border); margin: 20px 0; }
+    .scorecard-pre blockquote {
+      border-left: 3px solid var(--brand-primary);
+      padding: 8px 16px;
+      margin: 12px 0;
+      color: var(--text-secondary);
+      background: rgba(99,102,241,0.06);
+      border-radius: 0 6px 6px 0;
+    }
+    .scorecard-pre table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 13px; }
+    .scorecard-pre th, .scorecard-pre td {
+      border: 1px solid var(--bg-surface-border);
+      padding: 8px 12px;
+      text-align: left;
+    }
+    .scorecard-pre th { background: rgba(99,102,241,0.08); font-weight: 600; }
+    .scorecard-pre strong { font-weight: 600; color: var(--text-primary); }
+
+    /* Error state */
+    #error-state {
+      display: none;
+      text-align: center;
+      padding: 80px 24px;
+    }
+    .error-icon {
+      width: 64px; height: 64px; margin: 0 auto 24px;
+      color: var(--text-tertiary); background: var(--bg-surface);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    }
+    .error-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary); }
+    .error-sub   { font-size: 15px; color: var(--text-secondary); margin-bottom: 24px; }
+
+    /* Paywall state */
+    #paywall-state {
+      display: none;
+      text-align: center;
+      padding: 80px 24px;
+    }
+    .paywall-icon {
+      width: 64px; height: 64px; margin: 0 auto 24px;
+      color: var(--brand-primary); background: rgba(99,102,241,0.1);
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    }
+    .paywall-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary); }
+    .paywall-sub   { font-size: 15px; color: var(--text-secondary); margin-bottom: 28px; max-width: 400px; margin-left: auto; margin-right: auto; }
+  </style>
+
+  <script src="/tiktok-pixel.js"></script>
+</head>
+<body>
+
+<!-- Global Header -->
+<header class="app-header">
+  <a class="header-brand-link" href="/">
+    <div class="header-logo"><i data-lucide="target" style="width: 22px; height: 22px;"></i></div>
+    <div class="header-brand-info">
+      <h1>Acing Interview</h1>
+      <p>Scorecard</p>
+    </div>
+  </a>
+
+  <div class="header-actions">
+    <span id="plan-pill" class="badge"></span>
+    <a href="/history.html" class="btn btn-secondary" style="padding: 6px 12px; font-size: 13px;">
+      <i data-lucide="history" style="width:16px;height:16px"></i>
+      <span data-i18n="history.header.tagline">Interview history</span>
+    </a>
+    <a href="/profile.html" class="nav-link"><i data-lucide="settings" style="width:16px;height:16px;"></i> <span data-i18n="nav.settingsLabel">Settings</span></a>
+  </div>
+
+  <button class="mobile-menu-btn" id="hamburger-btn" aria-label="Menu"><i data-lucide="menu"></i></button>
+</header>
+
+<div id="mobile-drawer">
+  <div class="drawer-backdrop" onclick="closeMobileMenu()"></div>
+  <nav class="drawer-panel">
+    <div class="drawer-header">
+      <span>Menu</span>
+      <button class="drawer-close" onclick="closeMobileMenu()"><i data-lucide="x"></i></button>
+    </div>
+    <a class="drawer-item" href="/"><i data-lucide="home"></i> <span data-i18n="nav.homeLabel">Home</span></a>
+    <a class="drawer-item" href="/history.html"><i data-lucide="history"></i> <span data-i18n="history.header.tagline">Interview history</span></a>
+    <a class="drawer-item" href="/profile.html"><i data-lucide="settings"></i> <span data-i18n="nav.settingsLabel">Settings</span></a>
+  </nav>
+</div>
+
+<main>
+  <a href="/history.html" class="back-link">
+    <i data-lucide="arrow-left" style="width:14px;height:14px"></i>
+    <span data-i18n="history.header.tagline">Interview history</span>
+  </a>
+
+  <div id="loading-spinner">
+    <div style="width:36px;height:36px;border:3px solid var(--border-color,#2a2d3e);border-top-color:var(--brand-primary,#6366f1);border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+  </div>
+
+  <div id="scorecard-content">
+    <div class="page-title" id="scorecard-title">Scorecard</div>
+    <div class="page-sub" id="scorecard-sub"></div>
+    <div class="scorecard-pre" id="scorecard-body"></div>
+  </div>
+
+  <div id="paywall-state">
+    <div class="paywall-icon"><i data-lucide="lock" style="width:28px;height:28px"></i></div>
+    <div class="paywall-title" data-i18n="pricing.plans.hunter.name">Hunter plan required</div>
+    <div class="paywall-sub" data-i18n="pricing.f2.desc">Upgrade to the Hunter plan to unlock full scorecards for every completed interview.</div>
+    <a href="/pricing.html" class="btn btn-primary" data-i18n="pricing.cta">Upgrade to Hunter</a>
+  </div>
+
+  <div id="error-state">
+    <div class="error-icon"><i data-lucide="file-x" style="width:28px;height:28px"></i></div>
+    <div class="error-title" id="error-title">Scorecard not found</div>
+    <div class="error-sub" id="error-sub">This scorecard could not be loaded.</div>
+    <a href="/history.html" class="btn btn-secondary" data-i18n="history.header.tagline">Back to history</a>
+  </div>
+</main>
+
+<script>
+  lucide.createIcons();
+
+  const _authToken = localStorage.getItem('auth_token');
+  if (!_authToken) {
+    const threadId = location.pathname.split('/').pop();
+    location.replace('/login.html?next=/scorecard/' + threadId);
+  }
+
+  function _setLoading(show) {
+    document.getElementById('loading-spinner').style.display = show ? 'flex' : 'none';
+  }
+
+  function _showPaywall() {
+    _setLoading(false);
+    document.getElementById('paywall-state').style.display = 'block';
+    applyI18n();
+    lucide.createIcons();
+  }
+
+  function _showError(title, sub) {
+    _setLoading(false);
+    document.getElementById('error-title').textContent = title || 'Scorecard not found';
+    document.getElementById('error-sub').textContent   = sub   || 'This scorecard could not be loaded.';
+    document.getElementById('error-state').style.display = 'block';
+  }
+
+  function _showScorecard(text) {
+    _setLoading(false);
+    document.getElementById('scorecard-body').innerHTML = marked.parse(text);
+    document.getElementById('scorecard-content').style.display = 'block';
+  }
+
+  async function _loadPlanPill() {
+    try {
+      const res = await fetch('/me', { headers: { 'Authorization': `Bearer ${_authToken}` } });
+      if (!res.ok) return;
+      const user = await res.json();
+      const pill = document.getElementById('plan-pill');
+      if (user.plan === 'hunter') {
+        pill.textContent = 'Hunter';
+        pill.style.cssText = 'background:rgba(99,102,241,0.15);color:var(--brand-primary);border-color:rgba(99,102,241,0.3);';
+      }
+    } catch {}
+  }
+
+  async function _init() {
+    const threadId = location.pathname.split('/scorecard/')[1];
+    if (!threadId) {
+      _showError('Invalid URL', 'No session ID found in URL.');
+      return;
+    }
+
+    document.getElementById('scorecard-sub').textContent = threadId;
+
+    try {
+      const res = await fetch(`/sessions/${threadId}/scorecard`, {
+        headers: { 'Authorization': `Bearer ${_authToken}` }
+      });
+
+      if (res.status === 403) {
+        _showPaywall();
+        return;
+      }
+      if (res.status === 404) {
+        _showError('Scorecard not found', 'This interview may not have been completed yet.');
+        return;
+      }
+      if (!res.ok) {
+        _showError('Error loading scorecard', `Server returned ${res.status}.`);
+        return;
+      }
+
+      const data = await res.json();
+      _showScorecard(data.scorecard);
+
+      // Try to enrich title with session info
+      try {
+        const sessionsRes = await fetch('/sessions', { headers: { 'Authorization': `Bearer ${_authToken}` } });
+        if (sessionsRes.ok) {
+          const sessions = await sessionsRes.json();
+          const session  = sessions.find(s => s.threadId === threadId);
+          if (session) {
+            const title = [session.jobTitle, session.company].filter(Boolean).join(' — ');
+            if (title) document.getElementById('scorecard-title').textContent = title;
+            const d = new Date(session.startedAt);
+            document.getElementById('scorecard-sub').textContent =
+              d.toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' });
+          }
+        }
+      } catch {}
+
+    } catch (err) {
+      _showError('Network error', 'Could not connect to the server.');
+    }
+  }
+
+  function closeMobileMenu() {
+    document.getElementById('mobile-drawer').classList.remove('open');
+  }
+  document.getElementById('hamburger-btn').addEventListener('click', () => {
+    document.getElementById('mobile-drawer').classList.toggle('open');
+  });
+
+  _loadPlanPill();
+  _init();
+</script>
+</body>
+</html>

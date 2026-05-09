@@ -147,15 +147,9 @@
   let _sessionList  = [];
 
   function getFaseLabel(fase) {
-    const map = {
-      elevator_pitch: 'Elevator Pitch', elevator_pitch_report: 'Elevator Pitch — review',
-      CAR: 'CAR Story', CAR_report: 'CAR Story — review',
-      technical: 'Technical Questions', technical_report: 'Technical — review',
-      leadership: 'Leadership Questions', leadership_report: 'Leadership — review',
-      motivation: 'Motivation Questions', motivation_report: 'Motivation — review',
-      candidate_questions: 'Your Questions', feedback: 'Final Scorecard', done: 'Completed',
-    };
-    return map[fase] || fase || 'Starting...';
+    const key = 'history.phases.' + fase;
+    const val = t(key);
+    return val !== key ? val : (fase || t('history.phases.starting'));
   }
 
   function _fmt(ts) {
@@ -163,9 +157,9 @@
     const d = new Date(ts), now = new Date();
     const diffDays = Math.floor((now - d) / 86400000);
     const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    if (diffDays === 0) return `Today at ${time}`;
-    if (diffDays === 1) return `Yesterday at ${time}`;
-    return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ` at ${time}`;
+    if (diffDays === 0) return t('history.date.today', { time });
+    if (diffDays === 1) return t('history.date.yesterday', { time });
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ` ${t('history.date.at')} ${time}`;
   }
 
   function _msgCount(history) {
@@ -253,16 +247,19 @@
       <div class="session-body">
         <div class="session-row1">
           <span class="session-date">${_fmt(s.startedAt)}</span>
-          <span class="badge ${isDone ? 'badge-primary' : ''}" style="${isDone ? 'background:var(--status-success-bg);color:var(--status-success);border-color:var(--status-success-border)' : ''}">${isDone ? 'Completed' : 'In Progress'}</span>
+          <span class="badge ${isDone ? 'badge-primary' : ''}" style="${isDone ? 'background:var(--status-success-bg);color:var(--status-success);border-color:var(--status-success-border)' : ''}">${isDone ? t('history.badges.completed') : t('history.badges.inProgress')}</span>
         </div>
         <div class="session-row2">
           <span class="session-phase">${_escHtml(phaseText)}</span>
-          <span class="session-msgs">· ${turns} answer${turns !== 1 ? 's' : ''}</span>
+          <span class="session-msgs">· ${turns} ${turns !== 1 ? t('history.session.answers') : t('history.session.answer')}</span>
         </div>
       </div>
       <div class="session-actions">
+        ${isDone ? `<button class="btn btn-secondary scorecard-btn" style="padding: 6px 12px; font-size: 12px;" title="Scorecard">
+          <i data-lucide="bar-chart-2" style="width:14px;height:14px"></i> ${t('history.session.scorecard')}
+        </button>` : ''}
         <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px; pointer-events: none;">
-          ${isDone ? 'Review' : 'Continue'} <i data-lucide="chevron-right" style="width:14px;height:14px"></i>
+          ${isDone ? t('history.session.review') : t('history.session.continue')} <i data-lucide="chevron-right" style="width:14px;height:14px"></i>
         </button>
         <button class="delete-btn" title="Delete">
           <i data-lucide="trash-2" style="width:16px;height:16px"></i>
@@ -272,6 +269,10 @@
     card.querySelector('.delete-btn').addEventListener('click', (e) => {
       e.stopPropagation();
       deleteSession(s.threadId);
+    });
+    card.querySelector('.scorecard-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.location.href = `/scorecard/${s.threadId}`;
     });
     return card;
   }
@@ -290,9 +291,9 @@
       listEl.innerHTML = `
         <div class="empty-state">
           <div class="empty-icon"><i data-lucide="clipboard-x" style="width:32px;height:32px"></i></div>
-          <div class="empty-title">No interviews yet</div>
-          <div class="empty-sub">Start your first mock interview to see it here.</div>
-          <a class="btn btn-primary" href="/onboarding.html">Start new interview</a>
+          <div class="empty-title">${_escHtml(t('history.empty.title'))}</div>
+          <div class="empty-sub">${_escHtml(t('history.empty.sub'))}</div>
+          <a class="btn btn-primary" href="/onboarding.html">${_escHtml(t('history.empty.start'))}</a>
         </div>`;
       lucide.createIcons();
       return;
@@ -300,7 +301,7 @@
 
     const groups = _groupByRole(_sessionList);
     const totalRoles = groups.filter(g => g.jobTitle).length;
-    subEl.textContent = `${_sessionList.length} total sessions across ${totalRoles} roles.`;
+    subEl.textContent = t('history.summary', { count: _sessionList.length, roles: totalRoles });
 
     listEl.innerHTML = '';
 
@@ -319,13 +320,13 @@
           <i data-lucide="${isUnknown ? 'help-circle' : 'briefcase'}" style="width:24px;height:24px"></i>
         </div>
         <div class="role-info">
-          <div class="role-title" ${isUnknown ? 'style="color:var(--text-secondary);font-style:italic"' : ''}>${_escHtml(group.jobTitle || 'Unknown Role')}</div>
+          <div class="role-title" ${isUnknown ? 'style="color:var(--text-secondary);font-style:italic"' : ''}>${_escHtml(group.jobTitle || t('history.noRoleInfo'))}</div>
           ${group.company ? `<div class="role-company">${_escHtml(group.company)}</div>` : ''}
-          <div class="role-count">${total} sessions · ${completedCount} completed</div>
+          <div class="role-count">${t('history.roleCount', { total, completed: completedCount })}</div>
         </div>
         <div class="role-actions">
           ${!isUnknown && group.jobSessionId
-            ? `<button class="btn btn-secondary practice-btn" style="padding: 6px 12px; font-size: 12px;" data-jid="${_escHtml(group.jobSessionId)}" data-title="${_escHtml(group.jobTitle)}" data-company="${_escHtml(group.company)}"><i data-lucide="refresh-cw" style="width:14px;height:14px"></i> Practice again</button>`
+            ? `<button class="btn btn-secondary practice-btn" style="padding: 6px 12px; font-size: 12px;" data-jid="${_escHtml(group.jobSessionId)}" data-title="${_escHtml(group.jobTitle)}" data-company="${_escHtml(group.company)}"><i data-lucide="refresh-cw" style="width:14px;height:14px"></i> ${_escHtml(t('history.session.practiceAgain'))}</button>`
             : ''}
         </div>`;
 
@@ -348,7 +349,7 @@
     lucide.createIcons();
   }
 
-  document.addEventListener('DOMContentLoaded', render);
+  document.addEventListener('i18n:ready', render);
 
   // Load user plan info
   (async function(){

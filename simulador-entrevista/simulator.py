@@ -745,6 +745,13 @@ def candidate_questions(state: EntrevistaState, config: RunnableConfig) -> dict:
 
     if not avaliacao.fase_completa:
         user_response = interrupt(avaliacao.mensagem)
+        if user_response.strip().lower() in ("skip", "s"):
+            return {
+                "messages": [],
+                "phase_messages": [],
+                "archive": state.get("archive", []),
+                "fase": "feedback",
+            }
         new_phase_msgs = phase_msgs + [
             AIMessage(content=avaliacao.mensagem),
             HumanMessage(content=user_response),
@@ -849,79 +856,82 @@ def feedback(state: EntrevistaState, config: RunnableConfig) -> dict:
 
 def _format_scorecard(s: Scorecard, job_title: str = "", company: str = "") -> str:
     def bullets(items: list[str]) -> str:
-        return "\n".join(f"  - {item}" for item in items) if items else "  (none identified)"
+        return "\n".join(f"- {item}" for item in items) if items else "- *(none identified)*"
 
     def numbered(items: list[str]) -> str:
-        return "\n".join(f"  {i+1}. {item}" for i, item in enumerate(items)) if items else "  (none identified)"
+        return "\n".join(f"{i+1}. {item}" for i, item in enumerate(items)) if items else "1. *(none identified)*"
 
-    header = f"INTERVIEW SCORECARD"
+    header = "INTERVIEW SCORECARD"
     if job_title and company:
         header += f" — {job_title} at {company}"
     elif job_title:
         header += f" — {job_title}"
 
-    return "\n".join([
+    lines = [
+        f"# 🎯 {header}",
         "",
-        "============================================",
-        f"🎯 {header}",
-        "============================================",
+        "---",
         "",
-        "PART 1 — Elevator Pitch",
-        f"Score: {s.score_pitch}/5 | {s.comentario_pitch}",
+        "## 📊 Scores by Section",
         "",
-        "PART 2 — CAR Project Story",
-        f"Score: {s.score_CAR}/5 | {s.comentario_CAR}",
+        f"| Section | Score | Comments |",
+        f"|---------|-------|----------|",
+        f"| Part 1 — Elevator Pitch | **{s.score_pitch}/5** | {s.comentario_pitch} |",
+        f"| Part 2 — CAR Project Story | **{s.score_CAR}/5** | {s.comentario_CAR} |",
+        f"| Part 3 — Technical Questions | **{s.score_technical}/5** | {s.comentario_technical} |",
+        f"| Part 4 — Leadership & Approach | **{s.score_leadership}/5** | {s.comentario_leadership} |",
+        f"| Part 5 — Fit & Motivation | **{s.score_motivation}/5** | {s.comentario_motivation} |",
         "",
-        "PART 3 — Technical Questions",
-        f"Score: {s.score_technical}/5 | {s.comentario_technical}",
+        "---",
         "",
-        "PART 4 — Leadership & Project Approach",
-        f"Score: {s.score_leadership}/5 | {s.comentario_leadership}",
+        "## 💬 What You Didn't Say (But Should Have)",
         "",
-        "PART 5 — Fit & Motivation",
-        f"Score: {s.score_motivation}/5 | {s.comentario_motivation}",
-        "",
-        "--------------------------------------------",
-        "WHAT YOU DIDN'T SAY (BUT SHOULD HAVE)",
-        "",
-        "Elevator Pitch:",
+        "**Elevator Pitch:**",
         bullets(s.oportunidades_pitch),
         "",
-        "CAR Project:",
+        "**CAR Project:**",
         bullets(s.oportunidades_CAR),
         "",
-        "Technical Questions:",
+        "**Technical Questions:**",
         bullets(s.oportunidades_technical),
         "",
-        "Leadership:",
+        "**Leadership:**",
         bullets(s.oportunidades_leadership),
         "",
-        "--------------------------------------------",
-        "VOCABULARY & FRAMING TO PRACTICE",
+        "---",
+        "",
+        "## 📝 Vocabulary & Framing to Practice",
         "",
         bullets(s.vocabulario_para_praticar),
         "",
-        "--------------------------------------------",
-        "OVERALL COMMUNICATION PERFORMANCE",
-        f"Rating: {s.ingles_rating}",
-        "Recurring patterns to fix:",
+        "---",
+        "",
+        "## 🗣️ Overall Communication Performance",
+        "",
+        f"**Rating:** {s.ingles_rating}",
+        "",
+        "**Recurring patterns to fix:**",
         numbered(s.ingles_padroes),
         "",
-        "--------------------------------------------",
-        "OVERALL ASSESSMENT",
-        f"Total score: {s.score_total}/25",
-        f"Hire signal: {s.hire_signal}",
+        "---",
         "",
-        "TOP 2 STRENGTHS:",
+        "## 🏁 Overall Assessment",
+        "",
+        f"**Total score:** {s.score_total}/25  ",
+        f"**Hire signal:** {s.hire_signal}",
+        "",
+        "### ✅ Top 2 Strengths",
         numbered(s.forcas),
         "",
-        "TOP 2 AREAS TO IMPROVE BEFORE THE REAL INTERVIEW:",
+        "### 🔧 Top 2 Areas to Improve Before the Real Interview",
         numbered(s.melhorias),
         "",
-        "ONE THING THAT COULD MAKE OR BREAK YOUR INTERVIEW:",
-        f"  {s.insight_chave}",
-        "============================================",
-    ])
+        "### ⚡ One Thing That Could Make or Break Your Interview",
+        "",
+        f"> {s.insight_chave}",
+        "",
+    ]
+    return "\n".join(lines)
 
 
 # ---------------------------------------------------------------------------
