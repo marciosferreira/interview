@@ -1274,10 +1274,17 @@ async def interview_ws(ws: WebSocket):
                         lambda: session_store.save_scorecard(thread_id, user_id, scorecard_msg),
                     )
 
-                # Send closing/skip message as feedback (triggers spinner in UI)
+                # Send closing/skip message as feedback (triggers spinner in UI).
+                # AIMessages that precede the last HumanMessage were already sent to the
+                # client via the interrupt mechanism — exclude them to avoid duplicates.
+                _last_human = max(
+                    (i for i, m in enumerate(new_messages) if isinstance(m, HumanMessage)),
+                    default=-1,
+                )
                 closing_msgs = [
-                    m.content for m in new_messages
+                    m.content for i, m in enumerate(new_messages)
                     if isinstance(m, AIMessage)
+                    and i > _last_human
                     and m.content
                     and m.content not in ("[no_report]",)
                     and "INTERVIEW SCORECARD" not in m.content
