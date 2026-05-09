@@ -27,7 +27,7 @@ from pydantic import BaseModel
 
 from simulator import (
     graph, make_initial_state, model, session_store,
-    _build_report_system, REPORT_PHASE_MAP, _conn,
+    _build_report_system, REPORT_PHASE_MAP, get_db_conn,
 )
 from auth import (
     UserCreate, UserLogin, TokenResponse, RegisterResponse, ProfileUpdate,
@@ -45,16 +45,28 @@ from auth import (
 from email_service import send_verification_email, send_reset_email, send_contact_notification, send_contact_reply
 from prompt_generator import generate_interview_context, extract_candidate_name
 
-# DB helper — works for both psycopg2 (Postgres) and sqlite3
-_is_pg = hasattr(_conn, 'server_version')
+# DB helper — works for both psycopg2 pool (Postgres) and sqlite3
+_is_pg = bool(os.getenv("DATABASE_URL"))
 _ph = "%s" if _is_pg else "?"
 
-def _db_exec(sql: str, params=()):
-    if _is_pg:
-        cur = _conn.cursor()
-        cur.execute(sql, params)
-        return cur
-    return _conn.execute(sql, params)
+
+def _with_conn(func):
+    """Borrow a DB connection, run func(conn), return it to the pool."""
+    with get_db_conn() as conn:
+        return func(conn)
+
+
+def _db_exec(sql: str, params=(), conn=None):
+    """Execute SQL; conn must be provided for postgres (use within get_db_conn context)."""
+    if conn is not None:
+        if _is_pg:
+            cur = conn.cursor()
+            cur.execute(sql, params)
+            return cur
+        return conn.execute(sql, params)
+    # SQLite fallback (conn is the shared sqlite connection yielded by get_db_conn)
+    with get_db_conn() as c:
+        return c.execute(sql, params)
 
 _openai_api_key = os.getenv("OPENAI_API_KEY")
 openai_client = AsyncOpenAI(api_key=_openai_api_key) if _openai_api_key else None
@@ -127,11 +139,11 @@ async def register(body: UserCreate, background_tasks: BackgroundTasks):
     loop = asyncio.get_running_loop()
     user = await loop.run_in_executor(
         None,
-        lambda: create_user(_conn, body.name.strip(), body.email.strip(),
-                            body.password, body.language),
+        lambda: _with_conn(lambda c: create_user(c, body.name.strip(), body.email.strip(),
+                                                  body.password, body.language)),
     )
     token = await loop.run_in_executor(
-        None, lambda: create_verification_token(_conn, user["id"])
+        None, lambda: _with_conn(lambda c: create_verification_token(c, user["id"]))
     )
     background_tasks.add_task(
         send_verification_email, user["email"], token, user.get("language", "en")
@@ -144,7 +156,7 @@ async def login(body: UserLogin):
     loop = asyncio.get_running_loop()
     user = await loop.run_in_executor(
         None,
-        lambda: authenticate_user(_conn, body.email, body.password),
+        lambda: _with_conn(lambda c: authenticate_user(c, body.email, body.password)),
     )
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
@@ -157,10 +169,10 @@ async def login(body: UserLogin):
 @app.delete("/auth/account")
 async def delete_my_account(current_user: dict = Depends(get_current_user)):
     loop = asyncio.get_running_loop()
-    user = await loop.run_in_executor(None, lambda: get_user_by_id(_conn, current_user["id"]))
+    user = await loop.run_in_executor(None, lambda: _with_conn(lambda c: get_user_by_id(c, current_user["id"])))
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    stripe_info = await loop.run_in_executor(None, lambda: get_stripe_info(_conn, current_user["id"]))
+    stripe_info = await loop.run_in_executor(None, lambda: _with_conn(lambda c: get_stripe_info(c, current_user["id"])))
     is_hunter = user.get("plan") == "hunter"
     cancel_at = stripe_info.get("stripe_cancel_at") if stripe_info else None
     if is_hunter and not cancel_at:
@@ -170,7 +182,7 @@ async def delete_my_account(current_user: dict = Depends(get_current_user)):
         )
     if user.get("email") == ADMIN_EMAIL:
         raise HTTPException(status_code=403, detail="The admin account cannot be deleted.")
-    await loop.run_in_executor(None, lambda: delete_account(_conn, current_user["id"]))
+    await loop.run_in_executor(None, lambda: _with_conn(lambda c: delete_account(c, current_user["id"])))
     return {"ok": True}
 
 
@@ -178,7 +190,7 @@ async def delete_my_account(current_user: dict = Depends(get_current_user)):
 async def me(current_user: dict = Depends(get_current_user)):
     loop = asyncio.get_running_loop()
     user = await loop.run_in_executor(
-        None, lambda: get_user_by_id(_conn, current_user["id"])
+        None, lambda: _with_conn(lambda c: get_user_by_id(c, current_user["id"]))
     )
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -190,16 +202,16 @@ async def update_user_profile(body: ProfileUpdate, current_user: dict = Depends(
     loop = asyncio.get_running_loop()
     result = await loop.run_in_executor(
         None,
-        lambda: update_profile(
-            _conn, current_user["id"],
+        lambda: _with_conn(lambda c: update_profile(
+            c, current_user["id"],
             body.name, body.email, body.current_password, body.new_password,
             body.language,
-        ),
+        )),
     )
     # If email changed, send new verification email
     if result.get("email_changed"):
         token = await loop.run_in_executor(
-            None, lambda: create_verification_token(_conn, current_user["id"])
+            None, lambda: _with_conn(lambda c: create_verification_token(c, current_user["id"]))
         )
         try:
             await loop.run_in_executor(
@@ -213,13 +225,13 @@ async def update_user_profile(body: ProfileUpdate, current_user: dict = Depends(
 @app.post("/auth/send-verification")
 async def send_verification(current_user: dict = Depends(get_current_user)):
     loop = asyncio.get_running_loop()
-    user = await loop.run_in_executor(None, lambda: get_user_by_id(_conn, current_user["id"]))
+    user = await loop.run_in_executor(None, lambda: _with_conn(lambda c: get_user_by_id(c, current_user["id"])))
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if user.get("email_verified"):
         return {"ok": True, "already_verified": True}
     token = await loop.run_in_executor(
-        None, lambda: create_verification_token(_conn, current_user["id"])
+        None, lambda: _with_conn(lambda c: create_verification_token(c, current_user["id"]))
     )
     mock = os.getenv("MOCK_EMAIL", "false").lower() == "true"
     try:
@@ -244,7 +256,7 @@ _RESEND_COOLDOWN_SECONDS = 300  # 5 minutes between resend attempts
 async def resend_verification_public(body: ResendVerificationPublicRequest):
     """Public endpoint — resend verification email without auth (used on register success screen)."""
     loop = asyncio.get_running_loop()
-    user = await loop.run_in_executor(None, lambda: get_user_by_email(_conn, body.email.strip().lower()))
+    user = await loop.run_in_executor(None, lambda: _with_conn(lambda c: get_user_by_email(c, body.email.strip().lower())))
     if not user or user.get("email_verified"):
         return {"ok": True}
     # Rate limit: refuse if last token was issued less than _RESEND_COOLDOWN_SECONDS ago
@@ -255,7 +267,7 @@ async def resend_verification_public(body: ResendVerificationPublicRequest):
         if token_age_ms < _RESEND_COOLDOWN_SECONDS * 1000:
             wait_s = max(1, -(-(_RESEND_COOLDOWN_SECONDS * 1000 - token_age_ms) // 1000))  # ceiling div
             raise HTTPException(status_code=429, detail={"message": f"Please wait {wait_s} seconds before requesting another email.", "wait_seconds": wait_s})
-    token = await loop.run_in_executor(None, lambda: create_verification_token(_conn, user["id"]))
+    token = await loop.run_in_executor(None, lambda: _with_conn(lambda c: create_verification_token(c, user["id"])))
     try:
         await loop.run_in_executor(None, lambda: send_verification_email(user["email"], token, user.get("language", "en")))
     except Exception as exc:
@@ -267,7 +279,7 @@ async def resend_verification_public(body: ResendVerificationPublicRequest):
 @app.get("/auth/verify-email")
 async def verify_email(token: str):
     loop = asyncio.get_running_loop()
-    result = await loop.run_in_executor(None, lambda: verify_email_token(_conn, token))
+    result = await loop.run_in_executor(None, lambda: _with_conn(lambda c: verify_email_token(c, token)))
     if not result:
         raise HTTPException(status_code=400, detail="Invalid or expired verification link")
     return {"ok": True, "email": result["email"]}
@@ -286,7 +298,7 @@ class ResetPasswordRequest(BaseModel):
 async def forgot_password(body: ForgotPasswordRequest):
     loop = asyncio.get_running_loop()
     result = await loop.run_in_executor(
-        None, lambda: create_reset_token(_conn, body.email)
+        None, lambda: _with_conn(lambda c: create_reset_token(c, body.email))
     )
     mock = os.getenv("MOCK_EMAIL", "false").lower() == "true"
     response = {"ok": True}  # always return ok to avoid email enumeration
@@ -305,7 +317,7 @@ async def forgot_password(body: ForgotPasswordRequest):
 async def reset_password(body: ResetPasswordRequest):
     loop = asyncio.get_running_loop()
     ok = await loop.run_in_executor(
-        None, lambda: reset_password_with_token(_conn, body.token, body.new_password)
+        None, lambda: _with_conn(lambda c: reset_password_with_token(c, body.token, body.new_password))
     )
     if not ok:
         raise HTTPException(status_code=400, detail="Invalid or expired reset link")
@@ -317,21 +329,21 @@ async def upgrade_to_hunter(current_user: dict = Depends(get_current_user)):
     if current_user.get("email") != ADMIN_EMAIL:
         raise HTTPException(status_code=403, detail="Use Stripe checkout to upgrade")
     loop = asyncio.get_running_loop()
-    await loop.run_in_executor(None, lambda: upgrade_plan(_conn, current_user["id"], "hunter"))
-    user = await loop.run_in_executor(None, lambda: get_user_by_id(_conn, current_user["id"]))
+    await loop.run_in_executor(None, lambda: _with_conn(lambda c: upgrade_plan(c, current_user["id"], "hunter")))
+    user = await loop.run_in_executor(None, lambda: _with_conn(lambda c: get_user_by_id(c, current_user["id"])))
     return {"ok": True, "plan": "hunter", "user": user}
 
 
 @app.get("/auth/usage")
 async def get_usage(current_user: dict = Depends(get_current_user)):
     loop = asyncio.get_running_loop()
-    user = await loop.run_in_executor(None, lambda: get_user_by_id(_conn, current_user["id"]))
+    user = await loop.run_in_executor(None, lambda: _with_conn(lambda c: get_user_by_id(c, current_user["id"])))
     plan  = user.get("plan", "free") if user else "free"
     used  = await loop.run_in_executor(
-        None, lambda: count_interviews_this_week(_conn, current_user["id"])
+        None, lambda: _with_conn(lambda c: count_interviews_this_week(c, current_user["id"]))
     )
     limit = PLAN_WEEKLY_LIMITS.get(plan, 3)
-    stripe_info = await loop.run_in_executor(None, lambda: get_stripe_info(_conn, current_user["id"]))
+    stripe_info = await loop.run_in_executor(None, lambda: _with_conn(lambda c: get_stripe_info(c, current_user["id"])))
     return {
         "plan": plan, "used": used, "limit": limit, "remaining": max(0, limit - used),
         "has_stripe_subscription": bool(stripe_info.get("stripe_subscription_id")),
@@ -342,8 +354,8 @@ async def get_usage(current_user: dict = Depends(get_current_user)):
 @app.post("/auth/downgrade")
 async def downgrade_to_free(current_user: dict = Depends(get_current_user)):
     loop = asyncio.get_running_loop()
-    await loop.run_in_executor(None, lambda: upgrade_plan(_conn, current_user["id"], "free"))
-    user = await loop.run_in_executor(None, lambda: get_user_by_id(_conn, current_user["id"]))
+    await loop.run_in_executor(None, lambda: _with_conn(lambda c: upgrade_plan(c, current_user["id"], "free")))
+    user = await loop.run_in_executor(None, lambda: _with_conn(lambda c: get_user_by_id(c, current_user["id"])))
     return {"ok": True, "plan": "free", "user": user}
 
 
@@ -352,7 +364,7 @@ async def downgrade_to_free(current_user: dict = Depends(get_current_user)):
 @app.post("/stripe/create-checkout-session")
 async def stripe_create_checkout(current_user: dict = Depends(get_current_user)):
     loop = asyncio.get_running_loop()
-    user = await loop.run_in_executor(None, lambda: get_user_by_id(_conn, current_user["id"]))
+    user = await loop.run_in_executor(None, lambda: _with_conn(lambda c: get_user_by_id(c, current_user["id"])))
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     price_id = _stripe_price_for(user.get("language", "en"))
@@ -402,7 +414,7 @@ async def stripe_webhook(request: Request):
 
 def _find_user_for_customer(customer_id: str) -> Optional[dict]:
     """Look up local user by Stripe customer ID, falling back to customer email."""
-    user = get_user_by_stripe_customer(_conn, customer_id)
+    user = _with_conn(lambda c: get_user_by_stripe_customer(c, customer_id))
     if user:
         return user
     # Fallback: fetch customer from Stripe and match by email.
@@ -410,7 +422,7 @@ def _find_user_for_customer(customer_id: str) -> Optional[dict]:
         cus = _stripe.Customer.retrieve(customer_id)
         email = _sg(cus, "email") or ""
         if email:
-            user = get_user_by_email(_conn, email)
+            user = _with_conn(lambda c: get_user_by_email(c, email))
             if user:
                 print(f"[Stripe] found user {user['id']} via email fallback for customer {customer_id}")
     except Exception as exc:
@@ -434,8 +446,8 @@ def _handle_stripe_event(etype: str, data) -> None:
         subscription_id = _sg(data, "subscription")
         print(f"[Stripe] checkout.session.completed user_id={user_id} customer={customer_id} sub={subscription_id}")
         if user_id and customer_id:
-            upgrade_plan(_conn, user_id, "hunter")
-            set_stripe_info(_conn, user_id, customer_id, subscription_id or "")
+            _with_conn(lambda c: upgrade_plan(c, user_id, "hunter"))
+            _with_conn(lambda c: set_stripe_info(c, user_id, customer_id, subscription_id or ""))
             print(f"[Stripe] → upgraded user {user_id}")
         else:
             print(f"[Stripe] → missing user_id or customer_id, cannot upgrade")
@@ -468,10 +480,10 @@ def _handle_stripe_event(etype: str, data) -> None:
 
         # Always ensure customer mapping is stored (may be missing if checkout event failed).
         if subscription_id:
-            set_stripe_info(_conn, user["id"], customer_id, subscription_id)
+            _with_conn(lambda c: set_stripe_info(c, user["id"], customer_id, subscription_id))
 
         if user.get("plan") != "hunter":
-            upgrade_plan(_conn, user["id"], "hunter")
+            _with_conn(lambda c: upgrade_plan(c, user["id"], "hunter"))
             print(f"[Stripe] {etype} → upgraded user {user['id']} to hunter")
         else:
             print(f"[Stripe] {etype} → user {user['id']} already hunter")
@@ -480,9 +492,9 @@ def _handle_stripe_event(etype: str, data) -> None:
         customer_id = _sg(data, "customer")
         user = _find_user_for_customer(customer_id) if customer_id else None
         if user:
-            upgrade_plan(_conn, user["id"], "free")
-            clear_stripe_subscription(_conn, user["id"])
-            set_stripe_cancel_at(_conn, user["id"], None)
+            _with_conn(lambda c: upgrade_plan(c, user["id"], "free"))
+            _with_conn(lambda c: clear_stripe_subscription(c, user["id"]))
+            _with_conn(lambda c: set_stripe_cancel_at(c, user["id"], None))
             print(f"[Stripe] subscription.deleted → downgraded user {user['id']} to free")
 
     elif etype == "customer.subscription.updated":
@@ -490,7 +502,7 @@ def _handle_stripe_event(etype: str, data) -> None:
         status      = _sg(data, "status")
         user = _find_user_for_customer(customer_id) if customer_id else None
         if user and status not in ("active", "trialing"):
-            upgrade_plan(_conn, user["id"], "free")
+            _with_conn(lambda c: upgrade_plan(c, user["id"], "free"))
             print(f"[Stripe] subscription.updated status={status} → downgraded user {user['id']} to free")
 
     elif etype == "invoice.payment_failed":
@@ -505,7 +517,7 @@ def _handle_stripe_event(etype: str, data) -> None:
 @app.get("/stripe/invoices")
 async def stripe_invoices(current_user: dict = Depends(get_current_user)):
     loop = asyncio.get_running_loop()
-    info = await loop.run_in_executor(None, lambda: get_stripe_info(_conn, current_user["id"]))
+    info = await loop.run_in_executor(None, lambda: _with_conn(lambda c: get_stripe_info(c, current_user["id"])))
     customer_id = info.get("stripe_customer_id")
     if not customer_id:
         return {"invoices": []}
@@ -532,14 +544,14 @@ async def stripe_invoices(current_user: dict = Depends(get_current_user)):
 @app.post("/stripe/cancel")
 async def stripe_cancel_subscription(current_user: dict = Depends(get_current_user)):
     loop = asyncio.get_running_loop()
-    info = await loop.run_in_executor(None, lambda: get_stripe_info(_conn, current_user["id"]))
+    info = await loop.run_in_executor(None, lambda: _with_conn(lambda c: get_stripe_info(c, current_user["id"])))
     subscription_id = info.get("stripe_subscription_id")
     if not subscription_id:
         raise HTTPException(status_code=400, detail="No active Stripe subscription found")
     try:
         sub = _stripe.Subscription.modify(subscription_id, cancel_at_period_end=True)
         period_end = _sg(sub, "current_period_end")
-        set_stripe_cancel_at(_conn, current_user["id"], period_end)
+        _with_conn(lambda c: set_stripe_cancel_at(c, current_user["id"], period_end))
         return {"ok": True, "period_end": period_end}
     except _stripe.error.StripeError as exc:
         raise HTTPException(status_code=502, detail=str(exc))
@@ -550,7 +562,7 @@ async def stripe_portal(current_user: dict = Depends(get_current_user)):
     if not _STRIPE_PRICE_ID:
         raise HTTPException(status_code=503, detail="Stripe not configured")
     loop = asyncio.get_running_loop()
-    info = await loop.run_in_executor(None, lambda: get_stripe_info(_conn, current_user["id"]))
+    info = await loop.run_in_executor(None, lambda: _with_conn(lambda c: get_stripe_info(c, current_user["id"])))
     customer_id = info.get("stripe_customer_id")
     if not customer_id:
         raise HTTPException(status_code=400, detail="No Stripe subscription found")
@@ -585,7 +597,7 @@ async def prepare(body: PrepareRequest, current_user: dict = Depends(get_current
 
     # Fetch user info (language + plan)
     user = await loop.run_in_executor(
-        None, lambda: get_user_by_id(_conn, current_user["id"])
+        None, lambda: _with_conn(lambda c: get_user_by_id(c, current_user["id"]))
     )
     if user and not user.get("email_verified") and current_user.get("email") != ADMIN_EMAIL:
         raise HTTPException(status_code=403, detail="email_not_verified")
@@ -594,7 +606,7 @@ async def prepare(body: PrepareRequest, current_user: dict = Depends(get_current
 
     # Enforce weekly interview limit
     week_count = await loop.run_in_executor(
-        None, lambda: count_interviews_this_week(_conn, current_user["id"])
+        None, lambda: _with_conn(lambda c: count_interviews_this_week(c, current_user["id"]))
     )
     limit = PLAN_WEEKLY_LIMITS.get(plan, 3)
     if week_count >= limit:
@@ -630,15 +642,15 @@ async def prepare(body: PrepareRequest, current_user: dict = Depends(get_current
     # Persist in DB
     job_session_id = await loop.run_in_executor(
         None,
-        lambda: create_job_session(
-            _conn,
+        lambda: _with_conn(lambda c: create_job_session(
+            c,
             user_id=current_user["id"],
             job_title=body.job_title,
             company=body.company,
             job_description=body.job_description,
             resume_text=body.resume_text,
             interview_context=interview_context,
-        ),
+        )),
     )
 
     return {
@@ -654,7 +666,7 @@ async def prepare(body: PrepareRequest, current_user: dict = Depends(get_current
 async def list_user_job_sessions(current_user: dict = Depends(get_current_user)):
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(
-        None, lambda: list_job_sessions(_conn, current_user["id"])
+        None, lambda: _with_conn(lambda c: list_job_sessions(c, current_user["id"]))
     )
 
 
@@ -715,19 +727,20 @@ async def admin_list_users(current_user: dict = Depends(get_current_user)):
     week_ago_ms = int((__import__("time").time() - 7 * 24 * 3600) * 1000)
 
     def _query():
-        rows = _db_exec(f"""
-            SELECT
-                u.id, u.name, u.email, u.plan, u.email_verified, u.created_at,
-                COUNT(sm.thread_id)                                          AS total_sessions,
-                SUM(CASE WHEN sm.fase = 'done' THEN 1 ELSE 0 END)           AS completed,
-                SUM(CASE WHEN sm.started_at >= {_ph} THEN 1 ELSE 0 END)     AS sessions_week,
-                MAX(sm.last_active_at)                                       AS last_active,
-                u.stripe_subscription_id
-            FROM users u
-            LEFT JOIN session_meta sm ON u.id = sm.user_id
-            GROUP BY u.id, u.stripe_subscription_id
-            ORDER BY u.created_at DESC
-        """, (week_ago_ms,)).fetchall()
+        with get_db_conn() as conn:
+            rows = _db_exec(f"""
+                SELECT
+                    u.id, u.name, u.email, u.plan, u.email_verified, u.created_at,
+                    COUNT(sm.thread_id)                                          AS total_sessions,
+                    SUM(CASE WHEN sm.fase = 'done' THEN 1 ELSE 0 END)           AS completed,
+                    SUM(CASE WHEN sm.started_at >= {_ph} THEN 1 ELSE 0 END)     AS sessions_week,
+                    MAX(sm.last_active_at)                                       AS last_active,
+                    u.stripe_subscription_id
+                FROM users u
+                LEFT JOIN session_meta sm ON u.id = sm.user_id
+                GROUP BY u.id, u.stripe_subscription_id
+                ORDER BY u.created_at DESC
+            """, (week_ago_ms,), conn=conn).fetchall()
         return [
             {
                 "id": r[0], "name": r[1], "email": r[2],
@@ -752,7 +765,7 @@ async def admin_set_plan(user_id: str, body: dict, current_user: dict = Depends(
     if plan not in ("free", "hunter"):
         raise HTTPException(status_code=422, detail="Invalid plan")
     loop = asyncio.get_running_loop()
-    await loop.run_in_executor(None, lambda: upgrade_plan(_conn, user_id, plan))
+    await loop.run_in_executor(None, lambda: _with_conn(lambda c: upgrade_plan(c, user_id, plan)))
     return {"ok": True}
 
 
@@ -761,7 +774,7 @@ async def admin_verify_email(user_id: str, current_user: dict = Depends(get_curr
     if current_user.get("email") != ADMIN_EMAIL:
         raise HTTPException(status_code=403, detail="Admin only")
     loop = asyncio.get_running_loop()
-    ok = await loop.run_in_executor(None, lambda: force_verify_email(_conn, user_id))
+    ok = await loop.run_in_executor(None, lambda: _with_conn(lambda c: force_verify_email(c, user_id)))
     if not ok:
         raise HTTPException(status_code=404, detail="User not found")
     return {"ok": True}
@@ -773,23 +786,24 @@ async def admin_delete_user(user_id: str, current_user: dict = Depends(get_curre
         raise HTTPException(status_code=403, detail="Admin only")
 
     def _delete():
-        # Guard: never delete the admin account
-        row = _db_exec(f"SELECT email FROM users WHERE id = {_ph}", (user_id,)).fetchone()
-        if not row:
-            raise HTTPException(status_code=404, detail="User not found")
-        if row[0] == ADMIN_EMAIL:
-            raise HTTPException(status_code=403, detail="Cannot delete the admin account")
-        # Delete all interview data, then the user
-        thread_ids = [r[0] for r in _db_exec(
-            f"SELECT thread_id FROM session_meta WHERE user_id = {_ph}", (user_id,)
-        ).fetchall()]
-        if thread_ids:
-            placeholders = ",".join([_ph] * len(thread_ids))
-            _db_exec(f"DELETE FROM session_meta WHERE thread_id IN ({placeholders})", thread_ids)
-        _db_exec(f"DELETE FROM job_sessions WHERE user_id = {_ph}", (user_id,))
-        _db_exec(f"DELETE FROM users WHERE id = {_ph}", (user_id,))
-        if not _is_pg:
-            _conn.commit()
+        with get_db_conn() as conn:
+            # Guard: never delete the admin account
+            row = _db_exec(f"SELECT email FROM users WHERE id = {_ph}", (user_id,), conn=conn).fetchone()
+            if not row:
+                raise HTTPException(status_code=404, detail="User not found")
+            if row[0] == ADMIN_EMAIL:
+                raise HTTPException(status_code=403, detail="Cannot delete the admin account")
+            # Delete all interview data, then the user
+            thread_ids = [r[0] for r in _db_exec(
+                f"SELECT thread_id FROM session_meta WHERE user_id = {_ph}", (user_id,), conn=conn
+            ).fetchall()]
+            if thread_ids:
+                placeholders = ",".join([_ph] * len(thread_ids))
+                _db_exec(f"DELETE FROM session_meta WHERE thread_id IN ({placeholders})", tuple(thread_ids), conn=conn)
+            _db_exec(f"DELETE FROM job_sessions WHERE user_id = {_ph}", (user_id,), conn=conn)
+            _db_exec(f"DELETE FROM users WHERE id = {_ph}", (user_id,), conn=conn)
+            if not _is_pg:
+                conn.commit()
 
     loop = asyncio.get_running_loop()
     await loop.run_in_executor(None, _delete)
@@ -799,7 +813,7 @@ async def admin_delete_user(user_id: str, current_user: dict = Depends(get_curre
 @app.get("/sessions/{thread_id}/scorecard")
 async def get_scorecard(thread_id: str, current_user: dict = Depends(get_current_user)):
     loop = asyncio.get_running_loop()
-    user = await loop.run_in_executor(None, lambda: get_user_by_id(_conn, current_user["id"]))
+    user = await loop.run_in_executor(None, lambda: _with_conn(lambda c: get_user_by_id(c, current_user["id"])))
     if not user or user.get("plan", "free") != "hunter":
         raise HTTPException(status_code=403, detail="Scorecard access requires the Hunter plan")
     scorecard = await loop.run_in_executor(
@@ -1090,14 +1104,14 @@ async def interview_ws(ws: WebSocket):
     job_session_id = init.get("job_session_id", "")
 
     # Load user status — plan gates scorecard
-    user_db = await loop.run_in_executor(None, lambda: get_user_by_id(_conn, user_id))
+    user_db = await loop.run_in_executor(None, lambda: _with_conn(lambda c: get_user_by_id(c, user_id)))
     user_plan: str     = user_db.get("plan", "free")     if user_db else "free"
     user_language: str = user_db.get("language", "en")   if user_db else "en"
 
     # Load interview context from the job session
     if job_session_id:
         js = await loop.run_in_executor(
-            None, lambda: get_job_session(_conn, job_session_id, user_id)
+            None, lambda: _with_conn(lambda c: get_job_session(c, job_session_id, user_id))
         )
         if js:
             interview_context = js.get("interview_context", "")
@@ -1169,7 +1183,7 @@ async def interview_ws(ws: WebSocket):
             # ── Scorecard gate (Hunter plan only) ─────────────────────────
             if fase == "done":
                 user_db = await loop.run_in_executor(
-                    None, lambda: get_user_by_id(_conn, user_id)
+                    None, lambda: _with_conn(lambda c: get_user_by_id(c, user_id))
                 )
                 user_plan = user_db.get("plan", "free") if user_db else "free"
 
@@ -1359,7 +1373,7 @@ async def submit_contact(body: ContactRequest):
     loop = asyncio.get_running_loop()
     msg_id = await loop.run_in_executor(
         None,
-        lambda: create_contact_message(_conn, body.name, body.email, body.subject, body.body),
+        lambda: _with_conn(lambda c: create_contact_message(c, body.name, body.email, body.subject, body.body)),
     )
     try:
         await loop.run_in_executor(
@@ -1376,7 +1390,7 @@ async def admin_list_contact(current_user: dict = Depends(get_current_user)):
     if current_user.get("email") != ADMIN_EMAIL:
         raise HTTPException(status_code=403, detail="Admin only")
     loop = asyncio.get_running_loop()
-    messages = await loop.run_in_executor(None, lambda: list_contact_messages(_conn))
+    messages = await loop.run_in_executor(None, lambda: _with_conn(lambda c: list_contact_messages(c)))
     return {"messages": messages}
 
 
@@ -1393,12 +1407,12 @@ async def admin_reply_contact(msg_id: str, body: ContactReplyRequest,
         raise HTTPException(status_code=422, detail="Reply text is required")
 
     loop = asyncio.get_running_loop()
-    msg = await loop.run_in_executor(None, lambda: get_contact_message(_conn, msg_id))
+    msg = await loop.run_in_executor(None, lambda: _with_conn(lambda c: get_contact_message(c, msg_id)))
     if not msg:
         raise HTTPException(status_code=404, detail="Message not found")
 
     await loop.run_in_executor(
-        None, lambda: save_contact_reply(_conn, msg_id, body.reply_text)
+        None, lambda: _with_conn(lambda c: save_contact_reply(c, msg_id, body.reply_text))
     )
     try:
         await loop.run_in_executor(
@@ -1417,7 +1431,7 @@ async def admin_delete_contact(msg_id: str, current_user: dict = Depends(get_cur
     if current_user.get("email") != ADMIN_EMAIL:
         raise HTTPException(status_code=403, detail="Admin only")
     loop = asyncio.get_running_loop()
-    deleted = await loop.run_in_executor(None, lambda: delete_contact_message(_conn, msg_id))
+    deleted = await loop.run_in_executor(None, lambda: _with_conn(lambda c: delete_contact_message(c, msg_id)))
     if not deleted:
         raise HTTPException(status_code=404, detail="Message not found")
     return {"ok": True}

@@ -1,5 +1,6 @@
 import os
 import time
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Annotated, Optional
 from typing_extensions import TypedDict
@@ -34,19 +35,36 @@ if _database_url:
     # ── PostgreSQL (produção) ──────────────────────────────────────────────────
     try:
         import psycopg2 as _psycopg2
+        from psycopg2.pool import ThreadedConnectionPool as _ThreadedConnectionPool
         from langgraph.checkpoint.memory import MemorySaver as _MemorySaver
-        _conn = _psycopg2.connect(
-            _database_url,
-            connect_timeout=5,
+
+        _pool = _ThreadedConnectionPool(
+            2, 10,
+            dsn=_database_url,
+            connect_timeout=15,
             options="-c lock_timeout=5000 -c statement_timeout=30000",
         )
-        _conn.autocommit = True          # DDL sem transações pendentes
-        # LangGraph não tem checkpointer nativo para psycopg2 síncrono;
-        # usa MemorySaver para o grafo e psycopg2 para as tabelas de negócio.
+        _conn = None  # pool is used; _conn kept for compatibility checks
+
+        @contextmanager
+        def get_db_conn():
+            conn = _pool.getconn()
+            conn.autocommit = True
+            try:
+                yield conn
+            finally:
+                _pool.putconn(conn)
+
         _Checkpointer = _MemorySaver
     except Exception as _e:
         print(f"[warn] Falha ao conectar no PostgreSQL: {_e} — usando MemorySaver")
+        _pool = None
         _conn = None
+
+        @contextmanager
+        def get_db_conn():
+            yield None  # no-op; callers must guard against None
+
         from langgraph.checkpoint.memory import MemorySaver as _MemorySaver
         _Checkpointer = _MemorySaver
 else:
@@ -56,89 +74,101 @@ else:
         from langgraph.checkpoint.sqlite import SqliteSaver as _SqliteSaver
         _db_path = str(Path(__file__).parent / "sessions.db")
         _conn = _sqlite3.connect(_db_path, check_same_thread=False)
+        _pool = None
         _saver = _SqliteSaver(_conn)
         _saver.setup()
         _Checkpointer = lambda: _saver  # noqa: E731
+
+        @contextmanager
+        def get_db_conn():
+            yield _conn
+
     except Exception:
         _conn = None
+        _pool = None
+
+        @contextmanager
+        def get_db_conn():
+            yield None
+
         from langgraph.checkpoint.memory import MemorySaver as _MemorySaver
         _Checkpointer = _MemorySaver
+
+_is_pg = _pool is not None or (_conn is not None and hasattr(_conn, 'server_version'))
 
 
 # ── Session store ─────────────────────────────────────────────────────────────
 
 class SessionStore:
     """Stores chat history + metadata for the dashboard page.
-    Backed by sessions.db (SQLite) or PostgreSQL; falls back to in-memory dict if unavailable.
+    Backed by sessions.db (SQLite) or PostgreSQL pool; falls back to in-memory dict.
     """
 
-    def __init__(self, conn):
-        self._conn = conn
-        # Detecta se é psycopg2 (Postgres) ou sqlite3 para escolher placeholder correto
-        self._is_pg = conn is not None and hasattr(conn, 'server_version')
-        ph = "%s" if self._is_pg else "?"  # placeholder
-        if conn:
-            if self._is_pg:
-                cur = conn.cursor()
-                cur.execute("""
-                    CREATE TABLE IF NOT EXISTS session_meta (
-                        thread_id      TEXT PRIMARY KEY,
-                        user_id        TEXT,
-                        job_session_id TEXT,
-                        started_at     BIGINT NOT NULL,
-                        last_active_at BIGINT NOT NULL,
-                        fase           TEXT   NOT NULL DEFAULT '',
-                        history        TEXT   NOT NULL DEFAULT '[]'
-                    )
-                """)
-                # Migration com IF NOT EXISTS (Postgres)
-                for col, defn in [
-                    ("user_id",        "TEXT"),
-                    ("job_session_id", "TEXT"),
-                    ("scorecard_text", "TEXT"),
-                ]:
-                    cur.execute(f"ALTER TABLE session_meta ADD COLUMN IF NOT EXISTS {col} {defn}")
-                cur.close()
-                conn.commit()
-            else:
-                conn.execute("""
-                    CREATE TABLE IF NOT EXISTS session_meta (
-                        thread_id      TEXT PRIMARY KEY,
-                        user_id        TEXT,
-                        job_session_id TEXT,
-                        started_at     INTEGER NOT NULL,
-                        last_active_at INTEGER NOT NULL,
-                        fase           TEXT    NOT NULL DEFAULT '',
-                        history        TEXT    NOT NULL DEFAULT '[]'
-                    )
-                """)
-                # Migration para SQLite (sem IF NOT EXISTS no ALTER TABLE)
-                for col_def in [
-                    "ALTER TABLE session_meta ADD COLUMN user_id TEXT",
-                    "ALTER TABLE session_meta ADD COLUMN job_session_id TEXT",
-                    "ALTER TABLE session_meta ADD COLUMN scorecard_text TEXT",
-                ]:
-                    try:
-                        conn.execute(col_def)
-                    except Exception:
-                        pass
-                conn.commit()
+    def __init__(self):
+        self._is_pg = _is_pg
+        has_db = _pool is not None or _conn is not None
+        if has_db:
+            with get_db_conn() as conn:
+                if conn is None:
+                    self._mem: dict = {}
+                    return
+                if self._is_pg:
+                    cur = conn.cursor()
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS session_meta (
+                            thread_id      TEXT PRIMARY KEY,
+                            user_id        TEXT,
+                            job_session_id TEXT,
+                            started_at     BIGINT NOT NULL,
+                            last_active_at BIGINT NOT NULL,
+                            fase           TEXT   NOT NULL DEFAULT '',
+                            history        TEXT   NOT NULL DEFAULT '[]'
+                        )
+                    """)
+                    for col, defn in [
+                        ("user_id",        "TEXT"),
+                        ("job_session_id", "TEXT"),
+                        ("scorecard_text", "TEXT"),
+                    ]:
+                        cur.execute(f"ALTER TABLE session_meta ADD COLUMN IF NOT EXISTS {col} {defn}")
+                    cur.close()
+                else:
+                    conn.execute("""
+                        CREATE TABLE IF NOT EXISTS session_meta (
+                            thread_id      TEXT PRIMARY KEY,
+                            user_id        TEXT,
+                            job_session_id TEXT,
+                            started_at     INTEGER NOT NULL,
+                            last_active_at INTEGER NOT NULL,
+                            fase           TEXT    NOT NULL DEFAULT '',
+                            history        TEXT    NOT NULL DEFAULT '[]'
+                        )
+                    """)
+                    for col_def in [
+                        "ALTER TABLE session_meta ADD COLUMN user_id TEXT",
+                        "ALTER TABLE session_meta ADD COLUMN job_session_id TEXT",
+                        "ALTER TABLE session_meta ADD COLUMN scorecard_text TEXT",
+                    ]:
+                        try:
+                            conn.execute(col_def)
+                        except Exception:
+                            pass
+                    conn.commit()
         else:
-            self._mem: dict = {}
+            self._mem = {}
 
-    def _exec(self, sql: str, params=()):
-        """Executa uma query e retorna o cursor (psycopg2) ou resultado direto (sqlite3)."""
+    def _exec(self, conn, sql: str, params=()):
+        """Execute a query on the given connection; return cursor (pg) or result (sqlite)."""
         if self._is_pg:
-            cur = self._conn.cursor()
+            cur = conn.cursor()
             cur.execute(sql, params)
             return cur
-        else:
-            return self._conn.execute(sql, params)
+        return conn.execute(sql, params)
 
     def upsert(self, thread_id: str, started_at: int, last_active_at: int,
                fase: str, history: list,
                user_id: Optional[str] = None, job_session_id: Optional[str] = None) -> None:
-        if self._conn:
+        if _pool is not None or _conn is not None:
             ph = "%s" if self._is_pg else "?"
             sql = f"""INSERT INTO session_meta
                        (thread_id, user_id, job_session_id, started_at, last_active_at, fase, history)
@@ -147,11 +177,13 @@ class SessionStore:
                        last_active_at = excluded.last_active_at,
                        fase           = excluded.fase,
                        history        = excluded.history"""
-            cur = self._exec(sql, (thread_id, user_id, job_session_id, started_at, last_active_at,
-                                   fase, _json.dumps(history)))
-            if self._is_pg:
-                cur.close()
-            self._conn.commit()
+            with get_db_conn() as conn:
+                cur = self._exec(conn, sql, (thread_id, user_id, job_session_id, started_at,
+                                             last_active_at, fase, _json.dumps(history)))
+                if self._is_pg:
+                    cur.close()
+                else:
+                    conn.commit()
         else:
             self._mem[thread_id] = dict(
                 threadId=thread_id, userId=user_id, jobSessionId=job_session_id,
@@ -159,7 +191,7 @@ class SessionStore:
             )
 
     def list_sessions(self, user_id: Optional[str] = None, limit: int = 20) -> list:
-        if self._conn:
+        if _pool is not None or _conn is not None:
             ph = "%s" if self._is_pg else "?"
             if user_id:
                 sql = f"""SELECT sm.thread_id, sm.user_id, sm.job_session_id,
@@ -169,7 +201,7 @@ class SessionStore:
                        LEFT JOIN job_sessions js ON sm.job_session_id = js.id
                        WHERE sm.user_id = {ph}
                        ORDER BY sm.last_active_at DESC LIMIT {ph}"""
-                cur = self._exec(sql, (user_id, limit))
+                params = (user_id, limit)
             else:
                 sql = f"""SELECT sm.thread_id, sm.user_id, sm.job_session_id,
                               sm.started_at, sm.last_active_at, sm.fase, sm.history,
@@ -177,10 +209,12 @@ class SessionStore:
                        FROM session_meta sm
                        LEFT JOIN job_sessions js ON sm.job_session_id = js.id
                        ORDER BY sm.last_active_at DESC LIMIT {ph}"""
-                cur = self._exec(sql, (limit,))
-            rows = cur.fetchall()
-            if self._is_pg:
-                cur.close()
+                params = (limit,)
+            with get_db_conn() as conn:
+                cur = self._exec(conn, sql, params)
+                rows = cur.fetchall()
+                if self._is_pg:
+                    cur.close()
             return [
                 {
                     "threadId":      r[0],
@@ -202,55 +236,56 @@ class SessionStore:
             return sorted(sessions, key=lambda s: s["lastActiveAt"], reverse=True)[:limit]
 
     def delete(self, thread_id: str, user_id: Optional[str] = None) -> None:
-        if self._conn:
+        if _pool is not None or _conn is not None:
             ph = "%s" if self._is_pg else "?"
             if user_id:
-                cur = self._exec(
-                    f"DELETE FROM session_meta WHERE thread_id = {ph} AND user_id = {ph}",
-                    (thread_id, user_id),
-                )
+                sql = f"DELETE FROM session_meta WHERE thread_id = {ph} AND user_id = {ph}"
+                params = (thread_id, user_id)
             else:
-                cur = self._exec(
-                    f"DELETE FROM session_meta WHERE thread_id = {ph}", (thread_id,)
-                )
-            if self._is_pg:
-                cur.close()
-            self._conn.commit()
+                sql = f"DELETE FROM session_meta WHERE thread_id = {ph}"
+                params = (thread_id,)
+            with get_db_conn() as conn:
+                cur = self._exec(conn, sql, params)
+                if self._is_pg:
+                    cur.close()
+                else:
+                    conn.commit()
         else:
             self._mem.pop(thread_id, None)
 
     def save_scorecard(self, thread_id: str, user_id: str, scorecard_text: str) -> None:
-        if self._conn:
+        if _pool is not None or _conn is not None:
             ph = "%s" if self._is_pg else "?"
-            cur = self._exec(
-                f"UPDATE session_meta SET scorecard_text = {ph} WHERE thread_id = {ph} AND user_id = {ph}",
-                (scorecard_text, thread_id, user_id),
-            )
-            if self._is_pg:
-                cur.close()
-            self._conn.commit()
+            sql = f"UPDATE session_meta SET scorecard_text = {ph} WHERE thread_id = {ph} AND user_id = {ph}"
+            with get_db_conn() as conn:
+                cur = self._exec(conn, sql, (scorecard_text, thread_id, user_id))
+                if self._is_pg:
+                    cur.close()
+                else:
+                    conn.commit()
 
     def get_scorecard(self, thread_id: str, user_id: str) -> Optional[str]:
-        if self._conn:
+        if _pool is not None or _conn is not None:
             ph = "%s" if self._is_pg else "?"
-            cur = self._exec(
-                f"SELECT scorecard_text FROM session_meta WHERE thread_id = {ph} AND user_id = {ph}",
-                (thread_id, user_id),
-            )
-            row = cur.fetchone()
-            if self._is_pg:
-                cur.close()
+            sql = f"SELECT scorecard_text FROM session_meta WHERE thread_id = {ph} AND user_id = {ph}"
+            with get_db_conn() as conn:
+                cur = self._exec(conn, sql, (thread_id, user_id))
+                row = cur.fetchone()
+                if self._is_pg:
+                    cur.close()
             return row[0] if row else None
         return None
 
 
-session_store = SessionStore(_conn)
+session_store = SessionStore()
 
 # ── Setup auth tables ─────────────────────────────────────────────────────────
-# Done here so _conn is shared across auth.py and simulator.py without circular imports.
-if _conn:
+# Done here so the pool/conn is shared across auth.py and simulator.py without circular imports.
+if _pool is not None or _conn is not None:
     from auth import setup_user_tables
-    setup_user_tables(_conn)
+    with get_db_conn() as _setup_conn:
+        if _setup_conn is not None:
+            setup_user_tables(_setup_conn)
 
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
