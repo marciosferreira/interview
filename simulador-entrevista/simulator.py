@@ -262,6 +262,18 @@ class SessionStore:
                 else:
                     conn.commit()
 
+    def owns_session(self, thread_id: str, user_id: str) -> bool:
+        if _pool is not None or _conn is not None:
+            ph = "%s" if self._is_pg else "?"
+            sql = f"SELECT 1 FROM session_meta WHERE thread_id = {ph} AND user_id = {ph}"
+            with get_db_conn() as conn:
+                cur = self._exec(conn, sql, (thread_id, user_id))
+                row = cur.fetchone()
+                if self._is_pg:
+                    cur.close()
+            return row is not None
+        return thread_id in self._mem
+
     def get_scorecard(self, thread_id: str, user_id: str) -> Optional[str]:
         if _pool is not None or _conn is not None:
             ph = "%s" if self._is_pg else "?"
@@ -496,11 +508,22 @@ _MENSAGEM_FIELD = Field(
         "Alex's next spoken line — a question or short coaching nudge only. "
         "(1) Opening turn: reproduce the exact greeting from the phase prompt verbatim. "
         "(2) Ongoing interview: one follow-up question or coaching prompt, 1–3 sentences max. "
-        "(3) Coaching after 2+ failed attempts: a brief hint followed by "
-            "'take another attempt or say skip to move on'. "
-        "(4) When fase_completa=True: set this to exactly the string 'OK' and nothing else. "
+        "(3) Coaching after 2+ failed attempts: a brief hint. "
+        "(4) When fase_completa=True or skip_requested=True: set this to exactly 'OK'. "
         "NEVER include feedback, scoring, report content, or a summary of how the candidate did. "
         "The Judge handles all feedback after the phase ends — Alex never delivers it."
+    )
+)
+
+_SKIP_REQUESTED_FIELD = Field(
+    default=False,
+    description=(
+        "Set to True if — and only if — the candidate's most recent message clearly expresses "
+        "a desire to skip this phase, move on, or not answer further. "
+        "Recognize any natural phrasing in any language: 'skip', 'pular', 'next', 'move on', "
+        "'quero pular', 'pode ir para a próxima', 'vamos avançar', 'let's continue', etc. "
+        "NEVER set this on the very first turn (when there is no real candidate response yet). "
+        "NEVER set this if the candidate is answering the question, even partially or poorly."
     )
 )
 
@@ -515,6 +538,7 @@ class ElevatorPitchPhase(BaseModel):
     english_adequate: bool
     mensagem: str = _MENSAGEM_FIELD
     fase_completa: bool
+    skip_requested: bool = _SKIP_REQUESTED_FIELD
     observacoes: str
     ingles_erros: StrList
 
@@ -530,6 +554,7 @@ class CARPhase(BaseModel):
     english_adequate: bool
     mensagem: str = _MENSAGEM_FIELD
     fase_completa: bool
+    skip_requested: bool = _SKIP_REQUESTED_FIELD
     observacoes: str
     ingles_erros: StrList
 
@@ -543,6 +568,7 @@ class TechnicalPhase(BaseModel):
     english_adequate: bool
     mensagem: str = _MENSAGEM_FIELD
     fase_completa: bool
+    skip_requested: bool = _SKIP_REQUESTED_FIELD
     observacoes: str
     ingles_erros: StrList
 
@@ -557,6 +583,7 @@ class LeadershipPhase(BaseModel):
     english_adequate: bool
     mensagem: str = _MENSAGEM_FIELD
     fase_completa: bool
+    skip_requested: bool = _SKIP_REQUESTED_FIELD
     observacoes: str
     ingles_erros: StrList
 
@@ -569,13 +596,15 @@ class MotivationPhase(BaseModel):
     english_adequate: bool
     mensagem: str = _MENSAGEM_FIELD
     fase_completa: bool
+    skip_requested: bool = _SKIP_REQUESTED_FIELD
     observacoes: str
     ingles_erros: StrList
 
 
 class CandidateQuestionsPhase(BaseModel):
-    mensagem: str
+    mensagem: str = _MENSAGEM_FIELD
     fase_completa: bool
+    skip_requested: bool = _SKIP_REQUESTED_FIELD
     observacoes: str
 
 
@@ -608,6 +637,24 @@ class Scorecard(BaseModel):
 # Node factories
 # ---------------------------------------------------------------------------
 
+# Opening messages that don't count as real candidate input for skip detection
+_PHASE_OPENING_MSGS = frozenset({
+    "I'm ready to start this phase.",
+    "Olá, estou pronto para começar a entrevista.",
+    "Hi, I'm ready to start the interview.",
+})
+
+
+def _has_real_candidate_input(phase_msgs: list) -> bool:
+    """True if the candidate has sent at least one real reply (not just the synthetic opener)."""
+    return any(
+        isinstance(m, HumanMessage)
+        and m.content not in _PHASE_OPENING_MSGS
+        and not m.content.startswith("[")
+        for m in phase_msgs
+    )
+
+
 def _make_interview_node(output_class, checklist_key, notas_key, report_fase, phase_name):
     def node(state: EntrevistaState, config: RunnableConfig) -> dict:
         interview_context = state.get("interview_context", "")
@@ -631,6 +678,19 @@ def _make_interview_node(output_class, checklist_key, notas_key, report_fase, ph
         old_ingles = state.get("ingles_erros_acumulados", [])
         new_ingles = old_ingles + (avaliacao.ingles_erros or [])
 
+        # Skip detected via structured output (model understood candidate's intent semantically)
+        if avaliacao.skip_requested and _has_real_candidate_input(phase_msgs):
+            return {
+                "messages": [],
+                "phase_messages": phase_msgs + [
+                    HumanMessage(content="[Candidate skipped — phase incomplete]"),
+                ],
+                checklist_key: new_checklist,
+                notas_key: new_notas,
+                "ingles_erros_acumulados": new_ingles,
+                "fase": report_fase,
+            }
+
         # Safety guard: mensagem="OK" with fase_completa=False → treat as complete
         if avaliacao.mensagem.strip().lower() == "ok" and not avaliacao.fase_completa:
             return {
@@ -644,19 +704,6 @@ def _make_interview_node(output_class, checklist_key, notas_key, report_fase, ph
 
         if not avaliacao.fase_completa:
             user_response = interrupt(avaliacao.mensagem)
-
-            if user_response.strip().lower() in ("skip", "s", "pular"):
-                return {
-                    "messages": [],
-                    "phase_messages": phase_msgs + [
-                        AIMessage(content=avaliacao.mensagem),
-                        HumanMessage(content="[Candidate skipped — phase incomplete]"),
-                    ],
-                    checklist_key: new_checklist,
-                    notas_key: new_notas,
-                    "ingles_erros_acumulados": new_ingles,
-                    "fase": report_fase,
-                }
 
             new_phase_msgs = phase_msgs + [
                 AIMessage(content=avaliacao.mensagem),
@@ -746,21 +793,30 @@ def candidate_questions(state: EntrevistaState, config: RunnableConfig) -> dict:
     system_prompt = _build_interview_system(interview_context, "candidate_questions", language)
     structured = model.with_structured_output(CandidateQuestionsPhase)
 
+    _cq_opener = "I'm ready to ask my questions."
     phase_msgs: list = state.get("phase_messages") or [
-        HumanMessage(content="I'm ready to ask my questions.")
+        HumanMessage(content=_cq_opener)
     ]
     messages = [_cached_system(system_prompt)] + phase_msgs
     avaliacao = structured.invoke(messages)
 
+    # Skip detected via structured output
+    has_input = any(
+        isinstance(m, HumanMessage)
+        and m.content != _cq_opener
+        and not m.content.startswith("[")
+        for m in phase_msgs
+    )
+    if avaliacao.skip_requested and has_input:
+        return {
+            "messages": [],
+            "phase_messages": [],
+            "archive": state.get("archive", []),
+            "fase": "feedback",
+        }
+
     if not avaliacao.fase_completa:
         user_response = interrupt(avaliacao.mensagem)
-        if user_response.strip().lower() in ("skip", "s", "pular"):
-            return {
-                "messages": [],
-                "phase_messages": [],
-                "archive": state.get("archive", []),
-                "fase": "feedback",
-            }
         new_phase_msgs = phase_msgs + [
             AIMessage(content=avaliacao.mensagem),
             HumanMessage(content=user_response),

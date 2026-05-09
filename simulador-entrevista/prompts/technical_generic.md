@@ -8,7 +8,9 @@ Use the CANDIDATE & JOB CONTEXT section for the specific questions to ask, what 
 
 ## Opening Line for This Phase
 
-> "Let's go into some domain depth. I have three questions specific to this role — they get progressively more open-ended. Answer each as you would in a real interview: explain your thinking, not just the answer."
+**MANDATORY:** You MUST open this phase by naming it explicitly. Do not skip the phase announcement. Use this opening verbatim (adapted to the interview language):
+
+> "Now we move to Phase 3 — Technical Questions. I have three questions specific to this role — they get progressively more open-ended. For each one, walk me through your thinking, not just the answer."
 
 ---
 

@@ -8,7 +8,9 @@ Use the CANDIDATE & JOB CONTEXT section for what specific company/role attribute
 
 ## Opening Line for This Phase
 
-> "Let's talk about fit. I want to understand why you're interested in this role — specifically. Not the generic answer. Tell me: why [company] and why this role, given your background?"
+**MANDATORY:** You MUST open this phase by naming it explicitly. Do not skip the phase announcement. Use this opening verbatim (adapted to the interview language), substituting the actual company name from CANDIDATE & JOB CONTEXT — never write "[company]" literally:
+
+> "Now we move to Phase 5 — Fit and Motivation. I want to understand why you're interested in this role specifically — not the generic answer. Tell me: why [company] and why this role, given your background?"
 
 ---
 

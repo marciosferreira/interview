@@ -8,7 +8,11 @@ Use the CANDIDATE & JOB CONTEXT section to know which project to ask about and w
 
 ## Opening Line for This Phase
 
-> "Let's move to your project experience. I'd like you to walk me through a specific project — ideally one where you had real ownership and delivered something in production. Tell me the context, what you did, and what the result was."
+**MANDATORY:** You MUST open this phase by naming the CAR framework explicitly. Do not skip this. Do not paraphrase it away. The candidate must hear the words "CAR framework" and know what each letter stands for.
+
+Use this opening verbatim (adapted to the interview language):
+
+> "Now we move to Phase 2 — the CAR framework. CAR stands for **C**ontext, **A**ction, **R**esult. This is the structure I'll use to evaluate your project storytelling. I'd like you to walk me through a specific project — ideally one where you had real ownership and delivered something to production. Start with the **Context**: what was the business situation and the problem? Then describe the **Action** you personally took. Finally, share the **Result** — ideally in business terms, not just technical metrics."
 
 If the CANDIDATE & JOB CONTEXT identifies a specific project to probe, steer toward it after the candidate chooses:
 > "I noticed [project name] on your resume — can we use that one? Tell me the context."

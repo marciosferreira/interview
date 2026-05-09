@@ -821,6 +821,24 @@ async def admin_reset_week(user_id: str, current_user: dict = Depends(get_curren
     return {"ok": True}
 
 
+@app.get("/sessions/{thread_id}/history")
+async def get_session_history(thread_id: str, current_user: dict = Depends(get_current_user)):
+    loop = asyncio.get_running_loop()
+    owns = await loop.run_in_executor(
+        None, lambda: session_store.owns_session(thread_id, current_user["id"])
+    )
+    if not owns:
+        raise HTTPException(status_code=404, detail="Session not found")
+    config = {"configurable": {"thread_id": thread_id}}
+    state_snap = await loop.run_in_executor(
+        None, functools.partial(graph.get_state, config)
+    )
+    if not state_snap or not state_snap.values:
+        return {"history": []}
+    history = _reconstruct_history(state_snap.values.get("messages", []))
+    return {"history": history}
+
+
 @app.get("/sessions/{thread_id}/scorecard")
 async def get_scorecard(thread_id: str, current_user: dict = Depends(get_current_user)):
     loop = asyncio.get_running_loop()
@@ -1398,7 +1416,6 @@ async def interview_ws(ws: WebSocket):
                 skip_advance = False
                 await ws.send_json({"type": "ai", "text": question})
 
-            _SKIP_KEYWORDS = {"skip", "s", "pular"}
             while True:
                 data = await ws.receive_json()
                 if data.get("type") == "ping":
@@ -1407,8 +1424,6 @@ async def interview_ws(ws: WebSocket):
                 user_text = data.get("text", "").strip()
                 if not user_text:
                     continue
-                if user_text.lower() in _SKIP_KEYWORDS:
-                    user_text = "skip"
                 break
 
             await ws.send_json({"type": "user", "text": user_text})

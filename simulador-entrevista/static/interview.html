@@ -496,6 +496,65 @@
       background: linear-gradient(90deg, #16a34a, #4ade80);
     }
 
+    /* ── Scorecard badge — hexagonal gold ── */
+    .scorecard-step .ps-dot {
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      border-radius: 0;
+      border: none;
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, #2a1a00 0%, #3d2600 100%);
+      filter: drop-shadow(0 0 3px rgba(160, 100, 0, 0.35));
+      counter-increment: none;
+    }
+
+    .scorecard-step .ps-dot::before {
+      content: '★';
+      font-size: 15px;
+      color: #5a3c00;
+    }
+
+    .scorecard-step .ps-label {
+      color: #5a3c00;
+    }
+
+    .scorecard-step.active .ps-dot {
+      background: linear-gradient(135deg, #92400e 0%, #d97706 55%, #fbbf24 100%);
+      filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.7)) drop-shadow(0 0 3px rgba(251, 191, 36, 0.9));
+      transform: scale(1.2);
+      animation: gold-pulse 1.8s ease-in-out infinite;
+    }
+
+    .scorecard-step.active .ps-dot::before {
+      content: '★';
+      color: #fff;
+      text-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+    }
+
+    .scorecard-step.active .ps-label {
+      color: #fcd34d;
+      font-weight: 700;
+    }
+
+    .scorecard-step.done .ps-dot {
+      background: linear-gradient(135deg, #92400e 0%, #d97706 55%, #fbbf24 100%);
+      filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.55));
+    }
+
+    .scorecard-step.done .ps-dot::before {
+      content: '★';
+      color: #fff;
+    }
+
+    .scorecard-step.done .ps-label {
+      color: #fcd34d;
+    }
+
+    @keyframes gold-pulse {
+      0%, 100% { filter: drop-shadow(0 0 8px rgba(251,191,36,0.7)) drop-shadow(0 0 3px rgba(251,191,36,0.9)); }
+      50%       { filter: drop-shadow(0 0 16px rgba(251,191,36,0.95)) drop-shadow(0 0 6px rgba(255,215,0,1)); }
+    }
+
     /* ── Chat area ── */
     #chat {
       flex: 1;
@@ -1192,7 +1251,7 @@
       <div class="phase-step" data-step="5"><span class="ps-dot"></span><span class="ps-label"
           data-i18n="interview.phases.yourQuestions">Your Questions</span></div>
       <div class="phase-connector" data-conn="5"></div>
-      <div class="phase-step" data-step="6"><span class="ps-dot"></span><span class="ps-label"
+      <div class="phase-step scorecard-step" data-step="6"><span class="ps-dot"></span><span class="ps-label"
           data-i18n="interview.phases.scorecard">Scorecard</span></div>
     </div>
   </nav>
@@ -2285,15 +2344,22 @@
       badge.className = '';
       doneBanner.style.display = 'block';
       disableInput(true);
-      // Restore chat history (scorecard is NOT stored here — fetched from server below).
-      if (_bootRaw.history?.length) {
-        for (const m of _bootRaw.history) {
-          if (m.type === 'ai' || m.type === 'transition') addBubble('ai', m.text, m.voice || 'nova', true);
-          else if (m.type === 'user') addBubble('user', m.text, 'nova', false);
-          else if (m.type === 'feedback' && !m.text?.includes('INTERVIEW SCORECARD')) addFeedback(m.text);
-        }
-        scrollBottom();
-      }
+      // Fetch history from the server (LangGraph checkpoint) — localStorage history is never populated.
+      (async () => {
+        try {
+          const res = await fetch(`/sessions/${encodeURIComponent(_bootRaw.threadId)}/history`, {
+            headers: { 'Authorization': `Bearer ${_authToken}` },
+          });
+          if (!res.ok) return;
+          const { history } = await res.json();
+          for (const m of (history || [])) {
+            if (m.type === 'ai' || m.type === 'transition') addBubble('ai', m.text, m.voice || 'nova', true);
+            else if (m.type === 'user') addBubble('user', m.text, 'nova', false);
+            else if (m.type === 'feedback' && !m.text?.includes('INTERVIEW SCORECARD')) addFeedback(m.text);
+          }
+          scrollBottom();
+        } catch (_) {}
+      })();
     } else {
       connect();
       showTyping(true);   // waiting for first AI message

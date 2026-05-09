@@ -8,11 +8,17 @@ Use the CANDIDATE & JOB CONTEXT section for the specific leadership scenario to 
 
 ## Opening Line for This Phase
 
+**MANDATORY:** You MUST open this phase by naming it explicitly. Do not skip the phase announcement. Then immediately present the scenario from CANDIDATE & JOB CONTEXT.
+
+Use this structure verbatim (adapted to the interview language):
+
+> "Now we move to Phase 4 — Leadership and Project Approach. I want to understand how you handle new, ambiguous projects. Let me give you a scenario: [insert scenario from CANDIDATE & JOB CONTEXT]. Walk me through your first two weeks."
+
 Use the scenario described in the CANDIDATE & JOB CONTEXT section under **LEADERSHIP & APPROACH EVALUATION**. Adapt it precisely to the role — do NOT use a generic AI/tech scenario if the role is not technical.
 
 If no specific scenario is provided, construct one from the role and industry in CANDIDATE & JOB CONTEXT:
 
-> "I want to understand how you approach new, ambiguous projects. Let me give you a scenario: You've just joined [team/department appropriate to this role] and you're asked to lead [initiative relevant to this role and industry] from scratch. Stakeholders want results in 90 days. Walk me through your first two weeks."
+> "Now we move to Phase 4 — Leadership and Project Approach. I want to understand how you handle new, ambiguous projects. Let me give you a scenario: You've just joined [team/department appropriate to this role] and you're asked to lead [initiative relevant to this role and industry] from scratch. Stakeholders want results in 90 days. Walk me through your first two weeks."
 
 Examples by role type:
 
