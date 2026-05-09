@@ -1344,11 +1344,12 @@
     window.addEventListener('beforeunload', () => _syncToServer(true));
 
     function _saveSession(threadId) {
-      const existing = _loadRaw() || {};
+      // If _pendingJobSession is set we are starting a brand-new interview —
+      // never inherit history from whatever was stored before.
+      const existing = _pendingJobSession ? {} : (_loadRaw() || {});
       existing.threadId = threadId;
       existing.savedAt = Date.now();
-      if (!existing.startedAt) existing.startedAt = Date.now();
-      // Carry over job session info from pending (first time) or existing session
+      existing.startedAt = existing.startedAt || Date.now();
       if (_pendingJobSession) {
         existing.jobSessionId = _pendingJobSession.jobSessionId;
         existing.jobTitle = _pendingJobSession.jobTitle;
@@ -1910,7 +1911,11 @@
 
       ws.onmessage = (e) => {
         const msg = JSON.parse(e.data);
-        removeTyping();
+
+        // Don't remove the typing indicator on silent/bookkeeping messages —
+        // only remove it when actual content is about to be rendered.
+        const _silentTypes = new Set(['session', 'phase', 'pong']);
+        if (!_silentTypes.has(msg.type)) removeTyping();
 
         switch (msg.type) {
           case 'session':

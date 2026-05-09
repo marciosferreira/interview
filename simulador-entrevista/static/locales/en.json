@@ -304,9 +304,9 @@
     },
     "tts": {
       "speaking": "Alex is speaking…",
-      "pause": "⏸ Pause",
-      "resume": "▶ Resume",
-      "skip": "⏭ Skip"
+      "pause": "Pause",
+      "resume": "Resume",
+      "skip": "Skip"
     },
     "popover": {
       "sameRole": "New round — same role",

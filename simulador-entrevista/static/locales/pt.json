@@ -304,9 +304,9 @@
     },
     "tts": {
       "speaking": "Alex está falando…",
-      "pause": "⏸ Pausar",
-      "resume": "▶ Retomar",
-      "skip": "⏭ Pular"
+      "pause": "Pausar",
+      "resume": "Retomar",
+      "skip": "Pular"
     },
     "popover": {
       "sameRole": "Nova rodada — mesma vaga",
