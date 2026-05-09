@@ -70,7 +70,12 @@
     .session-msgs { font-size: 12px; color: var(--text-tertiary); }
     
     .session-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-    
+
+    @media (max-width: 600px) {
+      .session-card { flex-wrap: wrap; gap: 12px 16px; }
+      .session-actions { width: 100%; padding-left: 56px; flex-wrap: wrap; gap: 8px; }
+    }
+
     .delete-btn {
       background: transparent; border: none; color: var(--text-tertiary);
       padding: 6px; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s;
@@ -250,7 +255,7 @@
           <span class="badge ${isDone ? 'badge-primary' : ''}" style="${isDone ? 'background:var(--status-success-bg);color:var(--status-success);border-color:var(--status-success-border)' : ''}">${isDone ? t('history.badges.completed') : t('history.badges.inProgress')}</span>
         </div>
         <div class="session-row2">
-          <span class="session-phase">${_escHtml(phaseText)}</span>
+          ${!isDone ? `<span class="session-phase">${_escHtml(phaseText)}</span>` : ''}
           <span class="session-msgs">· ${turns} ${turns !== 1 ? t('history.session.answers') : t('history.session.answer')}</span>
         </div>
       </div>
