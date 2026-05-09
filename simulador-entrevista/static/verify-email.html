@@ -57,7 +57,7 @@
       const res  = await fetch(`/auth/verify-email?token=${encodeURIComponent(token)}`);
       const data = await res.json();
       if (res.ok) {
-        try { if (window.ttq) window.ttq.track('CompleteRegistration', { contents: [{ content_id: 'user_registration', content_name: 'User Registration' }] }); } catch {}
+        try { if (window.ttq) window.ttq.track('CompleteRegistration', { contents: [{ content_id: 'user_registration', content_name: 'User Registration', content_type: 'product' }] }); } catch {}
         try {
           const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
           if (u) { u.email_verified = true; localStorage.setItem('auth_user', JSON.stringify(u)); }
