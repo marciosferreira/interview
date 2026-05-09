@@ -30,7 +30,9 @@
     "settings": "⚙️ Settings",
     "settingsLabel": "Settings",
     "historyLabel": "History",
-    "signout": "Sign out"
+    "signout": "Sign out",
+    "drawerTitle": "Menu",
+    "contactUs": "Contact us"
   },
   "landing": {
     "hero": {
@@ -459,7 +461,8 @@
         "f6NoAccess": "Priority processing",
         "btnCurrent": "Current plan",
         "btnCreate": "Get started free →",
-        "btnDowngrade": "Downgrade to Explorer"
+        "btnDowngrade": "Downgrade to Explorer",
+        "activePlan": "Your current plan"
       },
       "hunter": {
         "badge": "🎯 Hunter",
@@ -478,7 +481,7 @@
         "btnCurrent": "✓ Current plan",
         "note": "Billed monthly · cancel anytime",
         "notePortal": "Cancel or change plan via Stripe portal",
-        "activePlan": "Active plan"
+        "activePlan": "Your current plan"
       }
     },
     "success": {

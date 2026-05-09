@@ -30,7 +30,9 @@
     "settings": "⚙️ Configurações",
     "settingsLabel": "Configurações",
     "historyLabel": "Histórico",
-    "signout": "Sair"
+    "signout": "Sair",
+    "drawerTitle": "Menu",
+    "contactUs": "Fale conosco"
   },
   "landing": {
     "hero": {
@@ -459,7 +461,8 @@
         "f6NoAccess": "Processamento prioritário",
         "btnCurrent": "Plano atual",
         "btnCreate": "Começar grátis →",
-        "btnDowngrade": "Fazer downgrade para Explorer"
+        "btnDowngrade": "Fazer downgrade para Explorer",
+        "activePlan": "Seu plano atual"
       },
       "hunter": {
         "badge": "🎯 Hunter",
@@ -478,7 +481,7 @@
         "btnCurrent": "✓ Plano atual",
         "note": "Cobrado mensalmente · cancele quando quiser",
         "notePortal": "Cancele ou altere seu plano no portal Stripe",
-        "activePlan": "Plano ativo"
+        "activePlan": "Seu plano atual"
       }
     },
     "success": {

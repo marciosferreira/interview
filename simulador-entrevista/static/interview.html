@@ -1151,10 +1151,14 @@
       color: #64748b;
     }
 
-    .plan-pill::after {
+    [data-tooltip] {
+      position: relative;
+    }
+
+    [data-tooltip]::after {
       content: attr(data-tooltip);
       position: absolute;
-      bottom: calc(100% + 6px);
+      top: calc(100% + 6px);
       left: 50%;
       transform: translateX(-50%);
       background: #1e2235;
@@ -1173,8 +1177,7 @@
       z-index: 999;
     }
 
-    .plan-pill:hover::after,
-    .plan-pill.tooltip-open::after {
+    [data-tooltip]:hover::after {
       opacity: 1;
     }
 
@@ -1195,12 +1198,12 @@
     </a>
     <div id="status-badge">Connecting…</div>
     <span id="plan-pill" class="plan-pill"></span>
-    <a id="profile-btn-hdr" href="/profile.html" title="Account settings"><i data-lucide="settings"
-        style="width:14px;height:14px;"></i> <span class="btn-label">Settings</span></a>
-    <a id="tips-btn-hdr" href="/tips.html" title="Interview tips &amp; frameworks"><i data-lucide="lightbulb"
-        style="width:14px;height:14px;"></i> <span class="btn-label">Tips</span></a>
-    <a id="history-btn" href="/history.html" title="View all past interviews"><i data-lucide="clipboard-list"
-        style="width:14px;height:14px;"></i> <span class="btn-label">History</span></a>
+    <a id="profile-btn-hdr" href="/profile.html"><i data-lucide="settings"
+        style="width:14px;height:14px;"></i> <span class="btn-label" data-i18n="nav.settingsLabel">Settings</span></a>
+    <a id="tips-btn-hdr" href="/tips.html"><i data-lucide="lightbulb"
+        style="width:14px;height:14px;"></i> <span class="btn-label" data-i18n="nav.tipsLabel">Tips</span></a>
+    <a id="history-btn" href="/history.html"><i data-lucide="clipboard-list"
+        style="width:14px;height:14px;"></i> <span class="btn-label" data-i18n="nav.historyLabel">History</span></a>
     <button id="hamburger-btn" aria-label="Menu"><i data-lucide="menu"></i></button>
   </header>
 
@@ -1209,7 +1212,7 @@
     <div class="drawer-backdrop"></div>
     <nav class="drawer-panel">
       <div class="drawer-header">
-        <span>Menu</span>
+        <span data-i18n="nav.drawerTitle">Menu</span>
         <button class="drawer-close"><i data-lucide="x" style="width:20px;height:20px"></i></button>
       </div>
       <a class="drawer-item" href="/"><span class="di-icon"><i data-lucide="home"></i></span> <span
@@ -1227,7 +1230,7 @@
         <span data-i18n="interview.popover.newRole">New role</span></button>
       <div class="drawer-divider"></div>
       <button class="drawer-item" onclick="closeMobileMenu(); window.openContactWidget?.()"><span class="di-icon"><i
-            data-lucide="mail"></i></span> Contact us</button>
+            data-lucide="mail"></i></span> <span data-i18n="nav.contactUs">Contact us</span></button>
     </nav>
   </div>
 
@@ -1345,7 +1348,8 @@
       });
       if (_mobilePhaseLbl) {
         const activeStep = document.querySelector('.phase-step.active .ps-label');
-        _mobilePhaseLbl.textContent = activeStep ? activeStep.textContent : '';
+        const fallback = allDone ? document.querySelector('.scorecard-step .ps-label') : null;
+        _mobilePhaseLbl.textContent = activeStep ? activeStep.textContent : (fallback ? fallback.textContent : '');
       }
       // Persist phase into SESSION_KEY + HISTORY_KEY
       const raw = _loadRaw();
@@ -2050,7 +2054,7 @@
             break;
 
           case 'feedback':
-            addFeedback(msg.text);
+            addBubble('ai', msg.text);
             document.getElementById('scorecard-generating').style.display = 'flex';
             break;
 
@@ -2069,7 +2073,7 @@
             document.getElementById('scorecard-generating').style.display = 'none';
             doneBanner.style.display = 'block';
             disableInput(true);
-            badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Done'; lucide.createIcons();
+            badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> ' + t('history.badges.completed'); lucide.createIcons();
             badge.className = '';
             break;
         }
@@ -2080,7 +2084,7 @@
         // Don't reconnect if the interview is already finished.
         const _closeRaw = _loadRaw();
         if (e.code === 1000 || _closeRaw?.fase === 'done') {
-          badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Done'; lucide.createIcons();
+          badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> ' + t('history.badges.completed'); lucide.createIcons();
           badge.className = '';
           return;
         }
@@ -2340,7 +2344,7 @@
     const _bootRaw = _loadRaw();
     if (_bootRaw?.fase === 'done' && !_pendingJobSession) {
       setPhase('done');
-      badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> Done'; lucide.createIcons();
+      badge.innerHTML = '<i data-lucide="check-circle" style="width:14px;height:14px"></i> <span data-i18n="history.badges.completed">Completed</span>'; lucide.createIcons();
       badge.className = '';
       doneBanner.style.display = 'block';
       disableInput(true);
@@ -2390,23 +2394,33 @@
     }
   </script>
   <script>
-    (function () {
+    let _planPillPlan = null;
+    function _renderPlanPill(plan) {
       try {
-        const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
-        if (!u) return;
+        _planPillPlan = plan;
         const el = document.getElementById('plan-pill');
         if (!el) return;
-        const isHunter = u.plan === 'hunter';
-        el.className = 'badge ' + (isHunter ? 'badge-primary' : '');
+        const isHunter = plan === 'hunter';
+        el.className = 'plan-pill badge ' + (isHunter ? 'badge-primary' : '');
         if (!isHunter) { el.style.border = '1px solid var(--bg-surface-border)'; el.style.color = 'var(--text-secondary)'; }
-        el.innerHTML = isHunter ? '<i data-lucide="target" style="width:12px;height:12px;margin-right:4px"></i> Hunter' : '<i data-lucide="map" style="width:12px;height:12px;margin-right:4px"></i> Explorer';
+        el.innerHTML = isHunter
+          ? t('upgrade.plans.hunter.badge')
+          : '<i data-lucide="map" style="width:12px;height:12px;margin-right:4px"></i> ' + t('upgrade.plans.explorer.badge');
         lucide.createIcons();
-        el.setAttribute('data-tooltip', 'Your current plan');
+        el.setAttribute('data-tooltip', t('upgrade.plans.' + (isHunter ? 'hunter' : 'explorer') + '.activePlan'));
         el.style.display = 'inline-block';
         el.style.cursor = 'pointer';
         el.addEventListener('click', () => location.href = '/upgrade.html');
       } catch (_) { }
+    }
+    (function () {
+      try {
+        const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
+        if (!u) return;
+        _renderPlanPill(u.plan);
+      } catch (_) { }
     })();
+    document.addEventListener('i18n:ready', () => { if (_planPillPlan) _renderPlanPill(_planPillPlan); });
     (async function () {
       try {
         const tok = localStorage.getItem('auth_token');
@@ -2416,13 +2430,7 @@
         const usage = await res.json();
         const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
         if (u && u.plan !== usage.plan) { u.plan = usage.plan; localStorage.setItem('auth_user', JSON.stringify(u)); }
-        const el = document.getElementById('plan-pill');
-        if (!el) return;
-        const isHunter = usage.plan === 'hunter';
-        el.className = 'badge ' + (isHunter ? 'badge-primary' : '');
-        if (!isHunter) { el.style.border = '1px solid var(--bg-surface-border)'; el.style.color = 'var(--text-secondary)'; }
-        el.innerHTML = isHunter ? '<i data-lucide="target" style="width:12px;height:12px;margin-right:4px"></i> Hunter' : '<i data-lucide="map" style="width:12px;height:12px;margin-right:4px"></i> Explorer';
-        lucide.createIcons();
+        _renderPlanPill(usage.plan);
       } catch (_) { }
     })();
     // Prevent Lucide from re-processing already-rendered icons on repeated createIcons() calls.

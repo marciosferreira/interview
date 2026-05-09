@@ -831,10 +831,13 @@ def candidate_questions(state: EntrevistaState, config: RunnableConfig) -> dict:
         }
 
     name = state.get("candidate_name") or "the candidate"
-    closing_msg = avaliacao.mensagem if avaliacao.mensagem.strip().lower() != "ok" else (
-        f"Thank you, {name}. This has been a really strong session. "
-        "Let me put together your scorecard."
+    language = state.get("language", "en")
+    _fallback = (
+        f"Obrigado, {name}. Foi uma sessão muito boa. Vou preparar o seu scorecard agora."
+        if language == "pt" else
+        f"Thank you, {name}. This has been a really strong session. Let me put together your scorecard."
     )
+    closing_msg = avaliacao.mensagem if avaliacao.mensagem.strip().lower() != "ok" else _fallback
     # Archive only the closing — raw candidate_questions messages discarded
     new_archive = state.get("archive", [])
     return {
