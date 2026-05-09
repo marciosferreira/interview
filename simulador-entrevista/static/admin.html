@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin — Acing Interview</title>
+  <title>Admin — Acing Interviews</title>
   
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -104,7 +104,7 @@
   <a class="header-brand-link" href="/">
     <div class="header-logo"><i data-lucide="target" style="width: 22px; height: 22px;"></i></div>
     <div class="header-brand-info">
-      <h1>Acing Interview</h1>
+      <h1>Acing Interviews</h1>
       <p>Admin panel</p>
     </div>
   </a>
@@ -300,6 +300,7 @@
             ? `<button class="plan-btn verify" onclick="verifyEmail('${u.id}',this)"><i data-lucide="check-circle" style="width:12px;height:12px"></i> Verify</button>`
             : ''
           }
+          <button class="plan-btn" style="background:var(--bg-surface);border:1px solid var(--bg-surface-border);color:var(--text-secondary)" title="Reset weekly interview limit" onclick="resetWeek('${u.id}',this)"><i data-lucide="refresh-cw" style="width:12px;height:12px"></i></button>
           ${u.email !== 'marciosferreira@yahoo.com.br'
             ? `<button class="plan-btn delete" onclick="deleteUser('${u.id}','${esc(u.name)}',this)"><i data-lucide="trash-2" style="width:12px;height:12px"></i></button>`
             : ''
@@ -364,6 +365,31 @@
       _users = _users.filter(u => u.id !== userId);
       renderSummary();
       applyFilters();
+    } catch {
+      alert('Network error.'); btn.disabled = false; btn.innerHTML = originalHtml;
+    }
+  }
+
+  async function resetWeek(userId, btn) {
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner" style="width:12px;height:12px;margin:0;"></span>';
+    try {
+      const res = await fetch(`/admin/users/${userId}/reset-week`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${_token}` },
+      });
+      if (!res.ok) { alert('Failed to reset weekly limit.'); btn.disabled = false; btn.innerHTML = originalHtml; return; }
+      btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      btn.style.background = 'var(--status-success-bg)';
+      btn.style.color = 'var(--status-success)';
+      btn.style.border = '1px solid var(--status-success-border)';
+      btn.disabled = false;
+      setTimeout(() => {
+        const u = _users.find(u => u.id === userId);
+        if (u) u.sessions_week = 0;
+        applyFilters();
+      }, 2500);
     } catch {
       alert('Network error.'); btn.disabled = false; btn.innerHTML = originalHtml;
     }

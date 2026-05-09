@@ -99,6 +99,7 @@ def setup_user_tables(conn: Any) -> None:
         ("stripe_customer_id",     "TEXT"),
         ("stripe_subscription_id", "TEXT"),
         ("stripe_cancel_at",       "BIGINT"),
+        ("week_reset_at",          "BIGINT"),
     ]:
         cur.execute(f"ALTER TABLE users ADD COLUMN IF NOT EXISTS {col} {defn}")
 
@@ -205,13 +206,25 @@ def upgrade_plan(conn: Any, user_id: str, plan: str = "hunter") -> None:
 def count_interviews_this_week(conn: Any, user_id: str) -> int:
     week_ago_ms = _now_ms() - 7 * 24 * 3_600_000
     cur = conn.cursor()
+    # Use week_reset_at as the lower bound if it's more recent than 7 days ago
+    cur.execute("SELECT week_reset_at FROM users WHERE id = %s", (user_id,))
+    row = cur.fetchone()
+    reset_at = row[0] if row and row[0] else 0
+    since_ms = max(week_ago_ms, reset_at)
     cur.execute(
         "SELECT COUNT(*) FROM job_sessions WHERE user_id = %s AND created_at >= %s",
-        (user_id, week_ago_ms),
+        (user_id, since_ms),
     )
     row = cur.fetchone()
     cur.close()
     return row[0] if row else 0
+
+
+def reset_weekly_limit(conn: Any, user_id: str) -> None:
+    cur = conn.cursor()
+    cur.execute("UPDATE users SET week_reset_at = %s WHERE id = %s", (_now_ms(), user_id))
+    cur.close()
+    conn.commit()
 
 
 def update_profile(conn: Any, user_id: str,

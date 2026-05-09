@@ -37,6 +37,7 @@ from auth import (
     create_reset_token, reset_password_with_token,
     upgrade_plan, count_interviews_this_week, PLAN_WEEKLY_LIMITS,
     create_job_session, update_job_session_context, get_job_session, list_job_sessions,
+    reset_weekly_limit,
     create_access_token, get_current_user, decode_token_raw,
     create_contact_message, list_contact_messages, save_contact_reply, get_contact_message, delete_contact_message,
     set_stripe_info, clear_stripe_subscription, get_user_by_stripe_customer, get_user_by_email,
@@ -617,6 +618,7 @@ async def prepare(body: PrepareRequest, current_user: dict = Depends(get_current
                 "plan": plan,
                 "limit": limit,
                 "used": week_count,
+                "language": language,
                 "message": f"You've used all {limit} interviews this week on your {plan.capitalize()} plan.",
             },
         )
@@ -807,6 +809,15 @@ async def admin_delete_user(user_id: str, current_user: dict = Depends(get_curre
 
     loop = asyncio.get_running_loop()
     await loop.run_in_executor(None, _delete)
+    return {"ok": True}
+
+
+@app.post("/admin/users/{user_id}/reset-week")
+async def admin_reset_week(user_id: str, current_user: dict = Depends(get_current_user)):
+    if current_user.get("email") != ADMIN_EMAIL:
+        raise HTTPException(status_code=403, detail="Admin only")
+    loop = asyncio.get_running_loop()
+    await loop.run_in_executor(None, lambda: _with_conn(lambda c: reset_weekly_limit(c, user_id)))
     return {"ok": True}
 
 
@@ -1032,6 +1043,51 @@ async def tts(text: str, voice: str = "nova", lang: str = "en", nocache: bool = 
     raise HTTPException(status_code=503, detail="TTS service temporarily unavailable")
 
 
+# ── History reconstruction from LangGraph state ──────────────────────────────
+
+_OPENING_TEXTS = {
+    "Olá, estou pronto para começar a entrevista.",
+    "Hi, I'm ready to start the interview.",
+}
+
+def _reconstruct_history(messages: list) -> list:
+    """Convert LangGraph state messages into display-ready history entries.
+
+    Returns a list of {type, text, voice} dicts — the same format the client
+    uses for addBubble / addFeedback.  Internal markers and the scorecard are
+    filtered out; report messages (AIMessage followed by [acknowledged...]) are
+    tagged as 'feedback' so they render in the green card style.
+    """
+    history = []
+    for i, msg in enumerate(messages):
+        if isinstance(msg, HumanMessage):
+            content = msg.content
+            # Skip the synthetic opening and all internal bracket markers
+            if content in _OPENING_TEXTS or content.startswith("["):
+                continue
+            history.append({"type": "user", "text": content, "voice": "nova"})
+
+        elif isinstance(msg, AIMessage):
+            content = msg.content
+            if not content or content in ("[no_report]",):
+                continue
+            if "INTERVIEW SCORECARD" in content:
+                continue
+            # Detect phase reports: an AIMessage followed by [acknowledged…]
+            next_msg = messages[i + 1] if i + 1 < len(messages) else None
+            is_report = (
+                next_msg is not None
+                and isinstance(next_msg, HumanMessage)
+                and "[acknowledged" in next_msg.content
+            )
+            history.append({
+                "type": "feedback" if is_report else "ai",
+                "text": content,
+                "voice": "onyx" if is_report else "nova",
+            })
+    return history
+
+
 # ── WebSocket streaming helper ────────────────────────────────────────────────
 
 async def _stream_to_client(ws: WebSocket, messages: list, system_prompt: str,
@@ -1148,7 +1204,8 @@ async def interview_ws(ws: WebSocket):
                 result["__interrupt__"] = interrupts_list
                 prev_msg_count       = len(state_snap.values.get("messages", []))
                 prev_report_streamed = False
-                await ws.send_json({"type": "resumed", "message_count": prev_msg_count})
+                history = _reconstruct_history(state_snap.values.get("messages", []))
+                await ws.send_json({"type": "resumed", "history": history})
                 await ws.send_json({"type": "phase", "fase": result.get("fase", "")})
             else:
                 is_resuming = False
@@ -1215,7 +1272,7 @@ async def interview_ws(ws: WebSocket):
                     _skip_msg = {
                         "pt": "⏭ Fase pulada — seguindo em frente.",
                     }.get(user_language, "⏭ Phase skipped — moving on.")
-                    await ws.send_json({"type": "feedback", "text": _skip_msg})
+                    await ws.send_json({"type": "transition", "text": _skip_msg})
 
                 await ws.send_json({"type": "scorecard_ready"})
                 await ws.send_json({"type": "done"})
@@ -1272,13 +1329,28 @@ async def interview_ws(ws: WebSocket):
                 )
 
                 _NEXT_PHASE_LABEL = {
-                    "elevator_pitch_report": "the CAR Project Story",
-                    "CAR_report":            "the Technical Questions",
-                    "technical_report":      "Leadership & Project Approach",
-                    "leadership_report":     "Fit & Motivation",
-                    "motivation_report":     "your questions for me",
+                    "en": {
+                        "elevator_pitch_report": "the CAR Project Story",
+                        "CAR_report":            "the Technical Questions",
+                        "technical_report":      "Leadership & Project Approach",
+                        "leadership_report":     "Fit & Motivation",
+                        "motivation_report":     "your questions for me",
+                    },
+                    "pt": {
+                        "elevator_pitch_report": "a história de projeto CAR",
+                        "CAR_report":            "as Perguntas Técnicas",
+                        "technical_report":      "Liderança & Abordagem de Projeto",
+                        "leadership_report":     "Fit & Motivação",
+                        "motivation_report":     "suas perguntas para mim",
+                    },
                 }
-                next_label = _NEXT_PHASE_LABEL.get(fase, "the next phase")
+                _phase_labels = _NEXT_PHASE_LABEL.get(lang, _NEXT_PHASE_LABEL["en"])
+                next_label = _phase_labels.get(fase, "the next phase" if lang != "pt" else "a próxima fase")
+
+                _READY_MSG = {
+                    "pt": f"Tome um momento para revisar esse feedback. Quando estiver pronto para seguir para {next_label}, é só me enviar uma mensagem.",
+                    "en": f"Take a moment to review that feedback. When you're ready to move on to {next_label}, just send me a message.",
+                }
 
                 if was_skipped:
                     full_text    = "[no_report]"
@@ -1296,7 +1368,7 @@ async def interview_ws(ws: WebSocket):
                     )
                     await ws.send_json({
                         "type": "ai",
-                        "text": f"Take a moment to review that feedback. When you're ready to move on to {next_label}, just send me a message.",
+                        "text": _READY_MSG.get(lang, _READY_MSG["en"]),
                     })
                 else:
                     full_text = ""
@@ -1326,7 +1398,7 @@ async def interview_ws(ws: WebSocket):
                 skip_advance = False
                 await ws.send_json({"type": "ai", "text": question})
 
-            _SKIP_KEYWORDS = {"skip", "s"}
+            _SKIP_KEYWORDS = {"skip", "s", "pular"}
             while True:
                 data = await ws.receive_json()
                 if data.get("type") == "ping":

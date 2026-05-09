@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title data-i18n="onboarding.pageTitle">Prepare Your Interview — Acing Interview</title>
+  <title data-i18n="onboarding.pageTitle">Prepare Your Interview — Acing Interviews</title>
   
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -110,7 +110,7 @@
   <a class="header-brand-link" href="/">
     <div class="header-logo"><i data-lucide="target" style="width: 22px; height: 22px;"></i></div>
     <div class="header-brand-info">
-      <h1>Acing Interview</h1>
+      <h1>Acing Interviews</h1>
       <p data-i18n="header.tagline">AI-powered mock interview preparation</p>
     </div>
   </a>
@@ -374,7 +374,13 @@
         if (res.status === 429 && data.detail?.code === 'weekly_limit_reached') {
           const plan  = data.detail.plan;
           const limit = data.detail.limit;
-          showError(`You've used all ${limit} interviews this week. <a href="/upgrade.html" style="color:#a78bfa;font-weight:600;text-decoration:underline">Upgrade</a> for more.`);
+          const lang  = data.detail.language || 'en';
+          const upgradeUrl = `/upgrade.html`;
+          const upgradeStyle = `style="color:#a78bfa;font-weight:600;text-decoration:underline"`;
+          const msg = lang === 'pt'
+            ? `Você usou todas as ${limit} entrevistas desta semana. <a href="${upgradeUrl}" ${upgradeStyle}>Faça upgrade</a> para continuar.`
+            : `You've used all ${limit} interviews this week. <a href="${upgradeUrl}" ${upgradeStyle}>Upgrade</a> for more.`;
+          showError(msg);
         } else {
           showError(data.detail || 'Error occurred');
         }

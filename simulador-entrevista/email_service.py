@@ -86,7 +86,7 @@ _RESET_COPY = {
 def _build_html(link: str, copy: dict) -> str:
     return f"""
 <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px">
-  <h2 style="color:#6366f1">Acing Interview</h2>
+  <h2 style="color:#6366f1">Acing Interviews</h2>
   <p>{copy['body']}</p>
   <a href="{link}" style="display:inline-block;margin:24px 0;padding:12px 28px;
      background:#6366f1;color:#fff;border-radius:10px;text-decoration:none;font-weight:600">
@@ -113,7 +113,7 @@ def send_contact_notification(name: str, from_email: str, subject: str, body: st
     text = f"New contact message from {name} <{from_email}>:\n\nSubject: {subject}\n\n{body}"
     html = f"""
 <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px">
-  <h2 style="color:#6366f1">New Contact Message — Acing Interview</h2>
+  <h2 style="color:#6366f1">New Contact Message — Acing Interviews</h2>
   <p><strong>From:</strong> {name} &lt;{from_email}&gt;</p>
   <p><strong>Subject:</strong> {subject}</p>
   <hr style="border:none;border-top:1px solid #2d3148;margin:16px 0"/>
@@ -129,7 +129,7 @@ def send_contact_reply(to_email: str, to_name: str, original_subject: str, reply
     text = f"Hello {to_name},\n\n{reply_text}\n\n---\nAcing Interview\n{_BASE}"
     html = f"""
 <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px">
-  <h2 style="color:#6366f1">Acing Interview</h2>
+  <h2 style="color:#6366f1">Acing Interviews</h2>
   <p>Hello {to_name},</p>
   <p style="white-space:pre-wrap">{reply_text}</p>
   <hr style="border:none;border-top:1px solid #2d3148;margin:24px 0"/>

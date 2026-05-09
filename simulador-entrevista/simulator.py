@@ -29,14 +29,16 @@ def _invoke_with_retry(runnable, messages, max_retries: int = 5, base_delay: flo
             else:
                 raise
 
+import sqlite3 as _sqlite3
+from langgraph.checkpoint.sqlite import SqliteSaver as _SqliteSaver
+
 _database_url = os.getenv("DATABASE_URL")
 
 if _database_url:
-    # ── PostgreSQL (produção) ──────────────────────────────────────────────────
+    # ── PostgreSQL (produção) — app data only ─────────────────────────────────
     try:
         import psycopg2 as _psycopg2
         from psycopg2.pool import ThreadedConnectionPool as _ThreadedConnectionPool
-        from langgraph.checkpoint.memory import MemorySaver as _MemorySaver
 
         _pool = _ThreadedConnectionPool(
             2, 10,
@@ -44,7 +46,7 @@ if _database_url:
             connect_timeout=15,
             options="-c lock_timeout=5000 -c statement_timeout=30000",
         )
-        _conn = None  # pool is used; _conn kept for compatibility checks
+        _conn = None
 
         @contextmanager
         def get_db_conn():
@@ -55,46 +57,42 @@ if _database_url:
             finally:
                 _pool.putconn(conn)
 
-        _Checkpointer = _MemorySaver
     except Exception as _e:
-        print(f"[warn] Falha ao conectar no PostgreSQL: {_e} — usando MemorySaver")
+        print(f"[warn] Falha ao conectar no PostgreSQL: {_e}")
         _pool = None
         _conn = None
-
-        @contextmanager
-        def get_db_conn():
-            yield None  # no-op; callers must guard against None
-
-        from langgraph.checkpoint.memory import MemorySaver as _MemorySaver
-        _Checkpointer = _MemorySaver
-else:
-    # ── SQLite (dev local sem DATABASE_URL) ───────────────────────────────────
-    try:
-        import sqlite3 as _sqlite3
-        from langgraph.checkpoint.sqlite import SqliteSaver as _SqliteSaver
-        _db_path = str(Path(__file__).parent / "sessions.db")
-        _conn = _sqlite3.connect(_db_path, check_same_thread=False)
-        _pool = None
-        _saver = _SqliteSaver(_conn)
-        _saver.setup()
-        _Checkpointer = lambda: _saver  # noqa: E731
-
-        @contextmanager
-        def get_db_conn():
-            yield _conn
-
-    except Exception:
-        _conn = None
-        _pool = None
 
         @contextmanager
         def get_db_conn():
             yield None
 
-        from langgraph.checkpoint.memory import MemorySaver as _MemorySaver
-        _Checkpointer = _MemorySaver
+else:
+    # ── SQLite (dev local sem DATABASE_URL) — app data ────────────────────────
+    _db_path = str(Path(__file__).parent / "sessions.db")
+    _conn = _sqlite3.connect(_db_path, check_same_thread=False)
+    _pool = None
 
-_is_pg = _pool is not None or (_conn is not None and hasattr(_conn, 'server_version'))
+    @contextmanager
+    def get_db_conn():
+        yield _conn
+
+
+# ── LangGraph checkpointer — always SQLite, separate connection ───────────────
+# Survives server restarts in both dev (local file) and prod (persistent volume).
+# Set LANGGRAPH_DB_PATH env var to a volume-mounted path in production.
+_cp_path = os.getenv("LANGGRAPH_DB_PATH", str(Path(__file__).parent / "sessions.db"))
+try:
+    _cp_conn = _sqlite3.connect(_cp_path, check_same_thread=False)
+    _cp_saver = _SqliteSaver(_cp_conn)
+    _cp_saver.setup()
+    _Checkpointer = lambda: _cp_saver  # noqa: E731
+    print(f"[checkpointer] SQLite → {_cp_path}")
+except Exception as _e:
+    print(f"[warn] SQLite checkpointer failed: {_e} — using MemorySaver (sessions won't survive restarts)")
+    from langgraph.checkpoint.memory import MemorySaver as _MemorySaver
+    _Checkpointer = _MemorySaver
+
+_is_pg = _pool is not None
 
 
 # ── Session store ─────────────────────────────────────────────────────────────
@@ -350,14 +348,19 @@ _LANG_REMINDER = {
 
 
 def _build_interview_system(interview_context: str, phase: str, language: str = "en") -> str:
-    """Compose: persona + candidate context + phase guide."""
+    """Compose: persona + candidate context + phase guide.
+
+    Only injects the interview_context sections relevant to this phase so the
+    model cannot 'see' questions from other phases and confuse them.
+    """
     phase_guide = _PHASE_FILES.get(phase, "")
     lang_block = "\n\n---\n\n" + _LANG_DIRECTIVE.get(language, _LANG_DIRECTIVE["en"])
+    slim_context = _extract_context_for_phase(interview_context, phase, extra=_INTERVIEW_EXTRA_SECTIONS)
     context_block = (
         "\n\n---\n\n## CANDIDATE & JOB CONTEXT\n\n"
-        + interview_context
+        + slim_context
         + "\n\n---\n\n"
-    ) if interview_context else "\n\n---\n\n"
+    ) if slim_context else "\n\n---\n\n"
     lang_reminder = _LANG_REMINDER.get(language, _LANG_REMINDER["en"])
     return _PERSONA + lang_block + context_block + phase_guide + lang_reminder
 
@@ -370,17 +373,19 @@ _REPORT_PHASE_SECTIONS = {
     "motivation":     "# FIT & MOTIVATION EVALUATION",
 }
 
+# Sections always included regardless of phase
 _ALWAYS_INCLUDE_SECTIONS = {"# CANDIDATE PROFILE", "# LANGUAGE & COMMUNICATION NOTES"}
+# Also included for interview nodes (gives role-level context without leaking other phase content)
+_INTERVIEW_EXTRA_SECTIONS = {"# TARGET ROLE ANALYSIS"}
 
 
-def _extract_context_for_report(interview_context: str, phase: str) -> str:
-    """Return only the sections of interview_context relevant to this phase's report."""
+def _extract_context_for_phase(interview_context: str, phase: str, extra: set = frozenset()) -> str:
+    """Return only the sections of interview_context relevant to a given phase."""
     if not interview_context:
         return ""
     phase_section = _REPORT_PHASE_SECTIONS.get(phase, "")
-    keep = _ALWAYS_INCLUDE_SECTIONS | ({phase_section} if phase_section else set())
+    keep = _ALWAYS_INCLUDE_SECTIONS | extra | ({phase_section} if phase_section else set())
 
-    # Split on markdown H1 headings
     import re
     parts = re.split(r'(?=^# )', interview_context, flags=re.MULTILINE)
     selected = []
@@ -389,6 +394,10 @@ def _extract_context_for_report(interview_context: str, phase: str) -> str:
         if not heading or any(heading.startswith(h) for h in keep):
             selected.append(part)
     return "\n\n".join(selected).strip()
+
+
+def _extract_context_for_report(interview_context: str, phase: str) -> str:
+    return _extract_context_for_phase(interview_context, phase)
 
 
 def _build_report_system(interview_context: str, phase: str, language: str = "en") -> str:
@@ -636,7 +645,7 @@ def _make_interview_node(output_class, checklist_key, notas_key, report_fase, ph
         if not avaliacao.fase_completa:
             user_response = interrupt(avaliacao.mensagem)
 
-            if user_response.strip().lower() in ("skip", "s"):
+            if user_response.strip().lower() in ("skip", "s", "pular"):
                 return {
                     "messages": [],
                     "phase_messages": phase_msgs + [
@@ -745,7 +754,7 @@ def candidate_questions(state: EntrevistaState, config: RunnableConfig) -> dict:
 
     if not avaliacao.fase_completa:
         user_response = interrupt(avaliacao.mensagem)
-        if user_response.strip().lower() in ("skip", "s"):
+        if user_response.strip().lower() in ("skip", "s", "pular"):
             return {
                 "messages": [],
                 "phase_messages": [],

@@ -1130,7 +1130,7 @@
     <a class="home-link" href="/">
       <div class="logo"><i data-lucide="target" style="width:22px;height:22px;"></i></div>
       <div>
-        <h1>Acing Interview</h1>
+        <h1>Acing Interviews</h1>
         <p id="header-subtitle">Connecting…</p>
       </div>
     </a>
@@ -1387,17 +1387,6 @@
 
     function _loadThreadId() {
       return _loadRaw()?.threadId || null;
-    }
-
-    // Append a message record to the stored history (capped at 300 entries).
-    function _persistMsg(type, text, voice) {
-      const raw = _loadRaw();
-      if (!raw) return;
-      if (!raw.history) raw.history = [];
-      raw.history.push({ type, text, voice: voice || 'nova' });
-      if (raw.history.length > 300) raw.history = raw.history.slice(-300);
-      localStorage.setItem(SESSION_KEY, JSON.stringify(raw));
-      _syncToServer();
     }
 
     function clearSession() {
@@ -1677,8 +1666,6 @@
           speak(_stripMarkdown(finalText), finalVoice, finalLang);
         });
         streamWrapperEl.appendChild(btn);
-        // Persist the streamed report so it reappears in history on resume.
-        _persistMsg('ai', finalText, finalVoice);
       }
 
       streamBubbleEl = null;
@@ -1930,7 +1917,7 @@
 
         // Don't remove the typing indicator on silent/bookkeeping messages —
         // only remove it when actual content is about to be rendered.
-        const _silentTypes = new Set(['session', 'phase', 'pong']);
+        const _silentTypes = new Set(['session', 'phase', 'pong', 'user']);
         if (!_silentTypes.has(msg.type)) removeTyping();
 
         switch (msg.type) {
@@ -1940,39 +1927,18 @@
             break;
 
           case 'resumed': {
-            // Restore the stored chat history so the user can see prior turns.
-            const raw = _loadRaw();
-            if (raw?.history?.length) {
-              // Detect stale history: server is at the very beginning (message_count ≤ 1)
-              // but client has more history entries — this happens after a server restart
-              // that lost the graph state and recreated a fresh session with the same
-              // thread_id. Discard the stale history to avoid showing old turns + a
-              // duplicate opening message.
-              const serverMsgCount = msg.message_count ?? Infinity;
-              if (serverMsgCount <= 1 && raw.history.length > 1) {
-                raw.history = [];
-                localStorage.setItem(SESSION_KEY, JSON.stringify(raw));
-                break;
-              }
-
+            // Server sends the full history reconstructed from the LangGraph
+            // checkpoint — no localStorage history needed.
+            const history = msg.history || [];
+            if (history.length) {
               removeTyping();
               const notice = document.createElement('div');
               notice.style.cssText = 'text-align:center;font-size:11px;color:#475569;padding:6px 0 2px';
               notice.textContent = t('interview.sessionRestored');
               chat.appendChild(notice);
-              // Drop the last 'ai' entry — the server is about to re-send the
-              // current pending question.  We also write the trimmed history back
-              // to localStorage so the server's re-send doesn't create a duplicate
-              // (otherwise the entry accumulates on every refresh).
-              let history = raw.history;
-              if (history.length > 0 && history[history.length - 1].type === 'ai') {
-                history = history.slice(0, -1);
-                raw.history = history;
-                localStorage.setItem(SESSION_KEY, JSON.stringify(raw));
-              }
               for (const m of history) {
-                if (m.type === 'ai') addBubble('ai', m.text, m.voice, true);
-                else if (m.type === 'user') addBubble('user', m.text, USER_TTS_VOICE, true);
+                if (m.type === 'ai') addBubble('ai', m.text, m.voice || 'nova', false);
+                else if (m.type === 'user') addBubble('user', m.text, USER_TTS_VOICE, false);
                 else if (m.type === 'feedback') _addFeedbackSilent(m.text);
               }
               scrollBottom();
@@ -2008,7 +1974,6 @@
 
           case 'ai':
             addBubble('ai', msg.text);
-            _persistMsg('ai', msg.text, 'nova');
             if (_autoTTS) {
               speak(msg.text).then(() => enableInput());
             } else {
@@ -2018,18 +1983,15 @@
 
           case 'transition':
             addBubble('ai', msg.text, 'onyx');
-            _persistMsg('ai', msg.text, 'onyx');
             if (_autoTTS) speak(msg.text, 'onyx');
             showTyping(true);
             break;
 
           case 'user':
-            _persistMsg('user', msg.text, 'nova');
             break;
 
           case 'feedback':
             addFeedback(msg.text);
-            _persistMsg('feedback', msg.text, 'onyx');
             document.getElementById('scorecard-generating').style.display = 'flex';
             break;
 

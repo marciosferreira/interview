@@ -320,7 +320,7 @@ new_head = """  <!-- Fonts & Icons -->
   <a class="header-brand-link" href="/">
     <div class="header-logo"><i data-lucide="target" style="width: 22px; height: 22px;"></i></div>
     <div class="header-brand-info">
-      <h1>Acing Interview</h1>
+      <h1>Acing Interviews</h1>
       <p id="header-subtitle">Connecting...</p>
     </div>
   </a>
