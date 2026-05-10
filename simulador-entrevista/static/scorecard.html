@@ -242,10 +242,10 @@
   }
 
   const _HIRE_SIGNAL_CONFIG = {
-    'Strong Yes': { cls: 'signal-strong-yes', emoji: '🟢', label: 'Strong Yes' },
-    'Yes':        { cls: 'signal-yes',        emoji: '✅', label: 'Yes'         },
-    'Borderline': { cls: 'signal-borderline', emoji: '🟡', label: 'Borderline'  },
-    'Not Yet':    { cls: 'signal-not-yet',    emoji: '🔴', label: 'Not Yet'     },
+    'Strong Yes': { cls: 'signal-strong-yes', emoji: '🟢', i18nKey: 'scorecard.hireSignals.strongYes' },
+    'Yes':        { cls: 'signal-yes',        emoji: '✅', i18nKey: 'scorecard.hireSignals.yes'       },
+    'Borderline': { cls: 'signal-borderline', emoji: '🟡', i18nKey: 'scorecard.hireSignals.borderline'},
+    'Not Yet':    { cls: 'signal-not-yet',    emoji: '🔴', i18nKey: 'scorecard.hireSignals.notYet'   },
   };
 
   function _showHireHero(hireSignal) {
@@ -254,7 +254,7 @@
     const hero = document.getElementById('hire-hero');
     hero.classList.add(cfg.cls);
     document.getElementById('hire-emoji').textContent = cfg.emoji;
-    document.getElementById('hire-value').textContent  = cfg.label;
+    document.getElementById('hire-value').textContent  = window.t ? window.t(cfg.i18nKey) : hireSignal;
     hero.style.display = 'block';
   }
 
@@ -278,7 +278,7 @@
       ? `<div style="background:var(--bg-surface);border:1px solid var(--bg-surface-border);border-radius:12px;padding:16px;filter:blur(5px);user-select:none;pointer-events:none;">
            <div style="font-size:11px;font-weight:700;color:var(--brand-primary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">🎯 ${isPt ? 'Sinal' : 'Signal'}</div>
            <div style="font-size:30px">${signalCfg.emoji}</div>
-           <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-top:8px">${signalCfg.label}</div>
+           <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-top:8px">${window.t ? window.t(signalCfg.i18nKey) : hireSignal}</div>
          </div>`
       : `<div style="background:var(--bg-surface);border:1px solid var(--bg-surface-border);border-radius:12px;padding:16px;filter:blur(5px);user-select:none;pointer-events:none;">
            <div style="font-size:11px;font-weight:700;color:var(--brand-primary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">🎯 ${isPt ? 'Sinal' : 'Signal'}</div>
@@ -287,7 +287,7 @@
          </div>`;
 
     const features = isPt
-      ? ['Nota de 0 a 10 em cada uma das 7 fases da entrevista',
+      ? ['Nota de 0 a 5 em cada uma das 7 fases da entrevista',
          'Feedback detalhado sobre vocabulário, clareza e estrutura das respostas',
          'Sinal de contratação: de "Contrate agora" a "Ainda não é sua vez"',
          'Narração em áudio por IA — ouça o relatório como um podcast',

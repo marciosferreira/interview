@@ -520,7 +520,13 @@
       "upgradeTitle": "Recurso exclusivo Hunter",
       "upgradeBody": "A leitura em áudio do scorecard está disponível apenas no plano Hunter."
     },
-    "hireLabel": "Sinal de contratação"
+    "hireLabel": "Sinal de contratação",
+    "hireSignals": {
+      "strongYes": "Contrate agora",
+      "yes": "Boas chances de contratação",
+      "borderline": "Quase lá",
+      "notYet": "Ainda não é sua vez"
+    }
   },
   "tips": {
     "pageTitle": "Dicas de Entrevista — Acing Interview",

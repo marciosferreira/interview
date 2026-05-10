@@ -520,7 +520,13 @@
       "upgradeTitle": "Hunter exclusive feature",
       "upgradeBody": "Scorecard audio narration is available on the Hunter plan only."
     },
-    "hireLabel": "Hiring signal"
+    "hireLabel": "Hiring signal",
+    "hireSignals": {
+      "strongYes": "Strong Yes",
+      "yes": "Yes",
+      "borderline": "Borderline",
+      "notYet": "Not Yet"
+    }
   },
   "tips": {
     "pageTitle": "Interview Tips — Acing Interview",
