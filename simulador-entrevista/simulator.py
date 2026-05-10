@@ -344,10 +344,18 @@ def _coerce_list(v):
 
 StrList = Annotated[list[str], BeforeValidator(_coerce_list)]
 
-model = ChatAnthropic(
-    model=os.getenv("MODEL_NAME", "claude-sonnet-4-6"),
-    api_key=os.getenv("ANTHROPIC_API_KEY"),
-)
+_EXPLORER_MODEL = os.getenv("EXPLORER_MODEL", "claude-haiku-4-5-20251001")
+_HUNTER_MODEL   = os.getenv("HUNTER_MODEL",   "claude-sonnet-4-6")
+
+_model_explorer = ChatAnthropic(model=_EXPLORER_MODEL, api_key=os.getenv("ANTHROPIC_API_KEY"))
+_model_hunter   = ChatAnthropic(model=_HUNTER_MODEL,   api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+model = _model_explorer  # fallback used by _stream_to_client default
+
+
+def get_model(plan: str) -> ChatAnthropic:
+    """Return the LLM instance for the given user plan."""
+    return _model_hunter if plan == "hunter" else _model_explorer
 
 # ---------------------------------------------------------------------------
 # Prompt loader
@@ -517,6 +525,7 @@ class EntrevistaState(TypedDict):
     archive:        list
     fase:           str
     language:       str      # user's preferred language ("en" or "pt")
+    user_plan:      str      # "explorer" or "hunter" — determines which LLM model to use
     interview_context: str   # generated per-session from CV + job description
     candidate_name: str      # extracted from interview_context
     job_title:      str
@@ -704,7 +713,7 @@ def _make_interview_node(output_class, checklist_key, notas_key, report_fase, ph
         interview_context = state.get("interview_context", "")
         language = state.get("language", "en")
         system_prompt = _build_interview_system(interview_context, phase_name, language)
-        structured = model.with_structured_output(output_class)
+        structured = get_model(state.get("user_plan", "explorer")).with_structured_output(output_class)
 
         phase_msgs: list = state.get("phase_messages") or [
             HumanMessage(content="I'm ready to start this phase.")
@@ -860,7 +869,7 @@ def candidate_questions(state: EntrevistaState, config: RunnableConfig) -> dict:
     interview_context = state.get("interview_context", "")
     language = state.get("language", "en")
     system_prompt = _build_interview_system(interview_context, "candidate_questions", language)
-    structured = model.with_structured_output(CandidateQuestionsPhase)
+    structured = get_model(state.get("user_plan", "explorer")).with_structured_output(CandidateQuestionsPhase)
 
     _cq_opener = "I'm ready to ask my questions."
     phase_msgs: list = state.get("phase_messages") or [
@@ -921,7 +930,7 @@ def feedback(state: EntrevistaState, config: RunnableConfig) -> dict:
     interview_context = state.get("interview_context", "")
     language = state.get("language", "en")
     system_prompt = _build_scorecard_system(interview_context, language)
-    structured = model.with_structured_output(Scorecard)
+    structured = get_model(state.get("user_plan", "explorer")).with_structured_output(Scorecard)
 
     # Build compact context from distilled phase reports + structured notes
     parts = []
@@ -1217,6 +1226,7 @@ def make_initial_state(
     job_title: str = "",
     company: str = "",
     language: str = "en",
+    user_plan: str = "explorer",
 ) -> EntrevistaState:
     opening = "Olá, estou pronto para começar a entrevista." if language == "pt" else "Hi, I'm ready to start the interview."
     return {
@@ -1225,6 +1235,7 @@ def make_initial_state(
         "archive": [],
         "fase": "elevator_pitch",
         "language": language,
+        "user_plan": user_plan,
         "interview_context": interview_context,
         "candidate_name": candidate_name,
         "job_title": job_title,

@@ -10,17 +10,17 @@ import os
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import HumanMessage, SystemMessage
 
-_gen_model = None
+_gen_model_cache: dict = {}
 
-def _get_model() -> ChatAnthropic:
-    global _gen_model
-    if _gen_model is None:
-        _gen_model = ChatAnthropic(
-            model=os.getenv("GENERATOR_MODEL", "claude-sonnet-4-6"),
+def _get_model(model_name: str | None = None) -> ChatAnthropic:
+    key = model_name or os.getenv("GENERATOR_MODEL", "claude-sonnet-4-6")
+    if key not in _gen_model_cache:
+        _gen_model_cache[key] = ChatAnthropic(
+            model=key,
             api_key=os.getenv("ANTHROPIC_API_KEY"),
             max_tokens=8192,
         )
-    return _gen_model
+    return _gen_model_cache[key]
 
 _SYSTEM = """You are an expert interview designer. Analyze a job description and resume, then produce a concise structured briefing for an AI interviewer named Alex.
 
@@ -155,6 +155,7 @@ async def generate_interview_context(
     job_description: str,
     resume_text: str,
     language: str = "en",
+    model_name: str | None = None,
 ) -> str:
     """Call the LLM to produce a personalized interview preparation document."""
     prompt = _PROMPT_TEMPLATE.format(
@@ -168,7 +169,7 @@ async def generate_interview_context(
         SystemMessage(content=_SYSTEM),
         HumanMessage(content=prompt),
     ]
-    response = await _get_model().ainvoke(messages)
+    response = await _get_model(model_name).ainvoke(messages)
     return response.content
 
 

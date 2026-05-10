@@ -26,8 +26,9 @@ from openai import AsyncOpenAI
 from pydantic import BaseModel
 
 from simulator import (
-    graph, make_initial_state, model, session_store,
+    graph, make_initial_state, model, get_model, session_store,
     _build_report_system, REPORT_PHASE_MAP, get_db_conn,
+    _EXPLORER_MODEL, _HUNTER_MODEL,
 )
 from auth import (
     UserCreate, UserLogin, TokenResponse, RegisterResponse, ProfileUpdate,
@@ -628,6 +629,7 @@ async def prepare(body: PrepareRequest, current_user: dict = Depends(get_current
             job_description=body.job_description,
             resume_text=body.resume_text,
             language=language,
+            model_name=_HUNTER_MODEL if plan == "hunter" else _EXPLORER_MODEL,
         )
     except Exception as exc:
         print(f"[prepare] LLM generation failed: {exc}")
@@ -1106,8 +1108,10 @@ def _reconstruct_history(messages: list) -> list:
 # ── WebSocket streaming helper ────────────────────────────────────────────────
 
 async def _stream_to_client(ws: WebSocket, messages: list, system_prompt: str,
-                             voice: str = "nova", lang: str = "en", max_retries: int = 5) -> str:
+                             voice: str = "nova", lang: str = "en", max_retries: int = 5,
+                             llm=None) -> str:
     from anthropic import APIStatusError
+    _llm = llm or model
     full_msg = [SystemMessage(content=[{
         "type": "text",
         "text": system_prompt,
@@ -1116,7 +1120,7 @@ async def _stream_to_client(ws: WebSocket, messages: list, system_prompt: str,
     for attempt in range(max_retries):
         full_text = ""
         try:
-            async for chunk in model.astream(full_msg):
+            async for chunk in _llm.astream(full_msg):
                 if chunk.content:
                     full_text += chunk.content
                     await ws.send_json({"type": "stream_chunk", "text": chunk.content, "voice": voice, "lang": lang})
@@ -1256,6 +1260,7 @@ async def interview_ws(ws: WebSocket):
                 job_title=job_title,
                 company=company,
                 language=user_language,
+                user_plan=user_plan,
             )
             result = await loop.run_in_executor(
                 None, functools.partial(graph.invoke, initial_state, config)
@@ -1443,7 +1448,8 @@ async def interview_ws(ws: WebSocket):
                     report_messages = [HumanMessage(content=f"## Phase Transcript\n\n{transcript_text}\n\n---\n\nNow generate the structured phase feedback report.")]
 
                     full_text = await _stream_to_client(
-                        ws, report_messages, report_system, voice="onyx", lang=lang
+                        ws, report_messages, report_system, voice="onyx", lang=lang,
+                        llm=get_model(user_plan),
                     )
                     await ws.send_json({
                         "type": "ai",
