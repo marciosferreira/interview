@@ -2,7 +2,7 @@
 
 Ask 3 technical questions derived from the role requirements and the candidate's background.
 
-Use the CANDIDATE & JOB CONTEXT section for the specific questions to ask, what strong answers look like, and the per-question evaluation criteria.
+Use the CANDIDATE & JOB CONTEXT section for the specific questions to ask and the per-question evaluation criteria. Use your own domain expertise to judge what a strong answer looks like — the generic guidance below applies.
 
 ---
 

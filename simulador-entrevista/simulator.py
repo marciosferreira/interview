@@ -251,6 +251,31 @@ class SessionStore:
         else:
             self._mem.pop(thread_id, None)
 
+    def save_history(self, thread_id: str, user_id: str, history: list) -> None:
+        if _pool is not None or _conn is not None:
+            ph = "%s" if self._is_pg else "?"
+            sql = f"UPDATE session_meta SET history = {ph} WHERE thread_id = {ph} AND user_id = {ph}"
+            with get_db_conn() as conn:
+                cur = self._exec(conn, sql, (_json.dumps(history), thread_id, user_id))
+                if self._is_pg:
+                    cur.close()
+                else:
+                    conn.commit()
+        elif thread_id in self._mem:
+            self._mem[thread_id]["history"] = history
+
+    def get_history(self, thread_id: str, user_id: str) -> list:
+        if _pool is not None or _conn is not None:
+            ph = "%s" if self._is_pg else "?"
+            sql = f"SELECT history FROM session_meta WHERE thread_id = {ph} AND user_id = {ph}"
+            with get_db_conn() as conn:
+                cur = self._exec(conn, sql, (thread_id, user_id))
+                row = cur.fetchone()
+                if self._is_pg:
+                    cur.close()
+            return _json.loads(row[0]) if row and row[0] else []
+        return self._mem.get(thread_id, {}).get("history", [])
+
     def save_scorecard(self, thread_id: str, user_id: str, scorecard_text: str) -> None:
         if _pool is not None or _conn is not None:
             ph = "%s" if self._is_pg else "?"

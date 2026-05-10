@@ -831,8 +831,16 @@ async def get_session_history(thread_id: str, current_user: dict = Depends(get_c
         None, functools.partial(graph.get_state, config)
     )
     if not state_snap or not state_snap.values:
-        return {"history": []}
+        stored = await loop.run_in_executor(
+            None, lambda: session_store.get_history(thread_id, current_user["id"])
+        )
+        return {"history": stored}
     history = _reconstruct_history(state_snap.values.get("messages", []))
+    if not history:
+        stored = await loop.run_in_executor(
+            None, lambda: session_store.get_history(thread_id, current_user["id"])
+        )
+        return {"history": stored}
     return {"history": history}
 
 
@@ -1195,6 +1203,30 @@ async def interview_ws(ws: WebSocket):
         thread_id = init["thread_id"]
         is_resuming = True
 
+    # For new rounds (not resuming), check weekly limit and register the round immediately.
+    # This catches "practice again" flows that bypass /prepare.
+    if not is_resuming:
+        _round_count = await loop.run_in_executor(
+            None, lambda: _with_conn(lambda c: count_interviews_this_week(c, user_id))
+        )
+        _round_limit = PLAN_WEEKLY_LIMITS.get(user_plan, 3)
+        if _round_count >= _round_limit:
+            await ws.send_json({
+                "type": "error",
+                "text": f"You've used all {_round_limit} interview rounds this week on your {user_plan.capitalize()} plan.",
+                "code": "weekly_limit_reached",
+            })
+            return
+        # Register the round in session_meta immediately so future checks count it.
+        _now = int(time.time() * 1000)
+        await loop.run_in_executor(
+            None,
+            lambda: session_store.upsert(
+                thread_id, _now, _now, "", [],
+                user_id=user_id, job_session_id=job_session_id or None,
+            ),
+        )
+
     config = {"configurable": {"thread_id": thread_id}}
     await ws.send_json({"type": "session", "thread_id": thread_id})
 
@@ -1265,6 +1297,13 @@ async def interview_ws(ws: WebSocket):
                         None,
                         lambda: session_store.save_scorecard(thread_id, user_id, scorecard_msg),
                     )
+
+                # Persist full history to session_meta so it survives LangGraph checkpoint loss.
+                _full_history = _reconstruct_history(messages)
+                await loop.run_in_executor(
+                    None,
+                    lambda: session_store.save_history(thread_id, user_id, _full_history),
+                )
 
                 # Send closing/skip message as feedback (triggers spinner in UI).
                 # AIMessages that precede the last HumanMessage were already sent to the

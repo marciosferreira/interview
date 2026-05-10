@@ -117,7 +117,7 @@
     "title": "Ready to practice?",
     "sub": "Paste a job description and your resume — Alex will run a personalized full-length mock interview with feedback on every phase.",
     "continueTitle": "Continue interview",
-    "newTitle": "New interview",
+    "newTitle": "New position",
     "newSub": "Paste a job description + resume to start a personalized session",
     "historyTitle": "Interview history",
     "historySub": "Browse and continue past sessions by role"
@@ -140,7 +140,7 @@
       "currentPlan": "Current plan",
       "active": "Active",
       "free": "Free",
-      "usage": "{{used}} / {{limit}} interviews this week",
+      "usage": "{{used}} / {{limit}} interviews rounds this week",
       "upgrade": "Upgrade →",
       "downgrade": "Downgrade",
       "downgrading": "Downgrading…",
@@ -216,7 +216,7 @@
       "errorSend": "Failed to send email — please try again."
     },
     "confirm": {
-      "downgrade": "Downgrade to Explorer? You'll be limited to 3 interviews per week, effective immediately."
+      "downgrade": "Downgrade to Explorer? You'll be limited to 3 interview rounds per week, effective immediately."
     }
   },
   "history": {
@@ -227,7 +227,7 @@
     "nav": {
       "current": "← Current interview",
       "currentLabel": "Current interview",
-      "newInterview": "New interview"
+      "newInterview": "New position"
     },
     "pageHeading": "Past interviews",
     "summary": "{{count}} interviews across {{roles}} roles",
@@ -307,7 +307,7 @@
       "item2": "Analyzing what the role requires",
       "item3": "Crafting interview phases specific to you",
       "item4": "Preparing evaluation criteria for each phase",
-      "time": "This usually takes 10–20 seconds."
+      "time": "This usually takes 40–60 seconds."
     },
     "errors": {
       "noTitle": "Please enter the job title.",
@@ -332,7 +332,10 @@
       "speaking": "Alex is speaking…",
       "pause": "Pause",
       "resume": "Resume",
-      "skip": "Skip"
+      "skip": "Skip",
+      "readScorecard": "Listen to Scorecard",
+      "stop": "Stop",
+      "loading": "Loading..."
     },
     "popover": {
       "sameRole": "New round — same role",
@@ -448,17 +451,18 @@
     "usageThisWeek": "This week",
     "plans": {
       "explorer": {
-        "badge": "Explorer",
+        "badge": "<i data-lucide=\"map\" style=\"width:12px;height:12px;margin-right:4px;\"></i> Explorer",
         "name": "Explorer",
         "tagline": "For casual practice",
         "priceHtml": "$0 <span>/ month</span>",
         "priceNote": "Always free",
-        "f1": "3 interviews per week",
+        "f1": "3 interview rounds per week",
         "f2": "Full 7-phase interview flow",
         "f3": "Phase-by-phase feedback",
         "f4": "Interview history",
         "f5NoAccess": "AI scorecard",
-        "f6NoAccess": "Priority processing",
+        "f6NoAccess": "Scorecard audio narration",
+        "f7NoAccess": "Smarter models",
         "btnCurrent": "Current plan",
         "btnCreate": "Get started free →",
         "btnDowngrade": "Downgrade to Explorer",
@@ -470,12 +474,13 @@
         "tagline": "For serious job seekers",
         "priceHtml": "$9<span style=\"font-size:22px;font-weight:700\">.99</span> <span>/ month</span>",
         "priceNote": "Cancel anytime",
-        "f1": "15 interviews per week",
+        "f1": "15 interview rounds per week",
         "f2": "Full 7-phase interview flow",
         "f3": "Phase-by-phase feedback",
         "f4": "AI scorecard",
-        "f5": "Interview history",
-        "f6": "Priority processing",
+        "f5": "Scorecard audio narration",
+        "f6": "Interview history",
+        "f7": "Smarter models",
         "btnUpgrade": "Upgrade to Hunter →",
         "btnPortal": "⚙ Manage subscription",
         "btnCurrent": "✓ Current plan",

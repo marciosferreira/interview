@@ -212,7 +212,7 @@ def count_interviews_this_week(conn: Any, user_id: str) -> int:
     reset_at = row[0] if row and row[0] else 0
     since_ms = max(week_ago_ms, reset_at)
     cur.execute(
-        "SELECT COUNT(*) FROM job_sessions WHERE user_id = %s AND created_at >= %s",
+        "SELECT COUNT(*) FROM session_meta WHERE user_id = %s AND started_at >= %s",
         (user_id, since_ms),
     )
     row = cur.fetchone()

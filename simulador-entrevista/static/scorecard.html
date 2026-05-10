@@ -182,11 +182,11 @@
     <div class="tts-toolbar" style="display:flex;gap:8px;align-items:center;">
       <button id="tts-btn" class="btn" onclick="toggleTTS()" style="font-size:13px; padding:6px 14px; background:#d97706; color:#fff; border:none; font-weight:600;">
         <i data-lucide="volume-2" class="tts-icon" style="width:15px;height:15px"></i>
-        <span class="tts-label">Ler Scorecard</span>
+        <span class="tts-label" data-i18n="interview.tts.readScorecard">Ler Scorecard</span>
       </button>
       <button id="tts-stop-btn" class="btn btn-secondary" onclick="stopTTS()" style="font-size:13px; padding:6px 14px; display:none;">
         <i data-lucide="square" style="width:15px;height:15px"></i>
-        Parar
+        <span data-i18n="interview.tts.stop">Parar</span>
       </button>
     </div>
     <div class="scorecard-pre" id="scorecard-body"></div>
@@ -290,23 +290,23 @@
     if (state === 'loading') {
       btn.disabled = true;
       iconEl.setAttribute('data-lucide', 'loader');
-      label.textContent = 'Carregando...';
+      label.textContent = t('interview.tts.loading');
       btn.classList.add('playing');
       stopBtn.style.display = 'none';
     } else if (state === 'playing') {
       btn.disabled = false;
       iconEl.setAttribute('data-lucide', 'pause');
-      label.textContent = 'Pausar';
+      label.textContent = t('interview.tts.pause');
       stopBtn.style.display = '';
     } else if (state === 'paused') {
       btn.disabled = false;
       iconEl.setAttribute('data-lucide', 'play');
-      label.textContent = 'Continuar';
+      label.textContent = t('interview.tts.resume');
       stopBtn.style.display = '';
     } else {
       btn.disabled = false;
       iconEl.setAttribute('data-lucide', 'volume-2');
-      label.textContent = 'Ler Scorecard';
+      label.textContent = t('interview.tts.readScorecard');
       stopBtn.style.display = 'none';
     }
     lucide.createIcons();
@@ -466,8 +466,9 @@
             const title = [session.jobTitle, session.company].filter(Boolean).join(' — ');
             if (title) document.getElementById('scorecard-title').textContent = title;
             const d = new Date(session.startedAt);
+            const locale = (i18n.currentLang() === 'pt') ? 'pt-BR' : 'en-US';
             document.getElementById('scorecard-sub').textContent =
-              d.toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' });
+              d.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
           }
         }
       } catch {}
