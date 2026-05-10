@@ -911,7 +911,7 @@ def feedback(state: EntrevistaState, config: RunnableConfig) -> dict:
 
     job_title = state.get("job_title", "")
     company   = state.get("company", "")
-    formatted = _format_scorecard(scorecard, job_title=job_title, company=company)
+    formatted = _format_scorecard(scorecard, job_title=job_title, company=company, language=language)
     return {
         "messages": [AIMessage(content=formatted)],
         "fase": "done",
@@ -922,14 +922,81 @@ def feedback(state: EntrevistaState, config: RunnableConfig) -> dict:
 # Scorecard formatter
 # ---------------------------------------------------------------------------
 
-def _format_scorecard(s: Scorecard, job_title: str = "", company: str = "") -> str:
+_SCORECARD_LABELS = {
+    "en": {
+        "header": "INTERVIEW SCORECARD",
+        "scores_section": "Scores by Section",
+        "part1": "Part 1 — Elevator Pitch",
+        "part2": "Part 2 — CAR Project Story",
+        "part3": "Part 3 — Technical Questions",
+        "part4": "Part 4 — Leadership & Approach",
+        "part5": "Part 5 — Fit & Motivation",
+        "missed_section": "What You Didn't Say (But Should Have)",
+        "missed_pitch": "Elevator Pitch:",
+        "missed_car": "CAR Project:",
+        "missed_tech": "Technical Questions:",
+        "missed_lead": "Leadership:",
+        "vocab_section": "Vocabulary & Framing to Practice",
+        "comm_section": "Overall Communication Performance",
+        "rating_label": "Rating:",
+        "patterns_label": "Recurring patterns to fix:",
+        "assessment_section": "Overall Assessment",
+        "total_label": "Total score:",
+        "hire_label": "Hire signal:",
+        "strengths_label": "Top 2 Strengths",
+        "improve_label": "Top 2 Areas to Improve Before the Real Interview",
+        "insight_label": "One Thing That Could Make or Break Your Interview",
+        "none": "*(none identified)*",
+    },
+    "pt": {
+        "header": "SCORECARD DA ENTREVISTA",
+        "scores_section": "Pontuações por Seção",
+        "part1": "Parte 1 — Elevator Pitch",
+        "part2": "Parte 2 — Projeto CAR",
+        "part3": "Parte 3 — Perguntas Técnicas",
+        "part4": "Parte 4 — Liderança & Abordagem",
+        "part5": "Parte 5 — Fit & Motivação",
+        "missed_section": "O Que Você Não Disse (Mas Deveria Ter Dito)",
+        "missed_pitch": "Elevator Pitch:",
+        "missed_car": "Projeto CAR:",
+        "missed_tech": "Perguntas Técnicas:",
+        "missed_lead": "Liderança:",
+        "vocab_section": "Vocabulário & Enquadramento para Praticar",
+        "comm_section": "Desempenho Geral de Comunicação",
+        "rating_label": "Avaliação:",
+        "patterns_label": "Padrões recorrentes a corrigir:",
+        "assessment_section": "Avaliação Geral",
+        "total_label": "Pontuação total:",
+        "hire_label": "Sinal de contratação:",
+        "strengths_label": "Top 2 Pontos Fortes",
+        "improve_label": "Top 2 Áreas para Melhorar Antes da Entrevista Real",
+        "insight_label": "Uma Coisa Que Pode Definir Sua Entrevista",
+        "none": "*(nenhum identificado)*",
+    },
+}
+
+
+_HIRE_SIGNAL_TRANSLATIONS = {
+    "pt": {
+        "Strong Yes": "Contrate agora",
+        "Yes":        "Boas chances de contratação",
+        "Borderline": "Quase lá",
+        "Not Yet":    "Ainda não é sua vez",
+    },
+}
+
+
+def _format_scorecard(s: Scorecard, job_title: str = "", company: str = "", language: str = "en") -> str:
+    lbl = _SCORECARD_LABELS.get(language, _SCORECARD_LABELS["en"])
+    hire_signal = _HIRE_SIGNAL_TRANSLATIONS.get(language, {}).get(s.hire_signal, s.hire_signal)
+
     def bullets(items: list[str]) -> str:
-        return "\n".join(f"- {item}" for item in items) if items else "- *(none identified)*"
+        return "\n".join(f"- {item}" for item in items) if items else f"- {lbl['none']}"
 
     def numbered(items: list[str]) -> str:
-        return "\n".join(f"{i+1}. {item}" for i, item in enumerate(items)) if items else "1. *(none identified)*"
+        return "\n".join(f"{i+1}. {item}" for i, item in enumerate(items)) if items else f"1. {lbl['none']}"
 
-    header = "INTERVIEW SCORECARD"
+    header = lbl["header"]
     if job_title and company:
         header += f" — {job_title} at {company}"
     elif job_title:
@@ -940,61 +1007,68 @@ def _format_scorecard(s: Scorecard, job_title: str = "", company: str = "") -> s
         "",
         "---",
         "",
-        "## 📊 Scores by Section",
+        f"## 📊 {lbl['scores_section']}",
         "",
-        f"| Section | Score | Comments |",
-        f"|---------|-------|----------|",
-        f"| Part 1 — Elevator Pitch | **{s.score_pitch}/5** | {s.comentario_pitch} |",
-        f"| Part 2 — CAR Project Story | **{s.score_CAR}/5** | {s.comentario_CAR} |",
-        f"| Part 3 — Technical Questions | **{s.score_technical}/5** | {s.comentario_technical} |",
-        f"| Part 4 — Leadership & Approach | **{s.score_leadership}/5** | {s.comentario_leadership} |",
-        f"| Part 5 — Fit & Motivation | **{s.score_motivation}/5** | {s.comentario_motivation} |",
+        f"**{lbl['part1']}** — {s.score_pitch}/5",
+        f"{s.comentario_pitch}",
+        "",
+        f"**{lbl['part2']}** — {s.score_CAR}/5",
+        f"{s.comentario_CAR}",
+        "",
+        f"**{lbl['part3']}** — {s.score_technical}/5",
+        f"{s.comentario_technical}",
+        "",
+        f"**{lbl['part4']}** — {s.score_leadership}/5",
+        f"{s.comentario_leadership}",
+        "",
+        f"**{lbl['part5']}** — {s.score_motivation}/5",
+        f"{s.comentario_motivation}",
         "",
         "---",
         "",
-        "## 💬 What You Didn't Say (But Should Have)",
+        f"## 💬 {lbl['missed_section']}",
         "",
-        "**Elevator Pitch:**",
+        f"**{lbl['missed_pitch']}**",
         bullets(s.oportunidades_pitch),
         "",
-        "**CAR Project:**",
+        f"**{lbl['missed_car']}**",
         bullets(s.oportunidades_CAR),
         "",
-        "**Technical Questions:**",
+        f"**{lbl['missed_tech']}**",
         bullets(s.oportunidades_technical),
         "",
-        "**Leadership:**",
+        f"**{lbl['missed_lead']}**",
         bullets(s.oportunidades_leadership),
         "",
         "---",
         "",
-        "## 📝 Vocabulary & Framing to Practice",
+        f"## 📝 {lbl['vocab_section']}",
         "",
         bullets(s.vocabulario_para_praticar),
         "",
         "---",
         "",
-        "## 🗣️ Overall Communication Performance",
+        f"## 🗣️ {lbl['comm_section']}",
         "",
-        f"**Rating:** {s.ingles_rating}",
+        f"**{lbl['rating_label']}** {s.ingles_rating}",
         "",
-        "**Recurring patterns to fix:**",
+        f"**{lbl['patterns_label']}**",
         numbered(s.ingles_padroes),
         "",
         "---",
         "",
-        "## 🏁 Overall Assessment",
+        f"## 🏁 {lbl['assessment_section']}",
         "",
-        f"**Total score:** {s.score_total}/25  ",
-        f"**Hire signal:** {s.hire_signal}",
+        f"**{lbl['total_label']}** {s.score_total}/25  ",
+        f"**{lbl['hire_label']}** {hire_signal}",
         "",
-        "### ✅ Top 2 Strengths",
+        f"### ✅ {lbl['strengths_label']}",
         numbered(s.forcas),
         "",
-        "### 🔧 Top 2 Areas to Improve Before the Real Interview",
+        f"### 🔧 {lbl['improve_label']}",
         numbered(s.melhorias),
         "",
-        "### ⚡ One Thing That Could Make or Break Your Interview",
+        f"### ⚡ {lbl['insight_label']}",
         "",
         f"> {s.insight_chave}",
         "",

@@ -92,9 +92,6 @@ def _stripe_price_for(language: str) -> str:
         return _STRIPE_PRICE_ID_BRL
     return _STRIPE_PRICE_ID_USD
 
-TTS_CACHE_DIR = Path(__file__).parent / "static" / "tts_cache"
-TTS_CACHE_DIR.mkdir(exist_ok=True)
-_TTS_CACHE_HEADERS = {"Cache-Control": "public, max-age=31536000, immutable"}
 
 app = FastAPI()
 
@@ -952,6 +949,11 @@ space to think. Vary intonation to signal transitions between topics. Sound like
 ## Transcript:
 {text}"""
 
+_GEMINI_TTS_SCORECARD_PROMPT = """\
+Read the following text with energy. Speak at a continuous pace — no long pauses between sentences or sections. Read every word exactly as it appears. Do not add or change anything.
+
+{text}"""
+
 
 _GEMINI_LANG_CODES = {"en": "en-US", "pt": "pt-BR"}
 _GEMINI_VOICES = {
@@ -963,13 +965,14 @@ _GEMINI_VOICES = {
 }
 
 
-def _gemini_tts_sync(text: str, lang: str = "en", voice: str | None = None) -> bytes:
+def _gemini_tts_sync(text: str, lang: str = "en", voice: str | None = None, mode: str = "interview") -> bytes:
     language_code = _GEMINI_LANG_CODES.get(lang, "en-US")
     voice_name = voice if voice in _GEMINI_VOICES else _GEMINI_TTS_VOICE
+    prompt_template = _GEMINI_TTS_SCORECARD_PROMPT if mode == "scorecard" else _GEMINI_TTS_PROMPT
     contents = [
         _genai_types.Content(
             role="user",
-            parts=[_genai_types.Part.from_text(text=_GEMINI_TTS_PROMPT.format(text=text))],
+            parts=[_genai_types.Part.from_text(text=prompt_template.format(text=text))],
         )
     ]
     config = _genai_types.GenerateContentConfig(
@@ -1010,10 +1013,9 @@ async def tts_config():
 
 
 @app.get("/tts")
-async def tts(text: str, voice: str = "nova", lang: str = "en", nocache: bool = False):
+async def tts(text: str, voice: str = "nova", lang: str = "en", nocache: bool = False, mode: str = "interview"):
     if _TTS_PROVIDER == "gemini":
         effective_gemini_voice = voice if voice in _GEMINI_VOICES else _GEMINI_TTS_VOICE
-        cache_key_str = f"gemini:{effective_gemini_voice}:{lang}:{text}"
         ext = "wav"
         media_type = "audio/wav"
     else:
@@ -1023,24 +1025,14 @@ async def tts(text: str, voice: str = "nova", lang: str = "en", nocache: bool = 
         instructions = _TTS_LANG_INSTRUCTIONS.get(lang, "")
         use_mini = bool(instructions)
         tts_model = "gpt-4o-mini-tts" if use_mini else "tts-1"
-        cache_key_str = f"{tts_model}:{voice}:{lang}:{text}"
         ext = "mp3"
         media_type = "audio/mpeg"
-
-    if not nocache:
-        cache_key  = hashlib.md5(cache_key_str.encode()).hexdigest()
-        cache_file = TTS_CACHE_DIR / f"{cache_key}.{ext}"
-        if cache_file.exists():
-            return Response(content=cache_file.read_bytes(), media_type=media_type,
-                            headers=_TTS_CACHE_HEADERS)
-    else:
-        cache_file = None
 
     last_exc: Exception | None = None
     for attempt in range(3):
         try:
             if _TTS_PROVIDER == "gemini":
-                audio_bytes = await asyncio.to_thread(_gemini_tts_sync, text, lang, voice)
+                audio_bytes = await asyncio.to_thread(_gemini_tts_sync, text, lang, voice, mode)
             else:
                 kwargs = dict(model=tts_model, voice=voice, input=text)
                 if instructions:
@@ -1048,10 +1040,7 @@ async def tts(text: str, voice: str = "nova", lang: str = "en", nocache: bool = 
                 response = await openai_client.audio.speech.create(**kwargs)
                 audio_bytes = response.content
 
-            if cache_file is not None:
-                cache_file.write_bytes(audio_bytes)
-            headers = _TTS_CACHE_HEADERS if cache_file is not None else {}
-            return Response(content=audio_bytes, media_type=media_type, headers=headers)
+            return Response(content=audio_bytes, media_type=media_type)
         except Exception as exc:
             last_exc = exc
             if attempt < 2:
@@ -1263,9 +1252,12 @@ async def interview_ws(ws: WebSocket):
                 user_plan = user_db.get("plan", "free") if user_db else "free"
 
                 # Always save the scorecard to DB regardless of plan
+                def _is_scorecard(content: str) -> bool:
+                    return "INTERVIEW SCORECARD" in content or "SCORECARD DA ENTREVISTA" in content
+
                 scorecard_msg = next(
                     (m.content for m in new_messages
-                     if isinstance(m, AIMessage) and "INTERVIEW SCORECARD" in m.content),
+                     if isinstance(m, AIMessage) and _is_scorecard(m.content)),
                     None,
                 )
                 if scorecard_msg:
@@ -1287,7 +1279,7 @@ async def interview_ws(ws: WebSocket):
                     and i > _last_human
                     and m.content
                     and m.content not in ("[no_report]",)
-                    and "INTERVIEW SCORECARD" not in m.content
+                    and not _is_scorecard(m.content)
                 ]
                 for text in closing_msgs:
                     await ws.send_json({"type": "feedback", "text": text})
@@ -1327,7 +1319,7 @@ async def interview_ws(ws: WebSocket):
                         continue
                     if was_report_streamed and had_transition:
                         continue
-                if "INTERVIEW SCORECARD" in msg.content:
+                if _is_scorecard(msg.content):
                     continue  # scorecard served separately via /sessions/{thread_id}/scorecard
                 is_scorecard = fase == "done"
                 msg_type = "feedback" if is_scorecard else "transition"

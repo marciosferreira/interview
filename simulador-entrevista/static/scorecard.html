@@ -18,6 +18,7 @@
 
   <script src="/i18n.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
     main {
@@ -90,6 +91,11 @@
     }
     .scorecard-pre th { background: rgba(99,102,241,0.08); font-weight: 600; }
     .scorecard-pre strong { font-weight: 600; color: var(--text-primary); }
+
+    /* TTS toolbar */
+    .tts-toolbar { margin-bottom: 16px; }
+    #tts-btn .tts-icon { transition: transform 0.4s linear; }
+    #tts-btn.playing .tts-icon { animation: spin 1.2s linear infinite; }
 
     /* Error state */
     #error-state {
@@ -173,6 +179,16 @@
   <div id="scorecard-content">
     <div class="page-title" id="scorecard-title">Scorecard</div>
     <div class="page-sub" id="scorecard-sub"></div>
+    <div class="tts-toolbar" style="display:flex;gap:8px;align-items:center;">
+      <button id="tts-btn" class="btn btn-secondary" onclick="toggleTTS()" style="font-size:13px; padding:6px 14px;">
+        <i data-lucide="volume-2" class="tts-icon" style="width:15px;height:15px"></i>
+        <span class="tts-label">Ler Scorecard</span>
+      </button>
+      <button id="tts-stop-btn" class="btn btn-secondary" onclick="stopTTS()" style="font-size:13px; padding:6px 14px; display:none;">
+        <i data-lucide="square" style="width:15px;height:15px"></i>
+        Parar
+      </button>
+    </div>
     <div class="scorecard-pre" id="scorecard-body"></div>
   </div>
 
@@ -200,6 +216,14 @@
     location.replace('/login.html?next=/scorecard/' + threadId);
   }
 
+  // ── State ──────────────────────────────────────────────────────────────────
+  let _userPlan      = 'free';
+  let _scorecardRaw  = '';
+  let _ttsAudio      = null;
+  let _ttsPlaying    = false;
+  let _ttsPaused     = false;
+
+  // ── UI helpers ─────────────────────────────────────────────────────────────
   function _setLoading(show) {
     document.getElementById('loading-spinner').style.display = show ? 'flex' : 'none';
   }
@@ -219,9 +243,12 @@
   }
 
   function _showScorecard(text) {
+    _scorecardRaw = text;
+    _userPlan = 'hunter'; // backend already gated this endpoint; if we got here, user is hunter
     _setLoading(false);
     document.getElementById('scorecard-body').innerHTML = marked.parse(text);
     document.getElementById('scorecard-content').style.display = 'block';
+    lucide.createIcons();
   }
 
   async function _loadPlanPill() {
@@ -229,12 +256,174 @@
       const res = await fetch('/me', { headers: { 'Authorization': `Bearer ${_authToken}` } });
       if (!res.ok) return;
       const user = await res.json();
+      _userPlan = user.plan || 'free';
       const pill = document.getElementById('plan-pill');
-      if (user.plan === 'hunter') {
+      if (_userPlan === 'hunter') {
         pill.textContent = 'Hunter';
         pill.style.cssText = 'background:rgba(99,102,241,0.15);color:var(--brand-primary);border-color:rgba(99,102,241,0.3);';
       }
     } catch {}
+  }
+
+  // ── TTS ────────────────────────────────────────────────────────────────────
+  function _stripMd(md) {
+    return md
+      .replace(/#{1,6}\s+/g, '')
+      .replace(/\*\*(.+?)\*\*/gs, '$1')
+      .replace(/\*(.+?)\*/gs, '$1')
+      .replace(/^[-*+]\s+/gm, '')
+      .replace(/^\d+\.\s+/gm, '')
+      .replace(/^>\s*/gm, '')
+      .replace(/---+/g, '. ')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/`[^`]+`/g, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
+
+  function _setTtsBtn(state) {
+    const btn     = document.getElementById('tts-btn');
+    const stopBtn = document.getElementById('tts-stop-btn');
+    const label   = btn.querySelector('.tts-label');
+    const iconEl  = btn.querySelector('.tts-icon');
+    btn.classList.remove('playing');
+    if (state === 'loading') {
+      btn.disabled = true;
+      iconEl.setAttribute('data-lucide', 'loader');
+      label.textContent = 'Carregando...';
+      btn.classList.add('playing');
+      stopBtn.style.display = 'none';
+    } else if (state === 'playing') {
+      btn.disabled = false;
+      iconEl.setAttribute('data-lucide', 'pause');
+      label.textContent = 'Pausar';
+      stopBtn.style.display = '';
+    } else if (state === 'paused') {
+      btn.disabled = false;
+      iconEl.setAttribute('data-lucide', 'play');
+      label.textContent = 'Continuar';
+      stopBtn.style.display = '';
+    } else {
+      btn.disabled = false;
+      iconEl.setAttribute('data-lucide', 'volume-2');
+      label.textContent = 'Ler Scorecard';
+      stopBtn.style.display = 'none';
+    }
+    lucide.createIcons();
+  }
+
+  function stopTTS() {
+    if (_ttsAudio) { _ttsAudio.pause(); _ttsAudio = null; }
+    _ttsPlaying = false;
+    _ttsPaused  = false;
+    _setTtsBtn('idle');
+  }
+
+  function _stopTTS() { stopTTS(); }
+
+  async function _fetchChunk(text, voice, lang) {
+    const url = `/tts?text=${encodeURIComponent(text)}&voice=${encodeURIComponent(voice)}&lang=${encodeURIComponent(lang)}&mode=scorecard`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('TTS chunk error');
+    const blob = await res.blob();
+    return URL.createObjectURL(blob);
+  }
+
+  function _playChunk(url) {
+    return new Promise((resolve, reject) => {
+      _ttsAudio = new Audio(url);
+      _ttsAudio.onended  = () => { URL.revokeObjectURL(url); resolve(); };
+      _ttsAudio.onerror  = () => { URL.revokeObjectURL(url); reject(); };
+      _ttsAudio.play();
+    });
+  }
+
+  async function _playTTS() {
+    const plain = _stripMd(_scorecardRaw);
+    if (!plain) return;
+
+    // Collapse all whitespace into single spaces before chunking
+    const collapsed = plain.replace(/\s+/g, ' ').trim();
+
+    // Split on sentence boundaries to create natural chunks
+    const CHUNK_LIMIT = 400;
+    const paras = collapsed.match(/[^.!?]+[.!?]+["']?|[^.!?]+$/g) || [collapsed];
+    const chunks = [];
+    let current = '';
+    for (const para of paras) {
+      if (current && current.length + para.length + 1 > CHUNK_LIMIT) {
+        chunks.push(current);
+        current = para;
+      } else {
+        current = current ? current + ' ' + para : para;
+      }
+    }
+    if (current) chunks.push(current);
+
+    if (!chunks.length) return;
+    _setTtsBtn('loading');
+
+    try {
+      const cfgRes = await fetch('/tts-config');
+      const cfg    = cfgRes.ok ? await cfgRes.json() : {};
+      const voice  = cfg.scorecard_voice || 'Charon';
+      const lang   = localStorage.getItem('preferred_lang') || 'pt';
+
+      // Fetch all chunks in parallel, play in order
+      const urlPromises = chunks.map(chunk => _fetchChunk(chunk, voice, lang));
+
+      // Start playing as soon as first chunk is ready
+      const firstUrl = await urlPromises[0];
+      _ttsPlaying = true;
+      _setTtsBtn('playing');
+
+      for (let i = 0; i < urlPromises.length; i++) {
+        if (!_ttsPlaying) break;
+        const url = i === 0 ? firstUrl : await urlPromises[i];
+        if (!_ttsPlaying) { URL.revokeObjectURL(url); break; }
+        await _playChunk(url);
+      }
+    } catch { /* silent */ }
+
+    _stopTTS();
+  }
+
+  async function toggleTTS() {
+    if (!_ttsPlaying && !_ttsPaused) {
+      if (_userPlan !== 'hunter') { _showUpgradeModal(); return; }
+      await _playTTS();
+      return;
+    }
+    if (_ttsPaused) {
+      _ttsPaused = false;
+      _setTtsBtn('playing');
+      if (_ttsAudio) _ttsAudio.play();
+      return;
+    }
+    // pause
+    _ttsPaused = true;
+    _setTtsBtn('paused');
+    if (_ttsAudio) _ttsAudio.pause();
+  }
+
+  function _showUpgradeModal() {
+    const bg   = getComputedStyle(document.documentElement).getPropertyValue('--bg-surface').trim()   || '#1e2035';
+    const text = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || '#e2e8f0';
+    const sub  = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#94a3b8';
+    Swal.fire({
+      title: 'Recurso exclusivo Hunter',
+      text:  'A leitura em áudio do scorecard está disponível apenas no plano Hunter.',
+      icon:  'info',
+      background:          bg,
+      color:               text,
+      iconColor:           '#6366f1',
+      showCancelButton:    true,
+      cancelButtonText:    'Cancelar',
+      confirmButtonText:   'Ver Planos',
+      confirmButtonColor:  '#6366f1',
+      cancelButtonColor:   '#374151',
+      reverseButtons:      true,
+    }).then(r => { if (r.isConfirmed) window.location.href = '/upgrade.html'; });
   }
 
   async function _init() {
