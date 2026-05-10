@@ -1469,6 +1469,7 @@
     const doneBanner = document.getElementById('done-banner');
 
     let ws = null;
+    let _limitReached = false;
     let mediaRecorder = null;
     let audioChunks = [];
     let recTimerInterval = null;
@@ -1627,6 +1628,36 @@
         ttsPaused = true;
         pauseBtn.innerHTML = '<i data-lucide="play" style="width:14px;height:14px"></i> ' + t('interview.tts.resume'); lucide.createIcons();
       }
+    }
+
+    // ── Weekly limit banner ──────────────────────────────────────────────
+    function _showLimitBanner(plan, limit) {
+      const isHunter = plan === 'hunter';
+      const isPt = _lang === 'pt';
+      const banner = document.createElement('div');
+      banner.style.cssText = [
+        'position:fixed', 'inset:0', 'z-index:9999',
+        'display:flex', 'flex-direction:column', 'align-items:center', 'justify-content:center',
+        'background:rgba(0,0,0,0.85)', 'backdrop-filter:blur(8px)',
+        'padding:32px', 'text-align:center', 'gap:16px',
+      ].join(';');
+      const icon = `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
+      const title = isPt ? `Limite de ${limit} rounds atingido` : `${limit}-round limit reached`;
+      const sub   = isHunter
+        ? (isPt ? 'Você usou todos os rounds desta semana. O limite renova em 7 dias.' : 'You used all rounds this week. Limit resets in 7 days.')
+        : (isPt ? `Você usou todos os ${limit} rounds do plano Explorer. Faça upgrade para continuar.` : `You've used all ${limit} Explorer rounds. Upgrade to keep going.`);
+      const ctaHref = isHunter ? '/history.html' : '/upgrade.html';
+      const ctaLabel = isHunter
+        ? (isPt ? 'Ver histórico' : 'View history')
+        : (isPt ? 'Fazer upgrade →' : 'Upgrade →');
+      banner.innerHTML = `
+        ${icon}
+        <div style="font-size:22px;font-weight:800;color:#f1f5f9">${title}</div>
+        <div style="font-size:15px;color:#94a3b8;max-width:360px;line-height:1.6">${sub}</div>
+        <a href="${ctaHref}" style="margin-top:8px;padding:12px 28px;background:#6366f1;color:#fff;border-radius:8px;font-weight:700;font-size:15px;text-decoration:none">${ctaLabel}</a>
+        ${!isHunter ? `<a href="/history.html" style="font-size:13px;color:#64748b;text-decoration:underline">${isPt ? 'Ver histórico' : 'View history'}</a>` : ''}
+      `;
+      document.body.appendChild(banner);
     }
 
     // ── Disconnection beep ───────────────────────────────────────────────
@@ -2081,6 +2112,14 @@
             break;
 
           case 'error':
+            if (msg.code === 'weekly_limit_reached') {
+              _limitReached = true;
+              disableInput(true);
+              badge.innerHTML = '<i data-lucide="lock" style="width:14px;height:14px"></i> Limit reached'; lucide.createIcons();
+              badge.className = '';
+              _showLimitBanner(msg.plan || 'explorer', msg.limit || 3);
+              break;
+            }
             addBubble('ai', '⚠️ ' + msg.text);
             disableInput(true);
             badge.innerHTML = '<i data-lucide="alert-triangle" style="width:14px;height:14px"></i> Error'; lucide.createIcons();
@@ -2099,6 +2138,8 @@
 
       ws.onclose = (e) => {
         clearInterval(pingInterval);
+        // Don't reconnect if limit was reached — already showing upgrade banner.
+        if (_limitReached) return;
         // Don't reconnect if the interview is already finished.
         const _closeRaw = _loadRaw();
         if (e.code === 1000 || _closeRaw?.fase === 'done') {
@@ -2383,8 +2424,31 @@
         } catch (_) {}
       })();
     } else {
-      connect();
-      showTyping(true);   // waiting for first AI message
+      // If starting a fresh round, check the weekly limit before opening the WS.
+      // This catches the "practice again" flow that bypasses /prepare.
+      if (_pendingJobSession) {
+        (async () => {
+          try {
+            const usageRes = await fetch('/auth/usage', {
+              headers: { 'Authorization': `Bearer ${_authToken}` },
+            });
+            if (usageRes.ok) {
+              const usage = await usageRes.json();
+              if (usage.used >= usage.limit) {
+                _limitReached = true;
+                disableInput(true);
+                _showLimitBanner(usage.plan || 'explorer', usage.limit || 3);
+                return;
+              }
+            }
+          } catch (_) { /* ignore — WS will catch it too */ }
+          connect();
+          showTyping(true);
+        })();
+      } else {
+        connect();
+        showTyping(true);
+      }
     }
 
     // Show a "tap to enable audio" overlay on touch devices.

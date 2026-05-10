@@ -463,7 +463,7 @@
         "f3": "Phase-by-phase feedback",
         "f4": "Interview history",
         "f5NoAccess": "AI scorecard",
-        "f6NoAccess": "Hiring signal (Strong Yes → Not Yet)",
+        "f6NoAccess": "Hiring signal — are you ready to be hired?",
         "f7NoAccess": "Scorecard audio narration",
         "f8NoAccess": "Smarter models",
         "btnCurrent": "Current plan",

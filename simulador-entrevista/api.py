@@ -734,14 +734,17 @@ async def admin_list_users(current_user: dict = Depends(get_current_user)):
                     u.id, u.name, u.email, u.plan, u.email_verified, u.created_at,
                     COUNT(sm.thread_id)                                          AS total_sessions,
                     SUM(CASE WHEN sm.fase = 'done' THEN 1 ELSE 0 END)           AS completed,
-                    SUM(CASE WHEN sm.started_at >= {_ph} THEN 1 ELSE 0 END)     AS sessions_week,
+                    SUM(CASE WHEN sm.started_at >= CASE
+                            WHEN COALESCE(u.week_reset_at, 0) > {week_ago_ms}
+                            THEN u.week_reset_at ELSE {week_ago_ms}
+                        END THEN 1 ELSE 0 END)                                  AS sessions_week,
                     MAX(sm.last_active_at)                                       AS last_active,
                     u.stripe_subscription_id
                 FROM users u
                 LEFT JOIN session_meta sm ON u.id = sm.user_id
                 GROUP BY u.id, u.stripe_subscription_id
                 ORDER BY u.created_at DESC
-            """, (week_ago_ms,), conn=conn).fetchall()
+            """, (), conn=conn).fetchall()
         return [
             {
                 "id": r[0], "name": r[1], "email": r[2],
@@ -1221,14 +1224,17 @@ async def interview_ws(ws: WebSocket):
                 "type": "error",
                 "text": f"You've used all {_round_limit} interview rounds this week on your {user_plan.capitalize()} plan.",
                 "code": "weekly_limit_reached",
+                "plan": user_plan,
+                "limit": _round_limit,
             })
+            await ws.close(code=1000)
             return
         # Register the round in session_meta immediately so future checks count it.
         _now = int(time.time() * 1000)
         await loop.run_in_executor(
             None,
             lambda: session_store.upsert(
-                thread_id, _now, _now, "", [],
+                thread_id, _now, _now, "elevator_pitch", [],
                 user_id=user_id, job_session_id=job_session_id or None,
             ),
         )

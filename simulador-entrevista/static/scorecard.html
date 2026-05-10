@@ -134,17 +134,8 @@
     /* Paywall state */
     #paywall-state {
       display: none;
-      text-align: center;
-      padding: 60px 24px;
+      padding: 48px 24px;
     }
-    .paywall-icon {
-      width: 64px; height: 64px; margin: 0 auto 24px;
-      color: var(--brand-primary); background: rgba(99,102,241,0.1);
-      border: 1px solid rgba(99,102,241,0.2);
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    }
-    .paywall-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary); }
-    .paywall-sub   { font-size: 15px; color: var(--text-secondary); margin-bottom: 28px; max-width: 400px; margin-left: auto; margin-right: auto; }
   </style>
 
   <script src="/tiktok-pixel.js"></script>
@@ -219,12 +210,7 @@
     <div class="scorecard-pre" id="scorecard-body"></div>
   </div>
 
-  <div id="paywall-state">
-    <div class="paywall-icon"><i data-lucide="lock" style="width:28px;height:28px"></i></div>
-    <div class="paywall-title" data-i18n="scorecard.paywall.title">Hunter plan required</div>
-    <div class="paywall-sub" data-i18n="scorecard.paywall.sub">Upgrade to Hunter to unlock the full scorecard and hiring signal for every completed interview.</div>
-    <a href="/upgrade.html" class="btn btn-primary" data-i18n="scorecard.paywall.cta">Upgrade to Hunter →</a>
-  </div>
+  <div id="paywall-state"></div>
 
   <div id="error-state">
     <div class="error-icon"><i data-lucide="file-x" style="width:28px;height:28px"></i></div>
@@ -274,9 +260,115 @@
 
   function _showPaywall(hireSignal) {
     _setLoading(false);
-    if (hireSignal) _showHireHero(hireSignal);
+
+    const isPt      = (window.i18n ? window.i18n.currentLang() : localStorage.getItem('preferred_lang') || (navigator.language||'').slice(0,2)) === 'pt';
+    const signalCfg = hireSignal && _HIRE_SIGNAL_CONFIG[hireSignal];
+
+    const phaseRows = (isPt
+      ? [['Apresentação','9/10','#22c55e'],['Experiência','7/10','#6366f1'],['Técnico','6/10','#ca8a04'],['Fit cultural','8/10','#22c55e']]
+      : [['Opening','9/10','#22c55e'],['Experience','7/10','#6366f1'],['Technical','6/10','#ca8a04'],['Culture fit','8/10','#22c55e']]
+    ).map(([l,v,c]) =>
+      `<div style="display:flex;justify-content:space-between;align-items:center">
+         <span style="font-size:12px;color:var(--text-secondary)">${l}</span>
+         <span style="font-size:13px;font-weight:700;color:${c}">${v}</span>
+       </div>`
+    ).join('');
+
+    const signalCard = signalCfg
+      ? `<div style="background:var(--bg-surface);border:1px solid var(--bg-surface-border);border-radius:12px;padding:16px;filter:blur(5px);user-select:none;pointer-events:none;">
+           <div style="font-size:11px;font-weight:700;color:var(--brand-primary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">🎯 ${isPt ? 'Sinal' : 'Signal'}</div>
+           <div style="font-size:30px">${signalCfg.emoji}</div>
+           <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-top:8px">${signalCfg.label}</div>
+         </div>`
+      : `<div style="background:var(--bg-surface);border:1px solid var(--bg-surface-border);border-radius:12px;padding:16px;filter:blur(5px);user-select:none;pointer-events:none;">
+           <div style="font-size:11px;font-weight:700;color:var(--brand-primary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">🎯 ${isPt ? 'Sinal' : 'Signal'}</div>
+           <div style="font-size:30px">🟢</div>
+           <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-top:8px">${isPt ? 'Contrate agora' : 'Strong Yes'}</div>
+         </div>`;
+
+    const features = isPt
+      ? ['Nota de 0 a 10 em cada uma das 7 fases da entrevista',
+         'Feedback detalhado sobre vocabulário, clareza e estrutura das respostas',
+         'Sinal de contratação: de "Contrate agora" a "Ainda não é sua vez"',
+         'Narração em áudio por IA — ouça o relatório como um podcast',
+         'Pontos de melhoria concretos e específicos para cada fase']
+      : ['Score 0–10 across all 7 interview phases',
+         'Detailed feedback on vocabulary, clarity, and answer structure',
+         'Hiring signal: from "Strong Yes" to "Not Yet"',
+         'AI audio narration — listen to the report like a podcast',
+         'Concrete, specific improvement tips for every phase'];
+
+    document.getElementById('paywall-state').innerHTML = `
+      <div style="text-align:center;margin-bottom:32px">
+        <div style="font-size:52px;margin-bottom:16px">🏆</div>
+        <div style="font-size:24px;font-weight:800;color:var(--text-primary);margin-bottom:10px">
+          ${isPt ? 'Seu scorecard está pronto' : 'Your scorecard is ready'}
+        </div>
+        <div style="font-size:15px;color:var(--text-secondary);max-width:440px;margin:0 auto;line-height:1.7">
+          ${isPt
+            ? 'Nossa IA analisou cada fase da sua entrevista. Veja onde você brilhou, onde pode melhorar e se está pronto para ser contratado.'
+            : 'Our AI analyzed every phase of your interview — where you shone, where to improve, and whether you\'re ready to be hired.'}
+        </div>
+      </div>
+
+      <div style="position:relative;display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:500px;margin:0 auto 32px">
+        <div style="background:var(--bg-surface);border:1px solid var(--bg-surface-border);border-radius:12px;padding:16px;filter:blur(5px);user-select:none;pointer-events:none;">
+          <div style="font-size:11px;font-weight:700;color:var(--brand-primary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px">📊 ${isPt ? 'Notas por fase' : 'Phase scores'}</div>
+          <div style="display:flex;flex-direction:column;gap:8px">${phaseRows}</div>
+        </div>
+        <div style="background:var(--bg-surface);border:1px solid var(--bg-surface-border);border-radius:12px;padding:16px;filter:blur(5px);user-select:none;pointer-events:none;">
+          <div style="font-size:11px;font-weight:700;color:var(--brand-primary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">💬 Feedback</div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.6">
+            ${isPt
+              ? 'Você demonstrou boa clareza ao explicar projetos anteriores. Foque em exemplos quantificados e estrutura STAR para respostas mais impactantes...'
+              : 'You showed great clarity explaining past projects. Focus on quantified examples and STAR structure for stronger answers...'}
+          </div>
+        </div>
+        ${signalCard}
+        <div style="background:var(--bg-surface);border:1px solid var(--bg-surface-border);border-radius:12px;padding:16px;filter:blur(5px);user-select:none;pointer-events:none;">
+          <div style="font-size:11px;font-weight:700;color:var(--brand-primary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">🔊 ${isPt ? 'Narração IA' : 'AI Narration'}</div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px">
+            ${isPt ? 'Ouça a IA narrar o scorecard completo em áudio, com tom natural.' : 'Listen to AI narrate your full scorecard in natural audio.'}
+          </div>
+          <div style="background:rgba(99,102,241,.25);border-radius:4px;height:5px;width:72%"></div>
+        </div>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
+          <div style="background:rgba(10,18,35,0.78);border:1px solid rgba(255,255,255,0.13);border-radius:14px;padding:18px 28px;text-align:center;backdrop-filter:blur(6px)">
+            <div style="font-size:30px;margin-bottom:8px">🔒</div>
+            <div style="font-size:13px;font-weight:700;color:#f1f5f9;letter-spacing:.02em">${isPt ? 'Exclusivo Hunter' : 'Hunter exclusive'}</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:var(--bg-surface);border:1px solid var(--bg-surface-border);border-radius:12px;padding:20px 24px;max-width:460px;margin:0 auto 32px;text-align:left">
+        <div style="font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:6px;text-align:center">
+          ${isPt ? 'O que é o Scorecard?' : 'What is the Scorecard?'}
+        </div>
+        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;text-align:center;line-height:1.6">
+          ${isPt
+            ? 'Um relatório completo gerado por IA ao final de cada entrevista, com análise fase a fase do seu desempenho.'
+            : 'A complete AI-generated report at the end of each interview, with a phase-by-phase analysis of your performance.'}
+        </div>
+        ${features.map(f => `
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">
+            <span style="color:#22c55e;font-size:15px;flex-shrink:0;margin-top:1px">✓</span>
+            <span style="font-size:13px;color:var(--text-secondary);line-height:1.5">${f}</span>
+          </div>`).join('')}
+      </div>
+
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+        <a href="/upgrade.html"
+           style="display:inline-block;padding:13px 36px;background:#6366f1;color:#fff;border-radius:8px;font-weight:700;font-size:15px;text-decoration:none"
+           onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+          ${isPt ? 'Desbloquear meu scorecard →' : 'Unlock my scorecard →'}
+        </a>
+        <a href="/history.html" style="font-size:13px;color:var(--text-tertiary);text-decoration:underline">
+          ${isPt ? 'Voltar ao histórico' : 'Back to history'}
+        </a>
+      </div>
+    `;
+
     document.getElementById('paywall-state').style.display = 'block';
-    applyI18n();
     lucide.createIcons();
   }
 

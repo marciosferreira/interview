@@ -82,8 +82,10 @@
       background: rgba(148,163,184,0.1); color: var(--text-secondary);
       border: 1px solid var(--bg-surface-border);
       cursor: pointer; text-decoration: none;
+      font-family: inherit; line-height: inherit;
     }
     .hire-badge.signal-locked:hover { background: rgba(99,102,241,0.1); color: var(--brand-primary); border-color: rgba(99,102,241,0.3); }
+    .hire-badge.signal-locked:focus { outline: none; }
 
     .session-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 
@@ -175,9 +177,10 @@
   }
 
   function getFaseLabel(fase) {
-    const key = 'history.phases.' + fase;
+    const resolved = fase || 'elevator_pitch';
+    const key = 'history.phases.' + resolved;
     const val = t(key);
-    return val !== key ? val : (fase || t('history.phases.starting'));
+    return val !== key ? val : resolved;
   }
 
   function _fmt(ts) {
@@ -267,6 +270,67 @@
     'Not Yet':    { cls: 'signal-not-yet',    emoji: '🔴' },
   };
 
+  function _showHireSignalModal() {
+    const isPt = window.i18n.currentLang() === 'pt';
+    const overlay = document.createElement('div');
+    overlay.id = 'hire-signal-modal';
+    overlay.style.cssText = [
+      'position:fixed', 'inset:0', 'z-index:9999',
+      'display:flex', 'align-items:center', 'justify-content:center',
+      'background:rgba(0,0,0,0.85)', 'backdrop-filter:blur(8px)',
+      'padding:24px',
+    ].join(';');
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+    const title = isPt ? 'Sinal de Contratação' : 'Hiring Signal';
+    const desc  = isPt
+      ? 'Ao final de cada entrevista, nossa IA avalia seu desempenho e emite um veredicto sobre sua prontidão para ser contratado:'
+      : 'At the end of each interview, our AI evaluates your performance and issues a verdict on your readiness to be hired:';
+
+    const signals = [
+      { emoji: '🟢', label: isPt ? 'Contrate agora'               : 'Strong Yes',  sub: isPt ? 'Você está pronto. Demonstrou segurança, clareza e profundidade.'          : 'You\'re ready. You showed confidence, clarity, and depth.'          },
+      { emoji: '✅', label: isPt ? 'Boas chances de contratação'   : 'Yes',         sub: isPt ? 'Bom desempenho geral, com pequenos pontos a polir.'                        : 'Strong overall performance with minor areas to refine.'             },
+      { emoji: '🟡', label: isPt ? 'Quase lá'                      : 'Borderline',  sub: isPt ? 'Potencial visível, mas precisa de mais prática em áreas-chave.'            : 'Clear potential, but needs more practice in key areas.'             },
+      { emoji: '🔴', label: isPt ? 'Ainda não é sua vez'           : 'Not Yet',     sub: isPt ? 'Continue praticando — cada round te deixa mais próximo da aprovação.'      : 'Keep practicing — each round gets you closer to the offer.'         },
+    ];
+
+    const signalsHtml = signals.map(s => `
+      <div style="display:flex;align-items:flex-start;gap:12px;text-align:left;padding:10px 14px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07)">
+        <span style="font-size:22px;flex-shrink:0;line-height:1.4">${s.emoji}</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#f1f5f9">${s.label}</div>
+          <div style="font-size:12px;color:#94a3b8;margin-top:3px;line-height:1.5">${s.sub}</div>
+        </div>
+      </div>
+    `).join('');
+
+    const hunterNote = isPt
+      ? 'O Sinal de Contratação é uma funcionalidade exclusiva do plano <strong style="color:#a78bfa">Hunter</strong>. Faça upgrade para desbloquear este e outros recursos premium.'
+      : 'The Hiring Signal is an exclusive feature of the <strong style="color:#a78bfa">Hunter</strong> plan. Upgrade to unlock this and other premium features.';
+
+    const upgradeLabel = isPt ? 'Ver planos →' : 'View plans →';
+    const closeLabel   = isPt ? 'Fechar'       : 'Close';
+
+    overlay.innerHTML = `
+      <div style="background:#1e293b;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:32px;max-width:460px;width:100%;display:flex;flex-direction:column;gap:16px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.6)">
+        <div style="font-size:44px;line-height:1">🎯</div>
+        <div style="font-size:22px;font-weight:800;color:#f1f5f9">${title}</div>
+        <div style="font-size:14px;color:#94a3b8;line-height:1.7">${desc}</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${signalsHtml}
+        </div>
+        <div style="font-size:13px;color:#94a3b8;border-top:1px solid rgba(255,255,255,0.08);padding-top:16px;line-height:1.7">${hunterNote}</div>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+          <a href="/upgrade.html" style="padding:10px 24px;background:#6366f1;color:#fff;border-radius:8px;font-weight:700;font-size:14px;text-decoration:none;transition:opacity .15s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">${upgradeLabel}</a>
+          <button id="hire-modal-close" style="padding:10px 24px;background:transparent;color:#64748b;border:1px solid rgba(255,255,255,0.1);border-radius:8px;font-weight:600;font-size:14px;cursor:pointer">${closeLabel}</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+    overlay.querySelector('#hire-modal-close').addEventListener('click', () => overlay.remove());
+  }
+
   function _buildHireBadge(s) {
     if (s.fase !== 'done') return '';
     if (_userPlan === 'hunter' && s.hireSignal) {
@@ -274,8 +338,8 @@
       if (!cfg) return '';
       return `<span class="hire-badge ${cfg.cls}">${cfg.emoji} ${_escHtml(s.hireSignal)}</span>`;
     }
-    // Explorer: locked teaser — always show for completed sessions
-    return `<a class="hire-badge signal-locked" href="/upgrade.html" onclick="event.stopPropagation()">🔒 Hiring signal</a>`;
+    // Explorer: locked teaser — opens modal explaining the feature
+    return `<button class="hire-badge signal-locked" onclick="event.stopPropagation();_showHireSignalModal()">🔒 ${t('scorecard.hireLabel')}</button>`;
   }
 
   function _buildSessionCard(s) {
@@ -299,7 +363,7 @@
         </div>
         <div class="session-row2">
           ${!isDone ? `<span class="session-phase">${_escHtml(phaseText)}</span>` : ''}
-          <span class="session-msgs">· ${turns} ${turns !== 1 ? t('history.session.answers') : t('history.session.answer')}</span>
+          ${!isDone && turns > 0 ? `<span class="session-msgs">· ${turns} ${turns !== 1 ? t('history.session.answers') : t('history.session.answer')}</span>` : ''}
         </div>
       </div>
       <div class="session-actions">
