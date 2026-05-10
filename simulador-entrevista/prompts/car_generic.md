@@ -44,7 +44,7 @@ The candidate must tell a coherent project story with:
 - **production_mindset**: shows awareness of production realities — observability, cost, failure modes, or maintenance
 - **english_adequate**: English is mostly fluent and appropriate for a senior professional interview
 
-All 8 must be True for the gate to pass.
+Use these criteria to guide the Judge's feedback — they are not a hard gate. Alex advances after 4 exchanges regardless of checklist status. Improvement happens across rounds, not within a single attempt.
 
 ---
 

@@ -437,18 +437,31 @@ def _extract_context_for_report(interview_context: str, phase: str) -> str:
     return _extract_context_for_phase(interview_context, phase)
 
 
+_REPORT_LANG_PREFIX = {
+    "pt": (
+        "**INSTRUÇÃO DE IDIOMA — PRIORIDADE MÁXIMA:** Todo o relatório — títulos, rótulos, "
+        "seções e conteúdo — deve ser escrito EXCLUSIVAMENTE em Português do Brasil. "
+        "Não use inglês em nenhuma parte da resposta."
+    ),
+    "en": (
+        "**LANGUAGE INSTRUCTION — HIGHEST PRIORITY:** The entire report — all headers, "
+        "labels, sections, and content — must be written EXCLUSIVELY in English. "
+        "Do not use any other language."
+    ),
+}
+
+
 def _build_report_system(interview_context: str, phase: str, language: str = "en") -> str:
-    """Compose: report format + phase-relevant context slice + phase guide."""
+    """Compose: language prefix + report format + phase context + phase guide."""
+    lang_prefix = _REPORT_LANG_PREFIX.get(language, _REPORT_LANG_PREFIX["en"])
     phase_guide = _PHASE_FILES.get(phase, "")
     slim_context = _extract_context_for_report(interview_context, phase)
-    lang_block = "\n\n---\n\n" + _LANG_DIRECTIVE.get(language, _LANG_DIRECTIVE["en"])
     context_block = (
         "\n\n---\n\n## CANDIDATE & JOB CONTEXT\n\n"
         + slim_context
         + "\n\n---\n\n"
     ) if slim_context else "\n\n---\n\n"
-    lang_reminder = _LANG_REMINDER.get(language, _LANG_REMINDER["en"])
-    return _REPORT_BASE + lang_block + context_block + phase_guide + lang_reminder
+    return lang_prefix + "\n\n---\n\n" + _REPORT_BASE + context_block + phase_guide
 
 
 def _build_scorecard_system(interview_context: str, language: str = "en") -> str:
@@ -536,7 +549,10 @@ _MENSAGEM_FIELD = Field(
         "(3) Coaching after 2+ failed attempts: a brief hint. "
         "(4) When fase_completa=True or skip_requested=True: set this to exactly 'OK'. "
         "NEVER include feedback, scoring, report content, or a summary of how the candidate did. "
-        "The Judge handles all feedback after the phase ends — Alex never delivers it."
+        "The Judge handles all feedback after the phase ends — Alex never delivers it. "
+        "CRITICAL: Alex has already read the candidate's CV from CANDIDATE & JOB CONTEXT. "
+        "NEVER ask for information that is already there (name, employer, tenure, degree, role title). "
+        "Follow-ups must probe DEPTH, IMPACT, or DIFFERENTIATION — not re-collect known facts."
     )
 )
 
@@ -680,6 +696,9 @@ def _has_real_candidate_input(phase_msgs: list) -> bool:
     )
 
 
+_MAX_EXCHANGES_PER_PHASE = 4
+
+
 def _make_interview_node(output_class, checklist_key, notas_key, report_fase, phase_name):
     def node(state: EntrevistaState, config: RunnableConfig) -> dict:
         interview_context = state.get("interview_context", "")
@@ -690,7 +709,32 @@ def _make_interview_node(output_class, checklist_key, notas_key, report_fase, ph
         phase_msgs: list = state.get("phase_messages") or [
             HumanMessage(content="I'm ready to start this phase.")
         ]
+
+        # Hard exchange limit: count AI messages already sent in this phase.
+        # Each AI message represents one exchange. After MAX_EXCHANGES, force advance
+        # without calling the LLM — the phase ends regardless of checklist status.
+        ai_exchange_count = sum(1 for m in phase_msgs if isinstance(m, AIMessage))
+        if ai_exchange_count >= _MAX_EXCHANGES_PER_PHASE:
+            return {
+                "messages": [],
+                "phase_messages": phase_msgs,
+                checklist_key: state[checklist_key],
+                notas_key: state[notas_key],
+                "ingles_erros_acumulados": state.get("ingles_erros_acumulados", []),
+                "fase": report_fase,
+            }
+
+        # On the final allowed exchange, append the limit notice to the system prompt
+        if ai_exchange_count == _MAX_EXCHANGES_PER_PHASE - 1:
+            system_prompt = (
+                system_prompt
+                + "\n\n[INTERVIEWER INSTRUCTION: This is exchange 4 — the final exchange for this phase. "
+                "After the candidate's response you must set fase_completa=True. "
+                "Keep your closing remark brief.]"
+            )
+
         messages = [_cached_system(system_prompt)] + phase_msgs
+
         avaliacao = _invoke_with_retry(structured, messages)
 
         old_checklist = state[checklist_key]

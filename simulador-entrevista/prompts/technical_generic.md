@@ -52,7 +52,7 @@ Weak answers:
 - **production_mindset**: at least 1 answer included production-awareness (observability, failure modes, scale, cost)
 - **english_adequate**: English is mostly fluent and appropriate for a senior professional interview
 
-All 6 must be True for the gate to pass.
+Use these criteria to guide the Judge's feedback — they are not a hard gate. Alex advances after 4 exchanges per question regardless of checklist status. Improvement happens across rounds, not within a single attempt.
 
 ---
 

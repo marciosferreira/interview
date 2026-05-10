@@ -1419,8 +1419,31 @@ async def interview_ws(ws: WebSocket):
                     # Build dynamic report system prompt with per-session context
                     ctx = result.get("interview_context") or interview_context
                     report_system = _build_report_system(ctx, phase_key, lang)
+
+                    # Format phase transcript as a single human message so the
+                    # model reads it as a document to evaluate, not a conversation
+                    # to continue. Passing raw messages makes the model reply as
+                    # Alex (asking another question) instead of as the Judge.
+                    _OPENING_TEXTS_SET = {
+                        "I'm ready to start this phase.",
+                        "Olá, estou pronto para começar a entrevista.",
+                        "Hi, I'm ready to start the interview.",
+                    }
+                    transcript_lines = []
+                    for m in phase_messages:
+                        if isinstance(m, HumanMessage):
+                            if m.content in _OPENING_TEXTS_SET or m.content.startswith("["):
+                                continue
+                            transcript_lines.append(f"CANDIDATE: {m.content}")
+                        elif isinstance(m, AIMessage):
+                            if not m.content or m.content.startswith("["):
+                                continue
+                            transcript_lines.append(f"INTERVIEWER: {m.content}")
+                    transcript_text = "\n\n".join(transcript_lines)
+                    report_messages = [HumanMessage(content=f"## Phase Transcript\n\n{transcript_text}\n\n---\n\nNow generate the structured phase feedback report.")]
+
                     full_text = await _stream_to_client(
-                        ws, phase_messages, report_system, voice="onyx", lang=lang
+                        ws, report_messages, report_system, voice="onyx", lang=lang
                     )
                     await ws.send_json({
                         "type": "ai",

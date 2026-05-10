@@ -1677,7 +1677,7 @@
     }
 
     function _appendStreamChunk(text, voice = 'nova', lang = _lang) {
-      streamVoice = voice;   // all chunks in a session share the same voice
+      streamVoice = voice;
       streamLang = lang;
       streamRawText += text;
       streamTTSBuf += text;
@@ -1686,25 +1686,43 @@
       if (!streamBubbleEl) {
         removeTyping();
         const row = document.createElement('div');
-        row.className = 'bubble-row ai';
-        const avatar = document.createElement('div');
-        avatar.className = 'avatar ai';
-        avatar.textContent = 'I';
-        streamWrapperEl = document.createElement('div');
-        streamWrapperEl.style.display = 'flex';
-        streamWrapperEl.style.flexDirection = 'column';
-        streamWrapperEl.style.alignItems = 'flex-start';
-        streamWrapperEl.style.minWidth = '0';
-        streamWrapperEl.style.flex = '1';
-        streamBubbleEl = document.createElement('div');
-        streamBubbleEl.className = 'bubble';
-        streamWrapperEl.appendChild(streamBubbleEl);
-        row.appendChild(avatar);
-        row.appendChild(streamWrapperEl);
+        const isFeedback = voice === 'onyx';
+
+        if (isFeedback) {
+          // Judge feedback — render as feedback card (same as addFeedback)
+          row.className = 'bubble-row feedback';
+          streamWrapperEl = document.createElement('div');
+          streamWrapperEl.style.display = 'flex';
+          streamWrapperEl.style.flexDirection = 'column';
+          streamWrapperEl.style.alignItems = 'flex-start';
+          streamWrapperEl.style.width = '100%';
+          streamBubbleEl = document.createElement('div');
+          streamBubbleEl.className = 'feedback-card';
+          streamWrapperEl.appendChild(streamBubbleEl);
+          row.appendChild(streamWrapperEl);
+        } else {
+          // Regular Alex AI bubble
+          row.className = 'bubble-row ai';
+          const avatar = document.createElement('div');
+          avatar.className = 'avatar ai';
+          avatar.textContent = 'I';
+          streamWrapperEl = document.createElement('div');
+          streamWrapperEl.style.display = 'flex';
+          streamWrapperEl.style.flexDirection = 'column';
+          streamWrapperEl.style.alignItems = 'flex-start';
+          streamWrapperEl.style.minWidth = '0';
+          streamWrapperEl.style.flex = '1';
+          streamBubbleEl = document.createElement('div');
+          streamBubbleEl.className = 'bubble';
+          streamWrapperEl.appendChild(streamBubbleEl);
+          row.appendChild(avatar);
+          row.appendChild(streamWrapperEl);
+        }
+
         chat.appendChild(row);
       }
 
-      // Update bubble with formatted markdown
+      // Update bubble/card with formatted markdown
       streamBubbleEl.innerHTML = renderMd(streamRawText);
       scrollBottom();
 

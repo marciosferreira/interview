@@ -31,7 +31,8 @@ Rules:
 - Adapt to the role domain — never impose tech framing on non-tech roles.
 - Match seniority to the job title.
 - Do not invent anything not in the documents.
-- Be concise. Alex does the rest."""
+- Be concise. Alex does the rest.
+- The CANDIDATE PROFILE section is critical: Alex reads it before the interview and uses it to avoid asking basic biographical questions. Fill every field with exact facts — never leave them vague or empty."""
 
 _PROMPT_TEMPLATE = """
 ## Job Posting
@@ -50,9 +51,13 @@ _PROMPT_TEMPLATE = """
 Generate a concise interview briefing. Use short bullets only — no paragraphs, no sample answers, no scripts. Alex will adapt everything in real time.
 
 # CANDIDATE PROFILE
+IMPORTANT: Fill these with exact facts from the resume. Alex reads this section before the interview starts and will NOT ask the candidate for any information already listed here.
+
 - **Full name:** (from resume, or "Candidate")
-- **Current role:** (title + company)
-- **Education:** (highest degree, one line)
+- **Location:** (city/country from resume, or "Not mentioned")
+- **Current role:** (exact title + company name)
+- **Years of experience:** (total professional experience, e.g. "10 years")
+- **Education:** (highest degree + field, one line)
 - **Top 2 achievements:** (specific, concrete, from resume)
 - **Domain expertise:** (primary skills/areas relevant to this role)
 - **Key differentiator:** (one line — what sets them apart for this role)

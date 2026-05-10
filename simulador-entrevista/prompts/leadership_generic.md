@@ -51,7 +51,7 @@ The candidate should demonstrate:
 - **connects_to_real_experience**: connects at least one answer to specific real experience from their background
 - **english_adequate**: English is mostly fluent and appropriate for a senior professional interview
 
-All 7 must be True for the gate to pass.
+Use these criteria to guide the Judge's feedback — they are not a hard gate. Alex advances after 4 exchanges regardless of checklist status. Improvement happens across rounds, not within a single attempt.
 
 ---
 

@@ -38,7 +38,7 @@ Weak answers:
 - **authentic_tone**: the answer sounds genuine and specific, not rehearsed or generic
 - **english_adequate**: English is mostly fluent and appropriate for a senior professional interview
 
-All 5 must be True for the gate to pass.
+Use these criteria to guide the Judge's feedback — they are not a hard gate. Alex advances after 4 exchanges regardless of checklist status. Improvement happens across rounds, not within a single attempt.
 
 ---
 
