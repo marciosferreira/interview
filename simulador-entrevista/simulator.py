@@ -194,7 +194,7 @@ class SessionStore:
             if user_id:
                 sql = f"""SELECT sm.thread_id, sm.user_id, sm.job_session_id,
                               sm.started_at, sm.last_active_at, sm.fase, sm.history,
-                              js.job_title, js.company
+                              js.job_title, js.company, sm.scorecard_text
                        FROM session_meta sm
                        LEFT JOIN job_sessions js ON sm.job_session_id = js.id
                        WHERE sm.user_id = {ph}
@@ -203,7 +203,7 @@ class SessionStore:
             else:
                 sql = f"""SELECT sm.thread_id, sm.user_id, sm.job_session_id,
                               sm.started_at, sm.last_active_at, sm.fase, sm.history,
-                              js.job_title, js.company
+                              js.job_title, js.company, sm.scorecard_text
                        FROM session_meta sm
                        LEFT JOIN job_sessions js ON sm.job_session_id = js.id
                        ORDER BY sm.last_active_at DESC LIMIT {ph}"""
@@ -224,6 +224,7 @@ class SessionStore:
                     "history":       _json.loads(r[6]),
                     "jobTitle":      r[7] or "",
                     "company":       r[8] or "",
+                    "hireSignal":    extract_hire_signal(r[9] or ""),
                 }
                 for r in rows
             ]
@@ -1062,6 +1063,19 @@ _HIRE_SIGNAL_TRANSLATIONS = {
         "Not Yet":    "Ainda não é sua vez",
     },
 }
+
+_HIRE_SIGNAL_PT_REVERSE = {v: k for k, v in _HIRE_SIGNAL_TRANSLATIONS["pt"].items()}
+
+
+def extract_hire_signal(scorecard_text: str) -> str:
+    """Return canonical hire_signal value (English) from stored scorecard markdown."""
+    if not scorecard_text:
+        return ""
+    for line in scorecard_text.splitlines():
+        if "Hire signal:" in line or "Sinal de contratação:" in line:
+            val = line.split(":", 1)[-1].strip().lstrip("*").rstrip("*").strip()
+            return _HIRE_SIGNAL_PT_REVERSE.get(val, val)
+    return ""
 
 
 def _format_scorecard(s: Scorecard, job_title: str = "", company: str = "", language: str = "en") -> str:

@@ -111,11 +111,31 @@
     .error-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary); }
     .error-sub   { font-size: 15px; color: var(--text-secondary); margin-bottom: 24px; }
 
+    /* Hire signal hero */
+    .hire-hero {
+      display: none;
+      border-radius: var(--radius-md);
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .hire-hero.signal-strong-yes { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); }
+    .hire-hero.signal-yes        { background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); }
+    .hire-hero.signal-borderline { background: rgba(234,179,8,0.1);  border: 1px solid rgba(234,179,8,0.3); }
+    .hire-hero.signal-not-yet    { background: rgba(239,68,68,0.1);  border: 1px solid rgba(239,68,68,0.3); }
+    .hire-emoji { font-size: 36px; margin-bottom: 8px; }
+    .hire-label { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; opacity: 0.7; }
+    .hire-value { font-size: 26px; font-weight: 800; }
+    .hire-hero.signal-strong-yes .hire-value { color: #22c55e; }
+    .hire-hero.signal-yes        .hire-value { color: var(--brand-primary); }
+    .hire-hero.signal-borderline .hire-value { color: #eab308; }
+    .hire-hero.signal-not-yet    .hire-value { color: #ef4444; }
+
     /* Paywall state */
     #paywall-state {
       display: none;
       text-align: center;
-      padding: 80px 24px;
+      padding: 60px 24px;
     }
     .paywall-icon {
       width: 64px; height: 64px; margin: 0 auto 24px;
@@ -179,6 +199,13 @@
   <div id="scorecard-content">
     <div class="page-title" id="scorecard-title">Scorecard</div>
     <div class="page-sub" id="scorecard-sub"></div>
+
+    <div class="hire-hero" id="hire-hero">
+      <div class="hire-emoji" id="hire-emoji"></div>
+      <div class="hire-label" data-i18n="scorecard.hireLabel">Hiring signal</div>
+      <div class="hire-value" id="hire-value"></div>
+    </div>
+
     <div class="tts-toolbar" style="display:flex;gap:8px;align-items:center;">
       <button id="tts-btn" class="btn" onclick="toggleTTS()" style="font-size:13px; padding:6px 14px; background:#d97706; color:#fff; border:none; font-weight:600;">
         <i data-lucide="volume-2" class="tts-icon" style="width:15px;height:15px"></i>
@@ -194,16 +221,16 @@
 
   <div id="paywall-state">
     <div class="paywall-icon"><i data-lucide="lock" style="width:28px;height:28px"></i></div>
-    <div class="paywall-title" data-i18n="pricing.plans.hunter.name">Hunter plan required</div>
-    <div class="paywall-sub" data-i18n="pricing.f2.desc">Upgrade to the Hunter plan to unlock full scorecards for every completed interview.</div>
-    <a href="/pricing.html" class="btn btn-primary" data-i18n="pricing.cta">Upgrade to Hunter</a>
+    <div class="paywall-title" data-i18n="scorecard.paywall.title">Hunter plan required</div>
+    <div class="paywall-sub" data-i18n="scorecard.paywall.sub">Upgrade to Hunter to unlock the full scorecard and hiring signal for every completed interview.</div>
+    <a href="/upgrade.html" class="btn btn-primary" data-i18n="scorecard.paywall.cta">Upgrade to Hunter →</a>
   </div>
 
   <div id="error-state">
     <div class="error-icon"><i data-lucide="file-x" style="width:28px;height:28px"></i></div>
-    <div class="error-title" id="error-title">Scorecard not found</div>
-    <div class="error-sub" id="error-sub">This scorecard could not be loaded.</div>
-    <a href="/history.html" class="btn btn-secondary" data-i18n="history.header.tagline">Back to history</a>
+    <div class="error-title" id="error-title"></div>
+    <div class="error-sub" id="error-sub"></div>
+    <a href="/history.html" class="btn btn-secondary" data-i18n="scorecard.error.backToHistory">Back to history</a>
   </div>
 </main>
 
@@ -228,8 +255,26 @@
     document.getElementById('loading-spinner').style.display = show ? 'flex' : 'none';
   }
 
-  function _showPaywall() {
+  const _HIRE_SIGNAL_CONFIG = {
+    'Strong Yes': { cls: 'signal-strong-yes', emoji: '🟢', label: 'Strong Yes' },
+    'Yes':        { cls: 'signal-yes',        emoji: '✅', label: 'Yes'         },
+    'Borderline': { cls: 'signal-borderline', emoji: '🟡', label: 'Borderline'  },
+    'Not Yet':    { cls: 'signal-not-yet',    emoji: '🔴', label: 'Not Yet'     },
+  };
+
+  function _showHireHero(hireSignal) {
+    const cfg = _HIRE_SIGNAL_CONFIG[hireSignal];
+    if (!cfg) return;
+    const hero = document.getElementById('hire-hero');
+    hero.classList.add(cfg.cls);
+    document.getElementById('hire-emoji').textContent = cfg.emoji;
+    document.getElementById('hire-value').textContent  = cfg.label;
+    hero.style.display = 'block';
+  }
+
+  function _showPaywall(hireSignal) {
     _setLoading(false);
+    if (hireSignal) _showHireHero(hireSignal);
     document.getElementById('paywall-state').style.display = 'block';
     applyI18n();
     lucide.createIcons();
@@ -242,10 +287,11 @@
     document.getElementById('error-state').style.display = 'block';
   }
 
-  function _showScorecard(text) {
+  function _showScorecard(text, hireSignal) {
     _scorecardRaw = text;
-    _userPlan = 'hunter'; // backend already gated this endpoint; if we got here, user is hunter
+    _userPlan = 'hunter';
     _setLoading(false);
+    if (hireSignal) _showHireHero(hireSignal);
     document.getElementById('scorecard-body').innerHTML = marked.parse(text);
     document.getElementById('scorecard-content').style.display = 'block';
     lucide.createIcons();
@@ -407,19 +453,18 @@
   }
 
   function _showUpgradeModal() {
-    const bg   = getComputedStyle(document.documentElement).getPropertyValue('--bg-surface').trim()   || '#1e2035';
-    const text = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || '#e2e8f0';
-    const sub  = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#94a3b8';
+    const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg-surface').trim() || '#1e2035';
+    const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || '#e2e8f0';
     Swal.fire({
-      title: 'Recurso exclusivo Hunter',
-      text:  'A leitura em áudio do scorecard está disponível apenas no plano Hunter.',
+      title: t('scorecard.tts.upgradeTitle'),
+      text:  t('scorecard.tts.upgradeBody'),
       icon:  'info',
       background:          bg,
-      color:               text,
+      color:               textColor,
       iconColor:           '#6366f1',
       showCancelButton:    true,
-      cancelButtonText:    'Cancelar',
-      confirmButtonText:   'Ver Planos',
+      cancelButtonText:    t('interview.cancel') || 'Cancel',
+      confirmButtonText:   t('upgrade.heroLabel') || 'See Plans',
       confirmButtonColor:  '#6366f1',
       cancelButtonColor:   '#374151',
       reverseButtons:      true,
@@ -429,53 +474,56 @@
   async function _init() {
     const threadId = location.pathname.split('/scorecard/')[1];
     if (!threadId) {
-      _showError('Invalid URL', 'No session ID found in URL.');
+      _showError(t('scorecard.error.invalidUrl'), t('scorecard.error.invalidUrlSub'));
       return;
     }
 
     document.getElementById('scorecard-sub').textContent = threadId;
 
+    // ── Fetch only — network errors caught here ──────────────────────────────
+    let data;
     try {
       const res = await fetch(`/sessions/${threadId}/scorecard`, {
         headers: { 'Authorization': `Bearer ${_authToken}` }
       });
-
-      if (res.status === 403) {
-        _showPaywall();
-        return;
-      }
       if (res.status === 404) {
-        _showError('Scorecard not found', 'This interview may not have been completed yet.');
+        _showError(t('scorecard.error.notFound'), t('scorecard.error.notFoundSub'));
         return;
       }
       if (!res.ok) {
-        _showError('Error loading scorecard', `Server returned ${res.status}.`);
+        _showError(t('scorecard.error.load'), t('scorecard.error.loadSub'));
         return;
       }
-
-      const data = await res.json();
-      _showScorecard(data.scorecard);
-
-      // Try to enrich title with session info
-      try {
-        const sessionsRes = await fetch('/sessions', { headers: { 'Authorization': `Bearer ${_authToken}` } });
-        if (sessionsRes.ok) {
-          const sessions = await sessionsRes.json();
-          const session  = sessions.find(s => s.threadId === threadId);
-          if (session) {
-            const title = [session.jobTitle, session.company].filter(Boolean).join(' — ');
-            if (title) document.getElementById('scorecard-title').textContent = title;
-            const d = new Date(session.startedAt);
-            const locale = (i18n.currentLang() === 'pt') ? 'pt-BR' : 'en-US';
-            document.getElementById('scorecard-sub').textContent =
-              d.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
-          }
-        }
-      } catch {}
-
+      data = await res.json();
     } catch (err) {
-      _showError('Network error', 'Could not connect to the server.');
+      console.error('[scorecard] fetch error:', err);
+      _showError(t('scorecard.error.network'), t('scorecard.error.networkSub'));
+      return;
     }
+
+    // ── Display — JS errors here do not show "network error" ─────────────────
+    if (!data.scorecard) {
+      _showPaywall(data.hire_signal);
+    } else {
+      _showScorecard(data.scorecard, data.hire_signal);
+    }
+
+    // Enrich title with job/company from session list
+    try {
+      const sessionsRes = await fetch('/sessions', { headers: { 'Authorization': `Bearer ${_authToken}` } });
+      if (sessionsRes.ok) {
+        const sessions = await sessionsRes.json();
+        const session  = sessions.find(s => s.threadId === threadId);
+        if (session) {
+          const title = [session.jobTitle, session.company].filter(Boolean).join(' — ');
+          if (title) document.getElementById('scorecard-title').textContent = title;
+          const d = new Date(session.startedAt);
+          const locale = (i18n.currentLang() === 'pt') ? 'pt-BR' : 'en-US';
+          document.getElementById('scorecard-sub').textContent =
+            d.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+      }
+    } catch {}
   }
 
   function closeMobileMenu() {
@@ -486,7 +534,7 @@
   });
 
   _loadPlanPill();
-  _init();
+  document.addEventListener('i18n:ready', _init, { once: true });
 </script>
 </body>
 </html>

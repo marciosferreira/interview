@@ -37,14 +37,14 @@
   "landing": {
     "hero": {
       "badge": "Simulador de Entrevistas · Com IA · Totalmente Personalizado",
-      "title": "Passe a etapa que decide<br>se suas habilidades <span>chegam a ser avaliadas.</span>",
-      "sub": "A maioria dos candidatos falha antes de mostrar suas habilidades. Essa etapa — comportamental, comunicação, fit — é o filtro. Passe, e você está perto. Não passe, e acabou. Treine até ficar automático.",
+      "title": "Entre na sua próxima entrevista<br><span>sabendo exatamente o que dizer.</span>",
+      "sub": "A maioria dos candidatos chega despreparada — histórias vagas, respostas genéricas, posicionamento fraco. Este simulador roda uma entrevista completa baseada no seu currículo e na vaga real, e mostra exatamente o que corrigir.",
       "cta": "Começar grátis →",
       "ctaSignin": "Entrar"
     },
     "gate": {
-      "title": "Por que essa etapa é a que mais importa",
-      "body": "Na maioria dos processos seletivos — tecnologia, finanças, consultoria, marketing — a entrevista comportamental é o <strong style=\"color:#4ade80\">primeiro filtro</strong>. Só quem passa avança para as próximas etapas. Quem não passa nunca chega a mostrar suas habilidades técnicas. Esta ferramenta te prepara exatamente para essa etapa — para que você chegue sabendo o que dizer, como dizer, e como será avaliado."
+      "title": "A entrevista é onde a vaga é ganha ou perdida",
+      "body": "Seja a primeira conversa ou a rodada final, o que você diz — e como você diz — decide o resultado. Perguntas comportamentais, cenários da vaga, fit e motivação: esta ferramenta te prepara para tudo isso, adaptada ao seu histórico e à vaga que você está buscando."
     },
     "howto": {
       "label": "Como funciona",
@@ -108,7 +108,7 @@
       }
     },
     "cta": {
-      "title": "Não deixe a primeira etapa ser a última.",
+      "title": "Entre na sua próxima entrevista preparado.",
       "sub": "Grátis. Qualquer área. Sem cartão de crédito.",
       "btn": "Começar a praticar grátis →"
     }
@@ -449,6 +449,8 @@
     "heroTitle": "Pratique mais.<br>Conquiste a vaga.",
     "heroSub": "Cada sessão de entrevista é totalmente personalizada para seu currículo e vaga. Faça upgrade para praticar mais rodadas por semana.",
     "usageThisWeek": "Esta semana",
+    "usageUsed": "usadas",
+    "planLabel": "plano",
     "plans": {
       "explorer": {
         "badge": "<i data-lucide=\"map\" style=\"width:12px;height:12px;margin-right:4px;\"></i> Explorer",
@@ -461,8 +463,9 @@
         "f3": "Feedback fase a fase",
         "f4": "Histórico de entrevistas",
         "f5NoAccess": "Scorecard com IA",
-        "f6NoAccess": "Narração em áudio do scorecard",
-        "f7NoAccess": "Modelos mais inteligentes",
+        "f6NoAccess": "Sinal de contratação (Contrate agora → Ainda não)",
+        "f7NoAccess": "Narração em áudio do scorecard",
+        "f8NoAccess": "Modelos mais inteligentes",
         "btnCurrent": "Plano atual",
         "btnCreate": "Começar grátis →",
         "btnDowngrade": "Fazer downgrade para Explorer",
@@ -478,9 +481,10 @@
         "f2": "Entrevista completa com 7 fases",
         "f3": "Feedback fase a fase",
         "f4": "Scorecard com IA",
-        "f5": "Narração em áudio do scorecard",
-        "f6": "Histórico de entrevistas",
-        "f7": "Modelos mais inteligentes",
+        "f5": "Sinal de contratação — você está pronto para ser contratado?",
+        "f6": "Narração em áudio do scorecard",
+        "f7": "Histórico de entrevistas",
+        "f8": "Modelos mais inteligentes",
         "btnUpgrade": "Assinar o Hunter →",
         "btnPortal": "⚙ Gerenciar assinatura",
         "btnCurrent": "✓ Plano atual",
@@ -494,6 +498,29 @@
       "body": "15 sessões de entrevista por semana desbloqueadas. Vá arrasar nas entrevistas.",
       "cta": "Iniciar uma nova entrevista →"
     }
+  },
+  "scorecard": {
+    "paywall": {
+      "title": "Plano Hunter necessário",
+      "sub": "Assine o Hunter para desbloquear o scorecard completo e o sinal de contratação de cada entrevista.",
+      "cta": "Assinar o Hunter →"
+    },
+    "error": {
+      "notFound": "Scorecard não encontrado",
+      "notFoundSub": "Esta entrevista pode ainda não ter sido concluída.",
+      "load": "Erro ao carregar scorecard",
+      "loadSub": "Erro no servidor. Tente novamente.",
+      "network": "Erro de conexão",
+      "networkSub": "Não foi possível conectar ao servidor.",
+      "invalidUrl": "URL inválida",
+      "invalidUrlSub": "Nenhuma sessão encontrada na URL.",
+      "backToHistory": "Voltar ao histórico"
+    },
+    "tts": {
+      "upgradeTitle": "Recurso exclusivo Hunter",
+      "upgradeBody": "A leitura em áudio do scorecard está disponível apenas no plano Hunter."
+    },
+    "hireLabel": "Sinal de contratação"
   },
   "tips": {
     "pageTitle": "Dicas de Entrevista — Acing Interview",

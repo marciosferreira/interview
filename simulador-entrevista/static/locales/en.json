@@ -37,14 +37,14 @@
   "landing": {
     "hero": {
       "badge": "Mock Interview Simulator · AI-Powered · Fully Personalized",
-      "title": "Pass the round that decides<br>if your skills <span>ever get evaluated.</span>",
-      "sub": "Most candidates fail before showing their skills. This round — behavioral, communication, fit — is the gate. Pass it, and you're close. Don't, and it's over. Practice it until it's automatic.",
+      "title": "Walk into your next interview<br><span>knowing exactly what to say.</span>",
+      "sub": "Most candidates walk in underprepared — vague stories, generic answers, weak framing. This simulator runs a full mock interview built around your resume and the actual job posting, then tells you exactly what to fix.",
       "cta": "Start for free →",
       "ctaSignin": "Sign in"
     },
     "gate": {
-      "title": "Why this round is the one that matters most",
-      "body": "In most hiring processes — tech, finance, consulting, marketing — the behavioral interview is the <strong style=\"color:#4ade80\">first filter</strong>. Only candidates who clear it move on to the next rounds. Failing here means your skills never even get evaluated. This tool prepares you for exactly that round — so you arrive knowing what to say, how to say it, and how you'll be judged."
+      "title": "The interview is where the role is won or lost",
+      "body": "Whether it's your first conversation or the final round, what you say — and how you say it — decides the outcome. Behavioral questions, role-specific scenarios, fit and motivation: this tool prepares you for all of them, tailored to your background and the specific job you're after."
     },
     "howto": {
       "label": "How it works",
@@ -108,7 +108,7 @@
       }
     },
     "cta": {
-      "title": "Don't let the first round be the last.",
+      "title": "Walk into your next interview prepared.",
       "sub": "Free to use. Any industry. No credit card required.",
       "btn": "Start practicing for free →"
     }
@@ -449,6 +449,8 @@
     "heroTitle": "Practice more.<br>Land the role.",
     "heroSub": "Every interview session is fully personalized to your resume and target role. Upgrade to practice more rounds per week.",
     "usageThisWeek": "This week",
+    "usageUsed": "used",
+    "planLabel": "plan",
     "plans": {
       "explorer": {
         "badge": "<i data-lucide=\"map\" style=\"width:12px;height:12px;margin-right:4px;\"></i> Explorer",
@@ -461,8 +463,9 @@
         "f3": "Phase-by-phase feedback",
         "f4": "Interview history",
         "f5NoAccess": "AI scorecard",
-        "f6NoAccess": "Scorecard audio narration",
-        "f7NoAccess": "Smarter models",
+        "f6NoAccess": "Hiring signal (Strong Yes → Not Yet)",
+        "f7NoAccess": "Scorecard audio narration",
+        "f8NoAccess": "Smarter models",
         "btnCurrent": "Current plan",
         "btnCreate": "Get started free →",
         "btnDowngrade": "Downgrade to Explorer",
@@ -478,9 +481,10 @@
         "f2": "Full 7-phase interview flow",
         "f3": "Phase-by-phase feedback",
         "f4": "AI scorecard",
-        "f5": "Scorecard audio narration",
-        "f6": "Interview history",
-        "f7": "Smarter models",
+        "f5": "Hiring signal — are you ready to be hired?",
+        "f6": "Scorecard audio narration",
+        "f7": "Interview history",
+        "f8": "Smarter models",
         "btnUpgrade": "Upgrade to Hunter →",
         "btnPortal": "⚙ Manage subscription",
         "btnCurrent": "✓ Current plan",
@@ -494,6 +498,29 @@
       "body": "15 interview sessions per week, unlocked. Go crush those interviews.",
       "cta": "Start a new interview →"
     }
+  },
+  "scorecard": {
+    "paywall": {
+      "title": "Hunter plan required",
+      "sub": "Upgrade to Hunter to unlock the full scorecard and hiring signal for every completed interview.",
+      "cta": "Upgrade to Hunter →"
+    },
+    "error": {
+      "notFound": "Scorecard not found",
+      "notFoundSub": "This interview may not have been completed yet.",
+      "load": "Error loading scorecard",
+      "loadSub": "Server error. Please try again.",
+      "network": "Network error",
+      "networkSub": "Could not connect to the server.",
+      "invalidUrl": "Invalid URL",
+      "invalidUrlSub": "No session ID found in URL.",
+      "backToHistory": "Back to history"
+    },
+    "tts": {
+      "upgradeTitle": "Hunter exclusive feature",
+      "upgradeBody": "Scorecard audio narration is available on the Hunter plan only."
+    },
+    "hireLabel": "Hiring signal"
   },
   "tips": {
     "pageTitle": "Interview Tips — Acing Interview",

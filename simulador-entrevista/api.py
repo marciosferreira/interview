@@ -28,7 +28,7 @@ from pydantic import BaseModel
 from simulator import (
     graph, make_initial_state, model, get_model, session_store,
     _build_report_system, REPORT_PHASE_MAP, get_db_conn,
-    _EXPLORER_MODEL, _HUNTER_MODEL,
+    _EXPLORER_MODEL, _HUNTER_MODEL, extract_hire_signal,
 )
 from auth import (
     UserCreate, UserLogin, TokenResponse, RegisterResponse, ProfileUpdate,
@@ -850,15 +850,17 @@ async def get_session_history(thread_id: str, current_user: dict = Depends(get_c
 async def get_scorecard(thread_id: str, current_user: dict = Depends(get_current_user)):
     loop = asyncio.get_running_loop()
     user = await loop.run_in_executor(None, lambda: _with_conn(lambda c: get_user_by_id(c, current_user["id"])))
-    if not user or user.get("plan", "free") != "hunter":
-        raise HTTPException(status_code=403, detail="Scorecard access requires the Hunter plan")
-    scorecard = await loop.run_in_executor(
+    plan = user.get("plan", "free") if user else "free"
+    scorecard_text = await loop.run_in_executor(
         None,
         lambda: session_store.get_scorecard(thread_id, current_user["id"]),
     )
-    if not scorecard:
+    if not scorecard_text:
         raise HTTPException(status_code=404, detail="Scorecard not found for this session")
-    return {"scorecard": scorecard}
+    hire_signal = extract_hire_signal(scorecard_text)
+    if plan != "hunter":
+        return {"scorecard": None, "hire_signal": hire_signal}
+    return {"scorecard": scorecard_text, "hire_signal": hire_signal}
 
 
 # ── Audio endpoints ───────────────────────────────────────────────────────────

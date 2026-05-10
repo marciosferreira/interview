@@ -68,7 +68,23 @@
     .session-row2 { display: flex; align-items: center; gap: 10px; }
     .session-phase { font-size: 13px; color: var(--text-secondary); }
     .session-msgs { font-size: 12px; color: var(--text-tertiary); }
-    
+
+    .hire-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 700; padding: 2px 8px;
+      border-radius: 999px; letter-spacing: 0.03em;
+    }
+    .hire-badge.signal-strong-yes { background: rgba(34,197,94,0.12); color: #22c55e; border: 1px solid rgba(34,197,94,0.3); }
+    .hire-badge.signal-yes        { background: rgba(99,102,241,0.12); color: var(--brand-primary); border: 1px solid rgba(99,102,241,0.3); }
+    .hire-badge.signal-borderline { background: rgba(234,179,8,0.12);  color: #ca8a04; border: 1px solid rgba(234,179,8,0.3); }
+    .hire-badge.signal-not-yet    { background: rgba(239,68,68,0.12);  color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+    .hire-badge.signal-locked {
+      background: rgba(148,163,184,0.1); color: var(--text-secondary);
+      border: 1px solid var(--bg-surface-border);
+      cursor: pointer; text-decoration: none;
+    }
+    .hire-badge.signal-locked:hover { background: rgba(99,102,241,0.1); color: var(--brand-primary); border-color: rgba(99,102,241,0.3); }
+
     .session-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 
     @media (max-width: 600px) {
@@ -150,6 +166,13 @@
 
   const SESSION_KEY = 'interview_v1';
   let _sessionList  = [];
+  let _userPlan     = 'free';
+  let _i18nReady    = false;
+  let _planReady    = false;
+
+  function _tryRender() {
+    if (_i18nReady && _planReady) render();
+  }
 
   function getFaseLabel(fase) {
     const key = 'history.phases.' + fase;
@@ -237,10 +260,29 @@
     window.location.href = '/onboarding.html';
   }
 
+  const _HIRE_BADGE = {
+    'Strong Yes': { cls: 'signal-strong-yes', emoji: '🟢' },
+    'Yes':        { cls: 'signal-yes',        emoji: '✅' },
+    'Borderline': { cls: 'signal-borderline', emoji: '🟡' },
+    'Not Yet':    { cls: 'signal-not-yet',    emoji: '🔴' },
+  };
+
+  function _buildHireBadge(s) {
+    if (s.fase !== 'done') return '';
+    if (_userPlan === 'hunter' && s.hireSignal) {
+      const cfg = _HIRE_BADGE[s.hireSignal];
+      if (!cfg) return '';
+      return `<span class="hire-badge ${cfg.cls}">${cfg.emoji} ${_escHtml(s.hireSignal)}</span>`;
+    }
+    // Explorer: locked teaser — always show for completed sessions
+    return `<a class="hire-badge signal-locked" href="/upgrade.html" onclick="event.stopPropagation()">🔒 Hiring signal</a>`;
+  }
+
   function _buildSessionCard(s) {
     const isDone    = s.fase === 'done';
     const phaseText = getFaseLabel(s.fase);
     const turns     = _msgCount(s.history);
+    const hireBadge = _buildHireBadge(s);
 
     const card = document.createElement('div');
     card.className = 'glass-card session-card glass-card-hover';
@@ -253,6 +295,7 @@
         <div class="session-row1">
           <span class="session-date">${_fmt(s.startedAt)}</span>
           <span class="badge ${isDone ? 'badge-primary' : ''}" style="${isDone ? 'background:var(--status-success-bg);color:var(--status-success);border-color:var(--status-success-border)' : ''}">${isDone ? t('history.badges.completed') : t('history.badges.inProgress')}</span>
+          ${hireBadge}
         </div>
         <div class="session-row2">
           ${!isDone ? `<span class="session-phase">${_escHtml(phaseText)}</span>` : ''}
@@ -354,28 +397,33 @@
     lucide.createIcons();
   }
 
-  document.addEventListener('i18n:ready', render);
+  document.addEventListener('i18n:ready', () => { _i18nReady = true; _tryRender(); });
 
-  // Load user plan info
+  // Load user plan — must complete before render so badges are correct
   (async function(){
     try {
       const res = await fetch('/auth/usage', { headers: { 'Authorization': 'Bearer ' + _authToken } });
-      if (!res.ok) return;
-      const usage = await res.json();
-      const el = document.getElementById('plan-pill');
-      if (!el) return;
-      const isHunter = usage.plan === 'hunter';
-      el.className = 'badge ' + (isHunter ? 'badge-primary' : '');
-      el.innerHTML = isHunter ? '<i data-lucide="target" style="width:12px;height:12px;margin-right:4px"></i> Hunter' : '<i data-lucide="map" style="width:12px;height:12px;margin-right:4px"></i> Explorer';
-      el.setAttribute('data-tooltip', isHunter ? 'Your current plan' : 'Upgrade to Hunter for more sessions');
-      if(!isHunter) {
-        el.style.border = '1px solid var(--bg-surface-border)';
-        el.style.color = 'var(--text-secondary)';
+      if (res.ok) {
+        const usage = await res.json();
+        _userPlan = usage.plan || 'free';
+        const el = document.getElementById('plan-pill');
+        if (el) {
+          const isHunter = _userPlan === 'hunter';
+          el.className = 'badge ' + (isHunter ? 'badge-primary' : '');
+          el.innerHTML = isHunter ? '<i data-lucide="target" style="width:12px;height:12px;margin-right:4px"></i> Hunter' : '<i data-lucide="map" style="width:12px;height:12px;margin-right:4px"></i> Explorer';
+          el.setAttribute('data-tooltip', isHunter ? 'Your current plan' : 'Upgrade to Hunter for more sessions');
+          if (!isHunter) {
+            el.style.border = '1px solid var(--bg-surface-border)';
+            el.style.color = 'var(--text-secondary)';
+          }
+          el.style.cursor = 'pointer';
+          el.addEventListener('click', () => location.href = '/upgrade.html');
+          lucide.createIcons();
+        }
       }
-      el.style.cursor = 'pointer';
-      el.addEventListener('click', () => location.href = '/upgrade.html');
-      lucide.createIcons();
-    } catch(_){}
+    } catch(_) {}
+    _planReady = true;
+    _tryRender();
   })();
 </script>
 <script src="/mobile-menu.js"></script>

@@ -177,8 +177,9 @@
         <li><i data-lucide="check" class="check" style="width:18px;height:18px"></i> <span data-i18n="upgrade.plans.explorer.f3">Phase-by-phase feedback</span></li>
         <li><i data-lucide="check" class="check" style="width:18px;height:18px"></i> <span data-i18n="upgrade.plans.explorer.f4">Interview history</span></li>
         <li><i data-lucide="x" class="cross" style="width:18px;height:18px"></i> <span style="color:var(--text-tertiary)" data-i18n="upgrade.plans.explorer.f5NoAccess">AI scorecard</span></li>
-        <li><i data-lucide="x" class="cross" style="width:18px;height:18px"></i> <span style="color:var(--text-tertiary)" data-i18n="upgrade.plans.explorer.f6NoAccess">Scorecard audio narration</span></li>
-        <li><i data-lucide="x" class="cross" style="width:18px;height:18px"></i> <span style="color:var(--text-tertiary)" data-i18n="upgrade.plans.explorer.f7NoAccess">Priority processing</span></li>
+        <li><i data-lucide="x" class="cross" style="width:18px;height:18px"></i> <span style="color:var(--text-tertiary)" data-i18n="upgrade.plans.explorer.f6NoAccess">Hiring signal (Strong Yes → Not Yet)</span></li>
+        <li><i data-lucide="x" class="cross" style="width:18px;height:18px"></i> <span style="color:var(--text-tertiary)" data-i18n="upgrade.plans.explorer.f7NoAccess">Scorecard audio narration</span></li>
+        <li><i data-lucide="x" class="cross" style="width:18px;height:18px"></i> <span style="color:var(--text-tertiary)" data-i18n="upgrade.plans.explorer.f8NoAccess">Smarter models</span></li>
       </ul>
       <button class="btn btn-secondary" style="width: 100%; pointer-events: none; opacity: 0.7;" id="free-btn" data-i18n="upgrade.plans.explorer.btnCurrent">Current plan</button>
     </div>
@@ -195,9 +196,10 @@
         <li><i data-lucide="check" class="check" style="width:18px;height:18px"></i> <span data-i18n="upgrade.plans.hunter.f2">Full 7-phase interview flow</span></li>
         <li><i data-lucide="check" class="check" style="width:18px;height:18px"></i> <span data-i18n="upgrade.plans.hunter.f3">Phase-by-phase feedback</span></li>
         <li><i data-lucide="check" class="check" style="width:18px;height:18px"></i> <strong style="color:var(--text-primary)" data-i18n="upgrade.plans.hunter.f4">AI scorecard</strong></li>
-        <li><i data-lucide="check" class="check" style="width:18px;height:18px"></i> <span data-i18n="upgrade.plans.hunter.f5">Scorecard audio narration</span></li>
-        <li><i data-lucide="check" class="check" style="width:18px;height:18px"></i> <span data-i18n="upgrade.plans.hunter.f6">Interview history</span></li>
-        <li><i data-lucide="check" class="check" style="width:18px;height:18px"></i> <span data-i18n="upgrade.plans.hunter.f7">Priority processing</span></li>
+        <li><i data-lucide="check" class="check" style="width:18px;height:18px"></i> <strong style="color:var(--text-primary)" data-i18n="upgrade.plans.hunter.f5">Hiring signal — are you ready to be hired?</strong></li>
+        <li><i data-lucide="check" class="check" style="width:18px;height:18px"></i> <span data-i18n="upgrade.plans.hunter.f6">Scorecard audio narration</span></li>
+        <li><i data-lucide="check" class="check" style="width:18px;height:18px"></i> <span data-i18n="upgrade.plans.hunter.f7">Interview history</span></li>
+        <li><i data-lucide="check" class="check" style="width:18px;height:18px"></i> <span data-i18n="upgrade.plans.hunter.f8">Smarter models</span></li>
       </ul>
       <button class="btn btn-primary" style="width: 100%; box-shadow: 0 10px 20px -5px rgba(99,102,241,0.4);" id="hunter-btn" data-i18n="upgrade.plans.hunter.btnUpgrade">Upgrade to Hunter &rarr;</button>
       <div class="trial-note" id="hunter-note" data-i18n="upgrade.plans.hunter.note">Billed monthly &middot; cancel anytime</div>
@@ -284,8 +286,8 @@
       const pct = Math.min(100, Math.round((data.used / data.limit) * 100));
       fill.style.width = pct + '%';
       if (pct >= 100) fill.classList.add('full');
-      count.textContent = `${data.used} / ${data.limit} used`;
-      label.textContent = `${window.t ? window.t('upgrade.usageThisWeek') : "This week's usage"} — ${plan === 'hunter' ? '🎯 Hunter' : '🗺️ Explorer'} plan`;
+      count.textContent = `${data.used} / ${data.limit} ${window.t ? window.t('upgrade.usageUsed') : 'used'}`;
+      label.textContent = `${window.t ? window.t('upgrade.usageThisWeek') : "This week"} — ${plan === 'hunter' ? '🎯 Hunter' : '🗺️ Explorer'} ${window.t ? window.t('upgrade.planLabel') : 'plan'}`;
 
       try {
         const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
