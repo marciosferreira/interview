@@ -253,7 +253,7 @@
 
   async function _loadPlanPill() {
     try {
-      const res = await fetch('/me', { headers: { 'Authorization': `Bearer ${_authToken}` } });
+      const res = await fetch('/auth/me', { headers: { 'Authorization': `Bearer ${_authToken}` } });
       if (!res.ok) return;
       const user = await res.json();
       _userPlan = user.plan || 'free';
