@@ -108,7 +108,15 @@ class _CacheMiddleware:
             return
 
         path = scope.get("path", "")
-        no_cache = path.endswith(".html") or path in ("/", "") or path.endswith(".json")
+
+        # Serve index.html for language landing routes before StaticFiles intercepts
+        if path in ("/en", "/pt"):
+            index_path = Path(__file__).parent / "static" / "index.html"
+            response = FileResponse(str(index_path))
+            await response(scope, receive, send)
+            return
+
+        no_cache = path.endswith(".html") or path in ("/", "", "/en", "/pt") or path.endswith(".json")
 
         async def send_with_headers(message):
             if no_cache and message["type"] == "http.response.start":
@@ -1621,6 +1629,16 @@ async def admin_delete_contact(msg_id: str, current_user: dict = Depends(get_cur
 @app.get("/scorecard/{thread_id}")
 async def scorecard_page(thread_id: str):
     return FileResponse(Path(__file__).parent / "static" / "scorecard.html")
+
+
+@app.get("/en")
+async def landing_en():
+    return FileResponse(Path(__file__).parent / "static" / "index.html")
+
+
+@app.get("/pt")
+async def landing_pt():
+    return FileResponse(Path(__file__).parent / "static" / "index.html")
 
 
 # Serve the frontend — mount last so API routes are registered first

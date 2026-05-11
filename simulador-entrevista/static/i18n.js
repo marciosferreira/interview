@@ -17,6 +17,9 @@
   const SUPPORTED   = ['en', 'pt'];
 
   function detectLang() {
+    // URL path takes priority: /pt → pt, /en → en (canonical landing routes)
+    const seg = window.location.pathname.split('/').filter(Boolean)[0] || '';
+    if (SUPPORTED.includes(seg)) return seg;
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored && SUPPORTED.includes(stored)) return stored;
     const browser = (navigator.language || '').slice(0, 2).toLowerCase();
@@ -78,11 +81,12 @@
 
   async function loadLang(lang) {
     try {
-      const res = await fetch(`/locales/${lang}.json?v=3`);
+      const res = await fetch(`/locales/${lang}.json?v=4`);
       if (!res.ok) throw new Error(res.status);
       _dict = await res.json();
       _lang = lang;
       localStorage.setItem(STORAGE_KEY, lang);
+      document.cookie = `${STORAGE_KEY}=${lang}; path=/; max-age=${365 * 24 * 3600}; samesite=lax`;
       applyTranslations();
       // Notify app code that translations are ready
       document.dispatchEvent(new CustomEvent('i18n:ready', { detail: { lang } }));
@@ -94,6 +98,8 @@
 
   function switchLang(lang) {
     if (!SUPPORTED.includes(lang) || lang === _lang) return;
+    const onLanding = /^\/(en|pt)?\/?$/.test(window.location.pathname);
+    if (onLanding) history.replaceState(null, '', `/${lang}/`);
     loadLang(lang);
   }
 
@@ -101,6 +107,10 @@
   window.t          = t;
   window.i18n       = { switchLang, currentLang: () => _lang };
 
-  // Boot
-  loadLang(_lang);
+  // Boot — redirect root to language-specific URL
+  if (window.location.pathname === '/') {
+    window.location.replace('/' + _lang + '/');
+  } else {
+    loadLang(_lang);
+  }
 })();

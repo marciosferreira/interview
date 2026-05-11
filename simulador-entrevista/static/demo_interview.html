@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="/css/layout.css">
 
   <script src="/analytics.js"></script>
+  <script src="/i18n.js"></script>
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -141,15 +142,15 @@
 <div class="back-bar">
   <a href="/" class="back-btn">
     <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
-    Back to Acing Interviews
+    <span data-i18n="demo.backHome">Back to Acing Interviews</span>
   </a>
-  <span class="back-bar-label">Sample interview session</span>
+  <span class="back-bar-label" data-i18n="demo.interview.barLabel">Sample interview session</span>
 </div>
 
 <div class="demo-wrap">
   <div class="demo-notice">
     <i data-lucide="flask-conical" style="width:15px;height:15px;color:#a5b4fc;flex-shrink:0"></i>
-    <span><strong>Sample session</strong> — This is a real example of what a mock interview looks like inside Acing Interviews.</span>
+    <span><strong data-i18n="demo.interview.noticeTitle">Sample session</strong> — <span data-i18n="demo.interview.noticeBody">This is a real example of what a mock interview looks like inside Acing Interviews.</span></span>
   </div>
 
   <div class="app">
@@ -160,11 +161,11 @@
         <div class="app-sub">AI Machine Learning Engineer · PL · Acme</div>
       </div>
       <div class="header-right">
-        <div class="badge"><span class="badge-check">✓</span> Completed</div>
+        <div class="badge"><span class="badge-check">✓</span> <span data-i18n="demo.interview.completed">Completed</span></div>
         <div class="badge-hunter">🎯 HUNTER</div>
-        <div class="badge"><i class="ti ti-settings" style="font-size:13px" aria-hidden="true"></i> Settings</div>
-        <div class="badge"><i class="ti ti-bulb" style="font-size:13px" aria-hidden="true"></i> Tips</div>
-        <div class="badge"><i class="ti ti-history" style="font-size:13px" aria-hidden="true"></i> History</div>
+        <div class="badge"><i class="ti ti-settings" style="font-size:13px" aria-hidden="true"></i> <span data-i18n="demo.interview.settings">Settings</span></div>
+        <div class="badge"><i class="ti ti-bulb" style="font-size:13px" aria-hidden="true"></i> <span data-i18n="demo.interview.tips">Tips</span></div>
+        <div class="badge"><i class="ti ti-history" style="font-size:13px" aria-hidden="true"></i> <span data-i18n="demo.interview.history">History</span></div>
       </div>
     </div>
 
@@ -172,43 +173,43 @@
       <div class="steps">
         <div class="step">
           <div class="step-icon step-done"><i class="ti ti-check" style="font-size:13px" aria-hidden="true"></i></div>
-          <div class="step-label done">Elevator Pitch</div>
+          <div class="step-label done" data-i18n="demo.interview.phases.elevatorPitch">Elevator Pitch</div>
         </div>
         <div class="step-connector"></div>
         <div class="step">
           <div class="step-icon step-done"><i class="ti ti-check" style="font-size:13px" aria-hidden="true"></i></div>
-          <div class="step-label done">CAR Story</div>
+          <div class="step-label done" data-i18n="demo.interview.phases.carStory">CAR Story</div>
         </div>
         <div class="step-connector"></div>
         <div class="step">
           <div class="step-icon step-done"><i class="ti ti-check" style="font-size:13px" aria-hidden="true"></i></div>
-          <div class="step-label done">Role-Specific</div>
+          <div class="step-label done" data-i18n="demo.interview.phases.roleSpecific">Role-Specific</div>
         </div>
         <div class="step-connector"></div>
         <div class="step">
           <div class="step-icon step-done"><i class="ti ti-check" style="font-size:13px" aria-hidden="true"></i></div>
-          <div class="step-label done">Leadership</div>
+          <div class="step-label done" data-i18n="demo.interview.phases.leadership">Leadership</div>
         </div>
         <div class="step-connector"></div>
         <div class="step">
           <div class="step-icon step-done"><i class="ti ti-check" style="font-size:13px" aria-hidden="true"></i></div>
-          <div class="step-label done">Motivation</div>
+          <div class="step-label done" data-i18n="demo.interview.phases.motivation">Motivation</div>
         </div>
         <div class="step-connector"></div>
         <div class="step">
           <div class="step-icon step-done"><i class="ti ti-check" style="font-size:13px" aria-hidden="true"></i></div>
-          <div class="step-label done">Your Questions</div>
+          <div class="step-label done" data-i18n="demo.interview.phases.yourQuestions">Your Questions</div>
         </div>
         <div class="step-connector-inactive"></div>
         <div class="step">
           <div class="step-icon step-active">⭐</div>
-          <div class="step-label" style="color:#f59e0b">Scorecard</div>
+          <div class="step-label" style="color:#f59e0b" data-i18n="demo.interview.phases.scorecard">Scorecard</div>
         </div>
       </div>
     </div>
 
     <div class="toolbar">
-      <button class="auto-btn"><i class="ti ti-volume-off" style="font-size:12px" aria-hidden="true"></i> Auto OFF</button>
+      <button class="auto-btn"><i class="ti ti-volume-off" style="font-size:12px" aria-hidden="true"></i> <span data-i18n="demo.interview.autoOff">Auto OFF</span></button>
     </div>
 
     <div class="chat">
@@ -216,7 +217,7 @@
         <div class="avatar avatar-i">I</div>
         <div>
           <div class="bubble bubble-ai">Hi, I'm Alex — thanks for making time today. I'll be conducting your interview for the AI/Machine Learning Engineer role. We have about 35 minutes together. I'll ask structured questions and follow-ups — take as much time as you need on each answer. If at any point you'd like to skip a question and move on, just say 'skip'. Let's get started. Tell me about yourself — your background, what you're working on now, and what draws you to this role.</div>
-          <div class="replay"><button class="replay-btn"><i class="ti ti-volume" style="font-size:11px" aria-hidden="true"></i> replay</button></div>
+          <div class="replay"><button class="replay-btn"><i class="ti ti-volume" style="font-size:11px" aria-hidden="true"></i> <span data-i18n="demo.interview.replay">replay</span></button></div>
         </div>
       </div>
 
@@ -229,7 +230,7 @@
         <div class="avatar avatar-i">I</div>
         <div>
           <div class="bubble bubble-ai">Got it. And right now — where are you working as a data scientist, and what's the specific problem you're solving there?</div>
-          <div class="replay"><button class="replay-btn"><i class="ti ti-volume" style="font-size:11px" aria-hidden="true"></i> replay</button></div>
+          <div class="replay"><button class="replay-btn"><i class="ti ti-volume" style="font-size:11px" aria-hidden="true"></i> <span data-i18n="demo.interview.replay">replay</span></button></div>
         </div>
       </div>
 
@@ -242,7 +243,7 @@
         <div class="avatar avatar-i">I</div>
         <div>
           <div class="bubble bubble-ai">You mentioned solving managers' problems at FIT — what does that actually mean? What's a real example of something you built or solved for them in the last few months?</div>
-          <div class="replay"><button class="replay-btn"><i class="ti ti-volume" style="font-size:11px" aria-hidden="true"></i> replay</button></div>
+          <div class="replay"><button class="replay-btn"><i class="ti ti-volume" style="font-size:11px" aria-hidden="true"></i> <span data-i18n="demo.interview.replay">replay</span></button></div>
         </div>
       </div>
 
@@ -252,23 +253,23 @@
       </div>
     </div>
 
-    <div class="complete-bar">
+    <div class="complete-bar" data-i18n="demo.interview.completeBar">
       Interview complete — click here to see your scorecard →
     </div>
 
     <div class="input-bar">
       <button class="mic-btn"><i class="ti ti-microphone" style="font-size:15px; color:#888" aria-hidden="true"></i></button>
-      <input class="input-field" placeholder="Type or press 🎤" readonly />
+      <input class="input-field" data-i18n-attr="placeholder:demo.interview.placeholder" placeholder="Type or press 🎤" readonly />
       <button class="send-btn"><i class="ti ti-send" style="font-size:15px; color:#fff" aria-hidden="true"></i></button>
-      <button class="contato-btn"><i class="ti ti-mail" style="font-size:13px" aria-hidden="true"></i> Contato</button>
+      <button class="contato-btn"><i class="ti ti-mail" style="font-size:13px" aria-hidden="true"></i> <span data-i18n="nav.contactUs">Contact us</span></button>
     </div>
-    <div class="hint">Click 🎤 to start/stop recording · Enter to send text · Shift+Enter for new line</div>
+    <div class="hint" data-i18n="demo.interview.hint">Click 🎤 to start/stop recording · Enter to send text · Shift+Enter for new line</div>
   </div>
 
   <div class="cta-block">
-    <h3>Start your own mock interview</h3>
-    <p>Paste any job description and your resume — the AI builds a personalized mock interview with voice,<br>evaluates every phase, and delivers a full scorecard like this one.</p>
-    <a href="/register.html" class="btn btn-primary">Start for free →</a>
+    <h3 data-i18n="demo.cta.interviewTitle">Start your own mock interview</h3>
+    <p data-i18n="demo.cta.body">Paste any job description and your resume — the AI builds a personalized mock interview with voice, evaluates every phase, and delivers a full scorecard like this one.</p>
+    <a href="/register.html" class="btn btn-primary" data-i18n="demo.cta.startFree">Start for free →</a>
   </div>
 </div>
 

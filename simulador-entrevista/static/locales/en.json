@@ -598,5 +598,45 @@
       "body_loggedout": "The best way to internalize these frameworks is to practice them out loud. Sign up free — no credit card required.",
       "btn_loggedout": "Get started free →"
     }
+  },
+  "demo": {
+    "backHome": "Back to Acing Interviews",
+    "interview": {
+      "barLabel": "Sample interview session",
+      "noticeTitle": "Sample session",
+      "noticeBody": "This is a real example of what a mock interview looks like inside Acing Interviews.",
+      "completed": "Completed",
+      "settings": "Settings",
+      "tips": "Tips",
+      "history": "History",
+      "autoOff": "Auto OFF",
+      "replay": "replay",
+      "completeBar": "Interview complete — click here to see your scorecard →",
+      "placeholder": "Type or press 🎤",
+      "hint": "Click 🎤 to start/stop recording · Enter to send text · Shift+Enter for new line",
+      "phases": {
+        "elevatorPitch": "Elevator Pitch",
+        "carStory": "CAR Story",
+        "roleSpecific": "Role-Specific",
+        "leadership": "Leadership",
+        "motivation": "Motivation",
+        "yourQuestions": "Your Questions",
+        "scorecard": "Scorecard"
+      }
+    },
+    "scorecard": {
+      "headerSub": "Sample Scorecard",
+      "noticeTitle": "Sample scorecard",
+      "noticeBody": "This is a real example of what you receive after completing a mock interview session.",
+      "hiringSignal": "Hiring signal",
+      "hiringYes": "Yes",
+      "powered": "Powered by Claude · Whisper · Gemini TTS"
+    },
+    "cta": {
+      "interviewTitle": "Start your own mock interview",
+      "scoreTitle": "Get your own scorecard",
+      "body": "Paste any job description and your resume — the AI builds a personalized mock interview with voice, evaluates every phase, and delivers a full scorecard like this one.",
+      "startFree": "Start for free →"
+    }
   }
 }

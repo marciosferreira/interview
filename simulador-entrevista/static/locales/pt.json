@@ -598,5 +598,45 @@
       "body_loggedout": "A melhor forma de internalizar esses frameworks é praticá-los em voz alta. Cadastre-se grátis — sem cartão de crédito.",
       "btn_loggedout": "Começar grátis →"
     }
+  },
+  "demo": {
+    "backHome": "Voltar para Acing Interviews",
+    "interview": {
+      "barLabel": "Sessão de entrevista de exemplo",
+      "noticeTitle": "Sessão de exemplo",
+      "noticeBody": "Este é um exemplo real de como é uma simulação de entrevista no Acing Interviews.",
+      "completed": "Concluído",
+      "settings": "Configurações",
+      "tips": "Dicas",
+      "history": "Histórico",
+      "autoOff": "Auto OFF",
+      "replay": "repetir",
+      "completeBar": "Entrevista concluída — clique aqui para ver seu scorecard →",
+      "placeholder": "Digite ou pressione 🎤",
+      "hint": "Clique em 🎤 para gravar · Enter para enviar · Shift+Enter para nova linha",
+      "phases": {
+        "elevatorPitch": "Apresentação",
+        "carStory": "Caso CAR",
+        "roleSpecific": "Específicas",
+        "leadership": "Liderança",
+        "motivation": "Motivação",
+        "yourQuestions": "Suas Perguntas",
+        "scorecard": "Scorecard"
+      }
+    },
+    "scorecard": {
+      "headerSub": "Scorecard de Exemplo",
+      "noticeTitle": "Scorecard de exemplo",
+      "noticeBody": "Este é um exemplo real do que você recebe ao concluir uma sessão de entrevista simulada.",
+      "hiringSignal": "Sinal de contratação",
+      "hiringYes": "Sim",
+      "powered": "Desenvolvido com Claude · Whisper · Gemini TTS"
+    },
+    "cta": {
+      "interviewTitle": "Inicie sua própria simulação de entrevista",
+      "scoreTitle": "Obtenha seu próprio scorecard",
+      "body": "Cole qualquer descrição de vaga e seu currículo — a IA cria uma entrevista simulada personalizada com voz, avalia cada fase e entrega um scorecard completo como este.",
+      "startFree": "Comece grátis →"
+    }
   }
 }

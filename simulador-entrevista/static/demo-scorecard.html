@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="/css/components.css">
   <link rel="stylesheet" href="/css/layout.css">
 
+  <script src="/i18n.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <style>
@@ -130,23 +131,23 @@
     <div class="header-logo"><i data-lucide="target" style="width:22px;height:22px;"></i></div>
     <div class="header-brand-info">
       <h1>Acing Interviews</h1>
-      <p>Sample Scorecard</p>
+      <p data-i18n="demo.scorecard.headerSub">Sample Scorecard</p>
     </div>
   </a>
   <div class="header-actions">
-    <a href="/register.html" class="btn btn-primary" style="padding:8px 16px;font-size:13px;">Get started free →</a>
+    <a href="/register.html" class="btn btn-primary" style="padding:8px 16px;font-size:13px;" data-i18n="nav.getStarted">Get started free</a>
   </div>
 </header>
 
 <main>
   <a href="/" class="back-link">
     <i data-lucide="arrow-left" style="width:16px;height:16px"></i>
-    Back to Acing Interviews
+    <span data-i18n="demo.backHome">Back to Acing Interviews</span>
   </a>
 
   <div class="demo-banner">
     <i data-lucide="flask-conical" style="width:15px;height:15px;color:var(--brand-primary)"></i>
-    <span><strong>Sample scorecard</strong> — This is a real example of what you receive after completing a mock interview session.</span>
+    <span><strong data-i18n="demo.scorecard.noticeTitle">Sample scorecard</strong> — <span data-i18n="demo.scorecard.noticeBody">This is a real example of what you receive after completing a mock interview session.</span></span>
   </div>
 
   <div class="page-title">AI Machine Learning Engineer — Acme Corp</div>
@@ -154,24 +155,24 @@
 
   <div class="hire-hero signal-yes">
     <div class="hire-emoji">✅</div>
-    <div class="hire-label">Hiring signal</div>
+    <div class="hire-label" data-i18n="demo.scorecard.hiringSignal">Hiring signal</div>
     <div class="hire-sep"></div>
-    <div class="hire-value">Yes</div>
+    <div class="hire-value" data-i18n="demo.scorecard.hiringYes">Yes</div>
   </div>
 
   <div class="scorecard-pre" id="scorecard-body"></div>
 
   <div class="cta-block">
-    <h3>Get your own scorecard</h3>
-    <p>Paste any job description and your resume — the AI builds a personalized mock interview with voice,<br>evaluates every phase, and delivers a scorecard like this one.</p>
-    <a href="/register.html" class="btn btn-primary">Start for free →</a>
+    <h3 data-i18n="demo.cta.scoreTitle">Get your own scorecard</h3>
+    <p data-i18n="demo.cta.body">Paste any job description and your resume — the AI builds a personalized mock interview with voice, evaluates every phase, and delivers a full scorecard like this one.</p>
+    <a href="/register.html" class="btn btn-primary" data-i18n="demo.cta.startFree">Start for free →</a>
   </div>
 </main>
 
 <footer class="app-footer">
-  Powered by Claude · Whisper · Gemini TTS &nbsp;·&nbsp;
-  <a href="/upgrade.html">Plans</a> &nbsp;·&nbsp;
-  <a href="/tips.html">Interview Tips</a>
+  <span data-i18n="demo.scorecard.powered">Powered by Claude · Whisper · Gemini TTS</span> &nbsp;·&nbsp;
+  <a href="/upgrade.html" data-i18n="nav.plans">Plans</a> &nbsp;·&nbsp;
+  <a href="/tips.html" data-i18n="nav.tips">Interview Tips</a>
 </footer>
 
 <script>

@@ -28,14 +28,21 @@
     },
   };
 
-  const lang = localStorage.getItem('preferred_lang') || 'en';
-  const c = _copy[lang] || _copy.en;
+  function _detectLang() {
+    if (window.i18n && window.i18n.currentLang) return window.i18n.currentLang();
+    const seg = window.location.pathname.split('/').filter(Boolean)[0] || '';
+    if (seg === 'en' || seg === 'pt') return seg;
+    return localStorage.getItem('preferred_lang') || 'en';
+  }
 
   let _name = '', _email = '';
   try {
     const u = JSON.parse(localStorage.getItem('auth_user') || 'null');
     if (u) { _name = u.name || ''; _email = u.email || ''; }
   } catch (_) {}
+
+  const lang = _detectLang();
+  let c = _copy[lang] || _copy.en;
 
   const style = document.createElement('style');
   style.textContent = `
@@ -143,6 +150,28 @@
   function _esc(s) {
     return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
+
+  function _applyLang(newLang) {
+    const nc = _copy[newLang] || _copy.en;
+    fab.innerHTML = '&#9993; ' + nc.btn;
+    overlay.querySelector('h2').textContent = nc.title;
+    overlay.querySelector('.c-sub').textContent = nc.sub;
+    const labels = overlay.querySelectorAll('label');
+    labels[0].textContent = nc.name;
+    labels[1].textContent = nc.email;
+    labels[2].textContent = nc.subject;
+    labels[3].textContent = nc.message;
+    document.getElementById('cw-name').placeholder    = nc.namePh;
+    document.getElementById('cw-email').placeholder   = nc.emailPh;
+    document.getElementById('cw-subject').placeholder = nc.subjectPh;
+    document.getElementById('cw-body').placeholder    = nc.messagePh;
+    document.getElementById('cw-submit').textContent  = nc.submit;
+  }
+
+  document.addEventListener('i18n:ready', (e) => {
+    c = _copy[e.detail.lang] || _copy.en;
+    _applyLang(e.detail.lang);
+  });
 
   const openModal  = () => overlay.classList.add('open');
   const closeModal = () => overlay.classList.remove('open');
