@@ -37,14 +37,24 @@
   "landing": {
     "hero": {
       "badge": "Simulador de Entrevistas · Com IA · Totalmente Personalizado",
-      "title": "Entre na sua próxima entrevista<br><span>sabendo exatamente o que dizer.</span>",
-      "sub": "A maioria dos candidatos chega despreparada — histórias vagas, respostas genéricas, posicionamento fraco. Este simulador roda uma entrevista completa baseada no seu currículo e na vaga real, e mostra exatamente o que corrigir.",
+      "title": "Uma entrevista simulada feita a partir<br><span>do seu currículo e da vaga real.</span>",
+      "sub": "Cole a descrição da vaga, adicione seu currículo — a IA monta uma entrevista completa e personalizada. Pratique com voz, receba feedback em cada fase e veja seu sinal de contratação.",
       "cta": "Começar grátis →",
-      "ctaSignin": "Entrar"
+      "ctaSignin": "Entrar",
+      "listenBtn": "Ouvir a Alex"
+    },
+    "demo": {
+      "label": "Ouça a entrevistadora de IA em ação",
+      "quote": "\"Você mencionou resolver problemas de gestores — o que isso significa na prática?\""
     },
     "gate": {
       "title": "A entrevista é onde a vaga é ganha ou perdida",
       "body": "Seja a primeira conversa ou a rodada final, o que você diz — e como você diz — decide o resultado. Perguntas comportamentais, cenários da vaga, fit e motivação: esta ferramenta te prepara para tudo isso, adaptada ao seu histórico e à vaga que você está buscando."
+    },
+    "tour": {
+      "label": "Veja em ação",
+      "title": "Tudo que você precisa, em uma sessão",
+      "sub": "Da descrição da vaga ao scorecard personalizado — 6 fases estruturadas, feedback real e um sinal de contratação no final."
     },
     "howto": {
       "label": "Como funciona",

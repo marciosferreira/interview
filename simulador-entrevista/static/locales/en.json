@@ -37,14 +37,24 @@
   "landing": {
     "hero": {
       "badge": "Mock Interview Simulator · AI-Powered · Fully Personalized",
-      "title": "Walk into your next interview<br><span>knowing exactly what to say.</span>",
-      "sub": "Most candidates walk in underprepared — vague stories, generic answers, weak framing. This simulator runs a full mock interview built around your resume and the actual job posting, then tells you exactly what to fix.",
+      "title": "A mock interview built from<br><span>your resume and the actual job.</span>",
+      "sub": "Paste the job description, add your resume — the AI builds a complete personalized interview. Practice out loud with your AI interviewer, get feedback on every phase, and see your hiring signal.",
       "cta": "Start for free →",
-      "ctaSignin": "Sign in"
+      "ctaSignin": "Sign in",
+      "listenBtn": "Hear Alex"
+    },
+    "demo": {
+      "label": "Hear the AI interviewer in action",
+      "quote": "\"You mentioned solving managers' problems at FIT — what does that actually mean?\""
     },
     "gate": {
       "title": "The interview is where the role is won or lost",
       "body": "Whether it's your first conversation or the final round, what you say — and how you say it — decides the outcome. Behavioral questions, role-specific scenarios, fit and motivation: this tool prepares you for all of them, tailored to your background and the specific job you're after."
+    },
+    "tour": {
+      "label": "See it in action",
+      "title": "Everything you need, in one session",
+      "sub": "From job description to personalized scorecard — 6 structured phases, real feedback, and a hiring signal at the end."
     },
     "howto": {
       "label": "How it works",
