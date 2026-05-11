@@ -111,21 +111,23 @@
     .error-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary); }
     .error-sub   { font-size: 15px; color: var(--text-secondary); margin-bottom: 24px; }
 
-    /* Hire signal hero */
+    /* Hire signal banner */
     .hire-hero {
       display: none;
       border-radius: var(--radius-md);
-      padding: 28px 32px;
-      margin-bottom: 24px;
-      text-align: center;
+      padding: 10px 20px;
+      margin-bottom: 20px;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
     }
-    .hire-hero.signal-strong-yes { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); }
-    .hire-hero.signal-yes        { background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); }
-    .hire-hero.signal-borderline { background: rgba(234,179,8,0.1);  border: 1px solid rgba(234,179,8,0.3); }
-    .hire-hero.signal-not-yet    { background: rgba(239,68,68,0.1);  border: 1px solid rgba(239,68,68,0.3); }
-    .hire-emoji { font-size: 36px; margin-bottom: 8px; }
-    .hire-label { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; opacity: 0.7; }
-    .hire-value { font-size: 26px; font-weight: 800; }
+    .hire-hero.signal-strong-yes { background: rgba(34,197,94,0.08);  border: 1px solid rgba(34,197,94,0.25); }
+    .hire-hero.signal-yes        { background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.25); }
+    .hire-hero.signal-borderline { background: rgba(234,179,8,0.08);  border: 1px solid rgba(234,179,8,0.25); }
+    .hire-hero.signal-not-yet    { background: rgba(239,68,68,0.08);  border: 1px solid rgba(239,68,68,0.25); }
+    .hire-emoji { font-size: 16px; line-height: 1; flex-shrink: 0; }
+    .hire-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); flex-shrink: 0; }
+    .hire-value { font-size: 13px; font-weight: 700; }
     .hire-hero.signal-strong-yes .hire-value { color: #22c55e; }
     .hire-hero.signal-yes        .hire-value { color: var(--brand-primary); }
     .hire-hero.signal-borderline .hire-value { color: #eab308; }
@@ -194,6 +196,7 @@
     <div class="hire-hero" id="hire-hero">
       <div class="hire-emoji" id="hire-emoji"></div>
       <div class="hire-label" data-i18n="scorecard.hireLabel">Hiring signal</div>
+      <div style="width:1px;height:14px;background:currentColor;opacity:0.2;flex-shrink:0"></div>
       <div class="hire-value" id="hire-value"></div>
     </div>
 
@@ -255,7 +258,7 @@
     hero.classList.add(cfg.cls);
     document.getElementById('hire-emoji').textContent = cfg.emoji;
     document.getElementById('hire-value').textContent  = window.t ? window.t(cfg.i18nKey) : hireSignal;
-    hero.style.display = 'block';
+    hero.style.display = 'flex';
   }
 
   function _showPaywall(hireSignal) {
@@ -572,39 +575,38 @@
 
     document.getElementById('scorecard-sub').textContent = threadId;
 
-    // ── Fetch only — network errors caught here ──────────────────────────────
-    let data;
-    try {
-      const res = await fetch(`/sessions/${threadId}/scorecard`, {
-        headers: { 'Authorization': `Bearer ${_authToken}` }
-      });
-      if (res.status === 404) {
-        _showError(t('scorecard.error.notFound'), t('scorecard.error.notFoundSub'));
-        return;
-      }
-      if (!res.ok) {
-        _showError(t('scorecard.error.load'), t('scorecard.error.loadSub'));
-        return;
-      }
-      data = await res.json();
-    } catch (err) {
-      console.error('[scorecard] fetch error:', err);
+    const headers = { 'Authorization': `Bearer ${_authToken}` };
+
+    // Fire both fetches in parallel
+    const [scorecardResult, sessionsResult] = await Promise.allSettled([
+      fetch(`/sessions/${threadId}/scorecard`, { headers }),
+      fetch('/sessions', { headers }),
+    ]);
+
+    // ── Handle scorecard response ─────────────────────────────────────────────
+    if (scorecardResult.status === 'rejected') {
+      console.error('[scorecard] fetch error:', scorecardResult.reason);
       _showError(t('scorecard.error.network'), t('scorecard.error.networkSub'));
       return;
     }
+    const res = scorecardResult.value;
+    if (res.status === 404) { _showError(t('scorecard.error.notFound'), t('scorecard.error.notFoundSub')); return; }
+    if (!res.ok)            { _showError(t('scorecard.error.load'),     t('scorecard.error.loadSub'));    return; }
 
-    // ── Display — JS errors here do not show "network error" ─────────────────
+    let data;
+    try { data = await res.json(); }
+    catch (err) { _showError(t('scorecard.error.load'), t('scorecard.error.loadSub')); return; }
+
     if (!data.scorecard) {
       _showPaywall(data.hire_signal);
     } else {
       _showScorecard(data.scorecard, data.hire_signal);
     }
 
-    // Enrich title with job/company from session list
+    // ── Enrich title from sessions (already fetched in parallel) ─────────────
     try {
-      const sessionsRes = await fetch('/sessions', { headers: { 'Authorization': `Bearer ${_authToken}` } });
-      if (sessionsRes.ok) {
-        const sessions = await sessionsRes.json();
+      if (sessionsResult.status === 'fulfilled' && sessionsResult.value.ok) {
+        const sessions = await sessionsResult.value.json();
         const session  = sessions.find(s => s.threadId === threadId);
         if (session) {
           const title = [session.jobTitle, session.company].filter(Boolean).join(' — ');
@@ -626,7 +628,7 @@
   });
 
   _loadPlanPill();
-  document.addEventListener('i18n:ready', _init, { once: true });
+  _init();
 </script>
 </body>
 </html>

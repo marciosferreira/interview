@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sample Scorecard — Acing Interviews</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/layout.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <style>
+    main {
+      flex: 1;
+      padding: 40px 24px;
+      max-width: 760px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .demo-banner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(99,102,241,0.08);
+      border: 1px solid rgba(99,102,241,0.25);
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      margin-bottom: 28px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .demo-banner strong { color: var(--brand-primary); }
+
+    .back-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 600;
+      background: rgba(99,102,241,0.12);
+      border: 1px solid rgba(99,102,241,0.35);
+      color: #a5b4fc;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      margin-bottom: 28px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .back-link:hover {
+      background: rgba(99,102,241,0.22);
+      border-color: rgba(99,102,241,0.6);
+      color: #a5b4fc;
+    }
+
+    .page-title { font-size: 24px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+    .page-sub   { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; }
+
+    /* Hire signal banner */
+    .hire-hero {
+      border-radius: var(--radius-md);
+      padding: 10px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+    }
+    .hire-hero.signal-yes { background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.25); }
+    .hire-emoji { font-size: 16px; line-height: 1; flex-shrink: 0; }
+    .hire-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); flex-shrink: 0; }
+    .hire-value { font-size: 13px; font-weight: 700; color: var(--brand-primary); }
+    .hire-sep   { width: 1px; height: 14px; background: currentColor; opacity: 0.2; flex-shrink: 0; }
+
+    /* Scorecard content */
+    .scorecard-pre {
+      background: var(--bg-surface);
+      border: 1px solid var(--bg-surface-border);
+      border-radius: var(--radius-md);
+      padding: 28px 32px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      line-height: 1.75;
+      color: var(--text-primary);
+      word-break: break-word;
+    }
+    .scorecard-pre h1 { font-size: 22px; font-weight: 700; margin: 0 0 20px; }
+    .scorecard-pre h2 { font-size: 17px; font-weight: 600; margin: 28px 0 12px; }
+    .scorecard-pre h3 { font-size: 15px; font-weight: 600; margin: 20px 0 8px; color: var(--text-secondary); }
+    .scorecard-pre p  { margin: 0 0 10px; }
+    .scorecard-pre ul, .scorecard-pre ol { padding-left: 20px; margin: 6px 0 12px; }
+    .scorecard-pre li { margin-bottom: 4px; }
+    .scorecard-pre hr { border: none; border-top: 1px solid var(--bg-surface-border); margin: 20px 0; }
+    .scorecard-pre blockquote {
+      border-left: 3px solid var(--brand-primary);
+      padding: 8px 16px; margin: 12px 0;
+      color: var(--text-secondary);
+      background: rgba(99,102,241,0.06);
+      border-radius: 0 6px 6px 0;
+    }
+    .scorecard-pre table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 13px; }
+    .scorecard-pre th, .scorecard-pre td { border: 1px solid var(--bg-surface-border); padding: 8px 12px; text-align: left; }
+    .scorecard-pre th { background: rgba(99,102,241,0.08); font-weight: 600; }
+    .scorecard-pre strong { font-weight: 600; color: var(--text-primary); }
+
+    .cta-block {
+      margin-top: 40px;
+      padding: 32px;
+      background: rgba(99,102,241,0.06);
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: var(--radius-lg);
+      text-align: center;
+    }
+    .cta-block h3 { font-size: 20px; margin-bottom: 10px; }
+    .cta-block p  { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+
+  <script src="/analytics.js"></script>
+</head>
+<body>
+
+<header class="app-header">
+  <a class="header-brand-link" href="/">
+    <div class="header-logo"><i data-lucide="target" style="width:22px;height:22px;"></i></div>
+    <div class="header-brand-info">
+      <h1>Acing Interviews</h1>
+      <p>Sample Scorecard</p>
+    </div>
+  </a>
+  <div class="header-actions">
+    <a href="/register.html" class="btn btn-primary" style="padding:8px 16px;font-size:13px;">Get started free →</a>
+  </div>
+</header>
+
+<main>
+  <a href="/" class="back-link">
+    <i data-lucide="arrow-left" style="width:16px;height:16px"></i>
+    Back to Acing Interviews
+  </a>
+
+  <div class="demo-banner">
+    <i data-lucide="flask-conical" style="width:15px;height:15px;color:var(--brand-primary)"></i>
+    <span><strong>Sample scorecard</strong> — This is a real example of what you receive after completing a mock interview session.</span>
+  </div>
+
+  <div class="page-title">AI Machine Learning Engineer — Acme Corp</div>
+  <div class="page-sub">May 10, 2026</div>
+
+  <div class="hire-hero signal-yes">
+    <div class="hire-emoji">✅</div>
+    <div class="hire-label">Hiring signal</div>
+    <div class="hire-sep"></div>
+    <div class="hire-value">Yes</div>
+  </div>
+
+  <div class="scorecard-pre" id="scorecard-body"></div>
+
+  <div class="cta-block">
+    <h3>Get your own scorecard</h3>
+    <p>Paste any job description and your resume — the AI builds a personalized mock interview with voice,<br>evaluates every phase, and delivers a scorecard like this one.</p>
+    <a href="/register.html" class="btn btn-primary">Start for free →</a>
+  </div>
+</main>
+
+<footer class="app-footer">
+  Powered by Claude · Whisper · Gemini TTS &nbsp;·&nbsp;
+  <a href="/upgrade.html">Plans</a> &nbsp;·&nbsp;
+  <a href="/tips.html">Interview Tips</a>
+</footer>
+
+<script>
+lucide.createIcons();
+
+const _DEMO_SCORECARD = `
+# 🎯 INTERVIEW SCORECARD — AI Machine Learning Engineer at Acme Corp
+
+---
+
+## 📊 Scores by Section
+
+**Part 1 — Elevator Pitch** — 4/5
+Strong opening with clear positioning. Good use of specific project references — the FIT multi-agent system landed well. Could be tighter: ran about 25 seconds over the ideal window, and "I'm passionate about machine learning" appeared once. Cut it.
+
+**Part 2 — CAR Project Story** — 3/5
+The challenge was clearly framed and the result was quantified (30% reduction in false alarm rate). However, the action section leaned heavily on "we" — the interviewer had to probe twice before you described your individual contribution. Own the story from the first sentence.
+
+**Part 3 — Technical Questions** — 4/5
+Solid answers on model deployment and MLOps patterns. The question on multi-agent orchestration was handled with genuine depth. The feature store trade-offs question was answered competently but lacked the business context that would have elevated it to a 5.
+
+**Part 4 — Leadership & Approach** — 3/5
+You described leading without authority effectively — the example of aligning three teams on a shared observability standard was convincing. However, when asked about handling failure, the answer stayed abstract. No concrete example emerged until prompted on the second follow-up.
+
+**Part 5 — Fit & Motivation** — 5/5
+The motivation answer was specific and credible. Linking your manufacturing telemetry background directly to the company's industrial ML focus was exactly right. This is rare and it will be remembered.
+
+---
+
+## 💬 What You Didn't Say (But Should Have)
+
+**Elevator Pitch:**
+- You didn't anchor the scale of what you've built — how many operators? How many incidents per month? Numbers make the story land.
+- "Multi-agent" means nothing to a non-technical interviewer without a one-sentence framing — add it next time.
+
+**CAR Project:**
+- You never stated the business cost of the problem *before* you solved it. "4 hours of manual correlation per incident" would have made the 30% result feel three times more impactful.
+- The improvement figure needs a baseline and a timeframe to be credible.
+
+**Technical Questions:**
+- When asked about observability in production ML, you covered logging well but missed drift detection — a key differentiator for senior ML roles.
+- You didn't ask a clarifying question before the system design answer. That signals you may jump to solutions before validating the problem.
+
+**Leadership:**
+- You could have mentioned the cross-functional impact — who benefited beyond the engineering team, and what did that enable the business to do?
+
+---
+
+## 📝 Vocabulary & Framing to Practice
+
+- Replace **"we worked on"** → "I designed / I led / I was responsible for"
+- Replace **"it was a complex problem"** → describe the complexity specifically: "the challenge was that three log systems had no common timestamp format"
+- Replace **"I'm passionate about ML"** → "This is the type of problem I find most interesting — here's why:" + one concrete example
+- Practice leading with business impact: **"The business impact was X"** before explaining the technical solution
+- Use the frame: **"Given [constraint], I decided to [action] because [reasoning]"** — it signals structured, senior-level thinking
+
+---
+
+## 🗣️ Overall Communication Performance
+
+**Rating:** B+ — Clear and structured overall, with occasional vagueness under pressure
+
+**Recurring patterns to fix:**
+1. Hedging before answering: "I think what I would say is…" — just answer directly
+2. Trailing off on results — you start strong ("we reduced the false alarm rate…") and then don't finish the number
+3. Using "we" when the interviewer is clearly asking about your individual decision and contribution
+
+---
+
+## 🏁 Overall Assessment
+
+**Total score:** 19/25
+**Hire signal:** Yes
+
+### ✅ Top 2 Strengths
+1. Technical depth is genuine and current — LangGraph, MLOps, production deployment, multi-agent systems. These came through without prompting and will differentiate you from generalist candidates.
+2. The motivation story was specific and company-aware. You connected your manufacturing background to their actual product domain. This is rare in interviews and very effective.
+
+### 🔧 Top 2 Areas to Improve Before the Real Interview
+1. **Own your stories.** Every "we did X" must become "I decided X, here's why, here's what I did specifically." Practice this until it's automatic — it's the single highest-leverage change you can make.
+2. **Business context before technical detail.** Lead every answer with the business problem and its cost, then explain what you built. Interviewers remember impact, not architecture.
+
+### ⚡ One Thing That Could Make or Break Your Interview
+
+> You have the technical substance to get this role — the gap is framing. You currently describe *what happened*; you need to describe *what you chose to do and why*. The difference between a 3/5 and a 5/5 answer is always: "I made a decision. Here it was. Here's why. Here's what it cost and what it gained." Practice that structure on every answer before the real interview.
+`;
+
+document.getElementById('scorecard-body').innerHTML = marked.parse(_DEMO_SCORECARD);
+</script>
+</body>
+</html>

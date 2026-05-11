@@ -90,6 +90,7 @@
     .hero h2 span {
       background: var(--brand-gradient);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
@@ -325,26 +326,25 @@
       max-width: 1100px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 64px;
+      grid-template-columns: 1fr;
+      gap: 0;
       align-items: center;
     }
 
     .feature-list {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
       gap: 32px;
     }
 
     .feature-item {
       display: flex;
-      gap: 20px;
+      flex-direction: column;
+      gap: 12px;
     }
 
     .feature-item-icon {
       color: var(--brand-secondary);
-      flex-shrink: 0;
-      margin-top: 2px;
     }
 
     .feature-item-content h4 {
@@ -360,14 +360,22 @@
     .feature-image {
       border-radius: var(--radius-xl);
       overflow: hidden;
-      border: 1px solid var(--bg-surface-border);
-      box-shadow: var(--shadow-lg);
+      opacity: 0.35;
+      filter: saturate(0.4) brightness(0.8);
     }
 
     @media (max-width: 768px) {
       .features-grid {
         grid-template-columns: 1fr;
-        gap: 40px;
+        gap: 0;
+      }
+      .feature-list {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 480px) {
+      .feature-list {
+        grid-template-columns: 1fr;
       }
       .gate-callout {
         flex-direction: column;
@@ -383,17 +391,52 @@
       margin: 0 auto;
       width: 100%;
     }
-    .product-tour-img {
+    .product-tour-previews {
+      display: flex;
+      gap: 24px;
+      margin-top: 48px;
+      align-items: flex-start;
+    }
+    .preview-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      transition: transform 0.2s;
+    }
+    .preview-card:hover {
+      transform: translateY(-4px);
+    }
+    .preview-card:hover .preview-card-img {
+      box-shadow: 0 30px 60px -12px rgba(0,0,0,0.6), 0 0 60px rgba(99,102,241,0.25);
+      border-color: rgba(99,102,241,0.5);
+    }
+    .preview-card-img {
       border-radius: var(--radius-xl);
       overflow: hidden;
       border: 1px solid var(--bg-surface-border);
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 40px rgba(99,102,241,0.15);
-      margin-top: 48px;
+      transition: box-shadow 0.2s, border-color 0.2s;
     }
-    .product-tour-img img {
+    .preview-card img {
       width: 100%;
       height: auto;
       display: block;
+    }
+    .preview-card-label {
+      padding: 0 4px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .preview-card-label svg { flex-shrink: 0; }
+    @media (max-width: 640px) {
+      .product-tour-previews {
+        flex-direction: column;
+      }
     }
 
     /* How-to 3-step block */
@@ -676,6 +719,35 @@
     <audio id="demo-audio-en" src="/assets/audio/sample_followup_en.wav" preload="none"></audio>
   </div>
 
+  <!-- Product Tour -->
+  <div class="product-tour">
+    <div class="section-header" style="margin-bottom:0">
+      <div class="badge badge-primary mb-4" data-i18n="landing.tour.label">See it in action</div>
+      <h2 class="section-title" style="margin-top:16px;" data-i18n="landing.tour.title">Everything you need, in one session</h2>
+      <p class="section-sub" data-i18n="landing.tour.sub">From job description to personalized scorecard — 6 structured phases, real feedback, and a hiring signal at the end.</p>
+    </div>
+    <div class="product-tour-previews">
+      <a href="/demo_interview.html" class="preview-card">
+        <div class="preview-card-label">
+          <i data-lucide="message-circle" style="width:14px;height:14px;"></i>
+          See a live interview session →
+        </div>
+        <div class="preview-card-img">
+          <img src="/assets/interview.png" alt="Mock interview session" loading="lazy">
+        </div>
+      </a>
+      <a href="/demo-scorecard.html" class="preview-card">
+        <div class="preview-card-label">
+          <i data-lucide="clipboard-check" style="width:14px;height:14px;"></i>
+          See a real scorecard →
+        </div>
+        <div class="preview-card-img">
+          <img src="/assets/score_card.png" alt="Scorecard example" loading="lazy">
+        </div>
+      </a>
+    </div>
+  </div>
+
   <!-- Gate callout -->
   <div class="section" style="padding-bottom:0">
     <div class="gate-callout">
@@ -686,18 +758,6 @@
         <h3 data-i18n="landing.gate.title">The interview is where the role is won or lost</h3>
         <p data-i18n-html="landing.gate.body">Whether it's your first conversation or the final round, what you say — and how you say it — decides the outcome. Behavioral questions, role-specific scenarios, fit and motivation: this tool prepares you for all of them, tailored to your background and the specific job you're after.</p>
       </div>
-    </div>
-  </div>
-
-  <!-- Product Tour -->
-  <div class="product-tour">
-    <div class="section-header" style="margin-bottom:0">
-      <div class="badge badge-primary mb-4" data-i18n="landing.tour.label">See it in action</div>
-      <h2 class="section-title" style="margin-top:16px;" data-i18n="landing.tour.title">Everything you need, in one session</h2>
-      <p class="section-sub" data-i18n="landing.tour.sub">From job description to personalized scorecard — 6 structured phases, real feedback, and a hiring signal at the end.</p>
-    </div>
-    <div class="product-tour-img">
-      <img src="/assets/home_image.png" alt="Product tour showing the 6 phases of the mock interview" loading="lazy">
     </div>
   </div>
 
@@ -812,9 +872,6 @@
             <p data-i18n="landing.features.f4.desc">Build fluency through repetition until your answers feel natural under pressure.</p>
           </div>
         </div>
-      </div>
-      <div class="feature-image">
-        <img src="/assets/features.png" alt="AI analyzing resume representation">
       </div>
     </div>
   </div>

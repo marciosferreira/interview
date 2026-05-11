@@ -852,14 +852,13 @@ async def get_session_history(thread_id: str, current_user: dict = Depends(get_c
 @app.get("/sessions/{thread_id}/scorecard")
 async def get_scorecard(thread_id: str, current_user: dict = Depends(get_current_user)):
     loop = asyncio.get_running_loop()
-    user = await loop.run_in_executor(None, lambda: _with_conn(lambda c: get_user_by_id(c, current_user["id"])))
-    plan = user.get("plan", "free") if user else "free"
-    scorecard_text = await loop.run_in_executor(
-        None,
-        lambda: session_store.get_scorecard(thread_id, current_user["id"]),
+    user, scorecard_text = await asyncio.gather(
+        loop.run_in_executor(None, lambda: _with_conn(lambda c: get_user_by_id(c, current_user["id"]))),
+        loop.run_in_executor(None, lambda: session_store.get_scorecard(thread_id, current_user["id"])),
     )
     if not scorecard_text:
         raise HTTPException(status_code=404, detail="Scorecard not found for this session")
+    plan = user.get("plan", "free") if user else "free"
     hire_signal = extract_hire_signal(scorecard_text)
     if plan != "hunter":
         return {"scorecard": None, "hire_signal": hire_signal}

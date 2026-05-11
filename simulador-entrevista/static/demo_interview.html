@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sample Interview Session — Acing Interviews</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/layout.css">
+
+  <script src="/analytics.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    .back-bar {
+      background: var(--bg-base, #0f1117);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(99,102,241,0.12);
+      border: 1px solid rgba(99,102,241,0.35);
+      color: #a5b4fc;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .back-btn:hover {
+      background: rgba(99,102,241,0.22);
+      border-color: rgba(99,102,241,0.6);
+    }
+    .back-bar-label {
+      font-size: 13px;
+      color: #666;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .demo-wrap {
+      padding: 24px 20px;
+      max-width: 860px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .demo-notice {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(99,102,241,0.08);
+      border: 1px solid rgba(99,102,241,0.25);
+      border-radius: 10px;
+      padding: 10px 16px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: #9ca3af;
+      font-family: 'Inter', sans-serif;
+    }
+    .demo-notice strong { color: #a5b4fc; }
+
+    .app { background: #0f1117; color: #e0e0e0; min-height: 600px; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; border: 1px solid #2a2c35; }
+    .app-header-inner { background: #16181f; border-bottom: 0.5px solid #2a2c35; padding: 10px 20px; display: flex; align-items: center; gap: 12px; }
+    .logo { width: 36px; height: 36px; background: #6c5ce7; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+    .logo-inner { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; }
+    .logo-dot { width: 6px; height: 6px; background: #fff; border-radius: 50%; }
+    .app-title { font-size: 14px; font-weight: 500; color: #fff; }
+    .app-sub { font-size: 11px; color: #888; }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; border: 0.5px solid #3a3c45; color: #bbb; display: flex; align-items: center; gap: 5px; }
+    .badge-check { color: #00b894; }
+    .badge-hunter { background: #2d1f00; color: #f59e0b; border-color: #6b4c00; font-size: 11px; padding: 3px 10px; border-radius: 20px; }
+    .progress-bar { background: #1a1c24; padding: 14px 24px; border-bottom: 0.5px solid #2a2c35; overflow-x: auto; }
+    .steps { display: flex; align-items: center; gap: 0; white-space: nowrap; }
+    .step { display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; }
+    .step-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+    .step-done { background: #00b894; color: #fff; }
+    .step-active { background: #f59e0b; color: #fff; }
+    .step-label { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+    .step-label.done { color: #00b894; }
+    .step-connector { width: 40px; height: 2px; background: #00b894; margin-bottom: 16px; }
+    .step-connector-inactive { width: 40px; height: 2px; background: #2a2c35; margin-bottom: 16px; }
+    .toolbar { background: #16181f; padding: 6px 20px; display: flex; justify-content: flex-end; border-bottom: 0.5px solid #2a2c35; }
+    .auto-btn { font-size: 11px; color: #888; border: 0.5px solid #3a3c45; border-radius: 20px; padding: 3px 10px; background: transparent; display: flex; align-items: center; gap: 5px; }
+    .chat { flex: 1; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+    .msg { display: flex; gap: 10px; align-items: flex-start; }
+    .msg.user { flex-direction: row-reverse; }
+    .avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+    .avatar-i { background: #6c5ce7; color: #fff; }
+    .avatar-y { background: #2d3250; color: #a0b0ff; border: 0.5px solid #3a4a80; }
+    .bubble { max-width: 78%; padding: 10px 14px; border-radius: 10px; font-size: 13px; line-height: 1.55; }
+    .bubble-ai { background: #1e2030; color: #d0d0d0; border: 0.5px solid #2a2c40; }
+    .bubble-user { background: #2d3250; color: #c5d0ff; border: 0.5px solid #3a4a80; }
+    .replay { margin-top: 5px; }
+    .replay-btn { font-size: 10px; color: #666; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0; }
+    .complete-bar { background: #00b894; padding: 12px; text-align: center; font-size: 13px; font-weight: 500; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .input-bar { background: #16181f; border-top: 0.5px solid #2a2c35; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+    .mic-btn { width: 34px; height: 34px; border-radius: 50%; background: #2a2c35; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .input-field { flex: 1; background: transparent; border: none; color: #888; font-size: 13px; outline: none; }
+    .send-btn { width: 34px; height: 34px; border-radius: 50%; background: #6c5ce7; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .contato-btn { background: #6c5ce7; color: #fff; border: none; border-radius: 8px; padding: 8px 14px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+    .hint { font-size: 10px; color: #555; text-align: center; padding: 4px 0 6px; background: #16181f; }
+
+    .cta-block {
+      margin-top: 32px;
+      padding: 32px;
+      background: rgba(99,102,241,0.06);
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: 12px;
+      text-align: center;
+      font-family: 'Inter', sans-serif;
+      margin-bottom: 40px;
+    }
+    .cta-block h3 { font-size: 20px; color: #fff; margin-bottom: 10px; }
+    .cta-block p  { font-size: 14px; color: #9ca3af; margin-bottom: 24px; line-height: 1.6; }
+  </style>
+</head>
+<body style="background:#0f1117; min-height:100vh;">
+
+<div class="back-bar">
+  <a href="/" class="back-btn">
+    <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+    Back to Acing Interviews
+  </a>
+  <span class="back-bar-label">Sample interview session</span>
+</div>
+
+<div class="demo-wrap">
+  <div class="demo-notice">
+    <i data-lucide="flask-conical" style="width:15px;height:15px;color:#a5b4fc;flex-shrink:0"></i>
+    <span><strong>Sample session</strong> — This is a real example of what a mock interview looks like inside Acing Interviews.</span>
+  </div>
+
+  <div class="app">
+    <div class="app-header-inner">
+      <div class="logo"><div class="logo-inner"><div class="logo-dot"></div></div></div>
+      <div>
+        <div class="app-title">Acing Interviews</div>
+        <div class="app-sub">AI Machine Learning Engineer · PL · Acme</div>
+      </div>
+      <div class="header-right">
+        <div class="badge"><span class="badge-check">✓</span> Completed</div>
+        <div class="badge-hunter">🎯 HUNTER</div>
+        <div class="badge"><i class="ti ti-settings" style="font-size:13px" aria-hidden="true"></i> Settings</div>
+        <div class="badge"><i class="ti ti-bulb" style="font-size:13px" aria-hidden="true"></i> Tips</div>
+        <div class="badge"><i class="ti ti-history" style="font-size:13px" aria-hidden="true"></i> History</div>
+      </div>
+    </div>
+
+    <div class="progress-bar">
+      <div class="steps">
+        <div class="step">
+          <div class="step-icon step-done"><i class="ti ti-check" style="font-size:13px" aria-hidden="true"></i></div>
+          <div class="step-label done">Elevator Pitch</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step">
+          <div class="step-icon step-done"><i class="ti ti-check" style="font-size:13px" aria-hidden="true"></i></div>
+          <div class="step-label done">CAR Story</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step">
+          <div class="step-icon step-done"><i class="ti ti-check" style="font-size:13px" aria-hidden="true"></i></div>
+          <div class="step-label done">Role-Specific</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step">
+          <div class="step-icon step-done"><i class="ti ti-check" style="font-size:13px" aria-hidden="true"></i></div>
+          <div class="step-label done">Leadership</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step">
+          <div class="step-icon step-done"><i class="ti ti-check" style="font-size:13px" aria-hidden="true"></i></div>
+          <div class="step-label done">Motivation</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step">
+          <div class="step-icon step-done"><i class="ti ti-check" style="font-size:13px" aria-hidden="true"></i></div>
+          <div class="step-label done">Your Questions</div>
+        </div>
+        <div class="step-connector-inactive"></div>
+        <div class="step">
+          <div class="step-icon step-active">⭐</div>
+          <div class="step-label" style="color:#f59e0b">Scorecard</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button class="auto-btn"><i class="ti ti-volume-off" style="font-size:12px" aria-hidden="true"></i> Auto OFF</button>
+    </div>
+
+    <div class="chat">
+      <div class="msg">
+        <div class="avatar avatar-i">I</div>
+        <div>
+          <div class="bubble bubble-ai">Hi, I'm Alex — thanks for making time today. I'll be conducting your interview for the AI/Machine Learning Engineer role. We have about 35 minutes together. I'll ask structured questions and follow-ups — take as much time as you need on each answer. If at any point you'd like to skip a question and move on, just say 'skip'. Let's get started. Tell me about yourself — your background, what you're working on now, and what draws you to this role.</div>
+          <div class="replay"><button class="replay-btn"><i class="ti ti-volume" style="font-size:11px" aria-hidden="true"></i> replay</button></div>
+        </div>
+      </div>
+
+      <div class="msg user">
+        <div class="avatar avatar-y">Y</div>
+        <div class="bubble bubble-user">i am a data scientist</div>
+      </div>
+
+      <div class="msg">
+        <div class="avatar avatar-i">I</div>
+        <div>
+          <div class="bubble bubble-ai">Got it. And right now — where are you working as a data scientist, and what's the specific problem you're solving there?</div>
+          <div class="replay"><button class="replay-btn"><i class="ti ti-volume" style="font-size:11px" aria-hidden="true"></i> replay</button></div>
+        </div>
+      </div>
+
+      <div class="msg user">
+        <div class="avatar avatar-y">Y</div>
+        <div class="bubble bubble-user">i work a fit and solve managers problems</div>
+      </div>
+
+      <div class="msg">
+        <div class="avatar avatar-i">I</div>
+        <div>
+          <div class="bubble bubble-ai">You mentioned solving managers' problems at FIT — what does that actually mean? What's a real example of something you built or solved for them in the last few months?</div>
+          <div class="replay"><button class="replay-btn"><i class="ti ti-volume" style="font-size:11px" aria-hidden="true"></i> replay</button></div>
+        </div>
+      </div>
+
+      <div class="msg user">
+        <div class="avatar avatar-y">Y</div>
+        <div class="bubble bubble-user">they dont know how to make reports</div>
+      </div>
+    </div>
+
+    <div class="complete-bar">
+      Interview complete — click here to see your scorecard →
+    </div>
+
+    <div class="input-bar">
+      <button class="mic-btn"><i class="ti ti-microphone" style="font-size:15px; color:#888" aria-hidden="true"></i></button>
+      <input class="input-field" placeholder="Type or press 🎤" readonly />
+      <button class="send-btn"><i class="ti ti-send" style="font-size:15px; color:#fff" aria-hidden="true"></i></button>
+      <button class="contato-btn"><i class="ti ti-mail" style="font-size:13px" aria-hidden="true"></i> Contato</button>
+    </div>
+    <div class="hint">Click 🎤 to start/stop recording · Enter to send text · Shift+Enter for new line</div>
+  </div>
+
+  <div class="cta-block">
+    <h3>Start your own mock interview</h3>
+    <p>Paste any job description and your resume — the AI builds a personalized mock interview with voice,<br>evaluates every phase, and delivers a full scorecard like this one.</p>
+    <a href="/register.html" class="btn btn-primary">Start for free →</a>
+  </div>
+</div>
+
+<script>lucide.createIcons();</script>
+</body>
+</html>
