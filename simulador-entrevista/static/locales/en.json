@@ -54,7 +54,9 @@
     "tour": {
       "label": "See it in action",
       "title": "Everything you need, in one session",
-      "sub": "From job description to personalized scorecard — 6 structured phases, real feedback, and a hiring signal at the end."
+      "sub": "From job description to personalized scorecard — 6 structured phases, real feedback, and a hiring signal at the end.",
+      "previewInterview": "See a live interview session →",
+      "previewScorecard": "See a real scorecard →"
     },
     "howto": {
       "label": "How it works",

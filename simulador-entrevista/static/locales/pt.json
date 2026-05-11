@@ -54,7 +54,9 @@
     "tour": {
       "label": "Veja em ação",
       "title": "Tudo que você precisa, em uma sessão",
-      "sub": "Da descrição da vaga ao scorecard personalizado — 6 fases estruturadas, feedback real e um sinal de contratação no final."
+      "sub": "Da descrição da vaga ao scorecard personalizado — 6 fases estruturadas, feedback real e um sinal de contratação no final.",
+      "previewInterview": "Veja uma sessão de entrevista ao vivo →",
+      "previewScorecard": "Veja um scorecard real →"
     },
     "howto": {
       "label": "Como funciona",
