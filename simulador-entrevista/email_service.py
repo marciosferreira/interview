@@ -4,7 +4,7 @@ from botocore.exceptions import ClientError
 
 _MOCK   = os.getenv("MOCK_EMAIL", "false").lower() == "true"
 _REGION = os.getenv("SES_REGION", "us-east-1")
-_FROM = os.getenv(key="SES_FROM_EMAIL", default="Acing Interviews <noreply@acinginterviews.com>")
+_FROM = os.getenv(key="SES_FROM_EMAIL", default="Acing Interviews <no_reply@acinginterviews.com>")
 _BASE   = os.getenv("APP_BASE_URL", "http://localhost:8000").rstrip("/")
 _CONTACT_FROM  = os.getenv("SES_CONTACT_EMAIL", "contact@acinginterviews.com")
 _NOTIFY_TO     = os.getenv("ADMIN_NOTIFY_EMAIL", "marciosferreira@yahoo.com.br")
