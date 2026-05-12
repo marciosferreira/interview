@@ -140,7 +140,7 @@
     "admin": "Admin"
   },
   "profile": {
-    "pageTitle": "Configurações — Acing Interview",
+    "pageTitle": "Configurações — Acing Interviews",
     "header": {
       "tagline": "Configurações da conta",
       "backBtn": "← Voltar para a entrevista",
@@ -232,7 +232,7 @@
     }
   },
   "history": {
-    "pageTitle": "Histórico de Entrevistas — Acing Interview",
+    "pageTitle": "Histórico de Entrevistas — Acing Interviews",
     "header": {
       "tagline": "Histórico de entrevistas"
     },
@@ -285,7 +285,7 @@
     }
   },
   "onboarding": {
-    "pageTitle": "Preparar Entrevista — Acing Interview",
+    "pageTitle": "Preparar Entrevista — Acing Interviews",
     "steps": {
       "jobDesc": "Descrição da Vaga",
       "resume": "Seu Currículo",
@@ -330,7 +330,7 @@
     }
   },
   "interview": {
-    "pageTitle": "Simulador de Entrevista — Acing Interview",
+    "pageTitle": "Simulador de Entrevista — Acing Interviews",
     "phases": {
       "elevatorPitch": "Elevator Pitch",
       "CAR": "História CAR",
@@ -376,7 +376,7 @@
     }
   },
   "forgot": {
-    "pageTitle": "Esqueci a Senha — Acing Interview",
+    "pageTitle": "Esqueci a Senha — Acing Interviews",
     "title": "Esqueceu a senha?",
     "subtitle": "Informe seu e-mail e enviaremos um link de redefinição",
     "email": "E-mail",
@@ -388,7 +388,7 @@
     "errorNetwork": "Erro de rede — tente novamente."
   },
   "reset": {
-    "pageTitle": "Redefinir Senha — Acing Interview",
+    "pageTitle": "Redefinir Senha — Acing Interviews",
     "title": "Definir nova senha",
     "subtitle": "Digite e confirme sua nova senha",
     "newPassword": "Nova senha",
@@ -406,9 +406,9 @@
     "errorNetwork": "Erro de rede — tente novamente."
   },
   "login": {
-    "pageTitle": "Entrar — Acing Interview",
+    "pageTitle": "Entrar — Acing Interviews",
     "title": "Bem-vindo de volta",
-    "subtitle": "Entre na sua conta do acing interview",
+    "subtitle": "Entre na sua conta do acing interviews",
     "email": "E-mail",
     "emailPlaceholder": "voce@exemplo.com",
     "password": "Senha",
@@ -426,7 +426,7 @@
     "errorResendWaitGeneric": "Aguarde um momento antes de solicitar outro e-mail."
   },
   "register": {
-    "pageTitle": "Criar Conta — Acing Interview",
+    "pageTitle": "Criar Conta — Acing Interviews",
     "title": "Crie sua conta",
     "subtitle": "Pratique entrevistas personalizadas para seu currículo e vaga",
     "name": "Nome completo",
@@ -456,7 +456,7 @@
     "errorResendWaitGeneric": "Aguarde um momento antes de solicitar outro e-mail."
   },
   "upgrade": {
-    "pageTitle": "Planos & Preços — Acing Interview",
+    "pageTitle": "Planos & Preços — Acing Interviews",
     "heroLabel": "Escolha seu plano",
     "heroTitle": "Pratique mais.<br>Conquiste a vaga.",
     "heroSub": "Cada sessão de entrevista é totalmente personalizada para seu currículo e vaga. Faça upgrade para praticar mais rodadas por semana.",
@@ -541,7 +541,7 @@
     }
   },
   "tips": {
-    "pageTitle": "Dicas de Entrevista — Acing Interview",
+    "pageTitle": "Dicas de Entrevista — Acing Interviews",
     "header": {
       "tagline": "Dicas &amp; Frameworks para Entrevistas"
     },

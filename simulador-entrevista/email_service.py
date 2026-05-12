@@ -6,7 +6,7 @@ _MOCK   = os.getenv("MOCK_EMAIL", "false").lower() == "true"
 _REGION = os.getenv("SES_REGION", "us-east-1")
 _FROM = os.getenv(key="SES_FROM_EMAIL", default="Acing Interviews <no_reply@acinginterviews.com>")
 _BASE   = os.getenv("APP_BASE_URL", "http://localhost:8000").rstrip("/")
-_CONTACT_FROM  = os.getenv("SES_CONTACT_EMAIL", "contact@acinginterviews.com")
+_CONTACT_FROM  = os.getenv("SES_CONTACT_EMAIL", "Acing Interviews <contact@acinginterviews.com>")
 _NOTIFY_TO     = os.getenv("ADMIN_NOTIFY_EMAIL", "marciosferreira@yahoo.com.br")
 
 _ses = None
@@ -54,7 +54,7 @@ _VERIFY_COPY = {
         "plain":   "Please verify your email by visiting:\n{link}\n\nThis link expires in 24 hours.",
     },
     "pt": {
-        "subject": "Verifique sua conta no Acing Interview",
+        "subject": "Verifique sua conta no Acing Interviews",
         "heading": "Verifique seu e-mail",
         "body":    "Clique no botão abaixo para verificar seu endereço de e-mail.",
         "button":  "Verificar meu e-mail",
@@ -73,7 +73,7 @@ _RESET_COPY = {
         "plain":   "Reset your password by visiting:\n{link}\n\nThis link expires in 15 minutes.",
     },
     "pt": {
-        "subject": "Redefina sua senha no Acing Interview",
+        "subject": "Redefina sua senha no Acing Interviews",
         "heading": "Redefina sua senha",
         "body":    "Recebemos uma solicitação de redefinição de senha para sua conta.",
         "button":  "Redefinir minha senha",

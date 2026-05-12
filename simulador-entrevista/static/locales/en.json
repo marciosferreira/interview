@@ -140,7 +140,7 @@
     "admin": "Admin"
   },
   "profile": {
-    "pageTitle": "Profile Settings — Acing Interview",
+    "pageTitle": "Profile Settings — Acing Interviews",
     "header": {
       "tagline": "Account settings",
       "backBtn": "← Back to interview",
@@ -232,7 +232,7 @@
     }
   },
   "history": {
-    "pageTitle": "Interview History — Acing Interview",
+    "pageTitle": "Interview History — Acing Interviews",
     "header": {
       "tagline": "Interview history"
     },
@@ -285,7 +285,7 @@
     }
   },
   "onboarding": {
-    "pageTitle": "Prepare Your Interview — Acing Interview",
+    "pageTitle": "Prepare Your Interview — Acing Interviews",
     "steps": {
       "jobDesc": "Job Description",
       "resume": "Your Resume",
@@ -330,7 +330,7 @@
     }
   },
   "interview": {
-    "pageTitle": "Mock Interview Simulator — Acing Interview",
+    "pageTitle": "Mock Interview Simulator — Acing Interviews",
     "phases": {
       "elevatorPitch": "Elevator Pitch",
       "CAR": "CAR Story",
@@ -376,7 +376,7 @@
     }
   },
   "forgot": {
-    "pageTitle": "Forgot Password — Acing Interview",
+    "pageTitle": "Forgot Password — Acing Interviews",
     "title": "Forgot password?",
     "subtitle": "Enter your email and we'll send a reset link",
     "email": "Email",
@@ -388,7 +388,7 @@
     "errorNetwork": "Network error — please try again."
   },
   "reset": {
-    "pageTitle": "Reset Password — Acing Interview",
+    "pageTitle": "Reset Password — Acing Interviews",
     "title": "Set new password",
     "subtitle": "Enter and confirm your new password",
     "newPassword": "New password",
@@ -406,7 +406,7 @@
     "errorNetwork": "Network error — please try again."
   },
   "login": {
-    "pageTitle": "Sign In — Acing Interview",
+    "pageTitle": "Sign In — Acing Interviews",
     "title": "Welcome back",
     "subtitle": "Sign in to your acing interviews account",
     "email": "Email",
@@ -426,7 +426,7 @@
     "errorResendWaitGeneric": "Please wait a moment before requesting another email."
   },
   "register": {
-    "pageTitle": "Create Account — Acing Interview",
+    "pageTitle": "Create Account — Acing Interviews",
     "title": "Create your account",
     "subtitle": "Practice interviews personalized to your resume and target role",
     "name": "Full name",
@@ -456,7 +456,7 @@
     "errorResendWaitGeneric": "Please wait a moment before requesting another email."
   },
   "upgrade": {
-    "pageTitle": "Plans & Pricing — Acing Interview",
+    "pageTitle": "Plans & Pricing — Acing Interviews",
     "heroLabel": "Choose your plan",
     "heroTitle": "Practice more.<br>Land the role.",
     "heroSub": "Every interview session is fully personalized to your resume and target role. Upgrade to practice more rounds per week.",
@@ -541,7 +541,7 @@
     }
   },
   "tips": {
-    "pageTitle": "Interview Tips — Acing Interview",
+    "pageTitle": "Interview Tips — Acing Interviews",
     "header": {
       "tagline": "Interview Tips &amp; Frameworks"
     },
