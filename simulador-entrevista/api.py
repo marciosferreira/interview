@@ -198,6 +198,8 @@ app.add_middleware(_CacheMiddleware)
 
 @app.post("/auth/register", response_model=RegisterResponse)
 async def register(body: UserCreate, background_tasks: BackgroundTasks):
+    if body.last_name and body.last_name.strip():
+        return RegisterResponse(email=body.email.strip().lower())
     if not body.name.strip():
         raise HTTPException(status_code=422, detail="Name is required")
     if not body.email.strip() or "@" not in body.email:
