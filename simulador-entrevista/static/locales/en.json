@@ -152,7 +152,7 @@
       "currentPlan": "Current plan",
       "active": "Active",
       "free": "Free",
-      "usage": "{{used}} / {{limit}} interviews rounds this week",
+      "usage": "{{used}} / {{limit}} interview rounds this week",
       "upgrade": "Upgrade →",
       "downgrade": "Downgrade",
       "downgrading": "Downgrading…",
