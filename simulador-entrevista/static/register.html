@@ -70,14 +70,6 @@
         <p style="font-size:11px; margin-top:4px; color:var(--text-tertiary)" data-i18n="register.passwordHint">Minimum 8 characters</p>
       </div>
 
-      <div class="form-group">
-        <label class="form-label" for="language" data-i18n="register.language">Interview language</label>
-        <select class="form-input" id="language" name="language" style="appearance:none; padding-right:32px; background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2394a3b8%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22></polyline></svg>'); background-repeat:no-repeat; background-position:right 12px center;">
-          <option value="en" selected data-i18n="register.langEn">English</option>
-          <option value="pt" data-i18n="register.langPt">Portuguese</option>
-        </select>
-      </div>
-
       <button class="btn btn-primary" style="width:100%; margin-top:8px;" type="submit" id="submit-btn" data-i18n="register.submit">Create account</button>
     </form>
 
@@ -85,12 +77,6 @@
       <span data-i18n="register.haveAccount">Already have an account?</span> <a href="/login.html" data-i18n="register.signIn">Sign in &rarr;</a>
     </div>
 
-    <div class="flex justify-center mt-6">
-      <div class="lang-switcher">
-        <button class="lang-btn" data-lang="en" onclick="i18n.switchLang('en')">EN</button>
-        <button class="lang-btn" data-lang="pt" onclick="i18n.switchLang('pt')">PT</button>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -162,7 +148,8 @@
     const name     = document.getElementById('name').value.trim();
     const email    = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
-    const language = document.getElementById('language').value;
+    const currentLang = window.i18n?.currentLang ? window.i18n.currentLang() : localStorage.getItem('preferred_lang');
+    const language = ['en', 'pt'].includes(currentLang) ? currentLang : 'en';
 
     if (!name) { showError(window.t ? window.t('register.errorName') : 'Name required'); submitBtn.disabled = false; submitBtn.textContent = window.t ? window.t('register.submit') : 'Create account'; return; }
     if (password.length < 8) { showError(window.t ? window.t('register.errorPassword') : 'Password too short'); submitBtn.disabled = false; submitBtn.textContent = window.t ? window.t('register.submit') : 'Create account'; return; }
@@ -178,7 +165,6 @@
         showError(data.detail || (window.t ? window.t('register.errorDefault') : 'Error occurred'));
         return;
       }
-      localStorage.setItem('preferred_lang', language);
       showSuccess(data.email || email);
     } catch (err) {
       showError(window.t ? window.t('register.errorNetwork') : 'Network error');

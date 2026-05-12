@@ -14,6 +14,9 @@
   <title>acing interviews — AI-Powered Mock Interviews</title>
   <meta name="description" content="Practice job interviews with an AI interviewer tailored to your CV and target role. Get real-time feedback, improve your answers, and land the job you want." />
   <meta name="robots" content="index, follow" />
+  <link rel="alternate" hreflang="en" href="https://acinginterviews.com/en/" />
+  <link rel="alternate" hreflang="pt" href="https://acinginterviews.com/pt/" />
+  <link rel="alternate" hreflang="x-default" href="https://acinginterviews.com/" />
 
   <!-- Open Graph / Social -->
   <meta property="og:type" content="website" />
@@ -36,7 +39,35 @@
   <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/components.css">
   <link rel="stylesheet" href="/css/layout.css">
-  
+
+  <script>
+    (function () {
+      var supported = ['en', 'pt'];
+      var path = window.location.pathname;
+      var isPublicHome = path === '/' || path === '/index.html';
+      if (!isPublicHome || localStorage.getItem('auth_token')) return;
+
+      var cookieMatch = document.cookie.match(/(?:^|;\s*)preferred_lang=(en|pt)(?:;|$)/);
+      var stored = localStorage.getItem('preferred_lang');
+      var lang = cookieMatch ? cookieMatch[1] : (supported.indexOf(stored) !== -1 ? stored : null);
+
+      if (!lang) {
+        var browserLangs = Array.isArray(navigator.languages) && navigator.languages.length
+          ? navigator.languages
+          : [navigator.language || ''];
+        for (var i = 0; i < browserLangs.length; i++) {
+          var candidate = browserLangs[i].slice(0, 2).toLowerCase();
+          if (supported.indexOf(candidate) !== -1) {
+            lang = candidate;
+            break;
+          }
+        }
+      }
+
+      window.location.replace('/' + (lang || 'en') + '/');
+    })();
+  </script>
+
   <script src="/i18n.js"></script>
 
   <!-- Google tag (gtag.js) -->
@@ -642,10 +673,6 @@
   <!-- Nav for logged-in users -->
   <div class="header-actions" id="nav-user" style="display:none;">
     <span id="plan-pill" class="badge"></span>
-    <div class="lang-switcher">
-      <button class="lang-btn" data-lang="en" onclick="i18n.switchLang('en')">EN</button>
-      <button class="lang-btn" data-lang="pt" onclick="i18n.switchLang('pt')">PT</button>
-    </div>
     <a href="/tips.html" class="nav-link">
       <i data-lucide="lightbulb" style="width:16px;height:16px;"></i> <span data-i18n="nav.tipsLabel">Tips</span>
     </a>

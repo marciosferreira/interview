@@ -244,6 +244,14 @@
     document.getElementById('loading-spinner').style.display = show ? 'flex' : 'none';
   }
 
+  function _getUserLanguage() {
+    try {
+      const user = JSON.parse(localStorage.getItem('auth_user') || 'null');
+      if (user && ['en', 'pt'].includes(user.language)) return user.language;
+    } catch (_) {}
+    return 'en';
+  }
+
   const _HIRE_SIGNAL_CONFIG = {
     'Strong Yes': { cls: 'signal-strong-yes', emoji: '🟢', i18nKey: 'scorecard.hireSignals.strongYes' },
     'Yes':        { cls: 'signal-yes',        emoji: '✅', i18nKey: 'scorecard.hireSignals.yes'       },
@@ -264,7 +272,7 @@
   function _showPaywall(hireSignal) {
     _setLoading(false);
 
-    const isPt      = (window.i18n ? window.i18n.currentLang() : localStorage.getItem('preferred_lang') || (navigator.language||'').slice(0,2)) === 'pt';
+    const isPt      = _getUserLanguage() === 'pt';
     const signalCfg = hireSignal && _HIRE_SIGNAL_CONFIG[hireSignal];
 
     const phaseRows = (isPt
@@ -508,7 +516,7 @@
       const cfgRes = await fetch('/tts-config');
       const cfg    = cfgRes.ok ? await cfgRes.json() : {};
       const voice  = cfg.scorecard_voice || 'Charon';
-      const lang   = localStorage.getItem('preferred_lang') || 'pt';
+      const lang   = _getUserLanguage();
 
       // Fetch all chunks in parallel, play in order
       const urlPromises = chunks.map(chunk => _fetchChunk(chunk, voice, lang));

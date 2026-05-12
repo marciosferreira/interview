@@ -67,12 +67,6 @@
       <span data-i18n="login.noAccount">Don't have an account?</span> <a href="/register.html" data-i18n="login.createOne">Create one &rarr;</a>
     </div>
 
-    <div class="flex justify-center mt-6">
-      <div class="lang-switcher">
-        <button class="lang-btn" data-lang="en" onclick="i18n.switchLang('en')">EN</button>
-        <button class="lang-btn" data-lang="pt" onclick="i18n.switchLang('pt')">PT</button>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -163,7 +157,6 @@
       }
       localStorage.setItem('auth_token', data.access_token);
       localStorage.setItem('auth_user', JSON.stringify(data.user));
-      if (data.user.language) localStorage.setItem('preferred_lang', data.user.language);
       const returnTo = new URLSearchParams(location.search).get('next') || '/index.html';
       location.replace(returnTo);
     } catch (err) {

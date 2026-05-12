@@ -18,7 +18,7 @@ import stripe as _stripe
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, UploadFile, WebSocket, WebSocketDisconnect, Depends
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp, Receive, Scope, Send
-from fastapi.responses import Response, FileResponse
+from fastapi.responses import Response, FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langgraph.types import Command
@@ -97,6 +97,53 @@ def _stripe_price_for(language: str) -> str:
 app = FastAPI()
 
 
+def _parse_cookie_header(cookie_header: str) -> dict[str, str]:
+    cookies = {}
+    for item in cookie_header.split(";"):
+        if "=" not in item:
+            continue
+        key, value = item.split("=", 1)
+        cookies[key.strip()] = value.strip()
+    return cookies
+
+
+def _detect_supported_language(accept_language: str, fallback: str = "en") -> str:
+    accepted = []
+    for index, item in enumerate(accept_language.split(",")):
+        parts = item.strip().split(";")
+        if not parts or not parts[0]:
+            continue
+        lang = parts[0].split("-")[0].lower()
+        if lang not in ("en", "pt"):
+            continue
+        quality = 1.0
+        for part in parts[1:]:
+            part = part.strip()
+            if part.startswith("q="):
+                try:
+                    quality = float(part[2:])
+                except ValueError:
+                    quality = 0.0
+        accepted.append((quality, -index, lang))
+
+    if accepted:
+        accepted.sort(reverse=True)
+        return accepted[0][2]
+    return fallback
+
+
+def _preferred_landing_language_from_headers(headers: dict[str, str]) -> str:
+    cookies = _parse_cookie_header(headers.get("cookie", ""))
+    cookie_lang = cookies.get("preferred_lang")
+    if cookie_lang in ("en", "pt"):
+        return cookie_lang
+    return _detect_supported_language(headers.get("accept-language", ""))
+
+
+def _preferred_landing_language(request: Request) -> str:
+    return _preferred_landing_language_from_headers(dict(request.headers))
+
+
 class _CacheMiddleware:
     def __init__(self, app: ASGIApp) -> None:
         self.app = app
@@ -109,14 +156,28 @@ class _CacheMiddleware:
 
         path = scope.get("path", "")
 
+        headers = {
+            key.decode("latin-1").lower(): value.decode("latin-1")
+            for key, value in scope.get("headers", [])
+        }
+
+        # The public root is only a locale negotiator. Canonical landing URLs are
+        # /en/ and /pt/ so crawlers, caches, and users all see a stable URL.
+        if path in ("", "/"):
+            lang = _preferred_landing_language_from_headers(headers)
+            response = RedirectResponse(url=f"/{lang}/", status_code=302)
+            response.headers["Vary"] = "Accept-Language, Cookie"
+            await response(scope, receive, send)
+            return
+
         # Serve index.html for language landing routes before StaticFiles intercepts
-        if path in ("/en", "/pt"):
+        if path in ("/en", "/en/", "/pt", "/pt/"):
             index_path = Path(__file__).parent / "static" / "index.html"
             response = FileResponse(str(index_path))
             await response(scope, receive, send)
             return
 
-        no_cache = path.endswith(".html") or path in ("/", "", "/en", "/pt") or path.endswith(".json")
+        no_cache = path.endswith(".html") or path in ("/", "", "/en", "/en/", "/pt", "/pt/") or path.endswith(".json")
 
         async def send_with_headers(message):
             if no_cache and message["type"] == "http.response.start":
@@ -143,11 +204,12 @@ async def register(body: UserCreate, background_tasks: BackgroundTasks):
         raise HTTPException(status_code=422, detail="Valid email is required")
     if len(body.password) < 8:
         raise HTTPException(status_code=422, detail="Password must be at least 8 characters")
+    language = body.language if body.language in ("en", "pt") else "en"
     loop = asyncio.get_running_loop()
     user = await loop.run_in_executor(
         None,
         lambda: _with_conn(lambda c: create_user(c, body.name.strip(), body.email.strip(),
-                                                  body.password, body.language)),
+                                                  body.password, language)),
     )
     token = await loop.run_in_executor(
         None, lambda: _with_conn(lambda c: create_verification_token(c, user["id"]))
@@ -1631,12 +1693,22 @@ async def scorecard_page(thread_id: str):
     return FileResponse(Path(__file__).parent / "static" / "scorecard.html")
 
 
+@app.get("/")
+async def landing_root(request: Request):
+    lang = _preferred_landing_language(request)
+    response = RedirectResponse(url=f"/{lang}/", status_code=302)
+    response.headers["Vary"] = "Accept-Language, Cookie"
+    return response
+
+
 @app.get("/en")
+@app.get("/en/")
 async def landing_en():
     return FileResponse(Path(__file__).parent / "static" / "index.html")
 
 
 @app.get("/pt")
+@app.get("/pt/")
 async def landing_pt():
     return FileResponse(Path(__file__).parent / "static" / "index.html")
 

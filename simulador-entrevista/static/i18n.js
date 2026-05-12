@@ -16,14 +16,31 @@
   const FALLBACK    = 'en';
   const SUPPORTED   = ['en', 'pt'];
 
+  function isLandingPath(path) {
+    return /^\/(en|pt)?\/?$/.test(path);
+  }
+
+  function isPublicHomepagePath(path) {
+    return isLandingPath(path) || (path === '/index.html' && !localStorage.getItem('auth_token'));
+  }
+
   function detectLang() {
     // URL path takes priority: /pt → pt, /en → en (canonical landing routes)
     const seg = window.location.pathname.split('/').filter(Boolean)[0] || '';
     if (SUPPORTED.includes(seg)) return seg;
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored && SUPPORTED.includes(stored)) return stored;
-    const browser = (navigator.language || '').slice(0, 2).toLowerCase();
-    return SUPPORTED.includes(browser) ? browser : FALLBACK;
+    // Browser detection belongs only to the landing entry point. App pages should
+    // not silently change language just because the browser locale is different.
+    if (!isPublicHomepagePath(window.location.pathname)) return FALLBACK;
+    const browserLangs = Array.isArray(navigator.languages) && navigator.languages.length
+      ? navigator.languages
+      : [navigator.language || ''];
+    for (const browserLang of browserLangs) {
+      const lang = browserLang.slice(0, 2).toLowerCase();
+      if (SUPPORTED.includes(lang)) return lang;
+    }
+    return FALLBACK;
   }
 
   let _dict = {};
@@ -98,7 +115,7 @@
 
   function switchLang(lang) {
     if (!SUPPORTED.includes(lang) || lang === _lang) return;
-    const onLanding = /^\/(en|pt)?\/?$/.test(window.location.pathname);
+    const onLanding = isLandingPath(window.location.pathname);
     if (onLanding) history.replaceState(null, '', `/${lang}/`);
     loadLang(lang);
   }
@@ -108,7 +125,7 @@
   window.i18n       = { switchLang, currentLang: () => _lang };
 
   // Boot — redirect root to language-specific URL
-  if (window.location.pathname === '/') {
+  if (window.location.pathname === '/' || (window.location.pathname === '/index.html' && !localStorage.getItem('auth_token'))) {
     window.location.replace('/' + _lang + '/');
   } else {
     loadLang(_lang);

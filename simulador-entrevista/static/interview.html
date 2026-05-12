@@ -1366,7 +1366,14 @@
     // ── Auth check ─────────────────────────────────────────────────────
     const _authToken = localStorage.getItem('auth_token');
     if (!_authToken) { location.replace('/login.html?next=/interview.html'); }
-    const _lang = localStorage.getItem('preferred_lang') || 'en';
+    function _getUserLanguage() {
+      try {
+        const user = JSON.parse(localStorage.getItem('auth_user') || 'null');
+        if (user && ['en', 'pt'].includes(user.language)) return user.language;
+      } catch (_) {}
+      return 'en';
+    }
+    const _lang = _getUserLanguage();
 
     // Load pending job session (set by onboarding.html)
     let _pendingJobSession = null;
