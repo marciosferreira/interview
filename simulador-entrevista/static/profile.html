@@ -59,6 +59,73 @@
     @media (max-width: 480px) {
       .invoice-actions { flex-direction: column; align-items: flex-end; }
     }
+
+    #plan-banner {
+      gap: 16px;
+    }
+    #plan-banner > div:first-child {
+      min-width: 0;
+    }
+    #plan-banner > .flex {
+      min-width: 0;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    #plan-name {
+      min-width: 0;
+      flex-wrap: wrap;
+    }
+    #plan-usage {
+      min-width: 0;
+      line-height: 1.35;
+    }
+    #plan-upgrade-link,
+    #plan-cancel-btn,
+    #plan-downgrade-btn {
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 560px) {
+      main {
+        padding: 32px 22px;
+      }
+      #plan-banner {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 20px !important;
+      }
+      #plan-banner > .flex {
+        width: 100%;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 12px;
+      }
+      #plan-usage {
+        font-size: 12px !important;
+      }
+      #plan-upgrade-link,
+      #plan-cancel-btn,
+      #plan-downgrade-btn {
+        min-height: 40px;
+        max-width: 100%;
+        justify-content: center;
+        padding: 8px 12px !important;
+        font-size: 12px !important;
+      }
+    }
+
+    @media (max-width: 380px) {
+      #plan-banner > .flex {
+        grid-template-columns: 1fr;
+      }
+      #plan-upgrade-link,
+      #plan-cancel-btn,
+      #plan-downgrade-btn {
+        width: 100%;
+      }
+    }
     
     .danger-section {
       background: rgba(239, 68, 68, 0.05); border: 1px solid var(--status-error-border);
