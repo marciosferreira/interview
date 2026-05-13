@@ -45,6 +45,9 @@
 
   let _dict = {};
   let _lang = detectLang();
+  if (_lang !== FALLBACK) {
+    document.documentElement.classList.add('i18n-pending');
+  }
 
   function _get(obj, path) {
     return path.split('.').reduce((o, k) => (o && o[k] !== undefined ? o[k] : undefined), obj);
@@ -90,6 +93,7 @@
     applyMetaTags();
     // Update <html lang>
     document.documentElement.lang = _lang;
+    document.documentElement.classList.remove('i18n-pending');
     // Update switcher buttons
     document.querySelectorAll('.lang-btn').forEach(btn => {
       btn.classList.toggle('lang-active', btn.dataset.lang === _lang);

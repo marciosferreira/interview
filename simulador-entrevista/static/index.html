@@ -36,9 +36,10 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   
   <!-- Styles -->
-  <link rel="stylesheet" href="/css/main.css">
-  <link rel="stylesheet" href="/css/components.css">
-  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/main.css?v=6">
+  <link rel="stylesheet" href="/css/components.css?v=6">
+  <link rel="stylesheet" href="/css/layout.css?v=6">
+  <link rel="preload" as="image" href="/assets/hero.png" fetchpriority="high">
 
   <script>
     (function () {
@@ -68,7 +69,7 @@
     })();
   </script>
 
-  <script src="/i18n.js"></script>
+  <script src="/i18n.js?v=6"></script>
 
 
   <!-- Microsoft Clarity -->
@@ -734,7 +735,7 @@
     </div>
     <!-- Right: product mockup -->
     <a class="hero-mockup" href="/register.html" aria-label="Start for free">
-      <img src="/assets/hero.png" alt="AI interview simulation interface" loading="eager">
+      <img src="/assets/hero.png" alt="AI interview simulation interface" width="614" height="409" loading="eager" fetchpriority="high" decoding="async">
     </a>
   </div>
 
@@ -773,7 +774,7 @@
           <span data-i18n="landing.tour.previewInterview">See a live interview session →</span>
         </div>
         <div class="preview-card-img">
-          <img src="/assets/interview.png" alt="Mock interview session" loading="lazy">
+          <img src="/assets/interview.png" alt="Mock interview session" width="1081" height="943" loading="lazy" decoding="async">
         </div>
       </a>
       <a href="/demo-scorecard.html" class="preview-card">
@@ -782,7 +783,7 @@
           <span data-i18n="landing.tour.previewScorecard">See a real scorecard →</span>
         </div>
         <div class="preview-card-img">
-          <img src="/assets/score_card.png" alt="Scorecard example" loading="lazy">
+          <img src="/assets/score_card.png" alt="Scorecard example" width="1091" height="952" loading="lazy" decoding="async">
         </div>
       </a>
     </div>

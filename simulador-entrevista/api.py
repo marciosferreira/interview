@@ -178,14 +178,23 @@ class _CacheMiddleware:
             return
 
         no_cache = path.endswith(".html") or path in ("/", "", "/en", "/en/", "/pt", "/pt/") or path.endswith(".json")
+        cacheable_static = path.lower().endswith((
+            ".css", ".js", ".png", ".jpg", ".jpeg", ".webp", ".avif",
+            ".svg", ".ico", ".woff2", ".wav", ".mp3",
+        ))
 
         async def send_with_headers(message):
-            if no_cache and message["type"] == "http.response.start":
+            if message["type"] == "http.response.start":
                 headers = list(message.get("headers", []))
-                headers += [
-                    (b"cache-control", b"no-cache, no-store, must-revalidate"),
-                    (b"pragma", b"no-cache"),
-                ]
+                if no_cache:
+                    headers += [
+                        (b"cache-control", b"no-cache, no-store, must-revalidate"),
+                        (b"pragma", b"no-cache"),
+                    ]
+                elif cacheable_static:
+                    headers += [
+                        (b"cache-control", b"public, max-age=31536000, immutable"),
+                    ]
                 message = {**message, "headers": headers}
             await send(message)
 

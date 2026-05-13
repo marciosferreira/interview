@@ -76,6 +76,12 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+html.i18n-pending [data-i18n],
+html.i18n-pending [data-i18n-html],
+html.i18n-pending [data-i18n-attr] {
+  visibility: hidden;
+}
+
 body {
   min-height: 100dvh;
   display: flex;
