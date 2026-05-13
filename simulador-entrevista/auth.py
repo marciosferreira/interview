@@ -43,6 +43,8 @@ class UserCreate(BaseModel):
     password: str
     language: str = "en"
     last_name: Optional[str] = None
+    company_site: Optional[str] = None
+    register_started_at: Optional[int] = None
 
 
 class UserLogin(BaseModel):

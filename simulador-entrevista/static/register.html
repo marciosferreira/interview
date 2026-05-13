@@ -113,6 +113,14 @@
       line-height: 1.45;
       text-align: center;
     }
+    .bot-check-field {
+      position: absolute;
+      left: -10000px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
     @media (max-width: 480px) {
       .auth-wrapper {
         padding: 24px 16px;
@@ -222,6 +230,11 @@
         <p style="font-size:11px; margin-top:4px; color:var(--text-tertiary)" data-i18n="register.passwordHint">Minimum 8 characters</p>
       </div>
 
+      <div class="bot-check-field" aria-hidden="true">
+        <label for="company_site">Company site</label>
+        <input type="text" name="company_site" id="company_site" tabindex="-1" autocomplete="off" />
+      </div>
+
       <button class="btn btn-primary" style="width:100%; margin-top:8px;" type="submit" id="submit-btn" data-i18n="register.submit">Start practicing for free</button>
       <p class="register-privacy-note" data-i18n="register.privacyNote">You can paste your target job and resume after this step.</p>
     </form>
@@ -249,6 +262,7 @@
   const resendStatus = document.getElementById('resend-status');
 
   let registeredEmail = '';
+  const registerStartedAt = Date.now();
 
   function showError(msg) {
     errorText.textContent = msg;
@@ -301,6 +315,7 @@
     const name     = document.getElementById('name').value.trim();
     const email    = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
+    const companySite = document.getElementById('company_site').value.trim();
     const currentLang = window.i18n?.currentLang ? window.i18n.currentLang() : localStorage.getItem('preferred_lang');
     const language = ['en', 'pt'].includes(currentLang) ? currentLang : 'en';
 
@@ -311,7 +326,7 @@
       const res = await fetch('/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, language }),
+        body: JSON.stringify({ name, email, password, language, company_site: companySite, register_started_at: registerStartedAt }),
       });
       const data = await res.json();
       if (!res.ok) {

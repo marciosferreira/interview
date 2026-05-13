@@ -207,7 +207,14 @@ app.add_middleware(_CacheMiddleware)
 
 @app.post("/auth/register", response_model=RegisterResponse)
 async def register(body: UserCreate, background_tasks: BackgroundTasks):
-    if body.last_name and body.last_name.strip():
+    honeypot_filled = (
+        (body.last_name and body.last_name.strip()) or
+        (body.company_site and body.company_site.strip())
+    )
+    now_ms = int(time.time() * 1000)
+    form_age_ms = now_ms - body.register_started_at if body.register_started_at else 0
+    timing_suspicious = form_age_ms < 1000 or form_age_ms > 2 * 60 * 60 * 1000
+    if honeypot_filled or timing_suspicious:
         return RegisterResponse(email=body.email.strip().lower())
     if not body.name.strip():
         raise HTTPException(status_code=422, detail="Name is required")
