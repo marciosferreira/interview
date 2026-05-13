@@ -15,7 +15,7 @@
   },
   "seo": {
     "title": "acing interviews — AI-Powered Mock Interviews",
-    "description": "Practice job interviews with an AI interviewer tailored to your CV and target role. Get real-time feedback, improve your answers, and land the job you want."
+    "description": "Ace your next job interview. Train with AI before the real interview, practice role-specific questions, and get feedback so you can answer with confidence."
   },
   "header": {
     "tagline": "AI-powered mock interview preparation"
@@ -36,10 +36,10 @@
   },
   "landing": {
     "hero": {
-      "badge": "Mock Interview Simulator · AI-Powered · Fully Personalized",
-      "title": "A mock interview built from<br><span>your resume and the actual job.</span>",
-      "sub": "Paste the job description, add your resume — the AI builds a complete personalized interview. Practice out loud with your AI interviewer, get feedback on every phase, and see your hiring signal.",
-      "cta": "Start for free →",
+      "badge": "Train with AI before the real interview",
+      "title": "Ace your next<br><span>job interview.</span>",
+      "sub": "AI analyzes your target role and creates personalized interviews so you can practice with confidence. Train on real role-specific questions, answer by voice or text, and get instant feedback.",
+      "cta": "Train now →",
       "ctaSignin": "Sign in",
       "listenBtn": "Hear Alex"
     },
@@ -53,8 +53,8 @@
     },
     "tour": {
       "label": "See it in action",
-      "title": "Everything you need, in one session",
-      "sub": "From job description to personalized scorecard — 6 structured phases, real feedback, and a hiring signal at the end.",
+      "title": "Practice like it is the real interview",
+      "sub": "From job description to personalized scorecard — real role-specific questions, instant feedback, and voice or text simulation.",
       "previewInterview": "See a live interview session →",
       "previewScorecard": "See a real scorecard →"
     },
@@ -103,26 +103,26 @@
     },
     "features": {
       "f1": {
-        "title": "Any field, any role",
-        "desc": "Engineering, finance, consulting, product, marketing, operations — the AI adapts to the job description you paste. Not a generic script."
+        "title": "Real role-specific questions",
+        "desc": "AI uses the job you want to create targeted questions, not a generic script."
       },
       "f2": {
-        "title": "English coaching included",
-        "desc": "Every session evaluates your word choice, sentence structure, register, and fluency — not just your content. Valuable even for native speakers who want sharper, more executive language."
+        "title": "Instant feedback",
+        "desc": "Get practical tips to improve your answers, structure, and confidence."
       },
       "f3": {
-        "title": "Voice or text",
-        "desc": "Answer by speaking or typing. The interviewer responds with realistic audio — so you practice the actual experience, not just the content."
+        "title": "Voice and text simulation",
+        "desc": "Answer by speaking or typing and practice like you are in the real interview."
       },
       "f4": {
-        "title": "Repeat until it's automatic",
-        "desc": "Each round is a fresh interview. Same role, different role — build fluency through repetition until your answers feel natural under pressure."
+        "title": "Train before the real interview",
+        "desc": "Repeat the simulation until your answers feel clearer, more natural, and more confident."
       }
     },
     "cta": {
-      "title": "Walk into your next interview prepared.",
+      "title": "Your next role starts here.",
       "sub": "Free to use. Any industry. No credit card required.",
-      "btn": "Start practicing for free →"
+      "btn": "Train now →"
     }
   },
   "dashboard": {

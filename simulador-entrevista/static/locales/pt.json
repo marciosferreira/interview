@@ -15,7 +15,7 @@
   },
   "seo": {
     "title": "acing interviews — Simulador de Entrevistas com IA",
-    "description": "Treine entrevistas de emprego com um entrevistador de IA personalizado para o seu currículo e vaga. Receba feedback em tempo real, melhore suas respostas e conquiste o emprego que quer."
+    "description": "Passe na sua próxima entrevista de emprego. Treine com IA antes da entrevista real, pratique perguntas da vaga e receba feedback para responder com confiança."
   },
   "header": {
     "tagline": "Preparação para entrevistas com IA"
@@ -36,10 +36,10 @@
   },
   "landing": {
     "hero": {
-      "badge": "Simulador de Entrevistas · Com IA · Totalmente Personalizado",
-      "title": "Uma entrevista simulada feita a partir<br><span>do seu currículo e da vaga real.</span>",
-      "sub": "Cole a descrição da vaga, adicione seu currículo — a IA monta uma entrevista completa e personalizada. Pratique com voz, receba feedback em cada fase e veja seu sinal de contratação.",
-      "cta": "Começar grátis →",
+      "badge": "Treine com IA antes da entrevista real",
+      "title": "Passe na sua próxima<br><span>entrevista de emprego.</span>",
+      "sub": "A IA analisa sua vaga e cria entrevistas personalizadas para você praticar com confiança. Treine perguntas reais, responda por voz ou texto e receba feedback instantâneo.",
+      "cta": "Treinar agora →",
       "ctaSignin": "Entrar",
       "listenBtn": "Ouvir a Alex"
     },
@@ -53,8 +53,8 @@
     },
     "tour": {
       "label": "Veja em ação",
-      "title": "Tudo que você precisa, em uma sessão",
-      "sub": "Da descrição da vaga ao scorecard personalizado — 6 fases estruturadas, feedback real e um sinal de contratação no final.",
+      "title": "Treine como se fosse a entrevista real",
+      "sub": "Da descrição da vaga ao scorecard personalizado — perguntas reais da vaga, feedback instantâneo e simulação por voz ou texto.",
       "previewInterview": "Veja uma sessão de entrevista ao vivo →",
       "previewScorecard": "Veja um scorecard real →"
     },
@@ -103,26 +103,26 @@
     },
     "features": {
       "f1": {
-        "title": "Qualquer área, qualquer vaga",
-        "desc": "Engenharia, finanças, consultoria, produto, marketing, operações — a IA se adapta à descrição da vaga que você cola. Não é um roteiro genérico."
+        "title": "Perguntas reais da vaga",
+        "desc": "A IA usa a vaga que você quer para criar perguntas específicas, não um roteiro genérico."
       },
       "f2": {
-        "title": "Coaching de inglês incluído",
-        "desc": "Cada sessão avalia sua escolha de palavras, estrutura de frases, registro e fluência — não só o conteúdo. Valioso até para nativos que querem uma linguagem mais executiva."
+        "title": "Feedback instantâneo",
+        "desc": "Receba dicas práticas para melhorar suas respostas, sua estrutura e sua confiança."
       },
       "f3": {
-        "title": "Voz ou texto",
-        "desc": "Responda falando ou digitando. O entrevistador responde com áudio realista — para você treinar a experiência real, não só o conteúdo."
+        "title": "Simulação por voz e texto",
+        "desc": "Responda falando ou digitando e pratique como se estivesse na entrevista real."
       },
       "f4": {
-        "title": "Repita até ficar automático",
-        "desc": "Cada rodada é uma entrevista nova. Mesma vaga ou outra — construa fluência pela repetição até suas respostas saírem naturais sob pressão."
+        "title": "Treine antes da entrevista real",
+        "desc": "Repita a simulação até suas respostas saírem mais claras, naturais e seguras."
       }
     },
     "cta": {
-      "title": "Entre na sua próxima entrevista preparado.",
+      "title": "Sua próxima vaga começa aqui.",
       "sub": "Grátis. Qualquer área. Sem cartão de crédito.",
-      "btn": "Começar a praticar grátis →"
+      "btn": "Treinar agora →"
     }
   },
   "dashboard": {
