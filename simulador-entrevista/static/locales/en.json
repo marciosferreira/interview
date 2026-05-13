@@ -454,6 +454,7 @@
     "signIn": "Sign in →",
     "errorName": "Name is required.",
     "errorPassword": "Password must be at least 8 characters.",
+    "errorEmailRegistered": "Email already registered.",
     "errorDefault": "Registration failed. Please try again.",
     "errorNetwork": "Network error — please try again.",
     "successTitle": "Almost there: confirm your email",

@@ -282,6 +282,15 @@
     errorMsg.style.display = 'flex';
   }
 
+  function localizedError(detail) {
+    const fallback = window.t ? window.t('register.errorDefault') : 'Registration failed. Please try again.';
+    if (!detail) return fallback;
+    if (detail === 'email_already_registered') {
+      return window.t ? window.t('register.errorEmailRegistered') : detail;
+    }
+    return detail;
+  }
+
   function showSuccess(email) {
     registeredEmail = email;
     const tpl = (window.t ? window.t('register.successText') : 'We sent a confirmation link to {email}. Confirm it to unlock your personalized mock interview.');
@@ -343,7 +352,7 @@
       });
       const data = await res.json();
       if (!res.ok) {
-        showError(data.detail || (window.t ? window.t('register.errorDefault') : 'Error occurred'));
+        showError(localizedError(data.detail));
         return;
       }
       showSuccess(data.email || email);

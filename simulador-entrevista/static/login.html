@@ -138,13 +138,15 @@
 
     const email    = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
+    const currentLang = window.i18n?.currentLang ? window.i18n.currentLang() : localStorage.getItem('preferred_lang');
+    const language = ['en', 'pt'].includes(currentLang) ? currentLang : 'en';
     lastEmail = email;
 
     try {
       const res = await fetch('/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, language }),
       });
       const data = await res.json();
       if (!res.ok) {

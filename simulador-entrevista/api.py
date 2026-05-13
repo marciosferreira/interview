@@ -187,6 +187,17 @@ def _preferred_landing_language(request: Request) -> str:
     return _preferred_landing_language_from_headers(dict(request.headers))
 
 
+def _sync_user_language(conn, user: dict, language: Optional[str]) -> dict:
+    if language not in ("en", "pt") or user.get("language") == language:
+        return user
+
+    cur = conn.cursor()
+    cur.execute(f"UPDATE users SET language = {_ph} WHERE id = {_ph}", (language, user["id"]))
+    cur.close()
+    conn.commit()
+    return {**user, "language": language}
+
+
 class _CacheMiddleware:
     def __init__(self, app: ASGIApp) -> None:
         self.app = app
@@ -292,6 +303,10 @@ async def login(body: UserLogin):
     )
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
+    user = await loop.run_in_executor(
+        None,
+        lambda: _with_conn(lambda c: _sync_user_language(c, user, body.language)),
+    )
     if not user.get("email_verified") and user.get("email") != ADMIN_EMAIL:
         raise HTTPException(status_code=403, detail="email_not_verified")
     token = create_access_token(user["id"], user["email"])

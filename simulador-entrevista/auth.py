@@ -51,6 +51,7 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     email: str
     password: str
+    language: Optional[str] = None
 
 
 class TokenResponse(BaseModel):
@@ -166,7 +167,7 @@ def create_user(conn: Any, name: str, email: str,
         conn.commit()
     except psycopg2.errors.UniqueViolation:
         conn.rollback()
-        raise HTTPException(status_code=409, detail="Email already registered")
+        raise HTTPException(status_code=409, detail="email_already_registered")
     return {
         "id": user_id, "name": name,
         "email": email.lower().strip(), "language": language,

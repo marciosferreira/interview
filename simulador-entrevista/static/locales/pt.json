@@ -454,6 +454,7 @@
     "signIn": "Entrar →",
     "errorName": "Nome é obrigatório.",
     "errorPassword": "A senha deve ter no mínimo 8 caracteres.",
+    "errorEmailRegistered": "E-mail já cadastrado.",
     "errorDefault": "Falha no cadastro. Tente novamente.",
     "errorNetwork": "Erro de rede — tente novamente.",
     "successTitle": "Quase lá: confirme seu e-mail",
