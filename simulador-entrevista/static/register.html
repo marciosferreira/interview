@@ -245,8 +245,8 @@
       </div>
 
       <div class="bot-check-field" aria-hidden="true">
-        <label for="company_site">Company site</label>
-        <input type="text" name="company_site" id="company_site" tabindex="-1" autocomplete="off" />
+        <label for="extra_context">Extra context</label>
+        <input type="text" name="extra_context" id="extra_context" tabindex="-1" autocomplete="off" />
       </div>
 
       <button class="btn btn-primary" style="width:100%; margin-top:8px;" type="submit" id="submit-btn" data-i18n="register.submit">Start practicing for free</button>
@@ -276,7 +276,6 @@
   const resendStatus = document.getElementById('resend-status');
 
   let registeredEmail = '';
-  const registerStartedAt = Date.now();
 
   function showError(msg) {
     errorText.textContent = msg;
@@ -329,7 +328,7 @@
     const name     = document.getElementById('name').value.trim();
     const email    = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
-    const companySite = document.getElementById('company_site').value.trim();
+    const extraContext = document.getElementById('extra_context').value.trim();
     const currentLang = window.i18n?.currentLang ? window.i18n.currentLang() : localStorage.getItem('preferred_lang');
     const language = ['en', 'pt'].includes(currentLang) ? currentLang : 'en';
 
@@ -340,7 +339,7 @@
       const res = await fetch('/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, language, company_site: companySite, register_started_at: registerStartedAt }),
+        body: JSON.stringify({ name, email, password, language, extra_context: extraContext }),
       });
       const data = await res.json();
       if (!res.ok) {

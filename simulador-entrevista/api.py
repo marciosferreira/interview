@@ -87,11 +87,54 @@ _STRIPE_PRICE_ID_USD   = os.getenv("STRIPE_PRICE_ID_USD", os.getenv("STRIPE_PRIC
 _STRIPE_PRICE_ID_BRL   = os.getenv("STRIPE_PRICE_ID_BRL", "")
 _APP_BASE_URL          = os.getenv("APP_BASE_URL", "http://localhost:8001").rstrip("/")
 
+_COUNTRY_NAMES = {
+    "US": "United States",
+    "BR": "Brazil",
+    "CA": "Canada",
+    "GB": "United Kingdom",
+    "PT": "Portugal",
+    "ES": "Spain",
+    "FR": "France",
+    "DE": "Germany",
+    "IT": "Italy",
+    "NL": "Netherlands",
+    "IE": "Ireland",
+    "AU": "Australia",
+    "IN": "India",
+    "MX": "Mexico",
+    "AR": "Argentina",
+    "CL": "Chile",
+    "CO": "Colombia",
+    "PE": "Peru",
+}
+
 
 def _stripe_price_for(language: str) -> str:
     if language == "pt" and _STRIPE_PRICE_ID_BRL:
         return _STRIPE_PRICE_ID_BRL
     return _STRIPE_PRICE_ID_USD
+
+
+def _client_ip(request: Request) -> str:
+    forwarded_for = request.headers.get("x-forwarded-for", "")
+    if forwarded_for:
+        return forwarded_for.split(",", 1)[0].strip()
+    real_ip = request.headers.get("x-real-ip") or request.headers.get("cf-connecting-ip")
+    if real_ip:
+        return real_ip.strip()
+    return request.client.host if request.client else ""
+
+
+def _signup_country(request: Request) -> tuple[str, str]:
+    code = (
+        request.headers.get("cloudfront-viewer-country") or
+        request.headers.get("cf-ipcountry") or
+        request.headers.get("x-vercel-ip-country") or
+        ""
+    ).strip().upper()
+    if len(code) != 2 or code == "XX":
+        return "", ""
+    return code, _COUNTRY_NAMES.get(code, code)
 
 
 app = FastAPI()
@@ -206,15 +249,13 @@ app.add_middleware(_CacheMiddleware)
 # ── Auth endpoints ────────────────────────────────────────────────────────────
 
 @app.post("/auth/register", response_model=RegisterResponse)
-async def register(body: UserCreate, background_tasks: BackgroundTasks):
+async def register(body: UserCreate, background_tasks: BackgroundTasks, request: Request):
     honeypot_filled = (
         (body.last_name and body.last_name.strip()) or
-        (body.company_site and body.company_site.strip())
+        (body.company_site and body.company_site.strip()) or
+        (body.extra_context and body.extra_context.strip())
     )
-    now_ms = int(time.time() * 1000)
-    form_age_ms = now_ms - body.register_started_at if body.register_started_at else 0
-    timing_suspicious = form_age_ms < 1000 or form_age_ms > 2 * 60 * 60 * 1000
-    if honeypot_filled or timing_suspicious:
+    if honeypot_filled:
         return RegisterResponse(email=body.email.strip().lower())
     if not body.name.strip():
         raise HTTPException(status_code=422, detail="Name is required")
@@ -223,11 +264,15 @@ async def register(body: UserCreate, background_tasks: BackgroundTasks):
     if len(body.password) < 8:
         raise HTTPException(status_code=422, detail="Password must be at least 8 characters")
     language = body.language if body.language in ("en", "pt") else "en"
+    signup_ip = _client_ip(request)
+    signup_country_code, signup_country_name = _signup_country(request)
     loop = asyncio.get_running_loop()
     user = await loop.run_in_executor(
         None,
         lambda: _with_conn(lambda c: create_user(c, body.name.strip(), body.email.strip(),
-                                                  body.password, language)),
+                                                  body.password, language,
+                                                  signup_ip, signup_country_code,
+                                                  signup_country_name)),
     )
     token = await loop.run_in_executor(
         None, lambda: _with_conn(lambda c: create_verification_token(c, user["id"]))
@@ -820,6 +865,7 @@ async def admin_list_users(current_user: dict = Depends(get_current_user)):
             rows = _db_exec(f"""
                 SELECT
                     u.id, u.name, u.email, u.plan, u.email_verified, u.created_at,
+                    u.signup_ip, u.signup_country_code, u.signup_country_name,
                     COUNT(sm.thread_id)                                          AS total_sessions,
                     SUM(CASE WHEN sm.fase = 'done' THEN 1 ELSE 0 END)           AS completed,
                     SUM(CASE WHEN sm.started_at >= CASE
@@ -838,9 +884,11 @@ async def admin_list_users(current_user: dict = Depends(get_current_user)):
                 "id": r[0], "name": r[1], "email": r[2],
                 "plan": r[3] or "free", "email_verified": bool(r[4]),
                 "created_at": r[5],
-                "total_sessions": r[6] or 0, "completed": r[7] or 0,
-                "sessions_week": r[8] or 0, "last_active": r[9],
-                "stripe_subscription_id": r[10] or "",
+                "signup_ip": r[6] or "", "signup_country_code": r[7] or "",
+                "signup_country_name": r[8] or "",
+                "total_sessions": r[9] or 0, "completed": r[10] or 0,
+                "sessions_week": r[11] or 0, "last_active": r[12],
+                "stripe_subscription_id": r[13] or "",
             }
             for r in rows
         ]

@@ -44,6 +44,7 @@ class UserCreate(BaseModel):
     language: str = "en"
     last_name: Optional[str] = None
     company_site: Optional[str] = None
+    extra_context: Optional[str] = None
     register_started_at: Optional[int] = None
 
 
@@ -103,6 +104,9 @@ def setup_user_tables(conn: Any) -> None:
         ("stripe_subscription_id", "TEXT"),
         ("stripe_cancel_at",       "BIGINT"),
         ("week_reset_at",          "BIGINT"),
+        ("signup_ip",              "TEXT"),
+        ("signup_country_code",    "TEXT"),
+        ("signup_country_name",    "TEXT"),
     ]:
         cur.execute(f"ALTER TABLE users ADD COLUMN IF NOT EXISTS {col} {defn}")
 
@@ -138,7 +142,10 @@ def setup_user_tables(conn: Any) -> None:
 # ── User CRUD ────────────────────────────────────────────────────────────────
 
 def create_user(conn: Any, name: str, email: str,
-                password: str, language: str = "en") -> dict:
+                password: str, language: str = "en",
+                signup_ip: Optional[str] = None,
+                signup_country_code: Optional[str] = None,
+                signup_country_name: Optional[str] = None) -> dict:
     import psycopg2
     user_id = str(uuid.uuid4())
     password_hash = _hash_password(password)
@@ -146,9 +153,14 @@ def create_user(conn: Any, name: str, email: str,
     try:
         cur = conn.cursor()
         cur.execute(
-            """INSERT INTO users (id, name, email, password_hash, language, created_at, email_verified)
-               VALUES (%s, %s, %s, %s, %s, %s, 0)""",
-            (user_id, name, email.lower().strip(), password_hash, language, now),
+            """INSERT INTO users
+                  (id, name, email, password_hash, language, created_at, email_verified,
+                   signup_ip, signup_country_code, signup_country_name)
+               VALUES (%s, %s, %s, %s, %s, %s, 0, %s, %s, %s)""",
+            (
+                user_id, name, email.lower().strip(), password_hash, language, now,
+                signup_ip, signup_country_code, signup_country_name,
+            ),
         )
         cur.close()
         conn.commit()
@@ -159,6 +171,9 @@ def create_user(conn: Any, name: str, email: str,
         "id": user_id, "name": name,
         "email": email.lower().strip(), "language": language,
         "email_verified": False,
+        "signup_ip": signup_ip,
+        "signup_country_code": signup_country_code,
+        "signup_country_name": signup_country_name,
     }
 
 

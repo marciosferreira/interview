@@ -56,6 +56,8 @@
     tbody td { padding: 14px 16px; color: var(--text-secondary); vertical-align: middle; white-space: nowrap; }
     tbody td.name { color: var(--text-primary); font-weight: 500; }
     tbody td.email { color: var(--text-tertiary); font-size: 13px; }
+    tbody td.location { color: var(--text-tertiary); font-size: 13px; }
+    .country-flag { font-size: 16px; margin-right: 6px; vertical-align: -1px; }
 
     .plan-btn {
       font-size: 12px; font-weight: 600; padding: 6px 12px;
@@ -146,6 +148,7 @@
             <th onclick="sortBy('email')">Email <i data-lucide="arrow-up-down" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-left:4px"></i></th>
             <th onclick="sortBy('plan')">Plan <i data-lucide="arrow-up-down" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-left:4px"></i></th>
             <th>Verified</th>
+            <th onclick="sortBy('signup_country_code')">Location <i data-lucide="arrow-up-down" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-left:4px"></i></th>
             <th onclick="sortBy('created_at')">Joined <i data-lucide="arrow-up-down" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-left:4px"></i></th>
             <th onclick="sortBy('total_sessions')">Sessions <i data-lucide="arrow-up-down" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-left:4px"></i></th>
             <th onclick="sortBy('completed')">Done <i data-lucide="arrow-up-down" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-left:4px"></i></th>
@@ -200,6 +203,19 @@
     if (diff < 3600000)  return Math.floor(diff / 60000) + 'm ago';
     if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
     return Math.floor(diff / 86400000) + 'd ago';
+  }
+
+  function _flag(code) {
+    if (!code || code.length !== 2) return '';
+    const chars = [...code.toUpperCase()].map(c => 127397 + c.charCodeAt(0));
+    return String.fromCodePoint(...chars);
+  }
+
+  function _location(u) {
+    const flag = _flag(u.signup_country_code);
+    const label = u.signup_country_name || u.signup_country_code || 'Unknown';
+    const ip = u.signup_ip || 'IP unknown';
+    return `<span title="${esc(ip)}">${flag ? `<span class="country-flag">${flag}</span>` : ''}${esc(label)}</span><br><span style="font-size:11px;color:var(--text-tertiary)">${esc(ip)}</span>`;
   }
 
   async function load() {
@@ -261,7 +277,8 @@
       if (_filter === 'explorer'  && u.plan !== 'free')   return false;
       if (_filter === 'verified'  && !u.email_verified)   return false;
       if (_filter === 'no-stripe' && !(u.plan === 'hunter' && !u.stripe_subscription_id)) return false;
-      if (q && !u.name.toLowerCase().includes(q) && !u.email.toLowerCase().includes(q)) return false;
+      const haystack = [u.name, u.email, u.signup_ip, u.signup_country_code, u.signup_country_name].join(' ').toLowerCase();
+      if (q && !haystack.includes(q)) return false;
       return true;
     });
     rows.sort((a, b) => {
@@ -286,6 +303,7 @@
           ${isHunter && !u.stripe_subscription_id ? '<span class="badge" style="background:var(--status-warning-bg);color:var(--status-warning);border:1px solid var(--status-warning-border);margin-left:4px;" title="No Stripe subscription">⚠️ manual</span>' : ''}
         </td>
         <td><span class="badge" style="background:${u.email_verified ? 'var(--status-success-bg)' : 'var(--status-error-bg)'};color:${u.email_verified ? 'var(--status-success)' : 'var(--status-error)'};border:1px solid ${u.email_verified ? 'var(--status-success-border)' : 'var(--status-error-border)'}"><i data-lucide="${u.email_verified ? 'check' : 'x'}" style="width:10px;height:10px;margin-right:2px;display:inline-block;vertical-align:middle;"></i>${u.email_verified ? 'Yes' : 'No'}</span></td>
+        <td class="location">${_location(u)}</td>
         <td>${_fmt(u.created_at)}</td>
         <td>${u.total_sessions}</td>
         <td>${u.completed}</td>
