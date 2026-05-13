@@ -86,20 +86,22 @@
     .logo { width: 36px; height: 36px; background: #6c5ce7; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
     .logo-inner { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; }
     .logo-dot { width: 6px; height: 6px; background: #fff; border-radius: 50%; }
+    .app-heading { min-width: 0; }
     .app-title { font-size: 14px; font-weight: 500; color: #fff; }
-    .app-sub { font-size: 11px; color: #888; }
+    .app-sub { font-size: 11px; color: #888; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; border: 0.5px solid #3a3c45; color: #bbb; display: flex; align-items: center; gap: 5px; }
+    .badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; border: 0.5px solid #3a3c45; color: #bbb; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
     .badge-check { color: #00b894; }
-    .badge-hunter { background: #2d1f00; color: #f59e0b; border-color: #6b4c00; font-size: 11px; padding: 3px 10px; border-radius: 20px; }
+    .badge-hunter { background: #2d1f00; color: #f59e0b; border: 0.5px solid #6b4c00; font-size: 11px; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
     .progress-bar { background: #1a1c24; padding: 14px 24px; border-bottom: 0.5px solid #2a2c35; overflow-x: auto; }
-    .steps { display: flex; align-items: center; gap: 0; white-space: nowrap; }
-    .step { display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; }
+    .steps { display: flex; align-items: center; gap: 0; white-space: nowrap; min-width: max-content; }
+    .step { display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; flex: 0 0 auto; min-width: 64px; }
     .step-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
     .step-done { background: #00b894; color: #fff; }
     .step-active { background: #f59e0b; color: #fff; }
     .step-label { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
     .step-label.done { color: #00b894; }
+    .mobile-current-phase { display: none; }
     .step-connector { width: 40px; height: 2px; background: #00b894; margin-bottom: 16px; }
     .step-connector-inactive { width: 40px; height: 2px; background: #2a2c35; margin-bottom: 16px; }
     .toolbar { background: #16181f; padding: 6px 20px; display: flex; justify-content: flex-end; border-bottom: 0.5px solid #2a2c35; }
@@ -135,6 +137,171 @@
     }
     .cta-block h3 { font-size: 20px; color: #fff; margin-bottom: 10px; }
     .cta-block p  { font-size: 14px; color: #9ca3af; margin-bottom: 24px; line-height: 1.6; }
+
+    @media (max-width: 640px) {
+      .back-bar {
+        padding: 10px 12px;
+        align-items: flex-start;
+      }
+      .back-btn {
+        min-width: 0;
+        padding: 8px 10px;
+        font-size: 13px;
+      }
+      .back-btn span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .back-bar-label {
+        max-width: 34%;
+        text-align: right;
+        line-height: 1.25;
+      }
+      .demo-wrap {
+        padding: 14px 10px 24px;
+      }
+      .demo-notice {
+        align-items: flex-start;
+        margin-bottom: 14px;
+        padding: 10px 12px;
+        line-height: 1.4;
+      }
+      .app {
+        min-height: 560px;
+        border-radius: 10px;
+      }
+      .app-header-inner {
+        display: grid;
+        grid-template-columns: 32px minmax(0, 1fr);
+        gap: 8px 10px;
+        padding: 10px 12px;
+        align-items: center;
+      }
+      .logo {
+        width: 32px;
+        height: 32px;
+        border-radius: 7px;
+      }
+      .logo-inner {
+        width: 18px;
+        height: 18px;
+      }
+      .app-title {
+        font-size: 13px;
+      }
+      .app-sub {
+        max-width: 100%;
+      }
+      .header-right {
+        grid-column: 1 / -1;
+        width: 100%;
+        margin-left: 0;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 4px;
+        overflow: hidden;
+        padding-bottom: 2px;
+      }
+      .badge,
+      .badge-hunter {
+        min-width: 0;
+        width: 100%;
+        justify-content: center;
+        gap: 3px;
+        padding: 4px 3px;
+        font-size: 9px;
+        line-height: 1.1;
+      }
+      .badge span:not(.badge-check),
+      .badge-hunter {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .badge .ti {
+        flex: 0 0 auto;
+        font-size: 11px !important;
+      }
+      .badge-check {
+        flex: 0 0 auto;
+      }
+      .progress-bar {
+        overflow: hidden;
+        padding: 12px 12px 10px;
+      }
+      .steps {
+        width: 100%;
+        min-width: 0;
+        white-space: normal;
+      }
+      .step {
+        flex: 0 0 24px;
+        min-width: 0;
+      }
+      .step-icon {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+      }
+      .step-label {
+        display: none;
+      }
+      .step-connector,
+      .step-connector-inactive {
+        flex: 1 1 8px;
+        width: auto;
+        min-width: 6px;
+        margin-bottom: 0;
+      }
+      .mobile-current-phase {
+        display: block;
+        margin-top: 8px;
+        color: #f59e0b;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1.2;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0;
+      }
+      .toolbar {
+        padding: 6px 12px;
+      }
+      .chat {
+        padding: 14px 12px;
+      }
+      .bubble {
+        max-width: 84%;
+      }
+      .complete-bar {
+        padding: 11px 12px;
+        font-size: 12px;
+        line-height: 1.35;
+      }
+      .input-bar {
+        padding: 10px 12px;
+        gap: 8px;
+      }
+      .contato-btn span {
+        display: none;
+      }
+      .contato-btn {
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        justify-content: center;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .hint {
+        padding: 5px 12px 8px;
+        line-height: 1.35;
+      }
+      .cta-block {
+        margin-top: 24px;
+        padding: 24px 18px;
+      }
+    }
   </style>
 </head>
 <body style="background:#0f1117; min-height:100vh;">
@@ -156,7 +323,7 @@
   <div class="app">
     <div class="app-header-inner">
       <div class="logo"><div class="logo-inner"><div class="logo-dot"></div></div></div>
-      <div>
+      <div class="app-heading">
         <div class="app-title">Acing Interviews</div>
         <div class="app-sub">AI Machine Learning Engineer · PL · Acme</div>
       </div>
@@ -206,6 +373,7 @@
           <div class="step-label" style="color:#f59e0b" data-i18n="demo.interview.phases.scorecard">Scorecard</div>
         </div>
       </div>
+      <div class="mobile-current-phase" data-i18n="demo.interview.phases.scorecard">Scorecard</div>
     </div>
 
     <div class="toolbar">
