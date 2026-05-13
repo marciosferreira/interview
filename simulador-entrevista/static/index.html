@@ -162,10 +162,12 @@
     }
 
     .hero-mockup {
+      display: block;
       border-radius: var(--radius-xl);
       overflow: hidden;
       border: 1px solid var(--bg-surface-border);
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 40px rgba(99,102,241,0.2);
+      cursor: pointer;
       z-index: 1;
     }
     .hero-mockup img {
@@ -731,9 +733,9 @@
       <audio id="hero-sample-en" src="/assets/audio/sample_output_en.wav" preload="none"></audio>
     </div>
     <!-- Right: product mockup -->
-    <div class="hero-mockup">
+    <a class="hero-mockup" href="/register.html" aria-label="Start for free">
       <img src="/assets/hero.png" alt="AI interview simulation interface" loading="eager">
-    </div>
+    </a>
   </div>
 
   <!-- Demo Strip -->

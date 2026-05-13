@@ -20,10 +20,125 @@
   <!-- TikTok Pixel -->
   <script src="/analytics.js"></script>
   <style>
+    .auth-card {
+      max-width: 460px;
+    }
+    .auth-header {
+      margin-bottom: 24px;
+    }
+    .auth-header h1 {
+      line-height: 1.12;
+      margin-bottom: 10px;
+    }
+    .register-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(99,102,241,0.35);
+      border-radius: 999px;
+      background: rgba(99,102,241,0.1);
+      color: #c4b5fd;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .register-benefits {
+      display: grid;
+      gap: 8px;
+      margin: 0 0 22px;
+      padding: 14px;
+      border: 1px solid var(--bg-surface-border);
+      border-radius: var(--radius-lg);
+      background: rgba(255,255,255,0.025);
+    }
+    .register-benefit {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .register-benefit i {
+      width: 15px;
+      height: 15px;
+      color: #4ade80;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .register-flow {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+    .register-step {
+      padding: 10px 8px;
+      border: 1px solid var(--bg-surface-border);
+      border-radius: var(--radius-md);
+      background: rgba(15,17,23,0.45);
+      text-align: center;
+    }
+    .register-step-num {
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 7px;
+      border-radius: 999px;
+      background: rgba(99,102,241,0.16);
+      color: #a5b4fc;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .register-step-text {
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+    .register-form-note {
+      margin: -4px 0 14px;
+      color: var(--text-tertiary);
+      font-size: 12px;
+      line-height: 1.45;
+      text-align: center;
+    }
+    .register-privacy-note {
+      margin-top: 10px;
+      color: var(--text-tertiary);
+      font-size: 11px;
+      line-height: 1.45;
+      text-align: center;
+    }
     .field-wrapper {
       position: absolute;
       left: -9999px;
       top: -9999px;
+    }
+    @media (max-width: 480px) {
+      .auth-wrapper {
+        padding: 24px 16px;
+        justify-content: flex-start;
+      }
+      .auth-card {
+        padding: 30px 22px;
+      }
+      .register-flow {
+        grid-template-columns: 1fr;
+      }
+      .register-step {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-align: left;
+      }
+      .register-step-num {
+        margin-bottom: 0;
+        flex-shrink: 0;
+      }
     }
   </style>
 </head>
@@ -37,8 +152,42 @@
           <i data-lucide="target"></i>
         </div>
       </a>
-      <h1 data-i18n="register.title">Create your account</h1>
-      <p data-i18n="register.subtitle">Practice interviews personalized to your resume</p>
+      <div class="register-kicker">
+        <i data-lucide="zap" style="width:13px;height:13px"></i>
+        <span data-i18n="register.kicker">Free start in 15 seconds.</span>
+      </div>
+      <h1 data-i18n="register.title">Start your mock interview in 15 seconds</h1>
+      <p data-i18n="register.subtitle">Create a free account, paste your dream role, and practice with AI built around that job.</p>
+    </div>
+
+    <div class="register-benefits" aria-label="What you get">
+      <div class="register-benefit">
+        <i data-lucide="check-circle"></i>
+        <span data-i18n="register.benefitRole">Questions personalized to the role you want</span>
+      </div>
+      <div class="register-benefit">
+        <i data-lucide="check-circle"></i>
+        <span data-i18n="register.benefitFeedback">Clear feedback on what to improve before the real interview</span>
+      </div>
+      <div class="register-benefit">
+        <i data-lucide="check-circle"></i>
+        <span data-i18n="register.benefitNoCard">No credit card required to begin</span>
+      </div>
+    </div>
+
+    <div class="register-flow" aria-label="How it works">
+      <div class="register-step">
+        <div class="register-step-num">1</div>
+        <div class="register-step-text" data-i18n="register.stepAccount">Create account</div>
+      </div>
+      <div class="register-step">
+        <div class="register-step-num">2</div>
+        <div class="register-step-text" data-i18n="register.stepRole">Paste your role</div>
+      </div>
+      <div class="register-step">
+        <div class="register-step-num">3</div>
+        <div class="register-step-text" data-i18n="register.stepPractice">Start practicing</div>
+      </div>
     </div>
 
     <div class="alert alert-error" id="error-msg" style="display:none">
@@ -51,7 +200,7 @@
       <div style="width:56px;height:56px;border-radius:50%;background:rgba(74,222,128,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
         <i data-lucide="mail-check" style="width:28px;height:28px;color:#4ade80"></i>
       </div>
-      <h2 id="success-title" style="font-size:1.25rem;font-weight:700;margin-bottom:10px" data-i18n="register.successTitle">Check your inbox</h2>
+      <h2 id="success-title" style="font-size:1.25rem;font-weight:700;margin-bottom:10px" data-i18n="register.successTitle">Almost there: confirm your email</h2>
       <p id="success-text" style="color:var(--text-secondary);margin-bottom:16px;line-height:1.6"></p>
       <p style="font-size:13px;color:var(--text-tertiary)">
         <span id="success-note" data-i18n="register.successNote">Didn't receive it? Check your spam folder or</span>
@@ -61,6 +210,7 @@
     </div>
 
     <form id="register-form" autocomplete="on">
+      <p class="register-form-note" data-i18n="register.formNote">3 fields. Less than 1 minute. Your first practice starts right after email confirmation.</p>
       <div class="form-group">
         <label class="form-label" for="name" data-i18n="register.name">Full name</label>
         <input class="form-input" type="text" id="name" name="name" data-i18n-attr="placeholder:register.namePlaceholder" placeholder="Alex Johnson" required autocomplete="name" />
@@ -82,7 +232,8 @@
         <input type="text" name="last_name" id="last_name" tabindex="-1" autocomplete="off" />
       </div>
 
-      <button class="btn btn-primary" style="width:100%; margin-top:8px;" type="submit" id="submit-btn" data-i18n="register.submit">Create account</button>
+      <button class="btn btn-primary" style="width:100%; margin-top:8px;" type="submit" id="submit-btn" data-i18n="register.submit">Start practicing for free</button>
+      <p class="register-privacy-note" data-i18n="register.privacyNote">You can paste your target job and resume after this step.</p>
     </form>
 
     <div class="auth-footer">
@@ -116,7 +267,7 @@
 
   function showSuccess(email) {
     registeredEmail = email;
-    const tpl = (window.t ? window.t('register.successText') : 'We sent a confirmation link to {email}. Click it to activate your account.');
+    const tpl = (window.t ? window.t('register.successText') : 'We sent a confirmation link to {email}. Confirm it to unlock your personalized mock interview.');
     successText.textContent = tpl.replace('{email}', email);
     form.style.display = 'none';
     successPanel.style.display = 'block';
@@ -164,8 +315,8 @@
     const currentLang = window.i18n?.currentLang ? window.i18n.currentLang() : localStorage.getItem('preferred_lang');
     const language = ['en', 'pt'].includes(currentLang) ? currentLang : 'en';
 
-    if (!name) { showError(window.t ? window.t('register.errorName') : 'Name required'); submitBtn.disabled = false; submitBtn.textContent = window.t ? window.t('register.submit') : 'Create account'; return; }
-    if (password.length < 8) { showError(window.t ? window.t('register.errorPassword') : 'Password too short'); submitBtn.disabled = false; submitBtn.textContent = window.t ? window.t('register.submit') : 'Create account'; return; }
+    if (!name) { showError(window.t ? window.t('register.errorName') : 'Name required'); submitBtn.disabled = false; submitBtn.textContent = window.t ? window.t('register.submit') : 'Start practicing for free'; return; }
+    if (password.length < 8) { showError(window.t ? window.t('register.errorPassword') : 'Password too short'); submitBtn.disabled = false; submitBtn.textContent = window.t ? window.t('register.submit') : 'Start practicing for free'; return; }
 
     try {
       const res = await fetch('/auth/register', {
@@ -183,7 +334,7 @@
       showError(window.t ? window.t('register.errorNetwork') : 'Network error');
     } finally {
       submitBtn.disabled = false;
-      submitBtn.textContent = window.t ? window.t('register.submit') : 'Create account';
+      submitBtn.textContent = window.t ? window.t('register.submit') : 'Start practicing for free';
     }
   });
 </script>
