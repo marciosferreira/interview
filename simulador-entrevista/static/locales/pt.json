@@ -197,7 +197,7 @@
     },
     "langHint": "Escolha o idioma da interface.",
     "fields": {
-      "name": "Nome completo",
+      "name": "Nome",
       "namePlaceholder": "Seu nome",
       "email": "E-mail",
       "emailPlaceholder": "voce@exemplo.com",
@@ -437,7 +437,7 @@
     "stepRole": "Cole sua vaga",
     "stepPractice": "Comece a praticar",
     "formNote": "3 campos. Menos de 1 minuto. Sua primeira prática começa logo após confirmar o e-mail.",
-    "name": "Nome completo",
+    "name": "Nome",
     "namePlaceholder": "Alex Johnson",
     "email": "E-mail",
     "emailPlaceholder": "voce@exemplo.com",

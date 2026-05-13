@@ -53,7 +53,7 @@ Generate a concise interview briefing. Use short bullets only — no paragraphs,
 # CANDIDATE PROFILE
 IMPORTANT: Fill these with exact facts from the resume. Alex reads this section before the interview starts and will NOT ask the candidate for any information already listed here.
 
-- **Full name:** (from resume, or "Candidate")
+- **Name:** (from resume, or "Candidate")
 - **Location:** (city/country from resume, or "Not mentioned")
 - **Current role:** (exact title + company name)
 - **Years of experience:** (total professional experience, e.g. "10 years")
@@ -176,7 +176,7 @@ async def generate_interview_context(
 def extract_candidate_name(interview_context: str) -> str:
     """Parse candidate name from the generated context document."""
     for line in interview_context.splitlines():
-        if "**Full name:**" in line or "Full name:" in line:
+        if "**Name:**" in line or "Name:" in line:
             name = line.split(":", 1)[-1].strip().lstrip("*").rstrip("*").strip()
             if name and name.lower() not in ("candidate", "unknown", "n/a", "not found", "not mentioned"):
                 return name
