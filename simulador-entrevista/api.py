@@ -968,7 +968,7 @@ async def parse_document(file: UploadFile):
 @app.post("/stt")
 async def stt(audio: UploadFile, lang: str = "en"):
     audio_bytes = await audio.read()
-    whisper_lang = "pt" if lang == "pt" else "en"
+    whisper_lang = "pt" if (lang or "").lower().startswith("pt") else "en"
     transcript = await openai_client.audio.transcriptions.create(
         model="whisper-1",
         file=(audio.filename or "audio.webm", audio_bytes, audio.content_type or "audio/webm"),

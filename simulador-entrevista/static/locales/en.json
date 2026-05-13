@@ -360,8 +360,8 @@
       "hint": "Click <strong>🎙️</strong> to start/stop recording · <strong>Enter</strong> to send text · <strong>Shift+Enter</strong> for new line"
     },
     "audio": {
-      "discard": "✕ Discard",
-      "send": "➤ Send"
+      "discard": "Discard",
+      "send": "Send"
     },
     "scorecardGenerating": "Generating your scorecard…",
     "doneBanner": "Interview complete — click here to see your scorecard ",
@@ -465,7 +465,7 @@
     "planLabel": "plan",
     "plans": {
       "explorer": {
-        "badge": "<i data-lucide=\"map\" style=\"width:12px;height:12px;margin-right:4px;\"></i> Explorer",
+        "badge": "Explorer",
         "name": "Explorer",
         "tagline": "For casual practice",
         "priceHtml": "$0 <span>/ month</span>",

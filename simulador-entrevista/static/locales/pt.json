@@ -360,8 +360,8 @@
       "hint": "Clique em <strong>🎙️</strong> para gravar/parar · <strong>Enter</strong> para enviar · <strong>Shift+Enter</strong> para nova linha"
     },
     "audio": {
-      "discard": "✕ Descartar",
-      "send": "➤ Enviar"
+      "discard": "Descartar",
+      "send": "Enviar"
     },
     "scorecardGenerating": "Gerando seu scorecard…",
     "doneBanner": "Entrevista concluída — clique aqui para ver seu scorecard ",
@@ -465,7 +465,7 @@
     "planLabel": "plano",
     "plans": {
       "explorer": {
-        "badge": "<i data-lucide=\"map\" style=\"width:12px;height:12px;margin-right:4px;\"></i> Explorer",
+        "badge": "Explorer",
         "name": "Explorer",
         "tagline": "Para prática casual",
         "priceHtml": "$0 <span>/ mês</span>",

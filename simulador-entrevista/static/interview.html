@@ -1366,10 +1366,25 @@
     const _authToken = localStorage.getItem('auth_token');
     if (!_authToken) { location.replace('/login.html?next=/interview.html'); }
     function _getUserLanguage() {
+      const supported = ['en', 'pt'];
+      const normalizeLang = (lang) => {
+        if (!lang || typeof lang !== 'string') return null;
+        const shortLang = lang.slice(0, 2).toLowerCase();
+        return supported.includes(shortLang) ? shortLang : null;
+      };
+
+      const preferredLang = normalizeLang(localStorage.getItem('preferred_lang'));
+      if (preferredLang) return preferredLang;
+
       try {
         const user = JSON.parse(localStorage.getItem('auth_user') || 'null');
-        if (user && ['en', 'pt'].includes(user.language)) return user.language;
+        const userLang = normalizeLang(user?.language);
+        if (userLang) return userLang;
       } catch (_) {}
+
+      const activeLang = normalizeLang(window.i18n?.currentLang?.());
+      if (activeLang) return activeLang;
+
       return 'en';
     }
     const _lang = _getUserLanguage();
@@ -1921,7 +1936,7 @@
       const form = new FormData();
       form.append('audio', blob, 'recording.webm');
       try {
-        const res = await fetch(`/stt?lang=${_lang}`, { method: 'POST', body: form });
+        const res = await fetch(`/stt?lang=${encodeURIComponent(_lang)}`, { method: 'POST', body: form });
         const data = await res.json();
         input.value = data.text || '';
         autoResize();
@@ -2493,12 +2508,12 @@
         if (!isHunter) { el.style.border = '1px solid var(--bg-surface-border)'; el.style.color = 'var(--text-secondary)'; }
         el.innerHTML = isHunter
           ? t('upgrade.plans.hunter.badge')
-          : '<i data-lucide="map" style="width:12px;height:12px;margin-right:4px"></i> ' + t('upgrade.plans.explorer.badge');
+          : '<i data-lucide="map" style="width:12px;height:12px;margin-right:4px"></i> ' + t('upgrade.plans.explorer.name');
         lucide.createIcons();
         el.setAttribute('data-tooltip', t('upgrade.plans.' + (isHunter ? 'hunter' : 'explorer') + '.activePlan'));
         el.style.display = 'inline-block';
         el.style.cursor = 'pointer';
-        el.addEventListener('click', () => location.href = '/upgrade.html');
+        el.onclick = () => location.href = '/upgrade.html';
       } catch (_) { }
     }
     (function () {
