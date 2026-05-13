@@ -114,24 +114,73 @@
     /* Hire signal banner */
     .hire-hero {
       display: none;
+      border: 1px solid var(--bg-surface-border);
       border-radius: var(--radius-md);
-      padding: 10px 20px;
+      padding: 14px 18px 16px;
       margin-bottom: 20px;
-      flex-direction: row;
-      align-items: center;
-      gap: 10px;
+      background: linear-gradient(180deg, rgba(15,23,42,0.78), rgba(15,23,42,0.42));
+      flex-direction: column;
+      gap: 14px;
     }
-    .hire-hero.signal-strong-yes { background: rgba(34,197,94,0.08);  border: 1px solid rgba(34,197,94,0.25); }
-    .hire-hero.signal-yes        { background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.25); }
-    .hire-hero.signal-borderline { background: rgba(234,179,8,0.08);  border: 1px solid rgba(234,179,8,0.25); }
-    .hire-hero.signal-not-yet    { background: rgba(239,68,68,0.08);  border: 1px solid rgba(239,68,68,0.25); }
-    .hire-emoji { font-size: 16px; line-height: 1; flex-shrink: 0; }
-    .hire-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); flex-shrink: 0; }
-    .hire-value { font-size: 13px; font-weight: 700; }
+    .hire-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .hire-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); flex-shrink: 0; }
+    .hire-value { font-size: 13px; font-weight: 800; text-align: right; }
     .hire-hero.signal-strong-yes .hire-value { color: #22c55e; }
-    .hire-hero.signal-yes        .hire-value { color: var(--brand-primary); }
-    .hire-hero.signal-borderline .hire-value { color: #eab308; }
-    .hire-hero.signal-not-yet    .hire-value { color: #ef4444; }
+    .hire-hero.signal-yes        .hire-value { color: #84cc16; }
+    .hire-hero.signal-borderline .hire-value { color: #f59e0b; }
+    .hire-hero.signal-not-yet    .hire-value { color: #f43f5e; }
+    .hire-scale-wrap { position: relative; padding-top: 13px; }
+    .hire-scale {
+      height: 12px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #ef4444 0%, #f97316 33%, #eab308 55%, #84cc16 76%, #22c55e 100%);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18), 0 8px 18px rgba(0,0,0,0.22);
+    }
+    .hire-pointer {
+      position: absolute;
+      top: 0;
+      left: var(--signal-pos, 0%);
+      width: 2px;
+      height: 26px;
+      background: #f8fafc;
+      border-radius: 999px;
+      box-shadow: 0 0 0 1px rgba(15,23,42,0.55), 0 0 14px rgba(248,250,252,0.45);
+      transform: translateX(-50%);
+    }
+    .hire-pointer::before {
+      content: "";
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 7px solid #f8fafc;
+      transform: translateX(-50%);
+    }
+    .hire-ticks {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 9px;
+    }
+    .hire-tick {
+      min-width: 0;
+      font-size: 10px;
+      line-height: 1.25;
+      font-weight: 650;
+      color: var(--text-tertiary);
+      text-align: center;
+    }
+    .hire-tick.active { color: var(--text-primary); }
+    @media (max-width: 560px) {
+      .hire-hero { padding: 14px; }
+      .hire-head { align-items: flex-start; flex-direction: column; gap: 6px; }
+      .hire-value { text-align: left; }
+      .hire-ticks { gap: 6px; }
+      .hire-tick { font-size: 9px; }
+    }
 
     /* Paywall state */
     #paywall-state {
@@ -194,10 +243,15 @@
     <div class="page-sub" id="scorecard-sub"></div>
 
     <div class="hire-hero" id="hire-hero">
-      <div class="hire-emoji" id="hire-emoji"></div>
-      <div class="hire-label" data-i18n="scorecard.hireLabel">Hiring signal</div>
-      <div style="width:1px;height:14px;background:currentColor;opacity:0.2;flex-shrink:0"></div>
-      <div class="hire-value" id="hire-value"></div>
+      <div class="hire-head">
+        <div class="hire-label" data-i18n="scorecard.hireLabel">Hiring signal</div>
+        <div class="hire-value" id="hire-value"></div>
+      </div>
+      <div class="hire-scale-wrap" aria-hidden="true">
+        <div class="hire-pointer" id="hire-pointer"></div>
+        <div class="hire-scale"></div>
+        <div class="hire-ticks" id="hire-ticks"></div>
+      </div>
     </div>
 
     <div class="tts-toolbar" style="display:flex;gap:8px;align-items:center;">
@@ -253,19 +307,25 @@
   }
 
   const _HIRE_SIGNAL_CONFIG = {
-    'Strong Yes': { cls: 'signal-strong-yes', emoji: '🟢', i18nKey: 'scorecard.hireSignals.strongYes' },
-    'Yes':        { cls: 'signal-yes',        emoji: '✅', i18nKey: 'scorecard.hireSignals.yes'       },
-    'Borderline': { cls: 'signal-borderline', emoji: '🟡', i18nKey: 'scorecard.hireSignals.borderline'},
-    'Not Yet':    { cls: 'signal-not-yet',    emoji: '🔴', i18nKey: 'scorecard.hireSignals.notYet'   },
+    'Strong Yes': { cls: 'signal-strong-yes', emoji: '🟢', i18nKey: 'scorecard.hireSignals.strongYes', pos: 96 },
+    'Yes':        { cls: 'signal-yes',        emoji: '✅', i18nKey: 'scorecard.hireSignals.yes',       pos: 68 },
+    'Borderline': { cls: 'signal-borderline', emoji: '🟡', i18nKey: 'scorecard.hireSignals.borderline',pos: 36 },
+    'Not Yet':    { cls: 'signal-not-yet',    emoji: '🔴', i18nKey: 'scorecard.hireSignals.notYet',   pos: 4  },
   };
+  const _HIRE_SIGNAL_SCALE = ['Not Yet', 'Borderline', 'Yes', 'Strong Yes'];
 
   function _showHireHero(hireSignal) {
     const cfg = _HIRE_SIGNAL_CONFIG[hireSignal];
     if (!cfg) return;
     const hero = document.getElementById('hire-hero');
-    hero.classList.add(cfg.cls);
-    document.getElementById('hire-emoji').textContent = cfg.emoji;
+    hero.className = 'hire-hero ' + cfg.cls;
+    hero.style.setProperty('--signal-pos', `${cfg.pos}%`);
     document.getElementById('hire-value').textContent  = window.t ? window.t(cfg.i18nKey) : hireSignal;
+    document.getElementById('hire-ticks').innerHTML = _HIRE_SIGNAL_SCALE.map(signal => {
+      const tickCfg = _HIRE_SIGNAL_CONFIG[signal];
+      const label = window.t ? window.t(tickCfg.i18nKey) : signal;
+      return `<div class="hire-tick ${signal === hireSignal ? 'active' : ''}">${label}</div>`;
+    }).join('');
     hero.style.display = 'flex';
   }
 

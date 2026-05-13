@@ -63,19 +63,73 @@
 
     /* Hire signal banner */
     .hire-hero {
+      border: 1px solid var(--bg-surface-border);
       border-radius: var(--radius-md);
-      padding: 10px 20px;
+      padding: 14px 18px 16px;
       margin-bottom: 20px;
-      display: flex;
-      flex-direction: row;
+      background: linear-gradient(180deg, rgba(15,23,42,0.78), rgba(15,23,42,0.42));
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
       align-items: center;
-      gap: 10px;
+      gap: 14px 16px;
     }
-    .hire-hero.signal-yes { background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.25); }
-    .hire-emoji { font-size: 16px; line-height: 1; flex-shrink: 0; }
-    .hire-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); flex-shrink: 0; }
-    .hire-value { font-size: 13px; font-weight: 700; color: var(--brand-primary); }
-    .hire-sep   { width: 1px; height: 14px; background: currentColor; opacity: 0.2; flex-shrink: 0; }
+    .hire-emoji,
+    .hire-sep { display: none; }
+    .hire-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .hire-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); flex-shrink: 0; }
+    .hire-value { justify-self: end; font-size: 13px; font-weight: 800; color: #84cc16; text-align: right; }
+    .hire-scale-wrap { position: relative; grid-column: 1 / -1; padding-top: 13px; }
+    .hire-scale {
+      height: 12px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #ef4444 0%, #f97316 33%, #eab308 55%, #84cc16 76%, #22c55e 100%);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18), 0 8px 18px rgba(0,0,0,0.22);
+    }
+    .hire-pointer {
+      position: absolute;
+      top: 0;
+      left: var(--signal-pos, 68%);
+      width: 2px;
+      height: 26px;
+      background: #f8fafc;
+      border-radius: 999px;
+      box-shadow: 0 0 0 1px rgba(15,23,42,0.55), 0 0 14px rgba(248,250,252,0.45);
+      transform: translateX(-50%);
+    }
+    .hire-pointer::before {
+      content: "";
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 7px solid #f8fafc;
+      transform: translateX(-50%);
+    }
+    .hire-ticks {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 9px;
+    }
+    .hire-tick {
+      min-width: 0;
+      font-size: 10px;
+      line-height: 1.25;
+      font-weight: 650;
+      color: var(--text-tertiary);
+      text-align: center;
+    }
+    .hire-tick.active { color: var(--text-primary); }
+    @media (max-width: 560px) {
+      .hire-hero { padding: 14px; }
+      .hire-hero { grid-template-columns: 1fr; gap: 6px; }
+      .hire-value { justify-self: start; text-align: left; }
+      .hire-ticks { gap: 6px; }
+      .hire-tick { font-size: 9px; }
+    }
 
     /* Scorecard content */
     .scorecard-pre {
@@ -153,11 +207,21 @@
   <div class="page-title">AI Machine Learning Engineer — Acme Corp</div>
   <div class="page-sub">May 10, 2026</div>
 
-  <div class="hire-hero signal-yes">
+  <div class="hire-hero signal-yes" style="--signal-pos:68%">
     <div class="hire-emoji">✅</div>
     <div class="hire-label" data-i18n="demo.scorecard.hiringSignal">Hiring signal</div>
     <div class="hire-sep"></div>
     <div class="hire-value" data-i18n="demo.scorecard.hiringYes">Yes</div>
+    <div class="hire-scale-wrap" aria-hidden="true">
+      <div class="hire-pointer"></div>
+      <div class="hire-scale"></div>
+      <div class="hire-ticks">
+        <div class="hire-tick" data-i18n="scorecard.hireSignals.notYet">Not Yet</div>
+        <div class="hire-tick" data-i18n="scorecard.hireSignals.borderline">Borderline</div>
+        <div class="hire-tick active" data-i18n="scorecard.hireSignals.yes">Yes</div>
+        <div class="hire-tick" data-i18n="scorecard.hireSignals.strongYes">Strong Yes</div>
+      </div>
+    </div>
   </div>
 
   <div class="scorecard-pre" id="scorecard-body"></div>
@@ -178,7 +242,7 @@
 <script>
 lucide.createIcons();
 
-const _DEMO_SCORECARD = `
+const _DEMO_SCORECARD_EN = `
 # 🎯 INTERVIEW SCORECARD — AI Machine Learning Engineer at Acme Corp
 
 ---
@@ -260,7 +324,97 @@ The motivation answer was specific and credible. Linking your manufacturing tele
 > You have the technical substance to get this role — the gap is framing. You currently describe *what happened*; you need to describe *what you chose to do and why*. The difference between a 3/5 and a 5/5 answer is always: "I made a decision. Here it was. Here's why. Here's what it cost and what it gained." Practice that structure on every answer before the real interview.
 `;
 
-document.getElementById('scorecard-body').innerHTML = marked.parse(_DEMO_SCORECARD);
+const _DEMO_SCORECARD_PT = `
+# 🎯 SCORECARD DA ENTREVISTA — Engenheiro de Machine Learning com IA na Acme Corp
+
+---
+
+## 📊 Notas por Seção
+
+**Parte 1 — Elevator Pitch** — 4/5
+A abertura foi forte, com posicionamento claro. O uso de referências específicas a projetos, como o sistema multiagente da FIT, funcionou bem. Poderia ser mais enxuto: passou cerca de 25 segundos da janela ideal, e a frase "sou apaixonado por machine learning" apareceu uma vez. Corte isso.
+
+**Parte 2 — História CAR** — 3/5
+O desafio foi apresentado com clareza e o resultado foi quantificado: redução de 30% na taxa de falsos alarmes. Porém, a parte de ação ficou muito apoiada em "nós". A entrevistadora precisou perguntar duas vezes até você descrever sua contribuição individual. Assuma a história desde a primeira frase.
+
+**Parte 3 — Perguntas Técnicas** — 4/5
+Boas respostas sobre implantação de modelos e padrões de MLOps. A pergunta sobre orquestração multiagente foi respondida com profundidade real. A resposta sobre trade-offs de feature store foi competente, mas faltou o contexto de negócio que levaria a resposta para 5.
+
+**Parte 4 — Liderança e Abordagem** — 3/5
+Você descreveu bem uma situação de liderança sem autoridade formal. O exemplo de alinhar três times em torno de um padrão compartilhado de observabilidade foi convincente. Porém, quando perguntado sobre lidar com falhas, a resposta ficou abstrata. Um exemplo concreto só apareceu depois do segundo follow-up.
+
+**Parte 5 — Fit e Motivação** — 5/5
+A resposta de motivação foi específica e crível. Conectar seu histórico com telemetria industrial ao foco da empresa em ML para indústria foi exatamente o caminho certo. Isso é raro e tende a ser lembrado.
+
+---
+
+## 💬 O Que Você Não Disse, Mas Deveria Ter Dito
+
+**Elevator Pitch:**
+- Você não ancorou a escala do que construiu: quantos operadores? Quantos incidentes por mês? Números fazem a história pousar melhor.
+- "Multiagente" não significa muito para uma pessoa não técnica sem uma explicação de uma frase. Adicione esse enquadramento na próxima vez.
+
+**História CAR:**
+- Você não explicou o custo de negócio do problema *antes* da solução. "4 horas de correlação manual por incidente" teria deixado o resultado de 30% muito mais forte.
+- A métrica de melhoria precisa de uma linha de base e de um período para soar confiável.
+
+**Perguntas Técnicas:**
+- Quando perguntado sobre observabilidade em ML em produção, você cobriu bem logging, mas deixou de mencionar detecção de drift, um diferencial importante para vagas sênior de ML.
+- Você não fez uma pergunta de clarificação antes da resposta de system design. Isso pode sinalizar que você pula para soluções antes de validar o problema.
+
+**Liderança:**
+- Você poderia ter mencionado o impacto cross-functional: quem se beneficiou além da engenharia, e o que isso permitiu para o negócio?
+
+---
+
+## 📝 Vocabulário e Enquadramento Para Praticar
+
+- Troque **"nós trabalhamos em"** por "eu projetei / eu liderei / eu fui responsável por"
+- Troque **"era um problema complexo"** por uma descrição específica da complexidade: "o desafio era que três sistemas de logs não tinham um formato comum de timestamp"
+- Troque **"sou apaixonado por ML"** por "este é o tipo de problema que mais me interessa — e aqui está o porquê:" + um exemplo concreto
+- Pratique começar pelo impacto de negócio: **"O impacto para o negócio foi X"** antes de explicar a solução técnica
+- Use a estrutura: **"Dada [restrição], eu decidi [ação] porque [raciocínio]"**. Isso sinaliza pensamento estruturado e maturidade sênior
+
+---
+
+## 🗣️ Desempenho Geral de Comunicação
+
+**Avaliação:** B+ — Claro e estruturado no geral, com alguma vagueza sob pressão
+
+**Padrões recorrentes para corrigir:**
+1. Hesitar antes de responder: "acho que o que eu diria é..." — responda diretamente
+2. Perder força ao falar dos resultados — você começa bem ("reduzimos a taxa de falsos alarmes...") e depois não fecha o número
+3. Usar "nós" quando a entrevistadora está claramente perguntando sobre sua decisão e contribuição individual
+
+---
+
+## 🏁 Avaliação Geral
+
+**Pontuação total:** 19/25
+**Sinal de contratação:** Boas chances de contratação
+
+### ✅ 2 Principais Pontos Fortes
+1. A profundidade técnica é real e atual: LangGraph, MLOps, implantação em produção e sistemas multiagente. Esses temas apareceram naturalmente e podem diferenciar você de candidatos generalistas.
+2. A história de motivação foi específica e conectada à empresa. Você ligou seu histórico em manufatura ao domínio real do produto deles. Isso é raro em entrevistas e muito eficaz.
+
+### 🔧 2 Principais Pontos Para Melhorar Antes da Entrevista Real
+1. **Assuma suas histórias.** Cada "nós fizemos X" precisa virar "eu decidi X, por este motivo, e fiz especificamente isto". Pratique até ficar automático. É a mudança de maior impacto.
+2. **Contexto de negócio antes do detalhe técnico.** Comece cada resposta com o problema de negócio e seu custo, depois explique o que você construiu. Entrevistadores lembram de impacto, não de arquitetura.
+
+### ⚡ Uma Coisa Que Pode Decidir Sua Entrevista
+
+> Você tem substância técnica para conquistar essa vaga. O gap está no enquadramento. Hoje você descreve *o que aconteceu*; precisa descrever *o que escolheu fazer e por quê*. A diferença entre uma resposta 3/5 e uma resposta 5/5 quase sempre é: "eu tomei uma decisão. Foi esta. Este foi o motivo. Este foi o custo e este foi o ganho." Pratique essa estrutura em todas as respostas antes da entrevista real.
+`;
+
+function renderDemoScorecard(lang) {
+  const selected = lang === 'pt' ? _DEMO_SCORECARD_PT : _DEMO_SCORECARD_EN;
+  document.getElementById('scorecard-body').innerHTML = marked.parse(selected);
+}
+
+renderDemoScorecard(window.i18n?.currentLang?.() || 'en');
+document.addEventListener('i18n:ready', (event) => {
+  renderDemoScorecard(event.detail?.lang || window.i18n?.currentLang?.() || 'en');
+});
 </script>
 </body>
 </html>
