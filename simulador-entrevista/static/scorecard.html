@@ -314,16 +314,25 @@
   };
   const _HIRE_SIGNAL_SCALE = ['Not Yet', 'Borderline', 'Yes', 'Strong Yes'];
 
+  function _tr(key, fallback) {
+    const val = window.t ? window.t(key) : key;
+    return val && val !== key ? val : fallback;
+  }
+
+  function _hireSignalLabel(signal) {
+    const cfg = _HIRE_SIGNAL_CONFIG[signal];
+    return cfg ? _tr(cfg.i18nKey, signal) : signal;
+  }
+
   function _showHireHero(hireSignal) {
     const cfg = _HIRE_SIGNAL_CONFIG[hireSignal];
     if (!cfg) return;
     const hero = document.getElementById('hire-hero');
     hero.className = 'hire-hero ' + cfg.cls;
     hero.style.setProperty('--signal-pos', `${cfg.pos}%`);
-    document.getElementById('hire-value').textContent  = window.t ? window.t(cfg.i18nKey) : hireSignal;
+    document.getElementById('hire-value').textContent  = _hireSignalLabel(hireSignal);
     document.getElementById('hire-ticks').innerHTML = _HIRE_SIGNAL_SCALE.map(signal => {
-      const tickCfg = _HIRE_SIGNAL_CONFIG[signal];
-      const label = window.t ? window.t(tickCfg.i18nKey) : signal;
+      const label = _hireSignalLabel(signal);
       return `<div class="hire-tick ${signal === hireSignal ? 'active' : ''}">${label}</div>`;
     }).join('');
     hero.style.display = 'flex';
@@ -349,7 +358,7 @@
       ? `<div style="background:var(--bg-surface);border:1px solid var(--bg-surface-border);border-radius:12px;padding:16px;filter:blur(5px);user-select:none;pointer-events:none;">
            <div style="font-size:11px;font-weight:700;color:var(--brand-primary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">🎯 ${isPt ? 'Sinal' : 'Signal'}</div>
            <div style="font-size:30px">${signalCfg.emoji}</div>
-           <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-top:8px">${window.t ? window.t(signalCfg.i18nKey) : hireSignal}</div>
+           <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-top:8px">${_hireSignalLabel(hireSignal)}</div>
          </div>`
       : `<div style="background:var(--bg-surface);border:1px solid var(--bg-surface-border);border-radius:12px;padding:16px;filter:blur(5px);user-select:none;pointer-events:none;">
            <div style="font-size:11px;font-weight:700;color:var(--brand-primary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">🎯 ${isPt ? 'Sinal' : 'Signal'}</div>
@@ -695,8 +704,11 @@
     document.getElementById('mobile-drawer').classList.toggle('open');
   });
 
-  _loadPlanPill();
-  _init();
+  const _i18nReady = window.i18n && window.i18n.ready ? window.i18n.ready : Promise.resolve();
+  _i18nReady.then(() => {
+    _loadPlanPill();
+    _init();
+  });
 </script>
 </body>
 </html>

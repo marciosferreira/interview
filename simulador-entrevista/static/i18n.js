@@ -45,6 +45,9 @@
 
   let _dict = {};
   let _lang = detectLang();
+  let _ready = false;
+  let _readyResolve;
+  const ready = new Promise(resolve => { _readyResolve = resolve; });
   if (_lang !== FALLBACK) {
     document.documentElement.classList.add('i18n-pending');
   }
@@ -102,7 +105,7 @@
 
   async function loadLang(lang) {
     try {
-      const res = await fetch(`/locales/${lang}.json?v=5`);
+      const res = await fetch(`/locales/${lang}.json?v=6`);
       if (!res.ok) throw new Error(res.status);
       _dict = await res.json();
       _lang = lang;
@@ -110,6 +113,8 @@
       document.cookie = `${STORAGE_KEY}=${lang}; path=/; max-age=${365 * 24 * 3600}; samesite=lax`;
       applyTranslations();
       // Notify app code that translations are ready
+      _ready = true;
+      _readyResolve();
       document.dispatchEvent(new CustomEvent('i18n:ready', { detail: { lang } }));
     } catch (e) {
       console.warn('[i18n] Failed to load', lang, e);
@@ -126,7 +131,7 @@
 
   // Public API
   window.t          = t;
-  window.i18n       = { switchLang, currentLang: () => _lang };
+  window.i18n       = { switchLang, currentLang: () => _lang, ready, isReady: () => _ready };
 
   // Boot — redirect root to language-specific URL
   if (window.location.pathname === '/' || (window.location.pathname === '/index.html' && !localStorage.getItem('auth_token'))) {
