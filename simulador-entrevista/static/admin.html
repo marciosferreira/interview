@@ -207,15 +207,15 @@
 
   function _flag(code) {
     if (!code || code.length !== 2) return '';
-    const chars = [...code.toUpperCase()].map(c => 127397 + c.charCodeAt(0));
-    return String.fromCodePoint(...chars);
+    const c = code.toLowerCase();
+    return `<img src="https://flagcdn.com/16x12/${c}.png" srcset="https://flagcdn.com/32x24/${c}.png 2x" width="16" height="12" alt="${code}" style="display:inline-block;vertical-align:middle;margin-right:5px;border-radius:2px;">`;
   }
 
   function _location(u) {
     const flag = _flag(u.signup_country_code);
     const label = u.signup_country_name || u.signup_country_code || 'Unknown';
     const ip = u.signup_ip || 'IP unknown';
-    return `<span title="${esc(ip)}">${flag ? `<span class="country-flag">${flag}</span>` : ''}${esc(label)}</span><br><span style="font-size:11px;color:var(--text-tertiary)">${esc(ip)}</span>`;
+    return `<span title="${esc(ip)}">${flag}${esc(label)}</span><br><span style="font-size:11px;color:var(--text-tertiary)">${esc(ip)}</span>`;
   }
 
   async function load() {

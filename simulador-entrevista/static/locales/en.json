@@ -26,7 +26,7 @@
     "tips": "💡 Tips",
     "tipsLabel": "Tips",
     "signin": "Sign in",
-    "getStarted": "Get started free",
+    "getStarted": "Get started now",
     "settings": "⚙️ Settings",
     "settingsLabel": "Settings",
     "historyLabel": "History",
@@ -39,7 +39,7 @@
       "badge": "Train with AI before the real interview",
       "title": "Your dream job<br><span>starts here.</span>",
       "sub": "Enter the role you're after and Alex creates a simulation right away — to find out how ready you truly are, get detailed feedback on your weak points, and make sure that dream opportunity isn't wasted.",
-      "cta": "Start now →",
+      "cta": "Get started now →",
       "ctaSignin": "Sign in",
       "listenBtn": "Hear Alex"
     },
@@ -122,7 +122,7 @@
     "cta": {
       "title": "Your next role starts here.",
       "sub": "Free to use. Any industry. No credit card required.",
-      "btn": "Start now →"
+      "btn": "Get started now →"
     }
   },
   "dashboard": {
@@ -491,7 +491,7 @@
         "f7NoAccess": "Scorecard audio narration",
         "f8NoAccess": "Smarter models",
         "btnCurrent": "Current plan",
-        "btnCreate": "Get started free →",
+        "btnCreate": "Get started now →",
         "btnDowngrade": "Downgrade to Explorer",
         "activePlan": "Your current plan"
       },
@@ -608,7 +608,7 @@
       "body_loggedin": "The best way to internalize these frameworks is to practice them out loud. Our AI interviewer gives you real-time feedback on structure, language, and confidence.",
       "btn_loggedin": "Start Practicing →",
       "body_loggedout": "The best way to internalize these frameworks is to practice them out loud. Sign up free — no credit card required.",
-      "btn_loggedout": "Get started free →"
+      "btn_loggedout": "Get started now →"
     }
   },
   "demo": {

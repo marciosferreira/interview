@@ -26,7 +26,7 @@
     "tips": "💡 Dicas",
     "tipsLabel": "Dicas",
     "signin": "Entrar",
-    "getStarted": "Começar grátis",
+    "getStarted": "Começar agora",
     "settings": "⚙️ Configurações",
     "settingsLabel": "Configurações",
     "historyLabel": "Histórico",
@@ -491,7 +491,7 @@
         "f7NoAccess": "Narração em áudio do scorecard",
         "f8NoAccess": "Modelos mais inteligentes",
         "btnCurrent": "Plano atual",
-        "btnCreate": "Começar grátis →",
+        "btnCreate": "Começar agora →",
         "btnDowngrade": "Fazer downgrade para Explorer",
         "activePlan": "Seu plano atual"
       },
@@ -608,7 +608,7 @@
       "body_loggedin": "A melhor forma de internalizar esses frameworks é praticá-los em voz alta. Nosso entrevistador IA dá feedback em tempo real sobre estrutura, linguagem e confiança.",
       "btn_loggedin": "Começar a Praticar →",
       "body_loggedout": "A melhor forma de internalizar esses frameworks é praticá-los em voz alta. Cadastre-se grátis — sem cartão de crédito.",
-      "btn_loggedout": "Começar grátis →"
+      "btn_loggedout": "Começar agora →"
     }
   },
   "demo": {

@@ -22,7 +22,7 @@
         homeLabel: 'Home',
         tipsLabel: 'Tips',
         signin: 'Sign in',
-        getStarted: 'Get started free',
+        getStarted: 'Get started now',
         settingsLabel: 'Settings',
         historyLabel: 'History',
         signout: 'Sign out',
@@ -64,7 +64,7 @@
         homeLabel: 'Início',
         tipsLabel: 'Dicas',
         signin: 'Entrar',
-        getStarted: 'Começar grátis',
+        getStarted: 'Começar agora',
         settingsLabel: 'Configurações',
         historyLabel: 'Histórico',
         signout: 'Sair',
@@ -130,6 +130,8 @@
   }
 
   let _lang = detectLang();
+  // Persist so subsequent pages (register, login, etc.) inherit the same language.
+  localStorage.setItem(STORAGE_KEY, _lang);
   let _dict = CRITICAL_TRANSLATIONS[_lang] || {};
   let _ready = false;
   let _readyResolve;
