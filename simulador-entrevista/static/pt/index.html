@@ -40,7 +40,7 @@
   <link rel="stylesheet" href="/css/main.css?v=6">
   <link rel="stylesheet" href="/css/components.css?v=6">
   <link rel="stylesheet" href="/css/layout.css?v=6">
-  <link rel="preload" as="image" href="/assets/hero.png" fetchpriority="high">
+  <link rel="preload" as="image" href="/assets/hero_3.png" fetchpriority="high">
 
   <script>
     (function () {
@@ -181,10 +181,11 @@
       display: block;
       border-radius: var(--radius-xl);
       overflow: hidden;
-      border: 1px solid var(--bg-surface-border);
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 40px rgba(99,102,241,0.2);
+      border: none;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 0 3px rgba(139,92,246,0.5), 0 0 16px 4px rgba(139,92,246,0.35), 0 0 40px 10px rgba(139,92,246,0.15);
       cursor: pointer;
       z-index: 1;
+      max-width: 90%;
     }
     .hero-mockup img {
       width: 100%;
@@ -266,6 +267,7 @@
       .hero-content { align-items: center; }
       .hero-actions { justify-content: center; }
       .hero-bg-glow { left: 50%; }
+      .hero-mockup { max-width: 60%; margin: 0 auto; }
     }
     @media (max-width: 640px) {
       .demo-strip-quote { display: none; }
@@ -764,7 +766,7 @@
     </div>
     <!-- Right: product mockup -->
     <a class="hero-mockup" href="/pt/register.html" aria-label="Começar grátis">
-      <img src="/assets/hero.png" alt="Interface de simulação de entrevista com IA" width="614" height="409" loading="eager" fetchpriority="high" decoding="async">
+      <img src="/assets/hero_3.png" alt="Interface de simulação de entrevista com IA" width="511" height="546" loading="eager" fetchpriority="high" decoding="async">
     </a>
   </div>
 
