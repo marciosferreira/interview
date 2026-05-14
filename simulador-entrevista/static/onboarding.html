@@ -340,11 +340,9 @@
 
     setStep(3);
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 90000);
-
     try {
-      const res = await fetch('/prepare', {
+      // Step 1: submit the job — returns task_id immediately (avoids proxy timeouts)
+      const postRes = await fetch('/prepare', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -356,29 +354,22 @@
           job_description: desc,
           resume_text: resume,
         }),
-        signal: controller.signal,
       });
-      clearTimeout(timeoutId);
 
-      if (res.status === 401) {
-        logout();
-        return;
-      }
+      if (postRes.status === 401) { logout(); return; }
 
-      let data;
-      try {
-        data = await res.json();
-      } catch (_) {
+      let postData;
+      try { postData = await postRes.json(); } catch (_) {
         setStep(2);
         showError(window.t ? window.t('onboarding.errors.timeout') : 'The request is taking longer than expected — please try again.');
         return;
       }
-      if (!res.ok) {
+      if (!postRes.ok) {
         setStep(2);
-        if (res.status === 429 && data.detail?.code === 'weekly_limit_reached') {
-          const plan  = data.detail.plan;
-          const limit = data.detail.limit;
-          const lang  = data.detail.language || 'en';
+        if (postRes.status === 429 && postData.detail?.code === 'weekly_limit_reached') {
+          const plan  = postData.detail.plan;
+          const limit = postData.detail.limit;
+          const lang  = postData.detail.language || 'en';
           const upgradeUrl = `/upgrade.html`;
           const upgradeStyle = `style="color:#a78bfa;font-weight:600;text-decoration:underline"`;
           const msg = lang === 'pt'
@@ -386,8 +377,34 @@
             : `You've used all ${limit} interviews this week. <a href="${upgradeUrl}" ${upgradeStyle}>Upgrade</a> for more.`;
           showError(msg);
         } else {
-          showError(data.detail || 'Error occurred');
+          showError(postData.detail || 'Error occurred');
         }
+        return;
+      }
+
+      // Step 2: poll /prepare/status/:task_id until done
+      const taskId = postData.task_id;
+      const deadline = Date.now() + 120000;
+      let data = null;
+      while (Date.now() < deadline) {
+        await new Promise(r => setTimeout(r, 2000));
+        const pollRes = await fetch(`/prepare/status/${taskId}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        if (pollRes.status === 401) { logout(); return; }
+        let pollData;
+        try { pollData = await pollRes.json(); } catch (_) { continue; }
+        if (!pollRes.ok) {
+          setStep(2);
+          showError(pollData.detail || (window.t ? window.t('onboarding.errors.default') : 'Something went wrong. Please try again.'));
+          return;
+        }
+        if (pollData.status === 'done') { data = pollData; break; }
+      }
+
+      if (!data) {
+        setStep(2);
+        showError(window.t ? window.t('onboarding.errors.timeout') : 'The request is taking longer than expected — please try again.');
         return;
       }
 
@@ -400,13 +417,8 @@
       localStorage.removeItem('interview_v1');
       location.replace('/interview.html');
     } catch (err) {
-      clearTimeout(timeoutId);
       setStep(2);
-      if (err.name === 'AbortError') {
-        showError(window.t ? window.t('onboarding.errors.timeout') : 'The request is taking longer than expected — please try again.');
-      } else {
-        showError(window.t ? window.t('onboarding.errors.network') : 'Network error — please check your connection and try again.');
-      }
+      showError(window.t ? window.t('onboarding.errors.network') : 'Network error — please check your connection and try again.');
     }
   }
 </script>
