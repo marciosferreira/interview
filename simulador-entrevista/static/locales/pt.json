@@ -15,7 +15,7 @@
   },
   "seo": {
     "title": "acing interviews — Simulador de Entrevistas com IA",
-    "description": "Passe na sua próxima entrevista de emprego. Treine com IA antes da entrevista real, pratique perguntas da vaga e receba feedback para responder com confiança."
+    "description": "Prepare-se para conquistar a vaga dos seus sonhos. Pratique com IA antes da entrevista real, melhore suas respostas e chegue mais confiante."
   },
   "header": {
     "tagline": "Preparação para entrevistas com IA"
@@ -37,8 +37,8 @@
   "landing": {
     "hero": {
       "badge": "Treine com IA antes da entrevista real",
-      "title": "Passe na sua próxima<br><span>entrevista de emprego.</span>",
-      "sub": "A IA analisa sua vaga e cria entrevistas personalizadas para você praticar com confiança. Treine perguntas reais, responda por voz ou texto e receba feedback instantâneo.",
+      "title": "Prepare-se para conquistar<br><span>a vaga dos seus sonhos.</span>",
+      "sub": "O primeiro passo é passar bem pela entrevista. Cole a vaga e seu currículo, e Alex vai criar uma simulação personalizada para você praticar, melhorar suas respostas e chegar mais confiante ao momento decisivo.",
       "cta": "Treinar agora →",
       "ctaSignin": "Entrar",
       "listenBtn": "Ouvir a Alex"
@@ -126,8 +126,8 @@
     }
   },
   "dashboard": {
-    "title": "Pronto para praticar?",
-    "sub": "Cole uma descrição de vaga e seu currículo — Alex vai conduzir uma entrevista completa e personalizada com feedback em cada fase.",
+    "title": "Vamos preparar você para a vaga dos seus sonhos.",
+    "sub": "Cole a descrição da vaga e seu currículo. Alex vai simular uma entrevista personalizada, ajudar você a melhorar suas respostas e mostrar onde ganhar mais confiança antes do dia decisivo.",
     "continueTitle": "Continuar entrevista",
     "newTitle": "Nova vaga",
     "newSub": "Cole a descrição da vaga + currículo para começar uma sessão personalizada",

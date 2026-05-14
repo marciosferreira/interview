@@ -15,7 +15,7 @@
   },
   "seo": {
     "title": "acing interviews — AI-Powered Mock Interviews",
-    "description": "Ace your next job interview. Train with AI before the real interview, practice role-specific questions, and get feedback so you can answer with confidence."
+    "description": "Prepare to land your dream job. Practice with AI before the real interview, sharpen your answers, and walk in with confidence."
   },
   "header": {
     "tagline": "AI-powered mock interview preparation"
@@ -37,8 +37,8 @@
   "landing": {
     "hero": {
       "badge": "Train with AI before the real interview",
-      "title": "Ace your next<br><span>job interview.</span>",
-      "sub": "AI analyzes your target role and creates personalized interviews so you can practice with confidence. Train on real role-specific questions, answer by voice or text, and get instant feedback.",
+      "title": "Prepare to land<br><span>your dream job.</span>",
+      "sub": "The first step is nailing the interview. Paste the job description and your resume, and Alex will create a personalized simulation so you can practice, sharpen your answers, and walk in with confidence.",
       "cta": "Train now →",
       "ctaSignin": "Sign in",
       "listenBtn": "Hear Alex"
@@ -126,8 +126,8 @@
     }
   },
   "dashboard": {
-    "title": "Ready to practice?",
-    "sub": "Paste a job description and your resume — Alex will run a personalized full-length mock interview with feedback on every phase.",
+    "title": "Let's prepare you for your dream job.",
+    "sub": "Paste the job description and your resume. Alex will run a personalized mock interview, help you sharpen your answers, and show you where to build more confidence before the big day.",
     "continueTitle": "Continue interview",
     "newTitle": "New position",
     "newSub": "Paste a job description + resume to start a personalized session",

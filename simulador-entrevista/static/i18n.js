@@ -49,8 +49,8 @@
         },
       },
       dashboard: {
-        title: 'Ready to practice?',
-        sub: 'Paste a job description and your resume — Alex will run a personalized full-length mock interview with feedback on every phase.',
+        title: "Let's prepare you for your dream job.",
+        sub: 'Paste the job description and your resume. Alex will run a personalized mock interview, help you sharpen your answers, and show you where to build more confidence before the big day.',
         continueTitle: 'Continue interview',
         newTitle: 'New position',
         newSub: 'Paste a job description + resume to start a personalized session',
@@ -91,8 +91,8 @@
         },
       },
       dashboard: {
-        title: 'Pronto para praticar?',
-        sub: 'Cole uma descrição de vaga e seu currículo — Alex vai conduzir uma entrevista completa e personalizada com feedback em cada fase.',
+        title: 'Vamos preparar você para a vaga dos seus sonhos.',
+        sub: 'Cole a descrição da vaga e seu currículo. Alex vai simular uma entrevista personalizada, ajudar você a melhorar suas respostas e mostrar onde ganhar mais confiança antes do dia decisivo.',
         continueTitle: 'Continuar entrevista',
         newTitle: 'Nova vaga',
         newSub: 'Cole a descrição da vaga + currículo para começar uma sessão personalizada',
