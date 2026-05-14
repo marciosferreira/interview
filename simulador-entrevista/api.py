@@ -18,7 +18,7 @@ import stripe as _stripe
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, UploadFile, WebSocket, WebSocketDisconnect, Depends
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp, Receive, Scope, Send
-from fastapi.responses import Response, FileResponse, RedirectResponse
+from fastapi.responses import Response, FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langgraph.types import Command
@@ -742,9 +742,64 @@ class PrepareRequest(BaseModel):
     resume_text:     str = ""
 
 
+# In-memory store for async prepare tasks (single-process; fine for this workload)
+_prepare_tasks: dict[str, dict] = {}
+
+
+async def _run_prepare_task(task_id: str, user_id: str, job_title: str, company: str,
+                             job_description: str, resume_text: str, language: str) -> None:
+    loop = asyncio.get_running_loop()
+    try:
+        for attempt in range(3):
+            try:
+                interview_context = await generate_interview_context(
+                    job_title=job_title,
+                    company=company or "Not provided",
+                    job_description=job_description or "Not provided. Create a general interview for this target role.",
+                    resume_text=resume_text or "Not provided. Ask broad follow-up questions to learn about the candidate's background.",
+                    language=language,
+                    model_name=_HUNTER_MODEL,
+                )
+                break
+            except Exception as exc:
+                print(f"[prepare] LLM generation attempt {attempt + 1} failed: {exc}")
+                if attempt < 2:
+                    await asyncio.sleep(2 ** attempt)
+        else:
+            _prepare_tasks[task_id] = {"status": "error", "detail": "Failed to generate interview context — please try again in a moment."}
+            return
+
+        candidate_name = extract_candidate_name(interview_context)
+
+        job_session_id = await loop.run_in_executor(
+            None,
+            lambda: _with_conn(lambda c: create_job_session(
+                c,
+                user_id=user_id,
+                job_title=job_title,
+                company=company,
+                job_description=job_description,
+                resume_text=resume_text,
+                interview_context=interview_context,
+            )),
+        )
+
+        _prepare_tasks[task_id] = {
+            "status": "done",
+            "job_session_id": job_session_id,
+            "candidate_name": candidate_name,
+            "job_title": job_title,
+            "company": company,
+            "context_preview": interview_context[:500] + "…" if len(interview_context) > 500 else interview_context,
+        }
+    except Exception as exc:
+        print(f"[prepare] Unexpected error in task {task_id}: {exc}")
+        _prepare_tasks[task_id] = {"status": "error", "detail": "Something went wrong — please try again."}
+
+
 @app.post("/prepare")
 async def prepare(body: PrepareRequest, current_user: dict = Depends(get_current_user)):
-    """Generate a personalized interview context and create a job session."""
+    """Start async interview context generation; returns a task_id for polling."""
     job_title = body.job_title.strip()
     company = body.company.strip()
     job_description = body.job_description.strip()
@@ -755,7 +810,6 @@ async def prepare(body: PrepareRequest, current_user: dict = Depends(get_current
 
     loop = asyncio.get_running_loop()
 
-    # Fetch user info (language + plan)
     user = await loop.run_in_executor(
         None, lambda: _with_conn(lambda c: get_user_by_id(c, current_user["id"]))
     )
@@ -764,7 +818,6 @@ async def prepare(body: PrepareRequest, current_user: dict = Depends(get_current
     language = user.get("language", "en") if user else "en"
     plan     = user.get("plan", "free")   if user else "free"
 
-    # Enforce weekly interview limit
     week_count = await loop.run_in_executor(
         None, lambda: _with_conn(lambda c: count_interviews_this_week(c, current_user["id"]))
     )
@@ -782,52 +835,30 @@ async def prepare(body: PrepareRequest, current_user: dict = Depends(get_current
             },
         )
 
-    # Generate interview context with Sonnet for every plan. This briefing drives
-    # the whole session, so keep it high quality even for free users.
-    for attempt in range(3):
-        try:
-            interview_context = await generate_interview_context(
-                job_title=job_title,
-                company=company or "Not provided",
-                job_description=job_description or "Not provided. Create a general interview for this target role.",
-                resume_text=resume_text or "Not provided. Ask broad follow-up questions to learn about the candidate's background.",
-                language=language,
-                model_name=_HUNTER_MODEL,
-            )
-            break
-        except Exception as exc:
-            print(f"[prepare] LLM generation attempt {attempt + 1} failed: {exc}")
-            if attempt < 2:
-                await asyncio.sleep(2 ** attempt)
-    else:
-        raise HTTPException(
-            status_code=503,
-            detail="Failed to generate interview context — please try again in a moment.",
-        )
+    task_id = str(uuid.uuid4())
+    _prepare_tasks[task_id] = {"status": "pending"}
+    asyncio.create_task(_run_prepare_task(
+        task_id, current_user["id"],
+        job_title, company, job_description, resume_text, language,
+    ))
 
-    candidate_name = extract_candidate_name(interview_context)
+    return JSONResponse(status_code=202, content={"task_id": task_id})
 
-    # Persist in DB
-    job_session_id = await loop.run_in_executor(
-        None,
-        lambda: _with_conn(lambda c: create_job_session(
-            c,
-            user_id=current_user["id"],
-            job_title=job_title,
-            company=company,
-            job_description=job_description,
-            resume_text=resume_text,
-            interview_context=interview_context,
-        )),
-    )
 
-    return {
-        "job_session_id": job_session_id,
-        "candidate_name": candidate_name,
-        "job_title": job_title,
-        "company": company,
-        "context_preview": interview_context[:500] + "…" if len(interview_context) > 500 else interview_context,
-    }
+@app.get("/prepare/status/{task_id}")
+async def prepare_status(task_id: str, current_user: dict = Depends(get_current_user)):
+    """Poll the status of a /prepare task."""
+    task = _prepare_tasks.get(task_id)
+    if task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    if task["status"] == "error":
+        _prepare_tasks.pop(task_id, None)
+        raise HTTPException(status_code=503, detail=task["detail"])
+    if task["status"] == "done":
+        result = dict(task)
+        _prepare_tasks.pop(task_id, None)
+        return result
+    return {"status": "pending"}
 
 
 @app.get("/job-sessions")

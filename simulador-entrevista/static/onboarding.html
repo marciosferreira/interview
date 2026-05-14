@@ -365,7 +365,14 @@
         return;
       }
 
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch (_) {
+        setStep(2);
+        showError(window.t ? window.t('onboarding.errors.timeout') : 'The request is taking longer than expected — please try again.');
+        return;
+      }
       if (!res.ok) {
         setStep(2);
         if (res.status === 429 && data.detail?.code === 'weekly_limit_reached') {
