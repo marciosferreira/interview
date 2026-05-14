@@ -47,6 +47,20 @@
 
   window.fbq('init', META_PIXEL_ID);
   window.fbq('track', 'PageView');
+
+  // LinkedIn Ads
+  var LI_PARTNER_ID = '9139274';
+  window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
+  window._linkedin_data_partner_ids.push(LI_PARTNER_ID);
+  if (!window.lintrk) {
+    window.lintrk = function(a, b) { window.lintrk.q.push([a, b]); };
+    window.lintrk.q = [];
+  }
+  var liScript = document.createElement('script');
+  liScript.type = 'text/javascript';
+  liScript.async = true;
+  liScript.src = 'https://snap.licdn.com/li.lms-analytics/insight.min.js';
+  document.head.appendChild(liScript);
 })();
 
 
