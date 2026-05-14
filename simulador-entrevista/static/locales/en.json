@@ -39,7 +39,7 @@
       "badge": "Train with AI before the real interview",
       "title": "Your dream job<br><span>starts here.</span>",
       "sub": "Enter the role you're after and Alex creates a simulation right away — to find out how ready you truly are, get detailed feedback on your weak points, and make sure that dream opportunity isn't wasted.",
-      "cta": "Train now →",
+      "cta": "Start now →",
       "ctaSignin": "Sign in",
       "listenBtn": "Hear Alex"
     },
@@ -122,7 +122,7 @@
     "cta": {
       "title": "Your next role starts here.",
       "sub": "Free to use. Any industry. No credit card required.",
-      "btn": "Train now →"
+      "btn": "Start now →"
     }
   },
   "dashboard": {

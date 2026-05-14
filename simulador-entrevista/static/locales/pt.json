@@ -39,7 +39,7 @@
       "badge": "Treine com IA antes da entrevista real",
       "title": "O emprego dos sonhos<br><span>começa aqui.</span>",
       "sub": "Informe o cargo desejado e Alex cria uma simulação na hora — para descobrir o quanto você está preparado, receber feedback detalhado sobre seus pontos fracos e garantir que essa chance não seja desperdiçada.",
-      "cta": "Treinar agora →",
+      "cta": "Começar agora →",
       "ctaSignin": "Entrar",
       "listenBtn": "Ouvir a Alex"
     },
@@ -122,7 +122,7 @@
     "cta": {
       "title": "Sua próxima vaga começa aqui.",
       "sub": "Grátis. Qualquer área. Sem cartão de crédito.",
-      "btn": "Treinar agora →"
+      "btn": "Começar agora →"
     }
   },
   "dashboard": {
