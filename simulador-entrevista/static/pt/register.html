@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title data-i18n="register.pageTitle">Create Account — Acing Interviews</title>
+  <title data-i18n="register.pageTitle">Criar Conta — Acing Interviews</title>
   
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="/css/components.css?v=6">
   <link rel="stylesheet" href="/css/layout.css?v=6">
   
+  <script>localStorage.setItem('preferred_lang', 'pt');</script>
   <script src="/i18n.js?v=6"></script>
   <!-- TikTok Pixel -->
   <script src="/analytics.js"></script>
@@ -196,39 +197,39 @@
       </a>
       <div class="register-kicker">
         <i data-lucide="zap" style="width:13px;height:13px"></i>
-        <span data-i18n="register.kicker">Free start in 15 seconds.</span>
+        <span data-i18n="register.kicker">Comece grátis em 15 segundos.</span>
       </div>
-      <h1 data-i18n="register.title">Start your mock interview in 15 seconds</h1>
-      <p data-i18n="register.subtitle">Create a free account, paste your dream role, and practice with AI built around that job.</p>
+      <h1 data-i18n="register.title">Pratique para sua vaga dos sonhos em 15 segundos</h1>
+      <p data-i18n="register.subtitle">Crie sua conta grátis, cole a vaga que você quer conquistar e pratique com uma IA feita para essa oportunidade.</p>
     </div>
 
-    <div class="register-benefits" aria-label="What you get">
+    <div class="register-benefits" aria-label="O que você recebe">
       <div class="register-benefit">
         <i data-lucide="check-circle"></i>
-        <span data-i18n="register.benefitRole">Questions personalized to the role you want</span>
+        <span data-i18n="register.benefitRole">Perguntas personalizadas para a vaga que você quer</span>
       </div>
       <div class="register-benefit">
         <i data-lucide="check-circle"></i>
-        <span data-i18n="register.benefitFeedback">Clear feedback on what to improve before the real interview</span>
+        <span data-i18n="register.benefitFeedback">Feedback claro sobre o que melhorar antes da entrevista real</span>
       </div>
       <div class="register-benefit">
         <i data-lucide="check-circle"></i>
-        <span data-i18n="register.benefitNoCard">No credit card required to begin</span>
+        <span data-i18n="register.benefitNoCard">Não precisa de cartão de crédito para começar</span>
       </div>
     </div>
 
-    <div class="register-flow" aria-label="How it works">
+    <div class="register-flow" aria-label="Como funciona">
       <div class="register-step">
         <div class="register-step-num">1</div>
-        <div class="register-step-text" data-i18n="register.stepAccount">Create account</div>
+        <div class="register-step-text" data-i18n="register.stepAccount">Crie a conta</div>
       </div>
       <div class="register-step">
         <div class="register-step-num">2</div>
-        <div class="register-step-text" data-i18n="register.stepRole">Paste your role</div>
+        <div class="register-step-text" data-i18n="register.stepRole">Cole sua vaga</div>
       </div>
       <div class="register-step">
         <div class="register-step-num">3</div>
-        <div class="register-step-text" data-i18n="register.stepPractice">Start practicing</div>
+        <div class="register-step-text" data-i18n="register.stepPractice">Comece a praticar</div>
       </div>
     </div>
 
@@ -242,46 +243,46 @@
       <div style="width:56px;height:56px;border-radius:50%;background:rgba(74,222,128,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
         <i data-lucide="mail-check" style="width:28px;height:28px;color:#4ade80"></i>
       </div>
-      <h2 id="success-title" style="font-size:1.25rem;font-weight:700;margin-bottom:10px" data-i18n="register.successTitle">Almost there: confirm your email</h2>
+      <h2 id="success-title" style="font-size:1.25rem;font-weight:700;margin-bottom:10px" data-i18n="register.successTitle">Quase lá: confirme seu e-mail</h2>
       <p id="success-text" style="color:var(--text-secondary);margin-bottom:16px;line-height:1.6"></p>
       <p style="font-size:13px;color:var(--text-tertiary)">
-        <span id="success-note" data-i18n="register.successNote">Didn't receive it? Check your spam folder or</span>
-        <a href="#" id="resend-link" data-i18n="register.successResend" style="color:var(--accent);text-decoration:underline;cursor:pointer">resend the email</a>.
+        <span id="success-note" data-i18n="register.successNote">Não recebeu? Verifique o spam ou</span>
+        <a href="#" id="resend-link" data-i18n="register.successResend" style="color:var(--accent);text-decoration:underline;cursor:pointer">reenvie o e-mail</a>.
       </p>
       <p id="resend-status" style="font-size:12px;color:var(--text-tertiary);margin-top:8px;display:none"></p>
     </div>
 
     <form id="register-form" autocomplete="on">
-      <p class="register-form-note" data-i18n="register.formNote">3 fields. Less than 1 minute. Your first practice starts right after email confirmation.</p>
+      <p class="register-form-note" data-i18n="register.formNote">3 campos. Menos de 1 minuto. Sua primeira prática começa logo após confirmar o e-mail.</p>
       <div class="register-fields">
         <div class="form-group">
-          <label class="form-label" for="name" data-i18n="register.name">Name</label>
+          <label class="form-label" for="name" data-i18n="register.name">Nome</label>
           <input class="form-input" type="text" id="name" name="name" data-i18n-attr="placeholder:register.namePlaceholder" placeholder="Alex Johnson" required autocomplete="name" />
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="email" data-i18n="register.email">Email</label>
-          <input class="form-input" type="email" id="email" name="email" data-i18n-attr="placeholder:register.emailPlaceholder" placeholder="you@example.com" required autocomplete="email" />
+          <label class="form-label" for="email" data-i18n="register.email">E-mail</label>
+          <input class="form-input" type="email" id="email" name="email" data-i18n-attr="placeholder:register.emailPlaceholder" placeholder="voce@exemplo.com" required autocomplete="email" />
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="password" data-i18n="register.password">Password</label>
-          <input class="form-input" type="password" id="password" name="password" data-i18n-attr="placeholder:register.passwordPlaceholder" placeholder="At least 8 characters" required autocomplete="new-password" />
-          <p style="font-size:11px; margin-top:4px; color:var(--text-tertiary)" data-i18n="register.passwordHint">Minimum 8 characters</p>
+          <label class="form-label" for="password" data-i18n="register.password">Senha</label>
+          <input class="form-input" type="password" id="password" name="password" data-i18n-attr="placeholder:register.passwordPlaceholder" placeholder="Mínimo 8 caracteres" required autocomplete="new-password" />
+          <p style="font-size:11px; margin-top:4px; color:var(--text-tertiary)" data-i18n="register.passwordHint">Mínimo 8 caracteres</p>
         </div>
       </div>
 
       <div class="bot-check-field" aria-hidden="true">
-        <label for="extra_context">Extra context</label>
+        <label for="extra_context">Contexto extra</label>
         <input type="text" name="extra_context" id="extra_context" tabindex="-1" autocomplete="off" />
       </div>
 
-      <button class="btn btn-primary" style="width:100%; margin-top:8px;" type="submit" id="submit-btn" data-i18n="register.submit">Start practicing for free</button>
-      <p class="register-privacy-note" data-i18n="register.privacyNote">You can paste your target job and resume after this step.</p>
+      <button class="btn btn-primary" style="width:100%; margin-top:8px;" type="submit" id="submit-btn" data-i18n="register.submit">Começar prática grátis</button>
+      <p class="register-privacy-note" data-i18n="register.privacyNote">Você poderá colar sua vaga e currículo depois deste passo.</p>
     </form>
 
     <div class="auth-footer">
-      <span data-i18n="register.haveAccount">Already have an account?</span> <a href="/login.html" data-i18n="register.signIn">Sign in &rarr;</a>
+      <span data-i18n="register.haveAccount">Já tem uma conta?</span> <a href="/login.html" data-i18n="register.signIn">Entrar →</a>
     </div>
 
   </div>
@@ -310,7 +311,7 @@
   }
 
   function localizedError(detail) {
-    const fallback = window.t ? window.t('register.errorDefault') : 'Registration failed. Please try again.';
+    const fallback = window.t ? window.t('register.errorDefault') : 'Falha no cadastro. Tente novamente.';
     if (!detail) return fallback;
     if (detail === 'email_already_registered') {
       return window.t ? window.t('register.errorEmailRegistered') : detail;
@@ -320,7 +321,7 @@
 
   function showSuccess(email) {
     registeredEmail = email;
-    const tpl = (window.t ? window.t('register.successText') : 'We sent a confirmation link to {email}. Confirm it to unlock your personalized mock interview.');
+    const tpl = (window.t ? window.t('register.successText') : 'Enviamos um link de confirmação para {email}. Confirme para liberar sua entrevista simulada personalizada.');
     successText.textContent = tpl.replace('{email}', email);
     form.style.display = 'none';
     successPanel.style.display = 'block';
@@ -342,15 +343,15 @@
       if (res.status === 429) {
         const data = await res.json();
         const secs = data.detail?.wait_seconds;
-        const tpl = window.t ? window.t('register.errorResendWait') : 'Please wait {seconds} seconds before requesting another email.';
-        resendStatus.textContent = secs ? tpl.replace('{seconds}', secs) : (window.t ? window.t('register.errorResendWaitGeneric') : 'Please wait a moment before requesting another email.');
+        const tpl = window.t ? window.t('register.errorResendWait') : 'Aguarde {seconds} segundos antes de solicitar outro e-mail.';
+        resendStatus.textContent = secs ? tpl.replace('{seconds}', secs) : (window.t ? window.t('register.errorResendWaitGeneric') : 'Aguarde um momento antes de solicitar outro e-mail.');
         setTimeout(() => { resendLink.style.pointerEvents = ''; resendStatus.style.display = 'none'; }, 10000);
       } else {
-        resendStatus.textContent = window.t ? window.t('register.successResendOk') : 'Email resent!';
+        resendStatus.textContent = window.t ? window.t('register.successResendOk') : 'E-mail reenviado!';
         setTimeout(() => { resendLink.style.pointerEvents = ''; }, 30000);
       }
     } catch {
-      resendStatus.textContent = window.t ? window.t('register.errorNetwork') : 'Network error';
+      resendStatus.textContent = window.t ? window.t('register.errorNetwork') : 'Erro de rede';
       resendLink.style.pointerEvents = '';
     }
   });
@@ -359,7 +360,7 @@
     e.preventDefault();
     errorMsg.style.display = 'none';
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="spinner"></span>' + (window.t ? window.t('register.creating') : 'Creating account...');
+    submitBtn.innerHTML = '<span class="spinner"></span>' + (window.t ? window.t('register.creating') : 'Criando conta...');
 
     const name     = document.getElementById('name').value.trim();
     const email    = document.getElementById('email').value.trim();
@@ -368,8 +369,8 @@
     const currentLang = window.i18n?.currentLang ? window.i18n.currentLang() : localStorage.getItem('preferred_lang');
     const language = ['en', 'pt'].includes(currentLang) ? currentLang : 'en';
 
-    if (!name) { showError(window.t ? window.t('register.errorName') : 'Name required'); submitBtn.disabled = false; submitBtn.textContent = window.t ? window.t('register.submit') : 'Start practicing for free'; return; }
-    if (password.length < 8) { showError(window.t ? window.t('register.errorPassword') : 'Password too short'); submitBtn.disabled = false; submitBtn.textContent = window.t ? window.t('register.submit') : 'Start practicing for free'; return; }
+    if (!name) { showError(window.t ? window.t('register.errorName') : 'Nome é obrigatório.'); submitBtn.disabled = false; submitBtn.textContent = window.t ? window.t('register.submit') : 'Começar prática grátis'; return; }
+    if (password.length < 8) { showError(window.t ? window.t('register.errorPassword') : 'A senha deve ter no mínimo 8 caracteres.'); submitBtn.disabled = false; submitBtn.textContent = window.t ? window.t('register.submit') : 'Começar prática grátis'; return; }
 
     try {
       const res = await fetch('/auth/register', {
@@ -384,10 +385,10 @@
       }
       showSuccess(data.email || email);
     } catch (err) {
-      showError(window.t ? window.t('register.errorNetwork') : 'Network error');
+      showError(window.t ? window.t('register.errorNetwork') : 'Erro de rede');
     } finally {
       submitBtn.disabled = false;
-      submitBtn.textContent = window.t ? window.t('register.submit') : 'Start practicing for free';
+      submitBtn.textContent = window.t ? window.t('register.submit') : 'Começar prática grátis';
     }
   });
 </script>

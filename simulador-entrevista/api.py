@@ -226,8 +226,18 @@ class _CacheMiddleware:
 
         # Serve index.html for language landing routes before StaticFiles intercepts
         if path in ("/en", "/en/", "/pt", "/pt/"):
-            index_path = Path(__file__).parent / "static" / "index.html"
+            lang = "pt" if path.startswith("/pt") else "en"
+            index_path = Path(__file__).parent / "static" / lang / "index.html"
             response = FileResponse(str(index_path))
+            await response(scope, receive, send)
+            return
+
+        if path == "/register.html":
+            lang = _preferred_landing_language_from_headers(headers)
+            register_path = Path(__file__).parent / "static" / lang / "register.html"
+            if not register_path.exists():
+                register_path = Path(__file__).parent / "static" / "register.html"
+            response = FileResponse(str(register_path))
             await response(scope, receive, send)
             return
 
@@ -1785,13 +1795,13 @@ async def landing_root(request: Request):
 @app.get("/en")
 @app.get("/en/")
 async def landing_en():
-    return FileResponse(Path(__file__).parent / "static" / "index.html")
+    return FileResponse(Path(__file__).parent / "static" / "en" / "index.html")
 
 
 @app.get("/pt")
 @app.get("/pt/")
 async def landing_pt():
-    return FileResponse(Path(__file__).parent / "static" / "index.html")
+    return FileResponse(Path(__file__).parent / "static" / "pt" / "index.html")
 
 
 # Serve the frontend — mount last so API routes are registered first

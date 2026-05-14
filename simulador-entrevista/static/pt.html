@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
 
 
@@ -92,6 +92,8 @@
     ══════════════════════════════════════ */
     #landing { display: none; flex-direction: column; }
     html.auth-session #dashboard { display: flex; }
+    html.i18n-pending #landing [data-i18n],
+    html.i18n-pending #landing [data-i18n-html] { visibility: visible; }
     html.i18n-pending #dashboard [data-i18n] { visibility: visible; }
 
     /* Hero Section */
@@ -160,6 +162,13 @@
       display: flex;
       align-items: center;
       gap: 8px;
+    }
+    .hero-listen-btn [data-lucide],
+    .hero-listen-btn .lucide {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 18px;
+      display: block;
     }
     .hero-listen-btn.playing {
       border-color: var(--brand-primary);
@@ -625,6 +634,19 @@
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
+    .card-icon [data-lucide],
+    .card-icon .lucide {
+      width: 24px;
+      height: 24px;
+      flex: 0 0 24px;
+      display: block;
+    }
+    .card-arrow {
+      width: 20px;
+      height: 20px;
+      flex: 0 0 20px;
+      display: block;
+    }
     .primary .card-icon { background: var(--brand-primary); color: white; }
     .secondary .card-icon { background: var(--bg-surface-border); color: var(--text-primary); }
     .continue-card .card-icon { background: var(--status-success); color: white; }
@@ -653,7 +675,7 @@
     </div>
     <div class="header-brand-info">
       <h1>Acing Interviews</h1>
-      <p data-i18n="header.tagline">AI-powered mock interview preparation</p>
+      <p data-i18n="header.tagline">Preparação para entrevistas com IA</p>
     </div>
   </a>
   
@@ -664,23 +686,23 @@
       <button class="lang-btn" data-lang="pt" onclick="i18n.switchLang('pt')">PT</button>
     </div>
     <a class="nav-link" href="/tips.html">
-      <i data-lucide="lightbulb" style="width:16px;height:16px;"></i> <span data-i18n="nav.tipsLabel">Tips</span>
+      <i data-lucide="lightbulb" style="width:16px;height:16px;"></i> <span data-i18n="nav.tipsLabel">Dicas</span>
     </a>
-    <a class="nav-link" href="/login.html" data-i18n="nav.signin">Sign in</a>
-    <a class="btn btn-primary" href="/register.html" style="padding: 8px 16px; font-size: 13px;" data-i18n="nav.getStarted">Get started free</a>
+    <a class="nav-link" href="/login.html" data-i18n="nav.signin">Entrar</a>
+    <a class="btn btn-primary" href="/pt/register.html" style="padding: 8px 16px; font-size: 13px;" data-i18n="nav.getStarted">Começar grátis</a>
   </div>
   
   <!-- Nav for logged-in users -->
   <div class="header-actions" id="nav-user" style="display:none;">
     <span id="plan-pill" class="badge"></span>
     <a href="/tips.html" class="nav-link">
-      <i data-lucide="lightbulb" style="width:16px;height:16px;"></i> <span data-i18n="nav.tipsLabel">Tips</span>
+      <i data-lucide="lightbulb" style="width:16px;height:16px;"></i> <span data-i18n="nav.tipsLabel">Dicas</span>
     </a>
     <a href="/profile.html" class="nav-link">
-      <i data-lucide="settings" style="width:16px;height:16px;"></i> <span data-i18n="nav.settingsLabel">Settings</span>
+      <i data-lucide="settings" style="width:16px;height:16px;"></i> <span data-i18n="nav.settingsLabel">Configurações</span>
     </a>
     <span id="user-name-display" class="nav-link" style="color:var(--text-tertiary)"></span>
-    <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 13px;" onclick="logout()" data-i18n="nav.signout">Sign out</button>
+    <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 13px;" onclick="logout()" data-i18n="nav.signout">Sair</button>
   </div>
   
   <button class="mobile-menu-btn" id="hamburger-btn" aria-label="Menu">
@@ -697,24 +719,24 @@
     </div>
     <!-- logged-in items -->
     <div id="drawer-auth" style="display:none;flex-direction:column;gap:6px">
-      <a class="drawer-item" href="/"><i data-lucide="home"></i> <span data-i18n="nav.homeLabel">Home</span></a>
-      <a class="drawer-item" href="/tips.html"><i data-lucide="lightbulb"></i> <span data-i18n="nav.tipsLabel">Tips</span></a>
-      <button class="drawer-item" onclick="closeMobileMenu(); newInterview()"><i data-lucide="plus"></i> <span data-i18n="history.nav.newInterview">New interview</span></button>
-      <a class="drawer-item" href="/history.html"><i data-lucide="clipboard-list"></i> <span data-i18n="nav.historyLabel">History</span></a>
-      <a class="drawer-item" href="/profile.html"><i data-lucide="settings"></i> <span data-i18n="nav.settingsLabel">Settings</span></a>
+      <a class="drawer-item" href="/"><i data-lucide="home"></i> <span data-i18n="nav.homeLabel">Início</span></a>
+      <a class="drawer-item" href="/tips.html"><i data-lucide="lightbulb"></i> <span data-i18n="nav.tipsLabel">Dicas</span></a>
+      <button class="drawer-item" onclick="closeMobileMenu(); newInterview()"><i data-lucide="plus"></i> <span data-i18n="history.nav.newInterview">Nova vaga</span></button>
+      <a class="drawer-item" href="/history.html"><i data-lucide="clipboard-list"></i> <span data-i18n="nav.historyLabel">Histórico</span></a>
+      <a class="drawer-item" href="/profile.html"><i data-lucide="settings"></i> <span data-i18n="nav.settingsLabel">Configurações</span></a>
       <div class="drawer-divider"></div>
-      <button class="drawer-item" onclick="closeMobileMenu(); logout()"><i data-lucide="log-out"></i> <span data-i18n="nav.signout">Sign out</span></button>
+      <button class="drawer-item" onclick="closeMobileMenu(); logout()"><i data-lucide="log-out"></i> <span data-i18n="nav.signout">Sair</span></button>
       <div class="drawer-divider"></div>
-      <button class="drawer-item" onclick="closeMobileMenu(); window.openContactWidget?.()"><i data-lucide="mail"></i> Contact us</button>
+      <button class="drawer-item" onclick="closeMobileMenu(); window.openContactWidget?.()"><i data-lucide="mail"></i> Fale conosco</button>
     </div>
     <!-- guest items -->
     <div id="drawer-guest" style="display:none;flex-direction:column;gap:6px">
-      <a class="drawer-item" href="/"><i data-lucide="home"></i> <span data-i18n="nav.homeLabel">Home</span></a>
-      <a class="drawer-item" href="/tips.html"><i data-lucide="lightbulb"></i> <span data-i18n="nav.tipsLabel">Tips</span></a>
-      <a class="drawer-item" href="/login.html"><i data-lucide="log-in"></i> <span data-i18n="nav.signin">Sign in</span></a>
-      <a class="drawer-item" href="/register.html" style="color:var(--brand-primary)"><i data-lucide="rocket"></i> <span data-i18n="nav.getStarted">Get started free</span></a>
+      <a class="drawer-item" href="/"><i data-lucide="home"></i> <span data-i18n="nav.homeLabel">Início</span></a>
+      <a class="drawer-item" href="/tips.html"><i data-lucide="lightbulb"></i> <span data-i18n="nav.tipsLabel">Dicas</span></a>
+      <a class="drawer-item" href="/login.html"><i data-lucide="log-in"></i> <span data-i18n="nav.signin">Entrar</span></a>
+      <a class="drawer-item" href="/pt/register.html" style="color:var(--brand-primary)"><i data-lucide="rocket"></i> <span data-i18n="nav.getStarted">Começar grátis</span></a>
       <div class="drawer-divider"></div>
-      <button class="drawer-item" onclick="closeMobileMenu(); window.openContactWidget?.()"><i data-lucide="mail"></i> Contact us</button>
+      <button class="drawer-item" onclick="closeMobileMenu(); window.openContactWidget?.()"><i data-lucide="mail"></i> Fale conosco</button>
     </div>
   </nav>
 </div>
@@ -726,22 +748,22 @@
     <div class="hero-bg-glow"></div>
     <!-- Left: copy + CTAs -->
     <div class="hero-content">
-      <div class="badge badge-primary mb-6" data-i18n="landing.hero.badge">Any Industry · AI-Powered · Fully Personalized</div>
-      <h2 data-i18n-html="landing.hero.title">Walk into your next interview<br><span>knowing exactly what to say.</span></h2>
-      <p class="hero-sub" data-i18n="landing.hero.sub">Most candidates walk in underprepared — vague stories, generic answers, weak framing. This simulator runs a full mock interview built around your resume and the actual job posting, then tells you exactly what to fix.</p>
+      <div class="badge badge-primary mb-6" data-i18n="landing.hero.badge">Treine com IA antes da entrevista real</div>
+      <h2 data-i18n-html="landing.hero.title">Passe na sua próxima<br><span>entrevista de emprego.</span></h2>
+      <p class="hero-sub" data-i18n="landing.hero.sub">A IA analisa sua vaga e cria entrevistas personalizadas para você praticar com confiança. Treine perguntas reais, responda por voz ou texto e receba feedback instantâneo.</p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="/register.html" data-i18n="landing.hero.cta">Start for free &rarr;</a>
+        <a class="btn btn-primary" href="/pt/register.html" data-i18n="landing.hero.cta">Treinar agora →</a>
         <button class="btn btn-secondary hero-listen-btn" id="hero-listen-btn" onclick="playHeroSample()">
           <i data-lucide="play-circle" style="width:18px;height:18px;"></i>
-          <span data-i18n="landing.hero.listenBtn">Hear Alex</span>
+          <span data-i18n="landing.hero.listenBtn">Ouvir a Alex</span>
         </button>
       </div>
       <audio id="hero-sample-pt" src="/assets/audio/sample_output_pt.wav" preload="none"></audio>
       <audio id="hero-sample-en" src="/assets/audio/sample_output_en.wav" preload="none"></audio>
     </div>
     <!-- Right: product mockup -->
-    <a class="hero-mockup" href="/register.html" aria-label="Start for free">
-      <img src="/assets/hero.png" alt="AI interview simulation interface" width="614" height="409" loading="eager" fetchpriority="high" decoding="async">
+    <a class="hero-mockup" href="/pt/register.html" aria-label="Começar grátis">
+      <img src="/assets/hero.png" alt="Interface de simulação de entrevista com IA" width="614" height="409" loading="eager" fetchpriority="high" decoding="async">
     </a>
   </div>
 
@@ -750,9 +772,9 @@
     <div class="demo-strip-inner">
       <div class="demo-strip-label">
         <i data-lucide="headphones" style="width:16px;height:16px;color:var(--brand-secondary)"></i>
-        <span data-i18n="landing.demo.label">Hear the AI interviewer in action</span>
+        <span data-i18n="landing.demo.label">Ouça a entrevistadora de IA em ação</span>
       </div>
-      <div class="demo-strip-quote" data-i18n="landing.demo.quote">"You mentioned solving managers' problems — what does that actually mean?"</div>
+      <div class="demo-strip-quote" data-i18n="landing.demo.quote">"Você mencionou resolver problemas de gestores — o que isso significa na prática?"</div>
       <div class="demo-strip-btns">
         <button class="demo-lang-btn" id="demo-btn-pt" onclick="playDemoAudio('pt')">
           <i data-lucide="play" style="width:12px;height:12px"></i> PT
@@ -769,27 +791,27 @@
   <!-- Product Tour -->
   <div class="product-tour">
     <div class="section-header" style="margin-bottom:0">
-      <div class="badge badge-primary mb-4" data-i18n="landing.tour.label">See it in action</div>
-      <h2 class="section-title" style="margin-top:16px;" data-i18n="landing.tour.title">Everything you need, in one session</h2>
-      <p class="section-sub" data-i18n="landing.tour.sub">From job description to personalized scorecard — 6 structured phases, real feedback, and a hiring signal at the end.</p>
+      <div class="badge badge-primary mb-4" data-i18n="landing.tour.label">Veja em ação</div>
+      <h2 class="section-title" style="margin-top:16px;" data-i18n="landing.tour.title">Treine como se fosse a entrevista real</h2>
+      <p class="section-sub" data-i18n="landing.tour.sub">Da descrição da vaga ao scorecard personalizado — perguntas reais da vaga, feedback instantâneo e simulação por voz ou texto.</p>
     </div>
     <div class="product-tour-previews">
       <a href="/demo_interview.html" class="preview-card">
         <div class="preview-card-label">
           <i data-lucide="message-circle" style="width:14px;height:14px;"></i>
-          <span data-i18n="landing.tour.previewInterview">See a live interview session →</span>
+          <span data-i18n="landing.tour.previewInterview">Veja uma sessão de entrevista ao vivo →</span>
         </div>
         <div class="preview-card-img">
-          <img src="/assets/interview.png" alt="Mock interview session" width="1081" height="943" loading="lazy" decoding="async">
+          <img src="/assets/interview.png" alt="Sessão de entrevista simulada" width="1081" height="943" loading="lazy" decoding="async">
         </div>
       </a>
       <a href="/demo-scorecard.html" class="preview-card">
         <div class="preview-card-label">
           <i data-lucide="clipboard-check" style="width:14px;height:14px;"></i>
-          <span data-i18n="landing.tour.previewScorecard">See a real scorecard →</span>
+          <span data-i18n="landing.tour.previewScorecard">Veja um scorecard real →</span>
         </div>
         <div class="preview-card-img">
-          <img src="/assets/score_card.png" alt="Scorecard example" width="1091" height="952" loading="lazy" decoding="async">
+          <img src="/assets/score_card.png" alt="Exemplo de scorecard" width="1091" height="952" loading="lazy" decoding="async">
         </div>
       </a>
     </div>
@@ -802,8 +824,8 @@
         <i data-lucide="traffic-cone" style="width:40px;height:40px;"></i>
       </div>
       <div class="gate-content">
-        <h3 data-i18n="landing.gate.title">The interview is where the role is won or lost</h3>
-        <p data-i18n-html="landing.gate.body">Whether it's your first conversation or the final round, what you say — and how you say it — decides the outcome. Behavioral questions, role-specific scenarios, fit and motivation: this tool prepares you for all of them, tailored to your background and the specific job you're after.</p>
+        <h3 data-i18n="landing.gate.title">A entrevista é onde a vaga é ganha ou perdida</h3>
+        <p data-i18n-html="landing.gate.body">Seja a primeira conversa ou a rodada final, o que você diz — e como você diz — decide o resultado. Perguntas comportamentais, cenários da vaga, fit e motivação: esta ferramenta te prepara para tudo isso, adaptada ao seu histórico e à vaga que você está buscando.</p>
       </div>
     </div>
   </div>
@@ -811,29 +833,29 @@
   <!-- How to start — 3 steps -->
   <div class="section" style="padding-top: 32px; padding-bottom: 0;">
     <div class="howto-block">
-      <div class="badge badge-primary mb-4" data-i18n="landing.howto.label">How it works</div>
-      <h2 class="section-title" style="margin-top:16px;" data-i18n="landing.howto.title">Built around your resume and the actual job</h2>
-      <p class="section-sub" data-i18n="landing.howto.sub">Before the interview starts, you paste the job description and your resume. The AI reads both and builds a mock interview tailored to your background, that specific role, and that company — not a generic script.</p>
+      <div class="badge badge-primary mb-4" data-i18n="landing.howto.label">Como funciona</div>
+      <h2 class="section-title" style="margin-top:16px;" data-i18n="landing.howto.title">Gerado a partir do seu currículo e da vaga real</h2>
+      <p class="section-sub" data-i18n="landing.howto.sub">Antes da entrevista começar, você cola a descrição da vaga e o seu currículo. A IA lê os dois e monta uma entrevista feita para você — seu histórico, aquela vaga, aquela empresa. Nada de roteiro genérico.</p>
       <div class="howto-steps">
         <div class="howto-step">
           <div class="howto-step-icon"><i data-lucide="clipboard-list" style="width:26px;height:26px;"></i></div>
-          <div class="howto-step-num">Step 1</div>
-          <div class="howto-step-title" data-i18n="landing.howto.s1.title">Paste the job description</div>
-          <div class="howto-step-desc" data-i18n="landing.howto.s1.desc">Copy it from any job board or company website</div>
+          <div class="howto-step-num">Passo 1</div>
+          <div class="howto-step-title" data-i18n="landing.howto.s1.title">Cole a descrição da vaga</div>
+          <div class="howto-step-desc" data-i18n="landing.howto.s1.desc">Copie de qualquer site de vagas ou da empresa</div>
         </div>
         <div class="howto-arrow"><i data-lucide="arrow-right" style="width:20px;height:20px;"></i></div>
         <div class="howto-step">
           <div class="howto-step-icon"><i data-lucide="file-text" style="width:26px;height:26px;"></i></div>
-          <div class="howto-step-num">Step 2</div>
-          <div class="howto-step-title" data-i18n="landing.howto.s2.title">Add your resume</div>
-          <div class="howto-step-desc" data-i18n="landing.howto.s2.desc">Paste the text or upload a PDF</div>
+          <div class="howto-step-num">Passo 2</div>
+          <div class="howto-step-title" data-i18n="landing.howto.s2.title">Adicione seu currículo</div>
+          <div class="howto-step-desc" data-i18n="landing.howto.s2.desc">Cole o texto ou faça upload do PDF</div>
         </div>
         <div class="howto-arrow"><i data-lucide="arrow-right" style="width:20px;height:20px;"></i></div>
         <div class="howto-step">
           <div class="howto-step-icon"><i data-lucide="sparkles" style="width:26px;height:26px;"></i></div>
-          <div class="howto-step-num">Step 3</div>
-          <div class="howto-step-title" data-i18n="landing.howto.s3.title">Get your personalized interview</div>
-          <div class="howto-step-desc" data-i18n="landing.howto.s3.desc">The AI generates every question around you and the role</div>
+          <div class="howto-step-num">Passo 3</div>
+          <div class="howto-step-title" data-i18n="landing.howto.s3.title">Receba sua entrevista personalizada</div>
+          <div class="howto-step-desc" data-i18n="landing.howto.s3.desc">A IA gera cada pergunta com base em você e na vaga</div>
         </div>
       </div>
     </div>
@@ -842,47 +864,47 @@
   <!-- How it works — phases -->
   <div class="section">
     <div class="section-header">
-      <div class="badge badge-primary mb-4" data-i18n="landing.phases.label">The 6 phases</div>
-      <h2 class="section-title" data-i18n="landing.phases.title">6 phases. One complete interview.</h2>
-      <p class="section-sub" data-i18n="landing.phases.sub">Works for any field. The AI adapts every question to your resume and the actual job description.</p>
+      <div class="badge badge-primary mb-4" data-i18n="landing.phases.label">As 6 fases</div>
+      <h2 class="section-title" data-i18n="landing.phases.title">6 fases. Uma entrevista completa.</h2>
+      <p class="section-sub" data-i18n="landing.phases.sub">Funciona para qualquer área — tecnologia, finanças, consultoria, marketing, operações e mais. A IA adapta cada pergunta ao seu currículo e à vaga real.</p>
     </div>
     
     <div class="phases">
       <div class="glass-card phase-card glass-card-hover">
         <div class="phase-icon-wrapper"><i data-lucide="mic" style="width:24px;height:24px;"></i></div>
-        <div class="phase-num" data-i18n="landing.phases.p1.num">PHASE 1</div>
+        <div class="phase-num" data-i18n="landing.phases.p1.num">FASE 1</div>
         <div class="phase-name" data-i18n="landing.phases.p1.name">Elevator Pitch</div>
-        <div class="phase-desc" data-i18n="landing.phases.p1.desc">Introduce yourself in 90 seconds. Get instant feedback on clarity, structure, and how well you frame your background.</div>
+        <div class="phase-desc" data-i18n="landing.phases.p1.desc">Apresente-se em 90 segundos. Receba feedback imediato sobre clareza, estrutura e como você posiciona seu background para essa vaga específica.</div>
       </div>
       <div class="glass-card phase-card glass-card-hover">
         <div class="phase-icon-wrapper"><i data-lucide="car-front" style="width:24px;height:24px;"></i></div>
-        <div class="phase-num" data-i18n="landing.phases.p2.num">PHASE 2</div>
-        <div class="phase-name" data-i18n="landing.phases.p2.name">CAR Story</div>
-        <div class="phase-desc" data-i18n="landing.phases.p2.desc">Tell a structured story — Challenge, Action, Result — about a real project. Works for any industry.</div>
+        <div class="phase-num" data-i18n="landing.phases.p2.num">FASE 2</div>
+        <div class="phase-name" data-i18n="landing.phases.p2.name">História CAR</div>
+        <div class="phase-desc" data-i18n="landing.phases.p2.desc">Conte uma história estruturada — Contexto, Ação, Resultado — sobre um projeto real. Funciona para qualquer área: uma campanha, uma negociação, uma migração, um lançamento.</div>
       </div>
       <div class="glass-card phase-card glass-card-hover">
         <div class="phase-icon-wrapper"><i data-lucide="search" style="width:24px;height:24px;"></i></div>
-        <div class="phase-num" data-i18n="landing.phases.p3.num">PHASE 3</div>
-        <div class="phase-name" data-i18n="landing.phases.p3.name">Role-Specific</div>
-        <div class="phase-desc" data-i18n="landing.phases.p3.desc">3 targeted questions generated from the actual job description — not generic.</div>
+        <div class="phase-num" data-i18n="landing.phases.p3.num">FASE 3</div>
+        <div class="phase-name" data-i18n="landing.phases.p3.name">Perguntas da Vaga</div>
+        <div class="phase-desc" data-i18n="landing.phases.p3.desc">3 perguntas geradas a partir da descrição real da vaga — não genéricas. Engenheiro, analista, gestor ou consultor: cada entrevista é diferente.</div>
       </div>
       <div class="glass-card phase-card glass-card-hover">
         <div class="phase-icon-wrapper"><i data-lucide="compass" style="width:24px;height:24px;"></i></div>
-        <div class="phase-num" data-i18n="landing.phases.p4.num">PHASE 4</div>
-        <div class="phase-name" data-i18n="landing.phases.p4.name">Leadership</div>
-        <div class="phase-desc" data-i18n="landing.phases.p4.desc">How you lead, handle ambiguity, and drive work to completion — assessed against what the role requires.</div>
+        <div class="phase-num" data-i18n="landing.phases.p4.num">FASE 4</div>
+        <div class="phase-name" data-i18n="landing.phases.p4.name">Liderança e Abordagem</div>
+        <div class="phase-desc" data-i18n="landing.phases.p4.desc">Como você lidera, lida com ambiguidade e conduz projetos até o fim — avaliado pelo que a vaga realmente exige.</div>
       </div>
       <div class="glass-card phase-card glass-card-hover">
         <div class="phase-icon-wrapper"><i data-lucide="lightbulb" style="width:24px;height:24px;"></i></div>
-        <div class="phase-num" data-i18n="landing.phases.p5.num">PHASE 5</div>
-        <div class="phase-name" data-i18n="landing.phases.p5.name">Fit & Motivation</div>
-        <div class="phase-desc" data-i18n="landing.phases.p5.desc">Why this role, why this company, why now — coached until your answer sounds genuine.</div>
+        <div class="phase-num" data-i18n="landing.phases.p5.num">FASE 5</div>
+        <div class="phase-name" data-i18n="landing.phases.p5.name">Fit e Motivação</div>
+        <div class="phase-desc" data-i18n="landing.phases.p5.desc">Por que essa vaga, por que essa empresa, por que agora — treinado até sua resposta soar genuína, não decorada.</div>
       </div>
       <div class="glass-card phase-card glass-card-hover">
         <div class="phase-icon-wrapper"><i data-lucide="message-square-plus" style="width:24px;height:24px;"></i></div>
-        <div class="phase-num" data-i18n="landing.phases.p6.num">PHASE 6</div>
-        <div class="phase-name" data-i18n="landing.phases.p6.name">Your Questions</div>
-        <div class="phase-desc" data-i18n="landing.phases.p6.desc">Practice asking smart, well-researched questions. The questions you ask signal as much as the answers you give.</div>
+        <div class="phase-num" data-i18n="landing.phases.p6.num">FASE 6</div>
+        <div class="phase-name" data-i18n="landing.phases.p6.name">Suas Perguntas</div>
+        <div class="phase-desc" data-i18n="landing.phases.p6.desc">Treine fazer perguntas inteligentes e bem fundamentadas. O que você pergunta diz tanto quanto o que você responde.</div>
       </div>
     </div>
   </div>
@@ -894,29 +916,29 @@
         <div class="feature-item">
           <div class="feature-item-icon"><i data-lucide="globe" style="width:28px;height:28px;"></i></div>
           <div class="feature-item-content">
-            <h4 data-i18n="landing.features.f1.title">Any field, any role</h4>
-            <p data-i18n="landing.features.f1.desc">Engineering, finance, consulting, product, marketing — the AI adapts to the job description you paste.</p>
+            <h4 data-i18n="landing.features.f1.title">Perguntas reais da vaga</h4>
+            <p data-i18n="landing.features.f1.desc">A IA usa a vaga que você quer para criar perguntas específicas, não um roteiro genérico.</p>
           </div>
         </div>
         <div class="feature-item">
           <div class="feature-item-icon"><i data-lucide="mic-2" style="width:28px;height:28px;"></i></div>
           <div class="feature-item-content">
-            <h4 data-i18n="landing.features.f2.title">English coaching included</h4>
-            <p data-i18n="landing.features.f2.desc">Every session evaluates your word choice, sentence structure, register, and fluency.</p>
+            <h4 data-i18n="landing.features.f2.title">Feedback instantâneo</h4>
+            <p data-i18n="landing.features.f2.desc">Receba dicas práticas para melhorar suas respostas, sua estrutura e sua confiança.</p>
           </div>
         </div>
         <div class="feature-item">
           <div class="feature-item-icon"><i data-lucide="headphones" style="width:28px;height:28px;"></i></div>
           <div class="feature-item-content">
-            <h4 data-i18n="landing.features.f3.title">Voice or text</h4>
-            <p data-i18n="landing.features.f3.desc">Answer by speaking or typing. The interviewer responds with realistic audio.</p>
+            <h4 data-i18n="landing.features.f3.title">Simulação por voz e texto</h4>
+            <p data-i18n="landing.features.f3.desc">Responda falando ou digitando e pratique como se estivesse na entrevista real.</p>
           </div>
         </div>
         <div class="feature-item">
           <div class="feature-item-icon"><i data-lucide="rotate-ccw" style="width:28px;height:28px;"></i></div>
           <div class="feature-item-content">
-            <h4 data-i18n="landing.features.f4.title">Repeat until it's automatic</h4>
-            <p data-i18n="landing.features.f4.desc">Build fluency through repetition until your answers feel natural under pressure.</p>
+            <h4 data-i18n="landing.features.f4.title">Treine antes da entrevista real</h4>
+            <p data-i18n="landing.features.f4.desc">Repita a simulação até suas respostas saírem mais claras, naturais e seguras.</p>
           </div>
         </div>
       </div>
@@ -925,9 +947,9 @@
 
   <!-- Bottom CTA -->
   <div class="cta-section">
-    <h3 data-i18n="landing.cta.title">Walk into your next interview prepared.</h3>
-    <p data-i18n="landing.cta.sub">Free to use. Any industry. No credit card required.</p>
-    <a class="btn btn-primary" href="/register.html" data-i18n="landing.cta.btn">Start practicing for free &rarr;</a>
+    <h3 data-i18n="landing.cta.title">Sua próxima vaga começa aqui.</h3>
+    <p data-i18n="landing.cta.sub">Grátis. Qualquer área. Sem cartão de crédito.</p>
+    <a class="btn btn-primary" href="/pt/register.html" data-i18n="landing.cta.btn">Treinar agora →</a>
   </div>
 </div>
 
@@ -938,12 +960,29 @@
     <h2 data-i18n="dashboard.title">Pronto para praticar?</h2>
     <p data-i18n="dashboard.sub">Cole uma descrição de vaga e seu currículo — Alex vai conduzir uma entrevista completa e personalizada com feedback em cada fase.</p>
   </div>
-  <div class="actions" id="actions"></div>
+  <div class="actions" id="actions" data-lang="pt">
+    <div class="glass-card action-card primary glass-card-hover" onclick="location.href='/onboarding.html'">
+      <div class="card-icon"><i data-lucide="sparkles"></i></div>
+      <div class="card-body">
+        <div class="card-title" data-i18n="dashboard.newTitle">Nova vaga</div>
+        <div class="card-sub" data-i18n="dashboard.newSub">Cole a descrição da vaga + currículo para começar uma sessão personalizada</div>
+      </div>
+      <i data-lucide="chevron-right" class="card-arrow"></i>
+    </div>
+    <a class="glass-card action-card secondary glass-card-hover" href="/history.html">
+      <div class="card-icon"><i data-lucide="clipboard-list"></i></div>
+      <div class="card-body">
+        <div class="card-title" data-i18n="dashboard.historyTitle">Histórico de entrevistas</div>
+        <div class="card-sub" data-i18n="dashboard.historySub">Navegue e continue sessões anteriores por vaga</div>
+      </div>
+      <i data-lucide="chevron-right" class="card-arrow"></i>
+    </a>
+  </div>
 </div>
 
 <footer class="app-footer">
-  <a href="/upgrade.html" data-i18n="footer.plans">Plans</a> &nbsp;·&nbsp;
-  <a href="/tips.html" data-i18n="footer.tips">Interview Tips</a>
+  <a href="/upgrade.html" data-i18n="footer.plans">Planos</a> &nbsp;·&nbsp;
+  <a href="/tips.html" data-i18n="footer.tips">Dicas de Entrevista</a>
   <span id="admin-link"></span>
 </footer>
 
@@ -1045,6 +1084,64 @@
     candidate_questions: 'Your Questions', feedback: 'Final Scorecard', done: 'Completed',
   };
 
+  const DASHBOARD_COPY = {
+    en: {
+      continueTitle: 'Continue interview',
+      newTitle: 'New position',
+      newSub: 'Paste a job description + resume to start a personalized session',
+      historyTitle: 'Interview history',
+      historySub: 'Browse and continue past sessions by role',
+      starting: 'Starting...',
+      todayAt: 'Today at',
+      yesterdayAt: 'Yesterday at',
+      at: 'at',
+    },
+    pt: {
+      continueTitle: 'Continuar entrevista',
+      newTitle: 'Nova vaga',
+      newSub: 'Cole a descrição da vaga + currículo para começar uma sessão personalizada',
+      historyTitle: 'Histórico de entrevistas',
+      historySub: 'Navegue e continue sessões anteriores por vaga',
+      starting: 'Iniciando...',
+      todayAt: 'Hoje às',
+      yesterdayAt: 'Ontem às',
+      at: 'às',
+    },
+  };
+  const FASE_LABEL_BY_LANG = {
+    en: FASE_LABEL,
+    pt: {
+      elevator_pitch: 'Elevator Pitch', elevator_pitch_report: 'Elevator Pitch — revisão',
+      CAR: 'História CAR', CAR_report: 'História CAR — revisão',
+      technical: 'Perguntas técnicas', technical_report: 'Técnica — revisão',
+      leadership: 'Liderança', leadership_report: 'Liderança — revisão',
+      motivation: 'Motivação', motivation_report: 'Motivação — revisão',
+      candidate_questions: 'Suas perguntas', feedback: 'Scorecard final', done: 'Concluída',
+    },
+  };
+
+  function _dashLang() {
+    const fromI18n = window.i18n && window.i18n.currentLang ? window.i18n.currentLang() : '';
+    const fromPath = location.pathname.split('/').filter(Boolean)[0] || '';
+    const fromHtml = document.documentElement.lang || '';
+    const fromStorage = localStorage.getItem('preferred_lang') || '';
+    const lang = [fromI18n, fromPath, fromHtml, fromStorage].find(v => ['en', 'pt'].includes(v));
+    return lang === 'pt' ? 'pt' : 'en';
+  }
+
+  function _dashText(key) {
+    const i18nKey = 'dashboard.' + key;
+    const val = window.t ? window.t(i18nKey) : i18nKey;
+    if (val && val !== i18nKey) return val;
+    const lang = _dashLang();
+    return (DASHBOARD_COPY[lang] && DASHBOARD_COPY[lang][key]) || DASHBOARD_COPY.en[key] || i18nKey;
+  }
+
+  function _phaseLabel(fase) {
+    const labels = FASE_LABEL_BY_LANG[_dashLang()] || FASE_LABEL_BY_LANG.en;
+    return labels[fase];
+  }
+
   function _loadRaw() {
     try {
       const d = JSON.parse(localStorage.getItem(SESSION_KEY));
@@ -1059,26 +1156,33 @@
     const d = new Date(ts), now = new Date();
     const diffDays = Math.floor((now - d) / 86400000);
     const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    if (diffDays === 0) return `Today at ${time}`;
-    if (diffDays === 1) return `Yesterday at ${time}`;
-    return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ` at ${time}`;
+    const copy = DASHBOARD_COPY[_dashLang()] || DASHBOARD_COPY.en;
+    if (diffDays === 0) return `${copy.todayAt} ${time}`;
+    if (diffDays === 1) return `${copy.yesterdayAt} ${time}`;
+    return d.toLocaleDateString(_dashLang() === 'pt' ? 'pt-BR' : undefined, { month: 'short', day: 'numeric' }) + ` ${copy.at} ${time}`;
   }
 
   function render() {
     const actionsEl = document.getElementById('actions');
     if (!actionsEl) return;
     const raw = _loadRaw();
+    const hasContinue = raw?.threadId && raw.fase !== 'done';
+    const lang = _dashLang();
+    if (!hasContinue && actionsEl.dataset.lang === lang && actionsEl.children.length) {
+      lucide.createIcons();
+      return;
+    }
     let html = '';
     
     // Continue session card
-    if (raw?.threadId && raw.fase !== 'done') {
-      const phase   = FASE_LABEL[raw.fase] || (raw.fase || 'Starting…');
+    if (hasContinue) {
+      const phase   = _phaseLabel(raw.fase) || (raw.fase || _dashText('starting'));
       const jobInfo = raw.jobTitle ? ` · ${raw.jobTitle}` : '';
       html += `
         <div class="glass-card action-card continue-card glass-card-hover" onclick="location.href='/interview.html'">
           <div class="card-icon"><i data-lucide="play"></i></div>
           <div class="card-body">
-            <div class="card-title">${window.t ? window.t('dashboard.continueTitle') : 'Continue Interview'}</div>
+            <div class="card-title">${_dashText('continueTitle')}</div>
             <div class="card-sub">${phase}${jobInfo}${raw.savedAt ? ' · ' + _fmt(raw.savedAt) : ''}</div>
           </div>
           <i data-lucide="chevron-right" class="card-arrow"></i>
@@ -1090,8 +1194,8 @@
       <div class="glass-card action-card primary glass-card-hover" onclick="location.href='/onboarding.html'">
         <div class="card-icon"><i data-lucide="sparkles"></i></div>
         <div class="card-body">
-          <div class="card-title">${window.t ? window.t('dashboard.newTitle') : 'New Interview'}</div>
-          <div class="card-sub">${window.t ? window.t('dashboard.newSub') : 'Start a new session'}</div>
+          <div class="card-title">${_dashText('newTitle')}</div>
+          <div class="card-sub">${_dashText('newSub')}</div>
         </div>
         <i data-lucide="chevron-right" class="card-arrow"></i>
       </div>
@@ -1100,13 +1204,14 @@
       <a class="glass-card action-card secondary glass-card-hover" href="/history.html">
         <div class="card-icon"><i data-lucide="clipboard-list"></i></div>
         <div class="card-body">
-          <div class="card-title">${window.t ? window.t('dashboard.historyTitle') : 'History'}</div>
-          <div class="card-sub">${window.t ? window.t('dashboard.historySub') : 'Review past scorecards'}</div>
+          <div class="card-title">${_dashText('historyTitle')}</div>
+          <div class="card-sub">${_dashText('historySub')}</div>
         </div>
         <i data-lucide="chevron-right" class="card-arrow"></i>
       </a>`;
       
     actionsEl.innerHTML = html;
+    actionsEl.dataset.lang = lang;
     lucide.createIcons();
   }
 
