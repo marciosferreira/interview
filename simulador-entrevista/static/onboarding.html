@@ -340,6 +340,9 @@
 
     setStep(3);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 90000);
+
     try {
       const res = await fetch('/prepare', {
         method: 'POST',
@@ -353,7 +356,9 @@
           job_description: desc,
           resume_text: resume,
         }),
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
 
       if (res.status === 401) {
         logout();
@@ -388,8 +393,13 @@
       localStorage.removeItem('interview_v1');
       location.replace('/interview.html');
     } catch (err) {
+      clearTimeout(timeoutId);
       setStep(2);
-      showError('Network error');
+      if (err.name === 'AbortError') {
+        showError(window.t ? window.t('onboarding.errors.timeout') : 'The request is taking longer than expected — please try again.');
+      } else {
+        showError(window.t ? window.t('onboarding.errors.network') : 'Network error — please check your connection and try again.');
+      }
     }
   }
 </script>

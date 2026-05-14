@@ -327,7 +327,8 @@
       "shortDesc": "The job description is optional.",
       "shortResume": "The resume is optional.",
       "default": "Something went wrong. Please try again.",
-      "network": "Network error — please check your connection and try again."
+      "network": "Network error — please check your connection and try again.",
+      "timeout": "This is taking longer than expected — please try again."
     }
   },
   "interview": {

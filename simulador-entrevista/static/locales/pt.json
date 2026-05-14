@@ -327,7 +327,8 @@
       "shortDesc": "A descrição da vaga é opcional.",
       "shortResume": "O currículo é opcional.",
       "default": "Algo deu errado. Tente novamente.",
-      "network": "Erro de rede — verifique sua conexão e tente novamente."
+      "network": "Erro de rede — verifique sua conexão e tente novamente.",
+      "timeout": "A solicitação está demorando mais do que o esperado — tente novamente."
     }
   },
   "interview": {

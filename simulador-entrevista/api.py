@@ -784,17 +784,22 @@ async def prepare(body: PrepareRequest, current_user: dict = Depends(get_current
 
     # Generate interview context with Sonnet for every plan. This briefing drives
     # the whole session, so keep it high quality even for free users.
-    try:
-        interview_context = await generate_interview_context(
-            job_title=job_title,
-            company=company or "Not provided",
-            job_description=job_description or "Not provided. Create a general interview for this target role.",
-            resume_text=resume_text or "Not provided. Ask broad follow-up questions to learn about the candidate's background.",
-            language=language,
-            model_name=_HUNTER_MODEL,
-        )
-    except Exception as exc:
-        print(f"[prepare] LLM generation failed: {exc}")
+    for attempt in range(3):
+        try:
+            interview_context = await generate_interview_context(
+                job_title=job_title,
+                company=company or "Not provided",
+                job_description=job_description or "Not provided. Create a general interview for this target role.",
+                resume_text=resume_text or "Not provided. Ask broad follow-up questions to learn about the candidate's background.",
+                language=language,
+                model_name=_HUNTER_MODEL,
+            )
+            break
+        except Exception as exc:
+            print(f"[prepare] LLM generation attempt {attempt + 1} failed: {exc}")
+            if attempt < 2:
+                await asyncio.sleep(2 ** attempt)
+    else:
         raise HTTPException(
             status_code=503,
             detail="Failed to generate interview context — please try again in a moment.",
