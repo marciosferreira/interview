@@ -197,10 +197,10 @@
       </a>
       <div class="register-kicker">
         <i data-lucide="zap" style="width:13px;height:13px"></i>
-        <span data-i18n="register.kicker">Comece grátis em 15 segundos.</span>
+        <span data-i18n="register.kicker">Comece grátis em segundos.</span>
       </div>
-      <h1 data-i18n="register.title">Pratique para sua vaga dos sonhos em 15 segundos</h1>
-      <p data-i18n="register.subtitle">Crie sua conta grátis, cole a vaga que você quer conquistar e pratique com uma IA feita para essa oportunidade.</p>
+      <h1 data-i18n="register.title">Começe sua entrevista em segundos</h1>
+      <p data-i18n="register.subtitle">Crie sua conta, informe a vaga desejada e deixe Alex te ajudar a chegar lá.</p>
     </div>
 
     <div class="register-benefits" aria-label="O que você recebe">
@@ -229,7 +229,7 @@
       </div>
       <div class="register-step">
         <div class="register-step-num">3</div>
-        <div class="register-step-text" data-i18n="register.stepPractice">Comece a praticar</div>
+        <div class="register-step-text" data-i18n="register.stepPractice">Comece a entrevista</div>
       </div>
     </div>
 
@@ -253,7 +253,7 @@
     </div>
 
     <form id="register-form" autocomplete="on">
-      <p class="register-form-note" data-i18n="register.formNote">3 campos. Menos de 1 minuto. Sua primeira prática começa logo após confirmar o e-mail.</p>
+      <p class="register-form-note" data-i18n="register.formNote">3 campos. Menos de 1 minuto. Sua primeira entrevista começa logo após confirmar o e-mail.</p>
       <div class="register-fields">
         <div class="form-group">
           <label class="form-label" for="name" data-i18n="register.name">Nome</label>
@@ -277,8 +277,8 @@
         <input type="text" name="extra_context" id="extra_context" tabindex="-1" autocomplete="off" />
       </div>
 
-      <button class="btn btn-primary" style="width:100%; margin-top:8px;" type="submit" id="submit-btn" data-i18n="register.submit">Começar prática grátis</button>
-      <p class="register-privacy-note" data-i18n="register.privacyNote">Você poderá colar sua vaga e currículo depois deste passo.</p>
+      <button class="btn btn-primary" style="width:100%; margin-top:8px;" type="submit" id="submit-btn" data-i18n="register.submit">Começar grátis</button>
+      <p class="register-privacy-note" data-i18n="register.privacyNote">Você poderá informar seu objetivo depois deste passo.</p>
     </form>
 
     <div class="auth-footer">
@@ -369,8 +369,8 @@
     const currentLang = window.i18n?.currentLang ? window.i18n.currentLang() : localStorage.getItem('preferred_lang');
     const language = ['en', 'pt'].includes(currentLang) ? currentLang : 'en';
 
-    if (!name) { showError(window.t ? window.t('register.errorName') : 'Nome é obrigatório.'); submitBtn.disabled = false; submitBtn.textContent = window.t ? window.t('register.submit') : 'Começar prática grátis'; return; }
-    if (password.length < 8) { showError(window.t ? window.t('register.errorPassword') : 'A senha deve ter no mínimo 8 caracteres.'); submitBtn.disabled = false; submitBtn.textContent = window.t ? window.t('register.submit') : 'Começar prática grátis'; return; }
+    if (!name) { showError(window.t ? window.t('register.errorName') : 'Nome é obrigatório.'); submitBtn.disabled = false; submitBtn.textContent = window.t ? window.t('register.submit') : 'Começar grátis'; return; }
+    if (password.length < 8) { showError(window.t ? window.t('register.errorPassword') : 'A senha deve ter no mínimo 8 caracteres.'); submitBtn.disabled = false; submitBtn.textContent = window.t ? window.t('register.submit') : 'Começar grátis'; return; }
 
     try {
       const res = await fetch('/auth/register', {
@@ -388,7 +388,7 @@
       showError(window.t ? window.t('register.errorNetwork') : 'Erro de rede');
     } finally {
       submitBtn.disabled = false;
-      submitBtn.textContent = window.t ? window.t('register.submit') : 'Começar prática grátis';
+      submitBtn.textContent = window.t ? window.t('register.submit') : 'Começar grátis';
     }
   });
 </script>

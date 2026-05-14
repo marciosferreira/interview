@@ -240,6 +240,8 @@
     if (onLanding) history.replaceState(null, '', `/${lang}/`);
     _dict = CRITICAL_TRANSLATIONS[lang] || {};
     _lang = lang;
+    localStorage.setItem(STORAGE_KEY, lang);
+    document.cookie = `${STORAGE_KEY}=${lang}; path=/; max-age=${365 * 24 * 3600}; samesite=lax`;
     applyTranslations({ finalize: false });
     loadLang(lang);
   }

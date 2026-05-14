@@ -196,10 +196,10 @@
       </a>
       <div class="register-kicker">
         <i data-lucide="zap" style="width:13px;height:13px"></i>
-        <span data-i18n="register.kicker">Free start in 15 seconds.</span>
+        <span data-i18n="register.kicker">Free start in seconds</span>
       </div>
-      <h1 data-i18n="register.title">Start your mock interview in 15 seconds</h1>
-      <p data-i18n="register.subtitle">Create a free account, paste your dream role, and practice with AI built around that job.</p>
+      <h1 data-i18n="register.title">Start your interview in seconds</h1>
+      <p data-i18n="register.subtitle">Create a free account, input your dream role, and let Alex help you get there.</p>
     </div>
 
     <div class="register-benefits" aria-label="What you get">
@@ -224,11 +224,11 @@
       </div>
       <div class="register-step">
         <div class="register-step-num">2</div>
-        <div class="register-step-text" data-i18n="register.stepRole">Paste your role</div>
+        <div class="register-step-text" data-i18n="register.stepRole">Input your role</div>
       </div>
       <div class="register-step">
         <div class="register-step-num">3</div>
-        <div class="register-step-text" data-i18n="register.stepPractice">Start practicing</div>
+        <div class="register-step-text" data-i18n="register.stepPractice">Start the interview</div>
       </div>
     </div>
 
@@ -252,7 +252,7 @@
     </div>
 
     <form id="register-form" autocomplete="on">
-      <p class="register-form-note" data-i18n="register.formNote">3 fields. Less than 1 minute. Your first practice starts right after email confirmation.</p>
+      <p class="register-form-note" data-i18n="register.formNote">3 fields. Less than 1 minute. Your first interview starts right after email confirmation.</p>
       <div class="register-fields">
         <div class="form-group">
           <label class="form-label" for="name" data-i18n="register.name">Name</label>
@@ -276,8 +276,8 @@
         <input type="text" name="extra_context" id="extra_context" tabindex="-1" autocomplete="off" />
       </div>
 
-      <button class="btn btn-primary" style="width:100%; margin-top:8px;" type="submit" id="submit-btn" data-i18n="register.submit">Start practicing for free</button>
-      <p class="register-privacy-note" data-i18n="register.privacyNote">You can paste your target job and resume after this step.</p>
+      <button class="btn btn-primary" style="width:100%; margin-top:8px;" type="submit" id="submit-btn" data-i18n="register.submit">Start for free</button>
+      <p class="register-privacy-note" data-i18n="register.privacyNote">You can input your target role after this step.</p>
     </form>
 
     <div class="auth-footer">
@@ -368,8 +368,8 @@
     const currentLang = window.i18n?.currentLang ? window.i18n.currentLang() : localStorage.getItem('preferred_lang');
     const language = ['en', 'pt'].includes(currentLang) ? currentLang : 'en';
 
-    if (!name) { showError(window.t ? window.t('register.errorName') : 'Name required'); submitBtn.disabled = false; submitBtn.textContent = window.t ? window.t('register.submit') : 'Start practicing for free'; return; }
-    if (password.length < 8) { showError(window.t ? window.t('register.errorPassword') : 'Password too short'); submitBtn.disabled = false; submitBtn.textContent = window.t ? window.t('register.submit') : 'Start practicing for free'; return; }
+    if (!name) { showError(window.t ? window.t('register.errorName') : 'Name required'); submitBtn.disabled = false; submitBtn.textContent = window.t ? window.t('register.submit') : 'Start for free'; return; }
+    if (password.length < 8) { showError(window.t ? window.t('register.errorPassword') : 'Password too short'); submitBtn.disabled = false; submitBtn.textContent = window.t ? window.t('register.submit') : 'Start for free'; return; }
 
     try {
       const res = await fetch('/auth/register', {
@@ -387,7 +387,7 @@
       showError(window.t ? window.t('register.errorNetwork') : 'Network error');
     } finally {
       submitBtn.disabled = false;
-      submitBtn.textContent = window.t ? window.t('register.submit') : 'Start practicing for free';
+      submitBtn.textContent = window.t ? window.t('register.submit') : 'Start for free';
     }
   });
 </script>
