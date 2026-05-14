@@ -1,6 +1,6 @@
 {
   "verifyEmail": {
-    "loading": "Verificando...",
+    "loading": "verificando",
     "loadingDesc": "Aguarde um momento.",
     "invalidTitle": "Link inválido",
     "invalidDesc": "Este link de verificação não contém um token válido.",

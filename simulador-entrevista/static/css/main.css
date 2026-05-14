@@ -82,6 +82,12 @@ html.i18n-pending [data-i18n-attr] {
   visibility: hidden;
 }
 
+html.i18n-pending .app-header [data-i18n],
+html.i18n-pending #mobile-drawer [data-i18n],
+html.i18n-pending .app-footer [data-i18n] {
+  visibility: visible;
+}
+
 body {
   min-height: 100dvh;
   display: flex;

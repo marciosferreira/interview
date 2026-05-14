@@ -15,6 +15,92 @@
   const STORAGE_KEY = 'preferred_lang';
   const FALLBACK    = 'en';
   const SUPPORTED   = ['en', 'pt'];
+  const CRITICAL_TRANSLATIONS = {
+    en: {
+      header: { tagline: 'AI-powered mock interview preparation' },
+      nav: {
+        homeLabel: 'Home',
+        tipsLabel: 'Tips',
+        signin: 'Sign in',
+        getStarted: 'Get started free',
+        settingsLabel: 'Settings',
+        historyLabel: 'History',
+        signout: 'Sign out',
+        contactUs: 'Contact us',
+      },
+      history: {
+        header: { tagline: 'Interview history' },
+        nav: { newInterview: 'New interview' },
+      },
+      footer: {
+        plans: 'Plans',
+        tips: 'Interview Tips',
+      },
+      profile: {
+        header: { tagline: 'Account settings' },
+        pageHeading: 'Profile Settings',
+        pageSub: 'Manage your account details and password.',
+        plan: {
+          currentPlan: 'Current plan',
+          active: 'Active',
+          free: 'Free',
+          usage: '{{used}} / {{limit}} interview rounds this week',
+          upgrade: 'Upgrade ->',
+        },
+      },
+      dashboard: {
+        title: 'Ready to practice?',
+        sub: 'Paste a job description and your resume — Alex will run a personalized full-length mock interview with feedback on every phase.',
+        continueTitle: 'Continue interview',
+        newTitle: 'New position',
+        newSub: 'Paste a job description + resume to start a personalized session',
+        historyTitle: 'Interview history',
+        historySub: 'Browse and continue past sessions by role',
+      },
+    },
+    pt: {
+      header: { tagline: 'Preparação para entrevistas com IA' },
+      nav: {
+        homeLabel: 'Início',
+        tipsLabel: 'Dicas',
+        signin: 'Entrar',
+        getStarted: 'Começar grátis',
+        settingsLabel: 'Configurações',
+        historyLabel: 'Histórico',
+        signout: 'Sair',
+        contactUs: 'Fale conosco',
+      },
+      history: {
+        header: { tagline: 'Histórico de entrevistas' },
+        nav: { newInterview: 'Nova vaga' },
+      },
+      footer: {
+        plans: 'Planos',
+        tips: 'Dicas de Entrevista',
+      },
+      profile: {
+        header: { tagline: 'Configurações da conta' },
+        pageHeading: 'Configurações do perfil',
+        pageSub: 'Gerencie os dados da sua conta e senha.',
+        plan: {
+          currentPlan: 'Plano atual',
+          active: 'Ativo',
+          free: 'Grátis',
+          usage: '{{used}} / {{limit}} rounds de entrevistas essa semana',
+          upgrade: 'Fazer upgrade ->',
+        },
+      },
+      dashboard: {
+        title: 'Pronto para praticar?',
+        sub: 'Cole uma descrição de vaga e seu currículo — Alex vai conduzir uma entrevista completa e personalizada com feedback em cada fase.',
+        continueTitle: 'Continuar entrevista',
+        newTitle: 'Nova vaga',
+        newSub: 'Cole a descrição da vaga + currículo para começar uma sessão personalizada',
+        historyTitle: 'Histórico de entrevistas',
+        historySub: 'Navegue e continue sessões anteriores por vaga',
+      },
+    },
+  };
 
   function isLandingPath(path) {
     return /^\/(en|pt)?\/?$/.test(path);
@@ -43,14 +129,15 @@
     return FALLBACK;
   }
 
-  let _dict = {};
   let _lang = detectLang();
+  let _dict = CRITICAL_TRANSLATIONS[_lang] || {};
   let _ready = false;
   let _readyResolve;
   const ready = new Promise(resolve => { _readyResolve = resolve; });
   if (_lang !== FALLBACK) {
     document.documentElement.classList.add('i18n-pending');
   }
+  startCriticalObserver();
 
   function _get(obj, path) {
     return path.split('.').reduce((o, k) => (o && o[k] !== undefined ? o[k] : undefined), obj);
@@ -79,20 +166,30 @@
     }
   }
 
-  function applyTranslations() {
-    document.querySelectorAll('[data-i18n]').forEach(el => {
+  function _translateElement(el) {
+    if (el.hasAttribute && el.hasAttribute('data-i18n')) {
       const val = t(el.dataset.i18n);
       if (val !== el.dataset.i18n) el.textContent = val;
-    });
-    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    }
+    if (el.hasAttribute && el.hasAttribute('data-i18n-html')) {
       const val = t(el.dataset.i18nHtml);
       if (val !== el.dataset.i18nHtml) el.innerHTML = val;
-    });
-    document.querySelectorAll('[data-i18n-attr]').forEach(el => {
+    }
+    if (el.hasAttribute && el.hasAttribute('data-i18n-attr')) {
       const [attr, key] = el.dataset.i18nAttr.split(':');
       const val = t(key);
       if (val !== key) el.setAttribute(attr, val);
-    });
+    }
+  }
+
+  function applyTranslations(opts) {
+    const root = opts && opts.root ? opts.root : document;
+    const finalize = !(opts && opts.finalize === false);
+    if (root.querySelectorAll) {
+      root.querySelectorAll('[data-i18n], [data-i18n-html], [data-i18n-attr]').forEach(_translateElement);
+    }
+    if (root !== document) _translateElement(root);
+    if (!finalize) return;
     applyMetaTags();
     // Update <html lang>
     document.documentElement.lang = _lang;
@@ -101,6 +198,19 @@
     document.querySelectorAll('.lang-btn').forEach(btn => {
       btn.classList.toggle('lang-active', btn.dataset.lang === _lang);
     });
+  }
+
+  function startCriticalObserver() {
+    if (!window.MutationObserver) return;
+    const observer = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        mutation.addedNodes.forEach(node => {
+          if (node.nodeType === 1) applyTranslations({ root: node, finalize: false });
+        });
+      });
+    });
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+    document.addEventListener('i18n:ready', () => observer.disconnect(), { once: true });
   }
 
   async function loadLang(lang) {
@@ -126,6 +236,9 @@
     if (!SUPPORTED.includes(lang) || lang === _lang) return;
     const onLanding = isLandingPath(window.location.pathname);
     if (onLanding) history.replaceState(null, '', `/${lang}/`);
+    _dict = CRITICAL_TRANSLATIONS[lang] || {};
+    _lang = lang;
+    applyTranslations({ finalize: false });
     loadLang(lang);
   }
 

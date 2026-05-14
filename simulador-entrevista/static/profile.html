@@ -62,6 +62,11 @@
 
     #plan-banner {
       gap: 16px;
+      display: flex;
+      min-height: 98px;
+    }
+    html.i18n-pending #plan-banner [data-i18n] {
+      visibility: visible;
     }
     #plan-banner > div:first-child {
       min-width: 0;
@@ -79,11 +84,27 @@
       min-width: 0;
       line-height: 1.35;
     }
+    #plan-banner.plan-loading #plan-usage {
+      color: var(--text-tertiary);
+    }
+    #plan-name svg,
+    #plan-name [data-lucide] {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 18px;
+    }
     #plan-upgrade-link,
     #plan-cancel-btn,
-    #plan-downgrade-btn {
+    #plan-downgrade-btn,
+    #plan-action-placeholder {
       flex: 0 0 auto;
       white-space: nowrap;
+    }
+    #plan-action-placeholder {
+      cursor: default;
+      min-width: 132px;
+      justify-content: center;
+      opacity: 0.72;
     }
 
     @media (max-width: 560px) {
@@ -107,7 +128,8 @@
       }
       #plan-upgrade-link,
       #plan-cancel-btn,
-      #plan-downgrade-btn {
+      #plan-downgrade-btn,
+      #plan-action-placeholder {
         min-height: 40px;
         max-width: 100%;
         justify-content: center;
@@ -122,7 +144,8 @@
       }
       #plan-upgrade-link,
       #plan-cancel-btn,
-      #plan-downgrade-btn {
+      #plan-downgrade-btn,
+      #plan-action-placeholder {
         width: 100%;
       }
     }
@@ -178,13 +201,19 @@
   <div class="page-sub" data-i18n="profile.pageSub">Manage your account details and password.</div>
 
   <!-- Plan banner -->
-  <div class="section flex items-center justify-between" id="plan-banner" style="display:none; padding: 20px;">
+  <div class="section flex items-center justify-between plan-loading" id="plan-banner" style="padding: 20px;">
     <div>
       <div id="plan-banner-label" style="font-size:12px;color:var(--text-secondary);margin-bottom:4px" data-i18n="profile.plan.currentPlan">Current plan</div>
-      <div id="plan-name" style="font-size:16px;font-weight:700;color:var(--text-primary); display:flex; align-items:center; gap:8px;"></div>
+      <div id="plan-name" style="font-size:16px;font-weight:700;color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+        <i data-lucide="map" style="color:var(--text-secondary)"></i> Explorer <span class="badge" style="border:1px solid var(--bg-surface-border);margin-left:8px;" data-i18n="profile.plan.free">Free</span>
+      </div>
     </div>
     <div class="flex items-center gap-4">
-      <div id="plan-usage" style="font-size:13px;color:var(--text-tertiary);"></div>
+      <div id="plan-usage" style="font-size:13px;color:var(--text-tertiary);">Loading usage...</div>
+      <button id="plan-action-placeholder" class="btn btn-secondary" type="button" disabled style="padding:6px 14px; font-size:13px;">
+        <span class="spinner"></span>
+        <span id="plan-action-placeholder-text">Checking plan...</span>
+      </button>
       <a id="plan-upgrade-link" class="btn btn-primary" href="/upgrade.html" style="display:none; padding:6px 14px; font-size:13px;" data-i18n="profile.plan.upgrade">Upgrade &rarr;</a>
       <button id="plan-cancel-btn" class="btn btn-danger" style="display:none; padding:6px 14px; font-size:13px;">Cancel subscription</button>
       <button id="plan-downgrade-btn" class="btn btn-danger" style="display:none; padding:6px 14px; font-size:13px;" data-i18n="profile.plan.downgrade">Downgrade</button>
@@ -323,6 +352,121 @@
 
   const _authHeader = { 'Authorization': `Bearer ${_token}`, 'Content-Type': 'application/json' };
   const SESSION_KEY = 'interview_v1';
+  const PROFILE_USAGE_CACHE_KEY = 'profile_usage_v1';
+  let latestProfileUsage = null;
+  const PROFILE_PLAN_COPY = {
+    en: {
+      currentPlan: 'Current plan',
+      active: 'Active',
+      free: 'Free',
+      usage: '{{used}} / {{limit}} interview rounds this week',
+      loadingUsage: 'Loading usage...',
+      checkingPlan: 'Checking plan...',
+      currentPlanTip: 'Your current plan',
+      upgradeTip: 'Upgrade to Hunter for more sessions',
+      cancelSubscription: 'Cancel subscription',
+    },
+    pt: {
+      currentPlan: 'Plano atual',
+      active: 'Ativo',
+      free: 'Gratis',
+      usage: '{{used}} / {{limit}} rounds de entrevistas essa semana',
+      loadingUsage: 'Carregando uso...',
+      checkingPlan: 'verificando...',
+      currentPlanTip: 'Seu plano atual',
+      upgradeTip: 'Faca upgrade para Hunter para mais sessoes',
+      cancelSubscription: 'Cancelar assinatura',
+    },
+  };
+
+  function profileLang() {
+    try {
+      const stored = localStorage.getItem('preferred_lang');
+      if (stored === 'pt' || stored === 'en') return stored;
+      const user = JSON.parse(localStorage.getItem('auth_user') || 'null');
+      if (user && (user.language === 'pt' || user.language === 'en')) return user.language;
+    } catch (_) {}
+    return window.i18n?.currentLang?.() || 'en';
+  }
+
+  function profileText(key, vars) {
+    const lang = profileLang() === 'pt' ? 'pt' : 'en';
+    const fallback = PROFILE_PLAN_COPY[lang][key] || PROFILE_PLAN_COPY.en[key] || key;
+    const value = window.t ? window.t(`profile.plan.${key}`, vars) : fallback;
+    if (value && value !== `profile.plan.${key}`) return value;
+    return Object.entries(vars || {}).reduce((text, [name, val]) => text.replace(`{{${name}}}`, val), fallback);
+  }
+
+  function readCachedUsage() {
+    try {
+      const cached = JSON.parse(localStorage.getItem(PROFILE_USAGE_CACHE_KEY) || 'null');
+      if (cached && cached.plan) return cached;
+      const user = JSON.parse(localStorage.getItem('auth_user') || 'null');
+      if (user && user.plan) return { plan: user.plan };
+    } catch (_) {}
+    return { plan: 'free' };
+  }
+
+  function renderPlanBanner(usage, opts = {}) {
+    const banner = document.getElementById('plan-banner');
+    if (!banner) return;
+    const normalized = usage || {};
+    const isHunter = normalized.plan === 'hunter';
+    const hasUsage = Number.isFinite(Number(normalized.used)) && Number.isFinite(Number(normalized.limit));
+    const bannerLabel = document.getElementById('plan-banner-label');
+    const planName = document.getElementById('plan-name');
+    const planUsage = document.getElementById('plan-usage');
+    const upgradeLink = document.getElementById('plan-upgrade-link');
+    const cancelBtn = document.getElementById('plan-cancel-btn');
+    const downgradeBtn = document.getElementById('plan-downgrade-btn');
+    const actionPlaceholder = document.getElementById('plan-action-placeholder');
+    const actionPlaceholderText = document.getElementById('plan-action-placeholder-text');
+
+    banner.classList.toggle('plan-loading', !hasUsage);
+    banner.style.display = 'flex';
+    if (bannerLabel) {
+      bannerLabel.innerHTML = profileText('currentPlan');
+      bannerLabel.style.color = '';
+    }
+    if (planName) {
+      planName.innerHTML = isHunter
+        ? `<i data-lucide="target" style="color:var(--brand-primary)"></i> Hunter <span class="badge badge-primary" style="margin-left:8px;">${profileText('active')}</span>`
+        : `<i data-lucide="map" style="color:var(--text-secondary)"></i> Explorer <span class="badge" style="border:1px solid var(--bg-surface-border);margin-left:8px;">${profileText('free')}</span>`;
+    }
+    if (planUsage) {
+      planUsage.textContent = hasUsage
+        ? profileText('usage', { used: normalized.used, limit: normalized.limit })
+        : (PROFILE_PLAN_COPY[profileLang() === 'pt' ? 'pt' : 'en'].loadingUsage);
+    }
+    if (upgradeLink) upgradeLink.style.display = 'none';
+    if (cancelBtn) cancelBtn.style.display = 'none';
+    if (downgradeBtn) downgradeBtn.style.display = 'none';
+    if (actionPlaceholderText) {
+      actionPlaceholderText.textContent = PROFILE_PLAN_COPY[profileLang() === 'pt' ? 'pt' : 'en'].checkingPlan;
+    }
+    if (actionPlaceholder) actionPlaceholder.style.display = opts.final ? 'none' : '';
+
+    if (opts.final) {
+      if (!isHunter && upgradeLink) {
+        upgradeLink.style.display = '';
+      } else if (normalized.stripe_cancel_at && bannerLabel) {
+        const _locale = window.i18n?.currentLang() === 'pt' ? 'pt-BR' : 'en-US';
+        const endDate = new Date(normalized.stripe_cancel_at * 1000).toLocaleDateString(_locale);
+        bannerLabel.innerHTML = `&#9888; ${window.t ? window.t('profile.plan.canceledUntil', { date: endDate }) : `Canceled, active until ${endDate}`}`;
+        bannerLabel.style.color = 'var(--status-warning)';
+      } else if (normalized.has_stripe_subscription && cancelBtn) {
+        cancelBtn.textContent = profileText('cancelSubscription');
+        cancelBtn.style.display = '';
+      } else if (isHunter && downgradeBtn) {
+        downgradeBtn.style.display = '';
+      }
+    }
+    lucide.createIcons();
+  }
+
+  function renderCachedPlanBanner() {
+    renderPlanBanner(readCachedUsage(), { final: false });
+  }
 
   function newInterview() {
     localStorage.removeItem(SESSION_KEY);
@@ -394,6 +538,8 @@
       }
 
       if (usage) {
+        latestProfileUsage = usage;
+        try { localStorage.setItem(PROFILE_USAGE_CACHE_KEY, JSON.stringify(usage)); } catch (_) {}
         try {
           const _lu = JSON.parse(localStorage.getItem('auth_user') || 'null');
           if (_lu && _lu.plan !== usage.plan) {
@@ -415,41 +561,8 @@
           lucide.createIcons();
         }
 
-        document.getElementById('plan-banner').style.display = 'flex';
-        document.getElementById('plan-upgrade-link').style.display = 'none';
-        document.getElementById('plan-cancel-btn').style.display = 'none';
-        document.getElementById('plan-downgrade-btn').style.display = 'none';
-        
-        const bannerLabel = document.getElementById('plan-banner-label');
-        if (bannerLabel) { bannerLabel.innerHTML = window.t ? window.t('profile.plan.currentPlan') : 'Current plan'; bannerLabel.style.color = ''; }
-        
+        renderPlanBanner(usage, { final: true });
         const isHunter = usage.plan === 'hunter';
-        const pName = document.getElementById('plan-name');
-        
-        if (isHunter) {
-          pName.innerHTML = `<i data-lucide="target" style="color:var(--brand-primary)"></i> Hunter <span class="badge badge-primary" style="margin-left:8px;">${window.t ? window.t('profile.plan.active') : 'Active'}</span>`;
-        } else {
-          pName.innerHTML = `<i data-lucide="map" style="color:var(--text-secondary)"></i> Explorer <span class="badge" style="border:1px solid var(--bg-surface-border);margin-left:8px;">${window.t ? window.t('profile.plan.free') : 'Free'}</span>`;
-        }
-        lucide.createIcons();
-        
-        document.getElementById('plan-usage').textContent = window.t ? window.t('profile.plan.usage', { used: usage.used, limit: usage.limit }) : `${usage.used} / ${usage.limit} used`;
-        
-        if (!isHunter) {
-          document.getElementById('plan-upgrade-link').style.display = '';
-        } else if (usage.stripe_cancel_at) {
-          const _locale = window.i18n?.currentLang() === 'pt' ? 'pt-BR' : 'en-US';
-          const endDate = new Date(usage.stripe_cancel_at * 1000).toLocaleDateString(_locale);
-          bannerLabel.innerHTML = `⚠️ ${window.t ? window.t('profile.plan.canceledUntil', { date: endDate }) : `Canceled, active until ${endDate}`}`;
-          bannerLabel.style.color = 'var(--status-warning)';
-        } else if (usage.has_stripe_subscription) {
-          const cancelBtn = document.getElementById('plan-cancel-btn');
-          cancelBtn.textContent = window.t ? window.t('profile.plan.cancelSubscription') : 'Cancel subscription';
-          cancelBtn.style.display = '';
-        } else {
-          document.getElementById('plan-downgrade-btn').style.display = '';
-        }
-
         const isAdmin = user.email === 'marciosferreira@yahoo.com.br';
         const canDelete = !isAdmin && (!isHunter || !!usage.stripe_cancel_at);
         const deleteBtn = document.getElementById('delete-account-btn');
@@ -466,7 +579,11 @@
       }
     } catch {}
   }
-  document.addEventListener('i18n:ready', loadUser, { once: true });
+  renderCachedPlanBanner();
+  loadUser();
+  document.addEventListener('i18n:ready', () => {
+    renderPlanBanner(latestProfileUsage || readCachedUsage(), { final: !!latestProfileUsage });
+  }, { once: true });
 
   document.getElementById('resend-btn').addEventListener('click', async () => {
     const btn = document.getElementById('resend-btn');
