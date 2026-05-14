@@ -38,7 +38,7 @@
     "hero": {
       "badge": "Train with AI before the real interview",
       "title": "Prepare to land<br><span>your dream job.</span>",
-      "sub": "The first step is nailing the interview. Paste the job description and your resume, and Alex will create a personalized simulation so you can practice, sharpen your answers, and walk in with confidence.",
+      "sub": "The first step is nailing the interview. Enter the role you want to practice for and Alex creates a simulation right away. Add a company, job description, or resume if you want a more targeted session.",
       "cta": "Train now →",
       "ctaSignin": "Sign in",
       "listenBtn": "Hear Alex"
@@ -54,22 +54,22 @@
     "tour": {
       "label": "See it in action",
       "title": "Practice like it is the real interview",
-      "sub": "From job description to personalized scorecard — real role-specific questions, instant feedback, and voice or text simulation.",
+      "sub": "From target role to personalized scorecard — focused questions, instant feedback, and voice or text simulation.",
       "previewInterview": "See a live interview session →",
       "previewScorecard": "See a real scorecard →"
     },
     "howto": {
       "label": "How it works",
-      "title": "Built around your resume and the actual job",
-      "sub": "Before the interview starts, you paste the job description and your resume. The AI reads both and builds a mock interview tailored to your background, that specific role, and that company — not a generic script.",
-      "s1": { "title": "Paste the job description", "desc": "Copy it from any job board or company website" },
-      "s2": { "title": "Add your resume", "desc": "Paste the text or upload a PDF" },
-      "s3": { "title": "Get your personalized interview", "desc": "The AI generates every question around you and the role" }
+      "title": "Start with the role. Personalize when you want.",
+      "sub": "To begin, just enter the role you want to practice for. The job description, company name, and resume are optional; when you add them, the AI creates questions more closely tailored to your background and opportunity.",
+      "s1": { "title": "Enter the role", "desc": "It is the only required field to start" },
+      "s2": { "title": "Add optional details", "desc": "Company, job post, or resume make the interview more targeted" },
+      "s3": { "title": "Start your interview", "desc": "The AI generates questions from what you provide" }
     },
     "phases": {
       "label": "The 6 phases",
       "title": "6 phases. One complete interview.",
-      "sub": "Works for any field — tech, finance, consulting, marketing, operations, and more. The AI adapts every question to your resume and the actual job description.",
+      "sub": "Works for any field — tech, finance, consulting, marketing, operations, and more. The AI starts from the role and adapts every question to the details you choose to add.",
       "p1": {
         "num": "PHASE 1",
         "name": "Elevator Pitch",
@@ -83,7 +83,7 @@
       "p3": {
         "num": "PHASE 3",
         "name": "Role-Specific Questions",
-        "desc": "3 targeted questions generated from the actual job description — not generic. Engineer, analyst, manager, or consultant: each interview is different."
+        "desc": "3 targeted questions generated from the role and any details you add. Engineer, analyst, manager, or consultant: each interview is different."
       },
       "p4": {
         "num": "PHASE 4",
@@ -127,7 +127,7 @@
   },
   "dashboard": {
     "title": "Let's prepare you for your dream job.",
-    "sub": "Paste the job description and your resume. Alex will run a personalized mock interview, help you sharpen your answers, and show you where to build more confidence before the big day.",
+    "sub": "Enter the role you want to practice for. Add job and background details if you want a more targeted interview.",
     "continueTitle": "Continue interview",
     "newTitle": "New position",
     "newSub": "Paste a job description + resume to start a personalized session",
@@ -292,29 +292,30 @@
       "preparing": "Preparing"
     },
     "upload": "Upload PDF or DOCX",
-    "minChars": "Minimum 50 characters required",
+    "minChars": "Optional",
+    "optionalHint": "Optional. Add details when you have them for a more targeted interview.",
     "step1": {
-      "title": "What role are you interviewing for?",
-      "desc": "Paste the job description below. The more detail you provide, the more targeted your mock interview will be.",
+      "title": "What role or job do you want to practice for?",
+      "desc": "Only the job title is required. The company name and job description are optional, but they help create a more targeted mock interview.",
       "jobTitle": "Job title *",
       "jobTitlePlaceholder": "e.g. Senior AI Engineer",
-      "company": "Company name",
+      "company": "Company name (optional)",
       "companyPlaceholder": "e.g. Acme Corp",
-      "jobDescLabel": "Job description *",
-      "jobDescPlaceholder": "Paste the full job description here — responsibilities, requirements, qualifications, and any other relevant details…",
-      "next": "Next: Add your resume →"
+      "jobDescLabel": "Job description (optional)",
+      "jobDescPlaceholder": "If you have it, paste the job description here — responsibilities, requirements, qualifications, and any other relevant details…",
+      "next": "Next step →"
     },
     "step2": {
-      "title": "Paste your resume",
-      "desc": "Copy and paste your resume below. Include your work experience, education, projects, and skills. The AI will use this to personalize every phase of your mock interview.",
-      "resumeLabel": "Resume text *",
-      "resumePlaceholder": "Paste your resume here — work experience, education, projects, skills, publications, etc.…",
+      "title": "Tell us about yourself or paste your resume",
+      "desc": "This step is optional, but it helps create a guided interview: the interviewer can ask better follow-ups, understand your background, and help you shape stronger answers.",
+      "resumeLabel": "About you or resume text (optional)",
+      "resumePlaceholder": "Share your experience, education, projects, and skills, or paste your resume here…",
       "back": "← Back",
       "start": "Prepare my interview →"
     },
     "step3": {
       "title": "Preparing your personalized interview…",
-      "sub": "Our AI is analyzing your resume and the job description to create a tailored mock interview experience.",
+      "sub": "Our AI is analyzing the available information to create a tailored mock interview experience.",
       "item1": "Reading your background and key achievements",
       "item2": "Analyzing what the role requires",
       "item3": "Crafting interview phases specific to you",
@@ -323,8 +324,8 @@
     },
     "errors": {
       "noTitle": "Please enter the job title.",
-      "shortDesc": "Job description is too short. Please paste the full description.",
-      "shortResume": "Resume is too short. Please paste your full resume.",
+      "shortDesc": "The job description is optional.",
+      "shortResume": "The resume is optional.",
       "default": "Something went wrong. Please try again.",
       "network": "Network error — please check your connection and try again."
     }
@@ -645,7 +646,7 @@
     "cta": {
       "interviewTitle": "Start your own mock interview",
       "scoreTitle": "Get your own scorecard",
-      "body": "Paste any job description and your resume — the AI builds a personalized mock interview with voice, evaluates every phase, and delivers a full scorecard like this one.",
+      "body": "Enter a target role, then optionally add a job description or resume — the AI builds a mock interview with voice, evaluates every phase, and delivers a full scorecard like this one.",
       "startFree": "Start for free →"
     }
   }

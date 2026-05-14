@@ -37,7 +37,7 @@ The candidate should demonstrate:
 3. **Execution realism** — recognizing the gap between a plan/prototype/pilot and real-world delivery: what can go wrong, what assumptions are being made, what's needed to make it stick
 4. **Concrete mitigation** — not just naming risks, but describing specific actions to address them
 5. **Stakeholder management** — proactive communication, not waiting to be asked; setting expectations early
-6. **Real experience connection** — connecting the answer to specific projects from their background
+6. **Real experience connection** — connecting the answer to specific projects from their background when provided, or to a concrete example the candidate shares during the interview
 
 ---
 
@@ -48,7 +48,7 @@ The candidate should demonstrate:
 - **execution_realism**: explicitly recognizes the gap between a plan/pilot/proposal and real-world delivery — shows awareness of what can go wrong
 - **concrete_mitigation_plan**: offers concrete mitigation strategies, not just acknowledgment of risk
 - **stakeholder_management**: demonstrates proactive stakeholder management — sets expectations, communicates early
-- **connects_to_real_experience**: connects at least one answer to specific real experience from their background
+- **connects_to_real_experience**: connects at least one answer to specific real experience from their background, or to a concrete example they share if no background was provided
 - **english_adequate**: English is mostly fluent and appropriate for a senior professional interview
 
 Use these criteria to guide the Judge's feedback — they are not a hard gate. Alex advances after 4 exchanges regardless of checklist status. Improvement happens across rounds, not within a single attempt.

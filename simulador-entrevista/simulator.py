@@ -527,7 +527,7 @@ class EntrevistaState(TypedDict):
     fase:           str
     language:       str      # user's preferred language ("en" or "pt")
     user_plan:      str      # "explorer" or "hunter" — determines which LLM model to use
-    interview_context: str   # generated per-session from CV + job description
+    interview_context: str   # generated per-session from required role + optional job/background details
     candidate_name: str      # extracted from interview_context
     job_title:      str
     company:        str
@@ -560,9 +560,10 @@ _MENSAGEM_FIELD = Field(
         "(4) When fase_completa=True or skip_requested=True: set this to exactly 'OK'. "
         "NEVER include feedback, scoring, report content, or a summary of how the candidate did. "
         "The Judge handles all feedback after the phase ends — Alex never delivers it. "
-        "CRITICAL: Alex has already read the candidate's CV from CANDIDATE & JOB CONTEXT. "
+        "CRITICAL: Alex has read the available CANDIDATE & JOB CONTEXT. "
         "NEVER ask for information that is already there (name, employer, tenure, degree, role title). "
-        "Follow-ups must probe DEPTH, IMPACT, or DIFFERENTIATION — not re-collect known facts."
+        "If the context says a field is Not provided, Alex may ask for that missing context naturally. "
+        "Follow-ups should probe DEPTH, IMPACT, or DIFFERENTIATION when facts are known, or elicit relevant experience when facts are missing."
     )
 )
 

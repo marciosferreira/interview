@@ -38,7 +38,7 @@
     "hero": {
       "badge": "Treine com IA antes da entrevista real",
       "title": "Prepare-se para conquistar<br><span>a vaga dos seus sonhos.</span>",
-      "sub": "O primeiro passo é passar bem pela entrevista. Cole a vaga e seu currículo, e Alex vai criar uma simulação personalizada para você praticar, melhorar suas respostas e chegar mais confiante ao momento decisivo.",
+      "sub": "O primeiro passo é passar bem pela entrevista. Informe o cargo que você quer treinar e Alex cria uma simulação na hora. Se quiser, adicione empresa, descrição da vaga ou currículo para deixar tudo mais direcionado.",
       "cta": "Treinar agora →",
       "ctaSignin": "Entrar",
       "listenBtn": "Ouvir a Alex"
@@ -54,22 +54,22 @@
     "tour": {
       "label": "Veja em ação",
       "title": "Treine como se fosse a entrevista real",
-      "sub": "Da descrição da vaga ao scorecard personalizado — perguntas reais da vaga, feedback instantâneo e simulação por voz ou texto.",
+      "sub": "Do cargo desejado ao scorecard personalizado — perguntas direcionadas, feedback instantâneo e simulação por voz ou texto.",
       "previewInterview": "Veja uma sessão de entrevista ao vivo →",
       "previewScorecard": "Veja um scorecard real →"
     },
     "howto": {
       "label": "Como funciona",
-      "title": "Gerado a partir do seu currículo e da vaga real",
-      "sub": "Antes da entrevista começar, você cola a descrição da vaga e o seu currículo. A IA lê os dois e monta uma entrevista feita para você — seu histórico, aquela vaga, aquela empresa. Nada de roteiro genérico.",
-      "s1": { "title": "Cole a descrição da vaga", "desc": "Copie de qualquer site de vagas ou da empresa" },
-      "s2": { "title": "Adicione seu currículo", "desc": "Cole o texto ou faça upload do PDF" },
-      "s3": { "title": "Receba sua entrevista personalizada", "desc": "A IA gera cada pergunta com base em você e na vaga" }
+      "title": "Comece pelo cargo. Personalize quando quiser.",
+      "sub": "Para começar, basta informar o cargo desejado. A descrição da vaga, o nome da empresa e seu currículo são opcionais; quando você adiciona esses detalhes, a IA cria perguntas mais direcionadas ao seu histórico e à oportunidade.",
+      "s1": { "title": "Informe o cargo", "desc": "É o único campo obrigatório para começar" },
+      "s2": { "title": "Adicione detalhes opcionais", "desc": "Empresa, vaga ou currículo deixam a entrevista mais direcionada" },
+      "s3": { "title": "Comece sua entrevista", "desc": "A IA gera perguntas a partir do que você informou" }
     },
     "phases": {
       "label": "As 6 fases",
       "title": "6 fases. Uma entrevista completa.",
-      "sub": "Funciona para qualquer área — tecnologia, finanças, consultoria, marketing, operações e mais. A IA adapta cada pergunta ao seu currículo e à vaga real.",
+      "sub": "Funciona para qualquer área — tecnologia, finanças, consultoria, marketing, operações e mais. A IA usa o cargo para começar e adapta cada pergunta aos detalhes que você decidir adicionar.",
       "p1": {
         "num": "FASE 1",
         "name": "Elevator Pitch",
@@ -88,7 +88,7 @@
       "p4": {
         "num": "FASE 4",
         "name": "Liderança e Abordagem",
-        "desc": "Como você lidera, lida com ambiguidade e conduz projetos até o fim — avaliado pelo que a vaga realmente exige."
+        "desc": "Como você lidera, lida com ambiguidade e conduz projetos até o fim — avaliado pelo que o cargo e os detalhes informados exigem."
       },
       "p5": {
         "num": "FASE 5",
@@ -127,10 +127,10 @@
   },
   "dashboard": {
     "title": "Vamos preparar você para a vaga dos seus sonhos.",
-    "sub": "Cole a descrição da vaga e seu currículo. Alex vai simular uma entrevista personalizada, ajudar você a melhorar suas respostas e mostrar onde ganhar mais confiança antes do dia decisivo.",
+    "sub": "Informe o cargo que você quer treinar. Se quiser, adicione detalhes sobre a vaga e sobre você para criar uma entrevista mais direcionada.",
     "continueTitle": "Continuar entrevista",
-    "newTitle": "Nova vaga",
-    "newSub": "Cole a descrição da vaga + currículo para começar uma sessão personalizada",
+    "newTitle": "Nova entrevista",
+    "newSub": "Dê alguns detalhes sobre a vaga e sobre você para criar sua entrevista.",
     "historyTitle": "Histórico de entrevistas",
     "historySub": "Navegue e continue sessões anteriores por vaga"
   },
@@ -239,7 +239,7 @@
     "nav": {
       "current": "← Entrevista atual",
       "currentLabel": "Entrevista atual",
-      "newInterview": "Nova vaga"
+      "newInterview": "Nova entrevista"
     },
     "pageHeading": "Entrevistas anteriores",
     "summary": "{{count}} entrevistas em {{roles}} vagas",
@@ -292,29 +292,30 @@
       "preparing": "Preparando"
     },
     "upload": "Enviar PDF ou DOCX",
-    "minChars": "Mínimo de 50 caracteres",
+    "minChars": "Opcional",
+    "optionalHint": "Opcional. Adicione detalhes quando tiver para uma entrevista mais direcionada.",
     "step1": {
-      "title": "Para qual vaga você está se candidatando?",
-      "desc": "Cole a descrição da vaga abaixo. Quanto mais detalhe você fornecer, mais direcionada será sua entrevista simulada.",
+      "title": "Qual vaga ou cargo você tem interesse em treinar?",
+      "desc": "Apenas o cargo é obrigatório. O nome da empresa e a descrição da vaga são opcionais, mas ajudam a criar uma entrevista simulada mais direcionada.",
       "jobTitle": "Cargo *",
       "jobTitlePlaceholder": "ex: Engenheiro de IA Sênior",
-      "company": "Nome da empresa",
+      "company": "Nome da empresa (opcional)",
       "companyPlaceholder": "ex: Acme Corp",
-      "jobDescLabel": "Descrição da vaga *",
-      "jobDescPlaceholder": "Cole a descrição completa da vaga aqui — responsabilidades, requisitos, qualificações e outros detalhes…",
-      "next": "Próximo: Adicionar currículo →"
+      "jobDescLabel": "Descrição da vaga (opcional)",
+      "jobDescPlaceholder": "Se tiver, cole a descrição da vaga aqui — responsabilidades, requisitos, qualificações e outros detalhes…",
+      "next": "Próximo passo →"
     },
     "step2": {
-      "title": "Cole seu currículo",
-      "desc": "Copie e cole seu currículo abaixo. Inclua experiência profissional, formação, projetos e habilidades. A IA usará isso para personalizar cada fase da entrevista.",
-      "resumeLabel": "Texto do currículo *",
-      "resumePlaceholder": "Cole seu currículo aqui — experiência, formação, projetos, habilidades, publicações, etc.…",
+      "title": "Fale sobre você ou cole seu currículo",
+      "desc": "Este passo não é obrigatório, mas ajuda a criar uma entrevista guiada: o entrevistador consegue dar follow-up, entender melhor seu histórico e ajudar você a construir respostas mais adequadas.",
+      "resumeLabel": "Sobre você ou texto do currículo (opcional)",
+      "resumePlaceholder": "Conte sobre sua experiência, formação, projetos e habilidades, ou cole seu currículo aqui…",
       "back": "← Voltar",
       "start": "Preparar minha entrevista →"
     },
     "step3": {
       "title": "Preparando sua entrevista personalizada…",
-      "sub": "Nossa IA está analisando seu currículo e a descrição da vaga para criar uma experiência de entrevista sob medida.",
+      "sub": "Nossa IA está analisando as informações disponíveis para criar uma experiência de entrevista sob medida.",
       "item1": "Lendo seu histórico e principais conquistas",
       "item2": "Analisando o que a vaga exige",
       "item3": "Criando fases de entrevista específicas para você",
@@ -323,8 +324,8 @@
     },
     "errors": {
       "noTitle": "Por favor, informe o cargo.",
-      "shortDesc": "A descrição da vaga é muito curta. Cole a descrição completa.",
-      "shortResume": "O currículo é muito curto. Cole seu currículo completo.",
+      "shortDesc": "A descrição da vaga é opcional.",
+      "shortResume": "O currículo é opcional.",
       "default": "Algo deu errado. Tente novamente.",
       "network": "Erro de rede — verifique sua conexão e tente novamente."
     }
@@ -469,7 +470,7 @@
     "pageTitle": "Planos & Preços — Acing Interviews",
     "heroLabel": "Escolha seu plano",
     "heroTitle": "Pratique mais.<br>Conquiste a vaga.",
-    "heroSub": "Cada sessão de entrevista é totalmente personalizada para seu currículo e vaga. Faça upgrade para praticar mais rodadas por semana.",
+    "heroSub": "Comece apenas com o cargo ou adicione detalhes da vaga e do seu histórico para personalizar ainda mais. Faça upgrade para praticar mais rodadas por semana.",
     "usageThisWeek": "Esta semana",
     "usageUsed": "usadas",
     "planLabel": "plano",
@@ -645,7 +646,7 @@
     "cta": {
       "interviewTitle": "Inicie sua própria simulação de entrevista",
       "scoreTitle": "Obtenha seu próprio scorecard",
-      "body": "Cole qualquer descrição de vaga e seu currículo — a IA cria uma entrevista simulada personalizada com voz, avalia cada fase e entrega um scorecard completo como este.",
+      "body": "Informe um cargo e, se quiser, adicione a vaga ou seu currículo — a IA cria uma entrevista simulada com voz, avalia cada fase e entrega um scorecard completo como este.",
       "startFree": "Comece grátis →"
     }
   }

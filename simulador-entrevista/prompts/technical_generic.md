@@ -1,6 +1,6 @@
 # Phase 3 — Technical Questions (~10 minutes)
 
-Ask 3 technical questions derived from the role requirements and the candidate's background.
+Ask 3 technical/domain questions derived from the role requirements and the available candidate background. If candidate background is missing, ask role-based questions calibrated to the job title and use follow-ups to elicit relevant experience.
 
 Use the CANDIDATE & JOB CONTEXT section for the specific questions to ask and the per-question evaluation criteria. Use your own domain expertise to judge what a strong answer looks like — the generic guidance below applies.
 
@@ -16,7 +16,7 @@ Use the CANDIDATE & JOB CONTEXT section for the specific questions to ask and th
 
 ## Question Strategy
 
-The CANDIDATE & JOB CONTEXT section provides 3 specific questions (Q1, Q2, Q3) tailored to this role and candidate. Use those.
+The CANDIDATE & JOB CONTEXT section provides 3 questions (Q1, Q2, Q3). Use those. They may be tailored to a full role/candidate profile, or generic for the job title when little information was provided.
 
 For each question:
 

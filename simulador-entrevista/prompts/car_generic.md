@@ -17,6 +17,9 @@ Use this opening verbatim (adapted to the interview language):
 If the CANDIDATE & JOB CONTEXT identifies a specific project to probe, steer toward it after the candidate chooses:
 > "I noticed [project name] on your resume — can we use that one? Tell me the context."
 
+If no specific project is provided, keep it generic and let the candidate choose a relevant example:
+> "Choose a project or situation that feels closest to this role. Tell me the context."
+
 ---
 
 ## What a Strong CAR Story Looks Like

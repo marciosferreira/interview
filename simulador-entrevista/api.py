@@ -28,7 +28,7 @@ from pydantic import BaseModel
 from simulator import (
     graph, make_initial_state, model, get_model, session_store,
     _build_report_system, REPORT_PHASE_MAP, get_db_conn,
-    _EXPLORER_MODEL, _HUNTER_MODEL, extract_hire_signal,
+    _HUNTER_MODEL, extract_hire_signal,
 )
 from auth import (
     UserCreate, UserLogin, TokenResponse, RegisterResponse, ProfileUpdate,
@@ -738,17 +738,20 @@ async def stripe_portal(current_user: dict = Depends(get_current_user)):
 class PrepareRequest(BaseModel):
     job_title:       str
     company:         str = ""
-    job_description: str
-    resume_text:     str
+    job_description: str = ""
+    resume_text:     str = ""
 
 
 @app.post("/prepare")
 async def prepare(body: PrepareRequest, current_user: dict = Depends(get_current_user)):
     """Generate a personalized interview context and create a job session."""
-    if len(body.job_description.strip()) < 50:
-        raise HTTPException(status_code=422, detail="Job description is too short")
-    if len(body.resume_text.strip()) < 50:
-        raise HTTPException(status_code=422, detail="Resume text is too short")
+    job_title = body.job_title.strip()
+    company = body.company.strip()
+    job_description = body.job_description.strip()
+    resume_text = body.resume_text.strip()
+
+    if not job_title:
+        raise HTTPException(status_code=422, detail="Job title is required")
 
     loop = asyncio.get_running_loop()
 
@@ -779,15 +782,16 @@ async def prepare(body: PrepareRequest, current_user: dict = Depends(get_current
             },
         )
 
-    # Generate personalized interview context (LLM call — may take 10–20 seconds)
+    # Generate interview context with Sonnet for every plan. This briefing drives
+    # the whole session, so keep it high quality even for free users.
     try:
         interview_context = await generate_interview_context(
-            job_title=body.job_title,
-            company=body.company,
-            job_description=body.job_description,
-            resume_text=body.resume_text,
+            job_title=job_title,
+            company=company or "Not provided",
+            job_description=job_description or "Not provided. Create a general interview for this target role.",
+            resume_text=resume_text or "Not provided. Ask broad follow-up questions to learn about the candidate's background.",
             language=language,
-            model_name=_HUNTER_MODEL if plan == "hunter" else _EXPLORER_MODEL,
+            model_name=_HUNTER_MODEL,
         )
     except Exception as exc:
         print(f"[prepare] LLM generation failed: {exc}")
@@ -804,10 +808,10 @@ async def prepare(body: PrepareRequest, current_user: dict = Depends(get_current
         lambda: _with_conn(lambda c: create_job_session(
             c,
             user_id=current_user["id"],
-            job_title=body.job_title,
-            company=body.company,
-            job_description=body.job_description,
-            resume_text=body.resume_text,
+            job_title=job_title,
+            company=company,
+            job_description=job_description,
+            resume_text=resume_text,
             interview_context=interview_context,
         )),
     )
@@ -815,8 +819,8 @@ async def prepare(body: PrepareRequest, current_user: dict = Depends(get_current
     return {
         "job_session_id": job_session_id,
         "candidate_name": candidate_name,
-        "job_title": body.job_title,
-        "company": body.company,
+        "job_title": job_title,
+        "company": company,
         "context_preview": interview_context[:500] + "…" if len(interview_context) > 500 else interview_context,
     }
 

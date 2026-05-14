@@ -722,7 +722,7 @@
     <div id="drawer-auth" style="display:none;flex-direction:column;gap:6px">
       <a class="drawer-item" href="/"><i data-lucide="home"></i> <span data-i18n="nav.homeLabel">Início</span></a>
       <a class="drawer-item" href="/tips.html"><i data-lucide="lightbulb"></i> <span data-i18n="nav.tipsLabel">Dicas</span></a>
-      <button class="drawer-item" onclick="closeMobileMenu(); newInterview()"><i data-lucide="plus"></i> <span data-i18n="history.nav.newInterview">Nova vaga</span></button>
+      <button class="drawer-item" onclick="closeMobileMenu(); newInterview()"><i data-lucide="plus"></i> <span data-i18n="history.nav.newInterview">Nova entrevista</span></button>
       <a class="drawer-item" href="/history.html"><i data-lucide="clipboard-list"></i> <span data-i18n="nav.historyLabel">Histórico</span></a>
       <a class="drawer-item" href="/profile.html"><i data-lucide="settings"></i> <span data-i18n="nav.settingsLabel">Configurações</span></a>
       <div class="drawer-divider"></div>
@@ -751,7 +751,7 @@
     <div class="hero-content">
       <div class="badge badge-primary mb-6" data-i18n="landing.hero.badge">Treine com IA antes da entrevista real</div>
       <h2 data-i18n-html="landing.hero.title">Prepare-se para conquistar<br><span>a vaga dos seus sonhos.</span></h2>
-      <p class="hero-sub" data-i18n="landing.hero.sub">O primeiro passo é passar bem pela entrevista. Cole a vaga e seu currículo, e Alex vai criar uma simulação personalizada para você praticar, melhorar suas respostas e chegar mais confiante ao momento decisivo.</p>
+      <p class="hero-sub" data-i18n="landing.hero.sub">O primeiro passo é passar bem pela entrevista. Informe o cargo que você quer treinar e Alex cria uma simulação na hora. Se quiser, adicione empresa, descrição da vaga ou currículo para deixar tudo mais direcionado.</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="/pt/register.html" data-i18n="landing.hero.cta">Treinar agora →</a>
         <button class="btn btn-secondary hero-listen-btn" id="hero-listen-btn" onclick="playHeroSample()">
@@ -794,7 +794,7 @@
     <div class="section-header" style="margin-bottom:0">
       <div class="badge badge-primary mb-4" data-i18n="landing.tour.label">Veja em ação</div>
       <h2 class="section-title" style="margin-top:16px;" data-i18n="landing.tour.title">Treine como se fosse a entrevista real</h2>
-      <p class="section-sub" data-i18n="landing.tour.sub">Da descrição da vaga ao scorecard personalizado — perguntas reais da vaga, feedback instantâneo e simulação por voz ou texto.</p>
+      <p class="section-sub" data-i18n="landing.tour.sub">Do cargo desejado ao scorecard personalizado — perguntas direcionadas, feedback instantâneo e simulação por voz ou texto.</p>
     </div>
     <div class="product-tour-previews">
       <a href="/demo_interview.html" class="preview-card">
@@ -835,28 +835,28 @@
   <div class="section" style="padding-top: 32px; padding-bottom: 0;">
     <div class="howto-block">
       <div class="badge badge-primary mb-4" data-i18n="landing.howto.label">Como funciona</div>
-      <h2 class="section-title" style="margin-top:16px;" data-i18n="landing.howto.title">Gerado a partir do seu currículo e da vaga real</h2>
-      <p class="section-sub" data-i18n="landing.howto.sub">Antes da entrevista começar, você cola a descrição da vaga e o seu currículo. A IA lê os dois e monta uma entrevista feita para você — seu histórico, aquela vaga, aquela empresa. Nada de roteiro genérico.</p>
+      <h2 class="section-title" style="margin-top:16px;" data-i18n="landing.howto.title">Comece pelo cargo. Personalize quando quiser.</h2>
+      <p class="section-sub" data-i18n="landing.howto.sub">Para começar, basta informar o cargo desejado. A descrição da vaga, o nome da empresa e seu currículo são opcionais; quando você adiciona esses detalhes, a IA cria perguntas mais direcionadas ao seu histórico e à oportunidade.</p>
       <div class="howto-steps">
         <div class="howto-step">
           <div class="howto-step-icon"><i data-lucide="clipboard-list" style="width:26px;height:26px;"></i></div>
           <div class="howto-step-num">Passo 1</div>
-          <div class="howto-step-title" data-i18n="landing.howto.s1.title">Cole a descrição da vaga</div>
-          <div class="howto-step-desc" data-i18n="landing.howto.s1.desc">Copie de qualquer site de vagas ou da empresa</div>
+          <div class="howto-step-title" data-i18n="landing.howto.s1.title">Informe o cargo</div>
+          <div class="howto-step-desc" data-i18n="landing.howto.s1.desc">É o único campo obrigatório para começar</div>
         </div>
         <div class="howto-arrow"><i data-lucide="arrow-right" style="width:20px;height:20px;"></i></div>
         <div class="howto-step">
           <div class="howto-step-icon"><i data-lucide="file-text" style="width:26px;height:26px;"></i></div>
           <div class="howto-step-num">Passo 2</div>
-          <div class="howto-step-title" data-i18n="landing.howto.s2.title">Adicione seu currículo</div>
-          <div class="howto-step-desc" data-i18n="landing.howto.s2.desc">Cole o texto ou faça upload do PDF</div>
+          <div class="howto-step-title" data-i18n="landing.howto.s2.title">Adicione detalhes opcionais</div>
+          <div class="howto-step-desc" data-i18n="landing.howto.s2.desc">Empresa, vaga ou currículo deixam a entrevista mais direcionada</div>
         </div>
         <div class="howto-arrow"><i data-lucide="arrow-right" style="width:20px;height:20px;"></i></div>
         <div class="howto-step">
           <div class="howto-step-icon"><i data-lucide="sparkles" style="width:26px;height:26px;"></i></div>
           <div class="howto-step-num">Passo 3</div>
-          <div class="howto-step-title" data-i18n="landing.howto.s3.title">Receba sua entrevista personalizada</div>
-          <div class="howto-step-desc" data-i18n="landing.howto.s3.desc">A IA gera cada pergunta com base em você e na vaga</div>
+          <div class="howto-step-title" data-i18n="landing.howto.s3.title">Comece sua entrevista</div>
+          <div class="howto-step-desc" data-i18n="landing.howto.s3.desc">A IA gera perguntas a partir do que você informou</div>
         </div>
       </div>
     </div>
@@ -867,7 +867,7 @@
     <div class="section-header">
       <div class="badge badge-primary mb-4" data-i18n="landing.phases.label">As 6 fases</div>
       <h2 class="section-title" data-i18n="landing.phases.title">6 fases. Uma entrevista completa.</h2>
-      <p class="section-sub" data-i18n="landing.phases.sub">Funciona para qualquer área — tecnologia, finanças, consultoria, marketing, operações e mais. A IA adapta cada pergunta ao seu currículo e à vaga real.</p>
+      <p class="section-sub" data-i18n="landing.phases.sub">Funciona para qualquer área — tecnologia, finanças, consultoria, marketing, operações e mais. A IA usa o cargo para começar e adapta cada pergunta aos detalhes que você decidir adicionar.</p>
     </div>
     
     <div class="phases">
@@ -893,7 +893,7 @@
         <div class="phase-icon-wrapper"><i data-lucide="compass" style="width:24px;height:24px;"></i></div>
         <div class="phase-num" data-i18n="landing.phases.p4.num">FASE 4</div>
         <div class="phase-name" data-i18n="landing.phases.p4.name">Liderança e Abordagem</div>
-        <div class="phase-desc" data-i18n="landing.phases.p4.desc">Como você lidera, lida com ambiguidade e conduz projetos até o fim — avaliado pelo que a vaga realmente exige.</div>
+        <div class="phase-desc" data-i18n="landing.phases.p4.desc">Como você lidera, lida com ambiguidade e conduz projetos até o fim — avaliado pelo que o cargo e os detalhes informados exigem.</div>
       </div>
       <div class="glass-card phase-card glass-card-hover">
         <div class="phase-icon-wrapper"><i data-lucide="lightbulb" style="width:24px;height:24px;"></i></div>
@@ -959,14 +959,14 @@
   <div class="dash-hero">
     <div class="dash-hero-icon"><i data-lucide="target" style="width:36px;height:36px;"></i></div>
     <h2 data-i18n="dashboard.title">Vamos preparar você para a vaga dos seus sonhos.</h2>
-    <p data-i18n="dashboard.sub">Cole a descrição da vaga e seu currículo. Alex vai simular uma entrevista personalizada, ajudar você a melhorar suas respostas e mostrar onde ganhar mais confiança antes do dia decisivo.</p>
+    <p data-i18n="dashboard.sub">Informe o cargo que você quer treinar. Se quiser, adicione detalhes sobre a vaga e sobre você para criar uma entrevista mais direcionada.</p>
   </div>
   <div class="actions" id="actions" data-lang="pt">
     <div class="glass-card action-card primary glass-card-hover" onclick="location.href='/onboarding.html'">
       <div class="card-icon"><i data-lucide="sparkles"></i></div>
       <div class="card-body">
-        <div class="card-title" data-i18n="dashboard.newTitle">Nova vaga</div>
-        <div class="card-sub" data-i18n="dashboard.newSub">Cole a descrição da vaga + currículo para começar uma sessão personalizada</div>
+        <div class="card-title" data-i18n="dashboard.newTitle">Nova entrevista</div>
+        <div class="card-sub" data-i18n="dashboard.newSub">Dê alguns detalhes sobre a vaga e sobre você para criar sua entrevista.</div>
       </div>
       <i data-lucide="chevron-right" class="card-arrow"></i>
     </div>
@@ -1099,8 +1099,8 @@
     },
     pt: {
       continueTitle: 'Continuar entrevista',
-      newTitle: 'Nova vaga',
-      newSub: 'Cole a descrição da vaga + currículo para começar uma sessão personalizada',
+      newTitle: 'Nova entrevista',
+      newSub: 'Dê alguns detalhes sobre a vaga e sobre você para criar sua entrevista.',
       historyTitle: 'Histórico de entrevistas',
       historySub: 'Navegue e continue sessões anteriores por vaga',
       starting: 'Iniciando...',

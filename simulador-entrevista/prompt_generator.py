@@ -1,9 +1,10 @@
 """
-Generates a personalized interview preparation document from a job description + resume.
+Generates an interview preparation document from required role title plus optional
+job/company details and optional candidate background.
 
 The output is a single markdown document that gets injected into every interview phase
-system prompt, giving the AI interviewer full context about who the candidate is and
-what the role requires.
+system prompt, giving the AI interviewer the best available context about who the
+candidate is and what the role may require.
 """
 
 import os
@@ -22,56 +23,70 @@ def _get_model(model_name: str | None = None) -> ChatAnthropic:
         )
     return _gen_model_cache[key]
 
-_SYSTEM = """You are an expert interview designer. Analyze a job description and resume, then produce a concise structured briefing for an AI interviewer named Alex.
+_SYSTEM = """You are an expert interview designer. Create a concise structured briefing for an AI interviewer named Alex from the information available.
 
 Alex is an experienced interviewer who will adapt your notes in real time — do NOT write scripts, long paragraphs, or sample answers. Write short, dense bullets only. Every item should be one line.
 
 Rules:
-- Reference actual names, projects, companies, and numbers from the resume/JD.
+- The job title is always available and is the minimum source of truth.
+- Job description and company name are optional. If provided, use them to create a focused interview for that exact role/company; if missing or thin, create a solid generic interview calibrated to the job title.
+- Candidate background/resume is optional. If provided, use it to suggest specific follow-ups about their experience; if missing or thin, create generic role-appropriate questions and ask the candidate to connect answers to their own experience during the interview.
+- Reference actual names, projects, companies, and numbers only when they are explicitly provided.
 - Adapt to the role domain — never impose tech framing on non-tech roles.
 - Match seniority to the job title.
 - Do not invent anything not in the documents.
+- When details are missing, say "Not provided" or "Use a generic role-based probe" instead of fabricating specifics.
 - Be concise. Alex does the rest.
-- The CANDIDATE PROFILE section is critical: Alex reads it before the interview and uses it to avoid asking basic biographical questions. Fill every field with exact facts — never leave them vague or empty."""
+- The CANDIDATE PROFILE section is critical: Alex reads it before the interview. Fill known fields with exact facts; mark unknown fields as "Not provided" so Alex knows what he may need to learn through the interview."""
 
 _PROMPT_TEMPLATE = """
-## Job Posting
+## Target Role
 **Title:** {job_title}
 **Company:** {company}
 
+## Job Details
 {job_description}
 
 ---
 
-## Candidate Resume
+## Candidate Background
 {resume_text}
 
 ---
 
 Generate a concise interview briefing. Use short bullets only — no paragraphs, no sample answers, no scripts. Alex will adapt everything in real time.
 
+IMPORTANT ADAPTATION RULES:
+- If Job Details are provided, tailor role analysis, technical/domain questions, leadership scenario, and motivation probes to those details.
+- If Company is provided, include company-aware motivation probes; if Company is not provided, use role/industry motivation probes and do not pretend Alex works at a named company.
+- If Candidate Background is provided, include specific follow-up angles tied to their experience, projects, achievements, gaps, and vocabulary.
+- If Candidate Background is missing or thin, do not make assumptions about experience. Design questions that let the candidate supply examples, and coach Alex to ask generic follow-ups such as "Can you connect that to something you've done before?"
+- Always produce a complete interview plan even with only the job title.
+
 # CANDIDATE PROFILE
-IMPORTANT: Fill these with exact facts from the resume. Alex reads this section before the interview starts and will NOT ask the candidate for any information already listed here.
+IMPORTANT: Fill these with exact facts only when provided. Alex will NOT ask the candidate for information already listed here, but may ask for missing background when fields say "Not provided".
 
 - **Name:** (from resume, or "Candidate")
 - **Location:** (city/country from resume, or "Not mentioned")
-- **Current role:** (exact title + company name)
-- **Years of experience:** (total professional experience, e.g. "10 years")
-- **Education:** (highest degree + field, one line)
-- **Top 2 achievements:** (specific, concrete, from resume)
-- **Domain expertise:** (primary skills/areas relevant to this role)
-- **Key differentiator:** (one line — what sets them apart for this role)
+- **Current role:** (exact title + company name, or "Not provided")
+- **Years of experience:** (total professional experience, or "Not provided")
+- **Education:** (highest degree + field, or "Not provided")
+- **Top 2 achievements:** (specific, concrete, from background, or "Not provided")
+- **Domain expertise:** (provided skills/areas relevant to this role, or "Not provided")
+- **Key differentiator:** (provided differentiator for this role, or "Not provided")
+- **Context quality:** (one of: "role title only", "role + partial job details", "role + candidate background", "role + job + candidate background")
 
 # TARGET ROLE ANALYSIS
 - **Role domain:** (e.g., Software Engineering / Sales / Finance / Marketing / HR / Operations)
 - **Core capability needed:** (the one underlying thing the hiring manager wants — one line)
-- **Hard requirements:** (non-negotiable skills/experience)
-- **Probe areas:** (2 areas where this candidate will be tested hardest, based on their gaps vs. the JD)
-- **Concerns:** (1–2 gaps or risks worth flagging)
+- **Hard requirements:** (from the JD if provided; otherwise infer common requirements from the job title and mark as role-based)
+- **Probe areas:** (2 areas to test; candidate-specific if background exists, otherwise generic for this job title)
+- **Concerns:** (1–2 gaps or risks; if candidate background is missing, say "insufficient candidate background to assess")
 
 # ELEVATOR PITCH GUIDANCE
-- **Must-cover elements:** (3–4 specific items from their background directly relevant to this role)
-- **What to avoid:** (specific weaknesses or irrelevant items to sidestep)
+- **Must-cover elements:** (3–4 specific items from their background if provided; otherwise role-relevant themes the candidate should address)
+- **Suggested follow-ups:** (2 specific follow-ups from candidate background if provided; otherwise generic prompts to elicit relevant background)
+- **What to avoid:** (specific weaknesses/irrelevant items if known; otherwise generic vague-answer patterns)
 - **Checklist for evaluation:**
   - personal_intro_clear: introduces name, role, and location
   - background_framed_as_asset: background framed as capability developed, not just credential listed
@@ -82,9 +97,10 @@ IMPORTANT: Fill these with exact facts from the resume. Alex reads this section 
   - english_adequate: English is fluent and professional throughout
 
 # CAR PROJECT GUIDANCE
-- **Best project for a CAR story:** (name it — most relevant to this role's hard requirements)
-- **Why it works:** (one line connecting it to the JD)
+- **Best project for a CAR story:** (name a provided project if available; otherwise ask candidate to choose a relevant project for the job title)
+- **Why it works:** (one line connecting it to the JD/details if provided, otherwise to the job title's core capability)
 - **Result to emphasize:** (business impact — quantify if possible)
+- **If answer is too generic:** (one coaching prompt asking the candidate to connect the story to their own experience)
 - **Checklist for evaluation:**
   - business_context_clear: business context set (industry, problem, stakeholders)
   - problem_stated_clearly: problem described in business terms
@@ -96,7 +112,7 @@ IMPORTANT: Fill these with exact facts from the resume. Alex reads this section 
   - english_adequate: English is fluent and professional throughout
 
 # TECHNICAL EVALUATION FOCUS
-3 domain questions calibrated to this role and seniority. Adapt to the domain (tech/finance/sales/marketing/HR/ops/legal). Write each question as Alex should ask it.
+3 domain questions calibrated to this role and seniority. Adapt to the domain (tech/finance/sales/marketing/HR/ops/legal). Use JD/company specifics when provided; otherwise create strong generic questions for the job title. Write each question as Alex should ask it.
 
 **Q1:** [foundational — core domain knowledge]
 Evaluation criteria:
@@ -121,7 +137,8 @@ Evaluation criteria:
 # LEADERSHIP & APPROACH EVALUATION
 - **Scenario topic:** (2-sentence description of the situation Alex should present — domain-specific, ambiguous, with time pressure and stakeholder friction; Alex will phrase it in his own words)
 - **Key signals to listen for:** (2–3 specific things a strong answer includes for this role)
-- **Red flags:** (1–2 weak answer patterns specific to this candidate's profile)
+- **Experience-based follow-up:** (specific follow-up from candidate background if provided; otherwise ask them to connect the scenario to a past situation)
+- **Red flags:** (1–2 weak answer patterns specific to this candidate's profile if known; otherwise generic weak patterns for the role)
 - **Checklist for evaluation:**
   - starts_with_situation_assessment: assesses current state before jumping to execution
   - identifies_primary_risk: names the primary risk clearly and early
@@ -132,13 +149,13 @@ Evaluation criteria:
   - english_adequate: English is fluent and professional throughout
 
 # FIT & MOTIVATION EVALUATION
-- **Company/role elements to probe:** (2 specific things from the JD a motivated candidate would know — not generic)
-- **Why this role makes sense for them:** (one line — career logic)
-- **Red flags:** (what signals a generic/rehearsed answer for this candidate)
+- **Company/role elements to probe:** (2 specific things from the company/JD if provided; otherwise role/industry elements a motivated candidate should reference)
+- **Why this role makes sense for them:** (one line using candidate background if provided; otherwise ask candidate to explain their career logic)
+- **Red flags:** (what signals a generic/rehearsed answer for this candidate if known; otherwise generic vague motivation)
 - **Checklist for evaluation:**
-  - specific_company_knowledge: references 2+ specific company/role attributes
-  - genuine_connection: draws explicit line between their background and company needs
-  - unique_fit: names something they can get here they cannot get in current role
+  - specific_company_knowledge: references 2+ specific company/role attributes when available, otherwise 2+ role/industry attributes
+  - genuine_connection: draws explicit line between their background and company/role needs, or explains career logic if background is missing
+  - unique_fit: names something they can get from this opportunity/type of role that they cannot get in their current situation
   - authentic_tone: sounds specific and genuine, not rehearsed
   - english_adequate: English is fluent and professional throughout
 

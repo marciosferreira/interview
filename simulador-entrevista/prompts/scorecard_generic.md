@@ -47,8 +47,9 @@ Integer score using the guide above. Base on the phase report score and checklis
 One sentence: strongest element + biggest gap. Reference what the phase report captured.
 
 **oportunidades_pitch / oportunidades_CAR / oportunidades_technical / oportunidades_leadership** (list of str)
-2–4 bullet points per phase: things the candidate had the background to mention but didn't.
-Start each with "You could have mentioned…". Be specific — reference their real experience from CANDIDATE & JOB CONTEXT.
+2–4 bullet points per phase: things the candidate had the background to mention but didn't, or role-relevant points they should have covered.
+Start each with "You could have mentioned…". Be specific — reference their real experience from CANDIDATE & JOB CONTEXT when available.
+If no background was provided in CANDIDATE & JOB CONTEXT, base opportunities on concrete details the candidate shared during the interview and role-relevant expectations instead.
 Draw from the per-phase reports and observer notes.
 
 **vocabulario_para_praticar** (list of str)

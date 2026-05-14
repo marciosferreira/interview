@@ -50,7 +50,7 @@
       },
       dashboard: {
         title: "Let's prepare you for your dream job.",
-        sub: 'Paste the job description and your resume. Alex will run a personalized mock interview, help you sharpen your answers, and show you where to build more confidence before the big day.',
+        sub: 'Enter the role you want to practice for. Add job and background details if you want a more targeted interview.',
         continueTitle: 'Continue interview',
         newTitle: 'New position',
         newSub: 'Paste a job description + resume to start a personalized session',
@@ -72,7 +72,7 @@
       },
       history: {
         header: { tagline: 'Histórico de entrevistas' },
-        nav: { newInterview: 'Nova vaga' },
+        nav: { newInterview: 'Nova entrevista' },
       },
       footer: {
         plans: 'Planos',
@@ -92,10 +92,10 @@
       },
       dashboard: {
         title: 'Vamos preparar você para a vaga dos seus sonhos.',
-        sub: 'Cole a descrição da vaga e seu currículo. Alex vai simular uma entrevista personalizada, ajudar você a melhorar suas respostas e mostrar onde ganhar mais confiança antes do dia decisivo.',
+        sub: 'Informe o cargo que você quer treinar. Se quiser, adicione detalhes sobre a vaga e sobre você para criar uma entrevista mais direcionada.',
         continueTitle: 'Continuar entrevista',
-        newTitle: 'Nova vaga',
-        newSub: 'Cole a descrição da vaga + currículo para começar uma sessão personalizada',
+        newTitle: 'Nova entrevista',
+        newSub: 'Dê alguns detalhes sobre a vaga e sobre você para criar sua entrevista.',
         historyTitle: 'Histórico de entrevistas',
         historySub: 'Navegue e continue sessões anteriores por vaga',
       },

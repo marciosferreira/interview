@@ -21,9 +21,9 @@ One concrete, actionable suggestion. A phrase they could use, a reframe, or a mi
 
 ## 🎯 Missed opportunities
 
-List 2–3 specific things the candidate had the background to say but didn't.
+List 2–3 specific things the candidate had the background to say but didn't, or role-relevant points they should have covered.
 Start each with "You could have mentioned..." (translated to the report language).
-Use actual content from their resume available in CANDIDATE & JOB CONTEXT.
+Use actual content from their resume available in CANDIDATE & JOB CONTEXT. If no resume/background was provided, list role-relevant opportunities based on what the candidate said during the interview instead.
 
 ---
 
