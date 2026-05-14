@@ -154,21 +154,6 @@ def _signup_country(request: Request) -> tuple[str, str]:
 app = FastAPI()
 
 
-@app.get("/debug/headers")
-async def debug_headers(request: Request):
-    ip = _client_ip(request)
-    country_code, country_name = _signup_country(request)
-    return {
-        "ip": ip,
-        "country_code": country_code,
-        "country_name": country_name,
-        "raw_headers": {
-            "x-forwarded-for": request.headers.get("x-forwarded-for"),
-            "cloudfront-viewer-country": request.headers.get("cloudfront-viewer-country"),
-            "x-real-ip": request.headers.get("x-real-ip"),
-        },
-    }
-
 
 def _parse_cookie_header(cookie_header: str) -> dict[str, str]:
     cookies = {}
