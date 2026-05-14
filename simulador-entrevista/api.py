@@ -132,12 +132,41 @@ def _signup_country(request: Request) -> tuple[str, str]:
         request.headers.get("x-vercel-ip-country") or
         ""
     ).strip().upper()
-    if len(code) != 2 or code == "XX":
-        return "", ""
-    return code, _COUNTRY_NAMES.get(code, code)
+    if len(code) == 2 and code != "XX":
+        return code, _COUNTRY_NAMES.get(code, code)
+
+    # Fallback: IP geolocation lookup (free tier, no key needed)
+    try:
+        ip = _client_ip(request)
+        if ip and not ip.startswith(("127.", "10.", "172.16.", "192.168.")):
+            import urllib.request as _urlreq
+            with _urlreq.urlopen(f"https://ipinfo.io/{ip}/json", timeout=2) as resp:
+                data = json.loads(resp.read())
+                code = data.get("country", "").strip().upper()
+                if len(code) == 2:
+                    return code, _COUNTRY_NAMES.get(code, code)
+    except Exception:
+        pass
+    return "", ""
 
 
 app = FastAPI()
+
+
+@app.get("/debug/headers")
+async def debug_headers(request: Request):
+    ip = _client_ip(request)
+    country_code, country_name = _signup_country(request)
+    return {
+        "ip": ip,
+        "country_code": country_code,
+        "country_name": country_name,
+        "raw_headers": {
+            "x-forwarded-for": request.headers.get("x-forwarded-for"),
+            "cloudfront-viewer-country": request.headers.get("cloudfront-viewer-country"),
+            "x-real-ip": request.headers.get("x-real-ip"),
+        },
+    }
 
 
 def _parse_cookie_header(cookie_header: str) -> dict[str, str]:
