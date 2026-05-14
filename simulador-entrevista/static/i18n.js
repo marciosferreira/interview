@@ -48,6 +48,12 @@
           upgrade: 'Upgrade ->',
         },
       },
+      landing: {
+        hero: {
+          title: 'Your dream job<br><span>starts here.</span>',
+          sub: "Enter the role you're after and Alex creates a simulation right away — to find out how ready you truly are, get detailed feedback on your weak points, and make sure that dream opportunity isn't wasted.",
+        },
+      },
       dashboard: {
         title: "Let's prepare you for your dream job.",
         sub: 'Enter the role you want to practice for. Add job and background details if you want a more targeted interview.',
@@ -88,6 +94,12 @@
           free: 'Grátis',
           usage: '{{used}} / {{limit}} rounds de entrevistas essa semana',
           upgrade: 'Fazer upgrade ->',
+        },
+      },
+      landing: {
+        hero: {
+          title: 'O emprego dos sonhos<br><span>começa aqui.</span>',
+          sub: 'Informe o cargo desejado e Alex cria uma simulação na hora — para descobrir o quanto você está preparado, receber feedback detalhado sobre seus pontos fracos e garantir que essa chance não seja desperdiçada.',
         },
       },
       dashboard: {
