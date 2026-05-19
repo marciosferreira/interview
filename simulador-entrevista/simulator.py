@@ -40,11 +40,18 @@ if _database_url:
         import psycopg2 as _psycopg2
         from psycopg2.pool import ThreadedConnectionPool as _ThreadedConnectionPool
 
+        from urllib.parse import urlparse, unquote
+        _u = urlparse(_database_url)
         _pool = _ThreadedConnectionPool(
             2, 10,
-            dsn=_database_url,
+            host=_u.hostname,
+            port=_u.port or 5432,
+            dbname=_u.path.lstrip('/'),
+            user=unquote(_u.username or ''),
+            password=unquote(_u.password or ''),
             connect_timeout=15,
             options="-c lock_timeout=5000 -c statement_timeout=30000",
+            sslmode='disable',
         )
         _conn = None
 
