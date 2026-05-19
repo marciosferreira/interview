@@ -56,6 +56,10 @@ _ph = "%s" if _is_pg else "?"
 def _with_conn(func):
     """Borrow a DB connection, run func(conn), return it to the pool."""
     with get_db_conn() as conn:
+        if conn is None:
+            db_url = os.getenv("DATABASE_URL", "NOT SET")
+            print(f"[FATAL] get_db_conn() returned None. DATABASE_URL={db_url[:50]}...")
+            raise RuntimeError("Database connection unavailable — check DATABASE_URL and PostgreSQL connectivity")
         return func(conn)
 
 

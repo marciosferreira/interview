@@ -58,7 +58,12 @@ if _database_url:
                 _pool.putconn(conn)
 
     except Exception as _e:
-        print(f"[warn] Falha ao conectar no PostgreSQL: {_e}")
+        import traceback as _tb
+        print(f"\n{'='*60}")
+        print(f"[FATAL] FALHA AO CONECTAR NO POSTGRESQL: {_e}")
+        print(f"DATABASE_URL: {_database_url[:40]}...")
+        _tb.print_exc()
+        print(f"{'='*60}\n")
         _pool = None
         _conn = None
 
