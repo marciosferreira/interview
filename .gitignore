@@ -28,4 +28,4 @@ Thumbs.db
 *.sqlite3
 
 # TTS audio cache — generated on first play, not worth committing
-simulador-entrevista/static/tts_cache/
+static/tts_cache/
